@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API - GraphAnalysis.jl</title>
+  
+
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "API";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+  <script src="../../js/theme.js"></script> 
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../../yinsGraph/" class="icon icon-home"> GraphAnalysis.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../../yinsGraph/">Overview</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../../solvers/">Solvers</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 current">
+        <a class="current" href="./">API</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#yinsgraph">yinsGraph</a></li>
+                
+                    <li><a class="toctree-l4" href="#exported">Exported</a></li>
+                
+                    <li><a class="toctree-l4" href="#internal">Internal</a></li>
+                
+            
+            </ul>
+        
+    </li>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../yinsGraph/">GraphAnalysis.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../yinsGraph/">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>API</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="https://github.com/danspielman/GraphAnalysis.jl" class="icon icon-github"> Edit on GitHub</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="yinsgraph">yinsGraph</h1>
+<h2 id="exported">Exported</h2>
+<hr />
+<p><a id="method__apr.1" class="lexicon_definition"></a></p>
+<h4 id="aprtv-tigsparsematrixcsctv-ti-sarrayfloat64-1-alphafloat64-epsfloat64">apr{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},  s::Array{Float64, 1},  alpha::Float64,  eps::Float64) <a href="#method__apr.1">¶</a></h4>
+<p>computes an approximate page rank vector from a starting vector s, an alpha and an epsilon </p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/cutPageRank.jl#L69">/Users/spielman/git/GraphAnalysis.jl/src/cutPageRank.jl:69</a></p>
+<hr />
+<p><a id="method__backindices.1" class="lexicon_definition"></a></p>
+<h4 id="backindicestv-tigsparsematrixcsctv-ti">backIndices{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}) <a href="#method__backindices.1">¶</a></h4>
+<p>computes the back indices in a graph in O(M+N) </p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/graphUtils.jl#L21">/Users/spielman/git/GraphAnalysis.jl/src/graphUtils.jl:21</a></p>
+<hr />
+<p><a id="method__completegraph.1" class="lexicon_definition"></a></p>
+<h4 id="completegraphnint64">completeGraph(n::Int64) <a href="#method__completegraph.1">¶</a></h4>
+<p>The complete graph </p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/graphGenerators.jl#L351">/Users/spielman/git/GraphAnalysis.jl/src/graphGenerators.jl:351</a></p>
+<hr />
+<p><a id="method__diagmat.1" class="lexicon_definition"></a></p>
+<h4 id="diagmattv-tigsparsematrixcsctv-ti">diagmat{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}) <a href="#method__diagmat.1">¶</a></h4>
+<p>returns the diagonal matrix(as a sparse matrix) of a graph </p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/graphOps.jl#L198">/Users/spielman/git/GraphAnalysis.jl/src/graphOps.jl:198</a></p>
+<hr />
+<p><a id="method__generalizednecklace.1" class="lexicon_definition"></a></p>
+<h4 id="generalizednecklacetv-tiasparsematrixcsctv-ti-hsparsematrixcsctv-tiinteger-kint64">generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti},  H::SparseMatrixCSC{Tv, Ti&lt;:Integer},  k::Int64) <a href="#method__generalizednecklace.1">¶</a></h4>
+<div class="codehilite"><pre>generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64)
+</pre></div>
+
+
+<p>Constructs a generalized necklace graph starting with two graphs A and H. The
+resulting new graph will be constructed by expanding each vertex in H to an
+instance of A. k random edges will be generated between components. Thus, the
+resulting graph may have weighted edges.</p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/graphGenerators.jl#L310">/Users/spielman/git/GraphAnalysis.jl/src/graphGenerators.jl:310</a></p>
+<hr />
+<p><a id="method__joingraphs.1" class="lexicon_definition"></a></p>
+<h4 id="joingraphstval-tindasparsematrixcsctval-tind-bsparsematrixcsctval-tind-kinteger">joinGraphs{Tval, Tind}(a::SparseMatrixCSC{Tval, Tind},  b::SparseMatrixCSC{Tval, Tind},  k::Integer) <a href="#method__joingraphs.1">¶</a></h4>
+<p>create a disjoint union of graphs a and b,
+ and then put k random edges between them</p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/graphOps.jl#L106">/Users/spielman/git/GraphAnalysis.jl/src/graphOps.jl:106</a></p>
+<hr />
+<p><a id="method__maxflow.1" class="lexicon_definition"></a></p>
+<h4 id="maxflowtv-tigsparsematrixcsctv-ti-sint64-tint64">maxflow{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},  s::Int64,  t::Int64) <a href="#method__maxflow.1">¶</a></h4>
+<p>implementation of Dinic's algorithm. computes the maximum flow and min-cut in G between s and t. we consider the adjacency matrix to be the capacity matrix </p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/flow.jl#L2">/Users/spielman/git/GraphAnalysis.jl/src/flow.jl:2</a></p>
+<hr />
+<p><a id="method__pathgraph.1" class="lexicon_definition"></a></p>
+<h4 id="pathgraphnint64">pathGraph(n::Int64) <a href="#method__pathgraph.1">¶</a></h4>
+<p>The path graph on n vertices </p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/graphGenerators.jl#L356">/Users/spielman/git/GraphAnalysis.jl/src/graphGenerators.jl:356</a></p>
+<hr />
+<p><a id="method__ppr.1" class="lexicon_definition"></a></p>
+<h4 id="pprtv-tigsparsematrixcsctv-ti-sarrayfloat64-1-alphafloat64">ppr{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},  s::Array{Float64, 1},  alpha::Float64) <a href="#method__ppr.1">¶</a></h4>
+<p>computes the personal page rank vector from a starting vector s and an alpha; operates with lazy walk matrix </p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/cutPageRank.jl#L35">/Users/spielman/git/GraphAnalysis.jl/src/cutPageRank.jl:35</a></p>
+<hr />
+<p><a id="method__prefattach.1" class="lexicon_definition"></a></p>
+<h4 id="prefattachnint64-kint64-pfloat64">prefAttach(n::Int64,  k::Int64,  p::Float64) <a href="#method__prefattach.1">¶</a></h4>
+<p>A preferential attachment graph in which each vertex has k edges to those
+that come before.  These are chosen with probability p to be from a random vertex,
+and with probability 1-p to come from the endpoint of a random edge.
+It begins with a k-clique on the first k+1 vertices.</p>
+<div class="codehilite"><pre>prefAttach(n::Int64, k::Int64, p::Float64)
+</pre></div>
+
+
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/graphGenerators.jl#L190">/Users/spielman/git/GraphAnalysis.jl/src/graphGenerators.jl:190</a></p>
+<hr />
+<p><a id="method__prn.1" class="lexicon_definition"></a></p>
+<h4 id="prntv-tigsparsematrixcsctv-ti-varrayint64-1-phifloat64-bint64">prn{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},  v::Array{Int64, 1},  phi::Float64,  b::Int64) <a href="#method__prn.1">¶</a></h4>
+<p>prn{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, v::Array{Int64,1}, phi::Float64, b::Int64)</p>
+<p>the PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper</p>
+<p>v is a set of vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]</p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/cutPageRank.jl#L113">/Users/spielman/git/GraphAnalysis.jl/src/cutPageRank.jl:113</a></p>
+<hr />
+<p><a id="method__pr.1" class="lexicon_definition"></a></p>
+<h4 id="prtv-tigsparsematrixcsctv-ti-alphafloat64">pr{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},  alpha::Float64) <a href="#method__pr.1">¶</a></h4>
+<p>computes a page rank vector satisfying p = a/n * 1 + (1 - a) * W * p</p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/cutPageRank.jl#L18">/Users/spielman/git/GraphAnalysis.jl/src/cutPageRank.jl:18</a></p>
+<hr />
+<p><a id="method__ringgraph.1" class="lexicon_definition"></a></p>
+<h4 id="ringgraphnint64">ringGraph(n::Int64) <a href="#method__ringgraph.1">¶</a></h4>
+<p>The simple ring on n vertices</p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/graphGenerators.jl#L73">/Users/spielman/git/GraphAnalysis.jl/src/graphGenerators.jl:73</a></p>
+<hr />
+<p><a id="method__tounitvector.1" class="lexicon_definition"></a></p>
+<h4 id="tounitvectoraarrayint64-1-n">toUnitVector(a::Array{Int64, 1},  n) <a href="#method__tounitvector.1">¶</a></h4>
+<p>creates a unit vector of length n from a given set of integers, with weights based on the number of occurences </p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/graphOps.jl#L176">/Users/spielman/git/GraphAnalysis.jl/src/graphOps.jl:176</a></p>
+<h2 id="internal">Internal</h2>
+<hr />
+<p><a id="method__pushpr.1" class="lexicon_definition"></a></p>
+<h4 id="pushprtv-tigsparsematrixcsctv-ti-uint64-alphafloat64-parrayfloat64-1-rarrayfloat64-1">pushpr{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},  u::Int64,  alpha::Float64,  p::Array{Float64, 1},  r::Array{Float64, 1}) <a href="#method__pushpr.1">¶</a></h4>
+<p>implements the push operation for the aproximate page rank vector </p>
+<p><em>source:</em>
+<a href="https://github.com/danspielman/GraphAnalysis.jl/tree/09c2f2abbcf66c11e83a17d1ace2908802e87896/src/cutPageRank.jl#L2">/Users/spielman/git/GraphAnalysis.jl/src/cutPageRank.jl:2</a></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../../solvers/" class="btn btn-neutral" title="Solvers"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../../solvers/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+
+</body>
+</html>

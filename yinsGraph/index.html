@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Overview - GraphAnalysis.jl</title>
+  
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Overview";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script>
+  <script src="../js/theme.js"></script> 
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="./" class="icon icon-home"> GraphAnalysis.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Overview</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#yinsgraph">yinsGraph</a></li>
+                
+                    <li><a class="toctree-l4" href="#to-install-yinsgraph">To install yinsGraph</a></li>
+                
+                    <li><a class="toctree-l4" href="#to-use-yinsgraph">To use yinsGraph</a></li>
+                
+                    <li><a class="toctree-l4" href="#to-develop-yinsgraph">To develop yinsGraph</a></li>
+                
+            
+            </ul>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../solvers/">Solvers</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../api/yinsGraph/">API</a>
+        
+    </li>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="./">GraphAnalysis.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="./">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Overview</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="https://github.com/danspielman/GraphAnalysis.jl" class="icon icon-github"> Edit on GitHub</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <div class="toc">
+<ul>
+<li><a href="#yinsgraph">yinsGraph</a><ul>
+<li><a href="#to-install-yinsgraph">To install yinsGraph</a></li>
+<li><a href="#to-use-yinsgraph">To use yinsGraph</a><ul>
+<li><a href="#graph-generators">Graph generators:</a></li>
+<li><a href="#operations-on-graphs">Operations on Graphs:</a></li>
+<li><a href="#fundamental-graph-algorithms">Fundamental Graph Algorithms:</a></li>
+<li><a href="#solving-linear-equations">Solving Linear equations:</a></li>
+</ul>
+</li>
+<li><a href="#to-develop-yinsgraph">To develop yinsGraph</a><ul>
+<li><a href="#using-sparse-matrices-as-graphs">Using sparse matrices as graphs</a></li>
+<li><a href="#parametric-types">Parametric Types</a></li>
+<li><a href="#data-structures">Data structures:</a></li>
+<li><a href="#interface-issue">Interface issue:</a></li>
+<li><a href="#writing-tests">Writing tests:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<h1 id="yinsgraph">yinsGraph</h1>
+<p>yinsGraph is a package that I (Dan) am writing to explore and manipulate graphs in Julia.  The graphs are represented as sparse matrices.  The particular class in Julia is called a SparseMatrixCSC.  The reasons for this are:</p>
+<ul>
+<li>They are fast, and</li>
+<li>We want to do linear algebra with them, so matrices help.</li>
+</ul>
+<p>You can probably learn more about the CSC (Compressed Sparse Column) format by googling it.  </p>
+<p>So far, speed tests of code that I've written for connected components, shorest paths, and minimum spanning trees have been as fast or faster than the previous routines I could call from Matlab.  </p>
+<h2 id="to-install-yinsgraph">To install yinsGraph</h2>
+<p>you will need a number of packages.
+You install these like</p>
+<div class="codehilite"><pre>Pkg.add(&quot;PyCall&quot;)
+Pkg.add(&quot;PyPlot&quot;)
+Pkg.add(&quot;DataStructures&quot;)
+</pre></div>
+
+
+<p>I also recommend the Optim package.</p>
+<p>I think you need to install matplotlib in python before PyPlot.<br />
+Look at this page for more information: https://github.com/stevengj/PyPlot.jl</p>
+<p>I'm not sure if there are any others.  If you find that there are, please list them above.</p>
+<h2 id="to-use-yinsgraph">To use yinsGraph</h2>
+<p>Examples of how to do many things in yinsGraph may be found in the IJulia notebooks.  These have the extensions .ipynb.  When they look nice, I think it makes sense to convert them to .html.  </p>
+<p>Right now, the notebooks worth looking at are:</p>
+<ul>
+<li><a href="../yinsGraph.html">yinsGraph</a> - usage, demo, and speed tests</li>
+<li>
+<p><a href="../Solvers.html">Solvers</a> - code for solving equations.  How to use direct methods, conjugate gradient, and a preconditioned augmented spanning tree solver.</p>
+</li>
+<li>
+<p>[ ] The implementation of CG in IterativeSolvers sort of sucks, as I now see in the tests.  It is allocating way to much memory.  It should be fixed either by devectorizing (see Julia Performance Tips), or by using BLAS routines.</p>
+</li>
+</ul>
+<p>(I suggest that you open the html in your browser)</p>
+<h3 id="graph-generators">Graph generators:</h3>
+<div class="codehilite"><pre> <span class="n">readIJ</span><span class="p">(</span><span class="n">filename</span><span class="p">::</span><span class="n">String</span><span class="p">)</span>
+ <span class="n">readIJV</span><span class="p">(</span><span class="n">filename</span><span class="p">::</span><span class="n">String</span><span class="p">)</span>
+ <span class="n">writeIJV</span><span class="p">(</span><span class="n">filename</span><span class="p">::</span><span class="n">String</span><span class="p">,</span> <span class="n">mat</span><span class="p">)</span>
+ <span class="n">ringGraph</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">)</span>
+ <span class="n">generalizedRing</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">gens</span><span class="p">)</span>
+ <span class="n">randMatching</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">)</span>
+ <span class="n">randRegular</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">k</span><span class="p">::</span><span class="kt">Int64</span><span class="p">)</span>
+ <span class="n">grownGraph</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">k</span><span class="p">::</span><span class="kt">Int64</span><span class="p">)</span>
+ <span class="n">grownGraphD</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">k</span><span class="p">::</span><span class="kt">Int64</span><span class="p">)</span>
+ <span class="n">prefAttach</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">k</span><span class="p">::</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">p</span><span class="p">::</span><span class="kt">Float64</span><span class="p">)</span>
+ <span class="n">hyperCube</span><span class="p">(</span><span class="n">d</span><span class="p">::</span><span class="kt">Int64</span><span class="p">)</span>
+ <span class="n">completeBinaryTree</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">)</span>
+ <span class="n">grid2</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">)</span>
+ <span class="n">grid2</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">m</span><span class="p">::</span><span class="kt">Int64</span><span class="p">;</span> <span class="n">isotropy</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+ <span class="n">grid2coords</span><span class="p">(</span><span class="n">n</span><span class="p">::</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">m</span><span class="p">::</span><span class="kt">Int64</span><span class="p">)</span>
+</pre></div>
+
+
+<ul>
+<li>[ ] The types in the arguments of those should probably be more flexible/general.</li>
+</ul>
+<p>For example, to generate a 4-by-5 grid, you type</p>
+<div class="codehilite"><pre><span class="n">graph</span> <span class="o">=</span> <span class="n">grid2</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+
+
+<h3 id="operations-on-graphs">Operations on Graphs:</h3>
+<ul>
+<li><code>shortIntGraph</code>  for converting the index type of a graph to an Int32.  </li>
+<li><code>lap</code>  to produce the laplacian of a graph</li>
+<li>[ ] Maybe this should grab the upper triangular part, and symmetrize first.     </li>
+<li><code>unweight</code> - change all the weights to 1</li>
+<li><code>mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind},f)</code>  to apply the function f to the weight of every edge.</li>
+<li><code>uniformWeight</code>  an example of mapweight.  It ignores the weight, and maps every weight to a random in [0,1]</li>
+<li><code>productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)</code> the cartesian product.  Given two paths it makes a grid.</li>
+<li><code>edgeVertexMat(mat::SparseMatrixCSC)</code>  signed edge vertex matrix</li>
+<li><code>subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)</code>
+  produce a new graph that keeps each edge with probability p.</li>
+<li><code>twoLift(a, k)</code> create a 2-lift of a with k flipped edges.  If k is unspecified, this generates a random 2-lift. </li>
+<li><code>joinGraphs(a, b, k)</code> create a disjoint union of a and b, and add k random edges between them</li>
+<li><code>plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)</code></li>
+<li><code>spectralDrawing(graph)</code></li>
+</ul>
+<h3 id="fundamental-graph-algorithms">Fundamental Graph Algorithms:</h3>
+<ul>
+<li><code>components</code> computes connected components, returns as a vector</li>
+<li><code>vecToComps</code> turns into an array with a list of vertices in each component</li>
+<li><code>shortestPaths(mat, start)</code>  returns an array of distances,
+    and pointers to the node closest (parent array)</li>
+<li><code>kruskal(mat; kind=:min)</code>  to get a max tree, use <code>kind = :max</code>
+    returns it as a sparse matrix.</li>
+</ul>
+<h3 id="solving-linear-equations">Solving Linear equations:</h3>
+<p>We have implemented Conjugate Gradient (cg) and the Preconditioned Conjugate Gradient (pcg).  These implementations use BLAS when they can, and a slower routine for data types like BigFloat.</p>
+<p>To learn more, read <a href="../solvers/">solvers.md</a>.</p>
+<h2 id="to-develop-yinsgraph">To develop yinsGraph</h2>
+<p>Just go for it.
+Don't worry about writing fast code at first.
+Just get it to work.
+We can speed it up later.
+The yinsGraph.ipynb notebook contains some examples of speed tests.
+Within some of the files, I am keeping old, unoptimized versions of code around for comparison (and for satisfaction).  I will give them the name "XSlow"</p>
+<p>I think that each file should contain a manifest up top listing the functions and types that it provides.  They should be divided up into those that are for internal use only, and those that should be exported.  Old code that didn't work well, but which you want to keep for reference should go at the end.</p>
+<h3 id="using-sparse-matrices-as-graphs">Using sparse matrices as graphs</h3>
+<p>The routines <code>deg</code>, <code>nbri</code> and <code>weighti</code> will let you treat a sparse matrix like a graph.</p>
+<p><code>deg(graph, u)</code> is the degree of node u.
+<code>nbri(graph, u, i)</code> is the ith neighbor of node u.
+<code>weighti(graph, u, i)</code> is the weight of the edge to the ith neighbor of node u.</p>
+<p>Note that we start indexing from 1.</p>
+<p>For example, to iterate over the neighbors of node v,
+  and play with the attached nodes, you could write code like:</p>
+<div class="codehilite"><pre>  <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="n">deg</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+     <span class="n">nbr</span> <span class="o">=</span> <span class="n">nbri</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+     <span class="n">wt</span> <span class="o">=</span> <span class="n">weighti</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+     <span class="n">foo</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">nbr</span><span class="p">,</span> <span class="n">wt</span><span class="p">)</span>
+  <span class="k">end</span>
+</pre></div>
+
+
+<p>But, this turns out to be much slower than working with the structure directly, like</p>
+<div class="codehilite"><pre>  <span class="k">for</span> <span class="n">ind</span> <span class="k">in</span> <span class="n">mat</span><span class="o">.</span><span class="n">colptr</span><span class="p">[</span><span class="n">v</span><span class="p">]:(</span><span class="n">mat</span><span class="o">.</span><span class="n">colptr</span><span class="p">[</span><span class="n">v</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">nbr</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">rowval</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+      <span class="n">wt</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">nzval</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+      <span class="n">foo</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">nbr</span><span class="p">,</span> <span class="n">wt</span><span class="p">)</span>
+  <span class="k">end</span>
+</pre></div>
+
+
+<ul>
+<li>[ ] Maybe we can make a macro to replace those functions.  It could be faster and more readable.</li>
+</ul>
+<h3 id="parametric-types">Parametric Types</h3>
+<p>A sparse matrix has two types associated with it: the types of its indices (some sort of integer) and the types of its values (some sort of number).  Most of the code has been written so that once these types are fixed, the type of everything else in the function has been too.  This is accomplished by putting curly braces after a function name, with the names of the types that we want to use in the braces.  For example,</p>
+<div class="codehilite"><pre><span class="n">shortestPaths</span><span class="p">{</span><span class="n">Tv</span><span class="p">,</span><span class="n">Ti</span><span class="p">}(</span><span class="n">mat</span><span class="p">::</span><span class="n">SparseMatrixCSC</span><span class="p">{</span><span class="n">Tv</span><span class="p">,</span><span class="n">Ti</span><span class="p">},</span> <span class="n">start</span><span class="p">::</span><span class="n">Ti</span><span class="p">)</span>
+</pre></div>
+
+
+<p><code>Tv</code>, sometimes written <code>Tval</code> denotes the types of the values, and <code>Ti</code> or <code>Tind</code> denotes the types of the indices.  This function will only be called if the node from which we compute the shortest paths, <code>start</code> is of type <code>Ti</code>.  Inside the code, whenever we write something like <code>pArray = zeros(Ti,n)</code>, it creates an array of zeros of type Ti.  Using these parameteric types is <em>much</em> faster than leaving the types unfixed.</p>
+<h3 id="data-structures">Data structures:</h3>
+<ul>
+<li><code>IntHeap</code> a heap that stores small integers (like indices of nodes in a graph) and that makes deletion fast.  Was much faster than using Julia's more general heap.</li>
+</ul>
+<h3 id="interface-issue">Interface issue:</h3>
+<p>There are many different sorts of things that our code could be passing around.  For example, kruskal returns a graph as a sparse matrix.  But, we could use a format that is more specialized for trees, like the RootedTree type.  At some point, when we optimize code, we will need to figure out the right interfaces between routines.  For example, some routines symmetrize at the end.  This is slow, and should be skipped if not necessary.  It also doubles storage.</p>
+<h3 id="writing-tests">Writing tests:</h3>
+<p>I haven't written any yet.  I'll admit that I'm using the notebooks as tests.  If I can run all the cells, then it's all good.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../solvers/" class="btn btn-neutral float-right" title="Solvers"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+      
+        <span style="margin-left: 15px"><a href="../solvers/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+
+</body>
+</html>
