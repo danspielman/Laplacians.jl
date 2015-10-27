@@ -12,6 +12,7 @@ pages:
 - [Laplacians.md, User Guide, Overview]
 - [solvers.md, User Guide, Solvers]
 - [generators.md, API, Generators]
+- [operations.md, API, Operations]
 
 docs_dir: 'docs'
 

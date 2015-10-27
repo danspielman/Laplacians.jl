@@ -1,7 +1,6 @@
 [TOC]
 
-# Julia
-Julia code, most of it for graph stuff
+# Using Julia
 
 To use the julia notebooks, you will need ipython and the IJulia package.  You should also get `jupyter`, which you should be able to install from ipython.
 To install IJulia, you type `Pkg.add("IJulia")` from Julia.

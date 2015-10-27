@@ -83,6 +83,14 @@ The following is a list of the graph generators.
 ## Random
 These are randomized graph generators.
             
-{{randMatching, randRegular, grownGraph, grownGraphD, prefAttach, generalizedNecklace}}
+{{randMatching, randRegular, grownGraph, grownGraphD, prefAttach}}
 """
 
+@file "operations.md" """
+
+## Operations on one graph
+{{shortIntGraph, lap, unweight, mapweight, uniformWeight, edgeVertexMat, subsampleEdges, twoLift, plotGraph, spectralDrawing, spectralCoords, diagmat}}
+
+## Operations on two graphs
+{{joinGraphs, generalizedNecklace}}
+"""
