@@ -1,0 +1,34 @@
+site_name: Laplacians.jl
+
+site_description: Graph analysis inspired by graph Laplacians and the needs of researchers at YINS
+
+theme: readthedocs
+
+repo_url: https://github.com/danspielman/Laplacians.jl
+
+pages:
+- [about.md, About]
+- [Julia.md, User Guide, Using Julia]
+- [Laplacians.md, User Guide, Overview]
+- [solvers.md, User Guide, Solvers]
+- [generators.md, API, Generators]
+
+docs_dir: 'docs'
+
+site_favicon: null
+
+
+markdown_extensions:
+  - extra
+  - tables
+  - fenced_code
+
+extra_css:
+  - Laplacians.css
+
+extra_javascript:
+  - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML
+  - mathjaxhelper.js
+
+  
+use_directory_urls: false
