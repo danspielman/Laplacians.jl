@@ -82,7 +82,8 @@ diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 ```
 returns the diagonal matrix(as a sparse matrix) of a graph
 
-## Operations on two graphs### joinGraphs
+## Operations on two graphs
+### joinGraphs
 ```
 joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
 ```

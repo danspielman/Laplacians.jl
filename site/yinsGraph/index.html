@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Overview - Laplacians.jl</title>
+  <title>yinsGraph - Laplacians.jl</title>
   
 
   <link rel="shortcut icon" href="../img/favicon.ico">
@@ -21,7 +21,7 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Overview";
+    var mkdocs_page_name = "yinsGraph";
   </script>
   
   <script src="../js/jquery-2.1.1.min.js"></script>
@@ -65,19 +65,24 @@
 
         
             
+    <li class="toctree-l1 ">
+        <a class="" href="../Julia/index.html">Using Julia</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../Laplacians/index.html">Overview</a>
+        
+    </li>
+
+        
+            
     <li class="toctree-l1 current">
-        <a class="current" href="index.html">Overview</a>
+        <a class="current" href="index.html">yinsGraph</a>
         
             <ul>
-            
-                <li class="toctree-l3"><a href="#yinsgraph">yinsGraph</a></li>
-                
-                    <li><a class="toctree-l4" href="#to-install-yinsgraph">To install yinsGraph</a></li>
-                
-                    <li><a class="toctree-l4" href="#to-use-yinsgraph">To use yinsGraph</a></li>
-                
-                    <li><a class="toctree-l4" href="#to-develop-yinsgraph">To develop yinsGraph</a></li>
-                
             
             </ul>
         
@@ -102,6 +107,13 @@
             
     <li class="toctree-l1 ">
         <a class="" href="../generators/index.html">Generators</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../operations/index.html">Operations</a>
         
     </li>
 
@@ -135,7 +147,7 @@
         
       
     
-    <li>Overview</li>
+    <li>yinsGraph</li>
     <li class="wy-breadcrumbs-aside">
       
         
@@ -178,8 +190,8 @@
 <li>They are fast, and</li>
 <li>We want to do linear algebra with them, so matrices help.</li>
 </ul>
-<p>You can probably learn more about the CSC (Compressed Sparse Column) format by googling it.  </p>
-<p>So far, speed tests of code that I've written for connected components, shorest paths, and minimum spanning trees have been as fast or faster than the previous routines I could call from Matlab.  </p>
+<p>You can probably learn more about the CSC (Compressed Sparse Column) format by googling it.</p>
+<p>So far, speed tests of code that I've written for connected components, shorest paths, and minimum spanning trees have been as fast or faster than the previous routines I could call from Matlab.</p>
 <h2 id="to-install-yinsgraph">To install yinsGraph</h2>
 <p>you will need a number of packages.
 You install these like</p>
@@ -189,19 +201,19 @@ Pkg.add(&quot;DataStructures&quot;)
 </code></pre>
 
 <p>I also recommend the Optim package.</p>
-<p>I think you need to install matplotlib in python before PyPlot.<br />
+<p>I think you need to install matplotlib in python before PyPlot.
 Look at this page for more information: https://github.com/stevengj/PyPlot.jl</p>
 <p>I'm not sure if there are any others.  If you find that there are, please list them above.</p>
 <h2 id="to-use-yinsgraph">To use yinsGraph</h2>
-<p>Examples of how to do many things in yinsGraph may be found in the IJulia notebooks.  These have the extensions .ipynb.  When they look nice, I think it makes sense to convert them to .html.  </p>
+<p>Examples of how to do many things in yinsGraph may be found in the IJulia notebooks.  These have the extensions .ipynb.  When they look nice, I think it makes sense to convert them to .html.</p>
 <p>Right now, the notebooks worth looking at are:</p>
 <ul>
-<li><a href="../yinsGraph.html">yinsGraph</a> - usage, demo, and speed tests</li>
+<li><a href="index.html">yinsGraph</a> - usage, demo, and speed tests</li>
 <li>
-<p><a href="../Solvers.html">Solvers</a> - code for solving equations.  How to use direct methods, conjugate gradient, and a preconditioned augmented spanning tree solver.</p>
+<p><a href="../solvers/index.html">Solvers</a> - code for solving equations.  How to use direct methods, conjugate gradient, and a preconditioned augmented spanning tree solver.</p>
 </li>
 <li>
-<p>[ ] The implementation of CG in IterativeSolvers sort of sucks, as I now see in the tests.  It is allocating way to much memory.  It should be fixed either by devectorizing (see Julia Performance Tips), or by using BLAS routines.</p>
+<p><a href="../solvers/index.html#iterative-solvers">IterativeSolvers</a> The implementation of CG in IterativeSolvers sort of sucks, as I now see in the tests.  It is allocating way to much memory.  It should be fixed either by devectorizing (see Julia Performance Tips), or by using BLAS routines.</p>
 </li>
 </ul>
 <p>(I suggest that you open the html in your browser)</p>
@@ -232,9 +244,9 @@ Look at this page for more information: https://github.com/stevengj/PyPlot.jl</p
 
 <h3 id="operations-on-graphs">Operations on Graphs:</h3>
 <ul>
-<li><code>shortIntGraph</code>  for converting the index type of a graph to an Int32.  </li>
+<li><code>shortIntGraph</code>  for converting the index type of a graph to an Int32.</li>
 <li><code>lap</code>  to produce the laplacian of a graph</li>
-<li>[ ] Maybe this should grab the upper triangular part, and symmetrize first.     </li>
+<li>[ ] Maybe this should grab the upper triangular part, and symmetrize first.</li>
 <li><code>unweight</code> - change all the weights to 1</li>
 <li><code>mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind},f)</code>  to apply the function f to the weight of every edge.</li>
 <li><code>uniformWeight</code>  an example of mapweight.  It ignores the weight, and maps every weight to a random in [0,1]</li>
@@ -242,7 +254,7 @@ Look at this page for more information: https://github.com/stevengj/PyPlot.jl</p
 <li><code>edgeVertexMat(mat::SparseMatrixCSC)</code>  signed edge vertex matrix</li>
 <li><code>subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)</code>
   produce a new graph that keeps each edge with probability p.</li>
-<li><code>twoLift(a, k)</code> create a 2-lift of a with k flipped edges.  If k is unspecified, this generates a random 2-lift. </li>
+<li><code>twoLift(a, k)</code> create a 2-lift of a with k flipped edges.  If k is unspecified, this generates a random 2-lift.</li>
 <li><code>joinGraphs(a, b, k)</code> create a disjoint union of a and b, and add k random edges between them</li>
 <li><code>plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)</code></li>
 <li><code>spectralDrawing(graph)</code></li>
@@ -317,7 +329,7 @@ Within some of the files, I am keeping old, unoptimized versions of code around 
         <a href="../solvers/index.html" class="btn btn-neutral float-right" title="Solvers"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../about/index.html" class="btn btn-neutral" title="About"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../Laplacians/index.html" class="btn btn-neutral" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -345,7 +357,7 @@ Within some of the files, I am keeping old, unoptimized versions of code around 
           <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-        <span><a href="../about/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../Laplacians/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
         <span style="margin-left: 15px"><a href="../solvers/index.html" style="color: #fcfcfc">Next &raquo;</a></span>

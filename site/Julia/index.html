@@ -70,25 +70,6 @@
         
             <ul>
             
-                <li class="toctree-l3"><a href="#using-julia">Using Julia</a></li>
-                
-                    <li><a class="toctree-l4" href="#converting-to-julia-04">Converting to Julia 0.4</a></li>
-                
-                    <li><a class="toctree-l4" href="#julia-notebooks">Julia Notebooks</a></li>
-                
-                    <li><a class="toctree-l4" href="#workflows">Workflows</a></li>
-                
-                    <li><a class="toctree-l4" href="#things-to-be-careful-of-common-bugs">Things to be careful of (common bugs)</a></li>
-                
-                    <li><a class="toctree-l4" href="#useful-julia-functions">Useful Julia functions</a></li>
-                
-                    <li><a class="toctree-l4" href="#optimizing-code-in-julia">Optimizing code in Julia</a></li>
-                
-                    <li><a class="toctree-l4" href="#how-should-julia-packages-be-organized">How should Julia packages be organized?</a></li>
-                
-                    <li><a class="toctree-l4" href="#how-should-notebooks-play-with-git">How should notebooks play with Git?</a></li>
-                
-            
             </ul>
         
     </li>
@@ -97,6 +78,13 @@
             
     <li class="toctree-l1 ">
         <a class="" href="../Laplacians/index.html">Overview</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../yinsGraph/index.html">yinsGraph</a>
         
     </li>
 
@@ -206,9 +194,9 @@ Then, you just need to type <code>using IJulia</code> once.  This will tell jupy
 You will then need to install some things from that, like
 conda install jupyter (the new notebooks package)
 conda install mathjax
-conda install matplotlib </p>
+conda install matplotlib</p>
 <p>This repository contains projects implemented in Julia by Dan Spielman's group.  While organizing by language is strange, we are trying it to help us learn the language.</p>
-<p>There are two projects in here so far.  One, yinsGraph, is for doing graph theory and solving Laplacian systems.  It's documentation is at <a href="yinsGraph/yinsGraph.md">yinsGraph/yinsGraph.md</a></p>
+<p>There are two projects in here so far.  One, yinsGraph, is for doing graph theory and solving Laplacian systems.  It's documentation is at <a href="../yinsGraph/index.html">yinsGraph.md</a></p>
 <p>I would like to use the documentation pages in this root directory to discuss issues with how to get Julia to work well.  For now, I'll just ask some questions and write a little that I've figured out.  If you figure some out, please write it here.</p>
 <h2 id="converting-to-julia-04">Converting to Julia 0.4</h2>
 <p>A description of the changes made in Julia 0.4 appears to be here
@@ -222,7 +210,7 @@ conda install matplotlib </p>
 <pre><code class="julia">push!(LOAD_PATH,&quot;/Users/[your_username]/git/julia/yinsGraph&quot;)
 </code></pre>
 
-<p>To overcome this issue, you can add the above line to the end of the julia.rc file, found in </p>
+<p>To overcome this issue, you can add the above line to the end of the julia.rc file, found in</p>
 <pre><code class="julia">/Applications/Julia-0.4.0-rc4.app/Contents/Resources/julia/etc/julia
 </code></pre>
 
@@ -231,7 +219,7 @@ For example, <code>?ringGraph</code> produces</p>
 <pre><code>The simple ring on n vertices
 </code></pre>
 
-<p>When having a multiline comment, make sure that lines don't have starting and trailing spaces. 
+<p>When having a multiline comment, make sure that lines don't have starting and trailing spaces.
 This will mess up the indentation when calling '?func_name'.</p>
 <h3 id="small-details">Small details</h3>
 <ul>
@@ -251,7 +239,7 @@ Here are the relevent links:</p>
 <li>http://jupyter.cs.brynmawr.edu/hub/dblank/public/Jupyter%20Notebook%20Users%20Manual.ipynb</li>
 </ul>
 <p>To turn a notebook into html, you type something like</p>
-<pre><code>ipython nbconvert Laplacians.ipynb 
+<pre><code>ipython nbconvert Laplacians.ipynb
 </code></pre>
 
 <h2 id="workflows">Workflows</h2>
@@ -326,7 +314,7 @@ a
 <p>I am going to make a short list of Julia functions/features that I find useful.  Please add those that you use often as well.</p>
 <ul>
 <li>
-<p>docstrings: in the above example, I used a docstring to document each function.  You can get these by typing <code>?addA2B</code>.  You can also  <a href="http://julia.readthedocs.org/en/latest/manual/documentation/">write longer docstrings and use markdown</a>.  I suggest putting them in front of every function.  </p>
+<p>docstrings: in the above example, I used a docstring to document each function.  You can get these by typing <code>?addA2B</code>.  You can also  <a href="http://julia.readthedocs.org/en/latest/manual/documentation/">write longer docstrings and use markdown</a>.  I suggest putting them in front of every function.</p>
 </li>
 <li>
 <p><code>methods(foo)</code> lists all methods with the name foo.</p>
@@ -336,11 +324,11 @@ a
 <pre><code class="julia">julia&gt; a = sparse(rand(3,3));
 julia&gt; fieldnames(a)
 5-element Array{Symbol,1}:
- :m     
- :n     
+ :m
+ :n
  :colptr
  :rowval
- :nzval 
+ :nzval
 </code></pre>
 
 <h2 id="optimizing-code-in-julia">Optimizing code in Julia</h2>

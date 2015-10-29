@@ -77,22 +77,14 @@
         
             <ul>
             
-                <li class="toctree-l3"><a href="#laplacians">Laplacians</a></li>
-                
-                    <li><a class="toctree-l4" href="#to-install-laplacians">To install Laplacians</a></li>
-                
-                    <li><a class="toctree-l4" href="#to-use-laplacians">To use Laplacians</a></li>
-                
-                    <li><a class="toctree-l4" href="#about-this-documentation">About this Documentation</a></li>
-                
-                    <li><a class="toctree-l4" href="#some-documentation-that-hasnt-yet-made-it-elsewhere">Some Documentation that hasn't yet made it elsewhere.</a></li>
-                
-                    <li><a class="toctree-l4" href="#to-develop-laplacians">To develop Laplacians</a></li>
-                
-                    <li><a class="toctree-l4" href="#integration-with-other-packages">Integration with other packages.</a></li>
-                
-            
             </ul>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../yinsGraph/index.html">yinsGraph</a>
         
     </li>
 
@@ -194,14 +186,14 @@
 </ul>
 </div>
 <h1 id="laplacians">Laplacians</h1>
-<p>Laplacians.jl is a package for analyzing graphs in Julia.  Our emphsis is on things related to Laplacian linear sytems, such as solving equations, sparsifying, computing eigenvectors, partitioning, and other graph optimization tasks.  </p>
+<p>Laplacians.jl is a package for analyzing graphs in Julia.  Our emphsis is on things related to Laplacian linear sytems, such as solving equations, sparsifying, computing eigenvectors, partitioning, and other graph optimization tasks.</p>
 <p>The graphs are represented as sparse matrices.  The particular class in Julia is called a SparseMatrixCSC.  The reasons for this are:</p>
 <ul>
 <li>They are fast, and</li>
 <li>We want to do linear algebra with them, so matrices help.</li>
 </ul>
-<p>You can probably learn more about the CSC (Compressed Sparse Column) format by googling it.  </p>
-<p>So far, speed tests of code that we've written for connected components, shorest paths, and minimum spanning trees have been as fast or faster than the previous routines we could call from Matlab.  </p>
+<p>You can probably learn more about the CSC (Compressed Sparse Column) format by googling it.</p>
+<p>So far, speed tests of code that we've written for connected components, shorest paths, and minimum spanning trees have been as fast or faster than the previous routines we could call from Matlab.</p>
 <h2 id="to-install-laplacians">To install Laplacians</h2>
 <p>you will need a number of packages.
 You install these like</p>
@@ -211,15 +203,15 @@ Pkg.add(&quot;DataStructures&quot;)
 </code></pre>
 
 <p>I also recommend the Optim package.</p>
-<p>I think you need to install matplotlib in python before PyPlot.<br />
+<p>I think you need to install matplotlib in python before PyPlot.
 Look at this page for more information: https://github.com/stevengj/PyPlot.jl</p>
 <p>I'm not sure if there are any others.  If you find that there are, please list them above.</p>
 <h2 id="to-use-laplacians">To use Laplacians</h2>
-<p>Examples of how to do many things in yinsGraph may be found in the IJulia notebooks.  These have the extensions .ipynb.  When they look nice, I think it makes sense to convert them to .html.  </p>
+<p>Examples of how to do many things in yinsGraph may be found in the IJulia notebooks.  These have the extensions .ipynb.  When they look nice, I think it makes sense to convert them to .html.</p>
 <p>Right now, the notebooks worth looking at are:</p>
 <ul>
-<li><a href="../yinsGraph.html">yinsGraph</a> - usage, demo, and speed tests (Laplacians was previously called yinsGraph)</li>
-<li><a href="../Solvers.html">Solvers</a> - code for solving equations.  How to use direct methods, conjugate gradient, and a preconditioned augmented spanning tree solver.</li>
+<li><a href="../yinsGraph/index.html">yinsGraph</a> - usage, demo, and speed tests (Laplacians was previously called yinsGraph)</li>
+<li><a href="../solvers/index.html">Solvers</a> - code for solving equations.  How to use direct methods, conjugate gradient, and a preconditioned augmented spanning tree solver.</li>
 </ul>
 <p>(I suggest that you open the html in your browser)</p>
 <h2 id="about-this-documentation">About this Documentation</h2>
@@ -302,8 +294,8 @@ Within some of the files, I am keeping old, unoptimized versions of code around 
 <h2 id="integration-with-other-packages">Integration with other packages.</h2>
 <p>There are other graph packages that we might want to sometimes use.</p>
 <ul>
-<li>Graphs.jl : I found this one to be too slow and awkward to be useful.</li>
-<li>LightGraphs.jl : this looks more promising.  We will have to check it out.</li>
+<li><a href="http://github.com/JuliaLang/Graphs.jl">Graphs.jl</a> : I found this one to be too slow and awkward to be useful.</li>
+<li><a href="http://github.com/JuliaGraphs/LightGraphs.jl">LightGraphs.jl</a> : this looks more promising.  We will have to check it out.</li>
 </ul>
               
             </div>
@@ -312,7 +304,7 @@ Within some of the files, I am keeping old, unoptimized versions of code around 
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../solvers/index.html" class="btn btn-neutral float-right" title="Solvers"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../yinsGraph/index.html" class="btn btn-neutral float-right" title="yinsGraph"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
         <a href="../Julia/index.html" class="btn btn-neutral" title="Using Julia"><span class="icon icon-circle-arrow-left"></span> Previous</a>
@@ -346,7 +338,7 @@ Within some of the files, I am keeping old, unoptimized versions of code around 
         <span><a href="../Julia/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../solvers/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../yinsGraph/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

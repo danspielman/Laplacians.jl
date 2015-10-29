@@ -10,11 +10,11 @@ Dan recommends installing the anaconda distribution of python.
 You will then need to install some things from that, like
 conda install jupyter (the new notebooks package)
 conda install mathjax
-conda install matplotlib 
+conda install matplotlib
 
 This repository contains projects implemented in Julia by Dan Spielman's group.  While organizing by language is strange, we are trying it to help us learn the language.
 
-There are two projects in here so far.  One, yinsGraph, is for doing graph theory and solving Laplacian systems.  It's documentation is at [yinsGraph/yinsGraph.md](yinsGraph/yinsGraph.md)
+There are two projects in here so far.  One, yinsGraph, is for doing graph theory and solving Laplacian systems.  It's documentation is at [yinsGraph.md](yinsGraph.md)
 
 I would like to use the documentation pages in this root directory to discuss issues with how to get Julia to work well.  For now, I'll just ask some questions and write a little that I've figured out.  If you figure some out, please write it here.
 
@@ -36,7 +36,7 @@ or
 push!(LOAD_PATH,"/Users/[your_username]/git/julia/yinsGraph")
 ~~~
 
-To overcome this issue, you can add the above line to the end of the julia.rc file, found in 
+To overcome this issue, you can add the above line to the end of the julia.rc file, found in
 
 ~~~julia
 /Applications/Julia-0.4.0-rc4.app/Contents/Resources/julia/etc/julia
@@ -49,7 +49,7 @@ For example, `?ringGraph` produces
 The simple ring on n vertices
 ~~~
 
-When having a multiline comment, make sure that lines don't have starting and trailing spaces. 
+When having a multiline comment, make sure that lines don't have starting and trailing spaces.
 This will mess up the indentation when calling '?func_name'.
 
 ### Small details
@@ -73,7 +73,7 @@ Here are the relevent links:
 To turn a notebook into html, you type something like
 
 ~~~
-ipython nbconvert Laplacians.ipynb 
+ipython nbconvert Laplacians.ipynb
 ~~~
 
 ## Workflows
@@ -116,7 +116,7 @@ a
 
 1x2 Array{Int64,2}:
  3  2
- 
+
 a = [1 0]
 b = [2 2]
 addA2Bfail(a,b)
@@ -124,7 +124,7 @@ a
 
 1x2 Array{Int64,2}:
  1  0
- 
+
 a += b
 a
 
@@ -141,7 +141,7 @@ a
 
 I am going to make a short list of Julia functions/features that I find useful.  Please add those that you use often as well.
 
-* docstrings: in the above example, I used a docstring to document each function.  You can get these by typing `?addA2B`.  You can also  [write longer docstrings and use markdown](http://julia.readthedocs.org/en/latest/manual/documentation/).  I suggest putting them in front of every function.  
+* docstrings: in the above example, I used a docstring to document each function.  You can get these by typing `?addA2B`.  You can also  [write longer docstrings and use markdown](http://julia.readthedocs.org/en/latest/manual/documentation/).  I suggest putting them in front of every function.
 
 * `methods(foo)` lists all methods with the name foo.
 * `fieldnames(footype)` tells you all the fields of footype.  Note that this is 0.4.  In 0.3.11, you type `names(footype)`
@@ -150,11 +150,11 @@ I am going to make a short list of Julia functions/features that I find useful. 
 julia> a = sparse(rand(3,3));
 julia> fieldnames(a)
 5-element Array{Symbol,1}:
- :m     
- :n     
+ :m
+ :n
  :colptr
  :rowval
- :nzval 
+ :nzval
 ~~~
 
 
@@ -206,5 +206,3 @@ I put the export statements in the main module.  The reason for this is that whi
 ## How should notebooks play with Git?
 
 The great thing about the notebooks is that they contain live code, so that you can play with them.  But, sometimes you get a version that serves as great documentation, and you don't want to klobber it my mistake later (or evern worse, have someone else klobber it).  Presumably if someone accidently commits a messed up version we can unwind that.  But, is there a good way to keep track of this?
-
-

@@ -79,21 +79,17 @@
 
         
             
+    <li class="toctree-l1 ">
+        <a class="" href="../yinsGraph/index.html">yinsGraph</a>
+        
+    </li>
+
+        
+            
     <li class="toctree-l1 current">
         <a class="current" href="index.html">Solvers</a>
         
             <ul>
-            
-                <li class="toctree-l3"><a href="#solving-linear-equations-in-laplacians">Solving linear equations in Laplacians</a></li>
-                
-                    <li><a class="toctree-l4" href="#direct-solvers">Direct Solvers</a></li>
-                
-                    <li><a class="toctree-l4" href="#iterative-solvers">Iterative Solvers</a></li>
-                
-                    <li><a class="toctree-l4" href="#low-stretch-spanning-trees">Low-Stretch Spanning Trees</a></li>
-                
-                    <li><a class="toctree-l4" href="#augmented-spanning-tree-preconditioners">Augmented spanning tree preconditioners</a></li>
-                
             
             </ul>
         
@@ -178,7 +174,7 @@
 </div>
 <h1 id="solving-linear-equations-in-laplacians">Solving linear equations in Laplacians</h1>
 <p>Right now, our solver code is in <code>solvers.jl</code>, but not included in yinsGraph.  So, you should include this directly.  Implementations of cg and pcg have been automatically included in yinsGraph.  They are in the file <code>pcg.jl</code></p>
-<p>For some experiments with solvers, including some of those below, look at the notebook <a href="../Solvers.ipynb">Solvers.ipynb</a>.</p>
+<p>For some experiments with solvers, including some of those below, look at the notebook Solvers.ipynb.</p>
 <h2 id="direct-solvers">Direct Solvers</h2>
 <p>You can compute a cholesky factor directly with <code>cholfact</code>.  It does  more than just compute the factor, and it saves its result in a data structure that implements <code>\</code>.  It uses SuiteSparse by Tim Davis.</p>
 <p>Here is an example of how you would use it to solve a general non-singular linear system.</p>
@@ -206,7 +202,7 @@ norm(la*f(b) - b)
 <p>Here are two other ways of using the wrapper:</p>
 <pre><code class="julia">lapChol = lapWrapSolver(cholfact)
 f = lapChol(la)
-b = randn(n); 
+b = randn(n);
 b = b - mean(b);
 norm(la*f(b) - b)
     2.6924696662484416e-15
@@ -305,7 +301,7 @@ sum(st)/nnz(a)
 </code></pre>
 
 <h2 id="augmented-spanning-tree-preconditioners">Augmented spanning tree preconditioners</h2>
-<p>Here is code that will invoke one.<br />
+<p>Here is code that will invoke one.
 It is designed for positive definite systems.  So, let's give it one.
 Right now, it is using a randomized version of a MST.  There is no real reason to think that this should work.</p>
 <pre><code class="julia">a = mapweight(grid2(1000),x-&gt;1/(rand(1)[1]));
@@ -340,7 +336,7 @@ b = randn(n)
 @time x = F(b)
     29.503484 seconds (9.76 k allocations: 23.268 GB, 7.31% gc time)
 
-norm(la*x - b)  
+norm(la*x - b)
     99.29610874176991
 </code></pre>
 
@@ -365,7 +361,7 @@ norm(la*x-b)
         <a href="../generators/index.html" class="btn btn-neutral float-right" title="Generators"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../Laplacians/index.html" class="btn btn-neutral" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../yinsGraph/index.html" class="btn btn-neutral" title="yinsGraph"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -393,7 +389,7 @@ norm(la*x-b)
           <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-        <span><a href="../Laplacians/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../yinsGraph/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
         <span style="margin-left: 15px"><a href="../generators/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
