@@ -12,7 +12,7 @@ pages:
 - [Laplacians.md, User Guide, Overview]
 - [yinsGraph.md, User Guide, yinsGraph]
 - [solvers.md, User Guide, Solvers]
-- [wholeApi.md, API, Whole API]
+- [wholeAPI.md, API, Whole API]
 - [generators.md, API, Generators]
 - [operations.md, API, Operations]
 
