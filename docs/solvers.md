@@ -4,7 +4,7 @@
 
 Right now, our solver code is in `solvers.jl`, but not included in yinsGraph.  So, you should include this directly.  Implementations of cg and pcg have been automatically included in yinsGraph.  They are in the file `pcg.jl`
 
-For some experiments with solvers, including some of those below, look at the notebook [Solvers.ipynb](Solvers.ipynb).
+For some experiments with solvers, including some of those below, look at the notebook Solvers.ipynb.
 
 ## Direct Solvers
 
@@ -41,11 +41,11 @@ Here are two other ways of using the wrapper:
 ~~~julia
 lapChol = lapWrapSolver(cholfact)
 f = lapChol(la)
-b = randn(n); 
+b = randn(n);
 b = b - mean(b);
 norm(la*f(b) - b)
 	2.6924696662484416e-15
-	
+
 x = lapWrapSolver(cholfact,la,b)
 norm(la*x - b)
 	2.6924696662484416e-15
@@ -63,7 +63,7 @@ b = randn(n)
 x = cg(a,b,maxits=100)
 norm(a*x - b)
 	1.2191649497921835e-6
-	
+
 bbig = convert(Array{BigFloat,1},b)
 xbig = cg(a,bbig,maxits=100)
 norm(a*xbig - bbig)
@@ -124,7 +124,7 @@ If our target is just low error, and we are willing to allow many iterations, he
 	0.747042 seconds (9.65 k allocations: 275.819 MB, 4.87% gc time)
 norm(la*x-b)
 	19.840756251253442
-	
+
 @time x = cg(la,b,tol=1e-1,maxits=10^5)
 	6.509665 seconds (22.55 k allocations: 1.680 GB, 3.68% gc time)
 norm(la*x-b)
@@ -147,7 +147,7 @@ t = randishKruskal(a);
 st = compStretches(t,a);
 sum(st)/nnz(a)
 	43.410262262262265
-	
+
 t = randishPrim(a);
 st = compStretches(t,a);
 sum(st)/nnz(a)
@@ -157,7 +157,7 @@ sum(st)/nnz(a)
 
 ## Augmented spanning tree preconditioners
 
-Here is code that will invoke one.  
+Here is code that will invoke one.
 It is designed for positive definite systems.  So, let's give it one.
 Right now, it is using a randomized version of a MST.  There is no real reason to think that this should work.
 
@@ -191,12 +191,12 @@ That was not too impressive.  We will have to investigate.  By default, it prese
 ~~~julia
 @time F = augTreeSolver(la,tol=1e-1,maxits=1000,treeAlg=randishPrim);
 	6.319489 seconds (4.00 M allocations: 2.030 GB, 18.81% gc time)
-	
+
 b = randn(n)
 @time x = F(b)
 	29.503484 seconds (9.76 k allocations: 23.268 GB, 7.31% gc time)
 
-norm(la*x - b)	
+norm(la*x - b)
 	99.29610874176991
 ~~~
 
@@ -214,7 +214,3 @@ norm(la*x-b)
 ~~~
 
 As you can see, lapWrapSolver can pass tol and maxits arguments to its solver, if they are given to it.
-
-
-
-

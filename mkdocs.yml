@@ -10,6 +10,7 @@ pages:
 - [about.md, About]
 - [Julia.md, User Guide, Using Julia]
 - [Laplacians.md, User Guide, Overview]
+- [yinsGraph.md, User Guide, yinsGraph]
 - [solvers.md, User Guide, Solvers]
 - [wholeApi.md, API, Whole API]
 - [generators.md, API, Generators]
@@ -32,5 +33,5 @@ extra_javascript:
   - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML
   - mathjaxhelper.js
 
-  
+
 use_directory_urls: false
