@@ -11,6 +11,7 @@ pages:
 - [Julia.md, User Guide, Using Julia]
 - [Laplacians.md, User Guide, Overview]
 - [solvers.md, User Guide, Solvers]
+- [wholeApi.md, API, Whole API]
 - [generators.md, API, Generators]
 - [operations.md, API, Operations]
 
