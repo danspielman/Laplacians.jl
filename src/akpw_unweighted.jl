@@ -1,8 +1,8 @@
-include("julia/yinsGraph/graphAlgs.jl")
-include("julia/yinsGraph/graphGenerators.jl")
+# include("julia/yinsGraph/graphAlgs.jl")
+# include("julia/yinsGraph/graphGenerators.jl")
 # include("julia/yinsGraph/treeAlgs.jl")
 
-
+using yinsGraph
 
 
 #partition into clusters of radii O(x(n)lnn) where 1/x(n) edges border the cluster
@@ -136,41 +136,46 @@ function partitionMatrix(mat::SparseMatrixCSC)
       boundary = getBoundary(mat, partition[nClusters])
 
       if nNodesInCluster > 2
-        x = exp(sqrt(log(nNodesInCluster) * log(log(nNodesInCluster))))
+        # x = 0.7199*exp(sqrt(log(nNodesInCluster) * log(log(nNodesInCluster))))
+        x = .75*exp(sqrt(log(nNodesInCluster) * log(log(nNodesInCluster))))
+        # x = log(nNodesInCluster)
       else
         x = 10
       end
 
       if (convert(Float64, volume) / convert(Float64, boundary) >= x) || lastnNodesInCluster == nNodesInCluster
         break
-      else 
-        newVertices = zeros(Bool, nVertices)
-        for v in 1:length(partition[nClusters])
-          if partition[nClusters][v] == true
-            for eInd in mat.colptr[v]:(mat.colptr[v+1]-1) #eInd is the edge
-              otherV = mat.rowval[eInd] #this gives us the other vertex
-
-              #doing this step before for boundary... maybe can combine?
-              if !visited[otherV]
-                newVertices[otherV] = true
-
-                treeInds[mat.rowval[eInd]] = eInd #..?
-              end #if
-            end #for
-          end #if
-        end #for
-
-        for v in 1:length(newVertices)
-          if newVertices[v] == 1
-            partition[nClusters][v] = true
-            nAddedToClusters += 1
-            nNodesInCluster += 1
-            visited[v] = true
-          end #if
-        end #for
-      end #if/else
-
+      end
+      # else 
       lastnNodesInCluster = nNodesInCluster
+
+      newVertices = zeros(Bool, nVertices)
+      for v in 1:length(partition[nClusters])
+        if partition[nClusters][v] == true
+          for eInd in mat.colptr[v]:(mat.colptr[v+1]-1) #eInd is the edge
+            otherV = mat.rowval[eInd] #this gives us the other vertex
+
+            #doing this step before for boundary... maybe can combine?
+            if !visited[otherV]
+              newVertices[otherV] = true
+
+              treeInds[mat.rowval[eInd]] = eInd #..?
+            end #if
+          end #for
+        end #if
+      end #for
+
+      for v in 1:length(newVertices)
+        if newVertices[v] == 1
+          partition[nClusters][v] = true
+          nAddedToClusters += 1
+          nNodesInCluster += 1
+          visited[v] = true
+        end #if
+      end #for
+      # end #if/else
+
+      # lastnNodesInCluster = nNodesInCluster
     end #while
   end #while
 
@@ -190,9 +195,6 @@ function collapsePartition(mat::SparseMatrixCSC, partition, map)
     for v in 1:nVertices #all vertices in cluster i
       if partition[c][v] == 1
         for eInd in mat.colptr[v]:(mat.colptr[v+1]-1) #all edges connecting to vertex j
-          if v == 49
-            # println("BOOOOP: ",eInd)
-          end
           otherV = mat.rowval[eInd]
 
           #if the two ends of the edge are in the same cluster don't add edge
@@ -205,17 +207,16 @@ function collapsePartition(mat::SparseMatrixCSC, partition, map)
             push!(jVector, map[otherV])
             push!(vVector, 1)
 
-            # iVector[]
-            push!(iVector, map[otherV]) 
-            push!(jVector, c)
-            push!(vVector, 1)
+            # push!(iVector, map[otherV]) 
+            # push!(jVector, c)
+            # push!(vVector, 1)
           end #if
         end
       end #if
     end #for
   end #for
 
-  newMat = sparse(iVector, jVector, vVector, nClusters, nClusters)
+  newMat = sparse(iVector, jVector, vVector, nClusters, nClusters, min)
 
   return newMat
 end #collapsePartition
@@ -237,7 +238,7 @@ end #collapsePartition
   # To collapse, will build a while new matrix, and keep a mapping to the original matrix
     # mapping: n-degree array. each value is the cluster index (v's new compressed value)
 
-function akpw(mat::SparseMatrixCSC)
+function akpw_unweighted(mat::SparseMatrixCSC)
   nVertices = mat.n
   nEdges = nnz(mat)
   treeInds = zeros(Int64, nEdges)
@@ -251,6 +252,7 @@ function akpw(mat::SparseMatrixCSC)
 
   while (true)
     partition, partitionTreeInds = partitionMatrix(newMat)
+    println(length(partition))
 
     if !first
       for i = 1:length(bigMapD)
@@ -352,15 +354,21 @@ function akpw(mat::SparseMatrixCSC)
 
 end #akpw
 
+# k = 30
+# ani = productGraph(pathGraph(k),pathGraph(k))
+# akpw_unweighted(ani)
 
-a = grid2(125)
-n = size(a)[1]
-(ai,aj,av) = findnz(triu(a))
 
-@time stretchTree = akpw(a)
+# a = grid2(10)
+# n = size(a)[1]
+# (ai,aj,av) = findnz(triu(a))
+
+# @time stretchTree = akpw(a)
 # primTree = prim(a)
+# spy(primTree)
 # println("done")
 # println(stretchTree)
+
 # println(compStretches(stretchTree, a))
 # println(compStretches(stretchTree, a))
 
