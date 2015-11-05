@@ -1,337 +1,378 @@
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Whole API - Laplacians.jl</title>
-  
-
-  <link rel="shortcut icon" href="../lambda2.ico">
-  
-
-  
-  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
-
-  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
-  <link rel="stylesheet" href="../css/highlight.css">
-  <link href="../Laplacians.css" rel="stylesheet">
-
-  
-  <script>
-    // Current page data
-    var mkdocs_page_name = "Whole API";
-  </script>
-  
-  <script src="../js/jquery-2.1.1.min.js"></script>
-  <script src="../js/modernizr-2.8.3.min.js"></script>
-  <script type="text/javascript" src="../js/highlight.pack.js"></script>
-  <script src="../js/theme.js"></script> 
-  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
-  <script src="../mathjaxhelper.js"></script>
-
-  
-</head>
-
-<body class="wy-body-for-nav" role="document">
-
-  <div class="wy-grid-for-nav">
-
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-      <div class="wy-side-nav-search">
-        <a href="../about/index.html" class="icon icon-home"> Laplacians.jl</a>
-        <div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-  </form>
-</div>
-      </div>
-
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-        <ul class="current">
-          
-            <li>
-    <li class="toctree-l1 ">
-        <a class="" href="../about/index.html">About</a>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-    </li>
-<li>
-          
-            <li>
-    <ul class="subnav">
-    <li><span>User Guide</span></li>
+        
+        
+        <link rel="shortcut icon" href="../../lambda2.ico">
+        
+
+	<title>Whole API - Laplacians.jl</title>
+
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <link href="../Laplacians.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
 
         
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../Julia/index.html">Using Julia</a>
-        
-    </li>
+    </head>
 
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../Laplacians/index.html">Overview</a>
-        
-    </li>
+    <body>
 
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../yinsGraph/index.html">yinsGraph</a>
-        
-    </li>
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
 
-        
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
             
-    <li class="toctree-l1 ">
-        <a class="" href="../solvers/index.html">Solvers</a>
-        
-    </li>
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
 
-        
-    </ul>
-<li>
-          
-            <li>
-    <ul class="subnav">
-    <li><span>API</span></li>
+            <!-- Main title -->
+            <a class="navbar-brand" href="../about/index.html">Laplacians.jl</a>
+        </div>
 
-        
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
             
-    <li class="toctree-l1 current">
-        <a class="current" href="index.html">Whole API</a>
-        
-            <ul>
-            
-                <li class="toctree-l3"><a href="#laplacians">Laplacians</a></li>
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
                 
-            
-                <li class="toctree-l3"><a href="#rootedtree">RootedTree</a></li>
                 
-            
-                <li class="toctree-l3"><a href="#apr">apr</a></li>
+                    <li >
+                        <a href="../about/index.html">About</a>
+                    </li>
                 
-            
-                <li class="toctree-l3"><a href="#backindices">backIndices</a></li>
                 
-            
-                <li class="toctree-l3"><a href="#cg">cg</a></li>
                 
-            
-                <li class="toctree-l3"><a href="#compdepth">compDepth</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../Julia/index.html">Using Julia</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../Laplacians/index.html">Overview</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../solvers/index.html">Solvers</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
                 
-            
-                <li class="toctree-l3"><a href="#compstretches">compStretches</a></li>
                 
-            
-                <li class="toctree-l3"><a href="#completebinarytree">completeBinaryTree</a></li>
                 
-            
-                <li class="toctree-l3"><a href="#completegraph">completeGraph</a></li>
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li class="active">
+    <a href="index.html">Whole API</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../graphGeneratorsAPI/index.html">graphGenerators</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../graphOpsAPI/index.html">graphOps</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../graphAlgsAPI/index.html">graphAlgs</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../cutPageRankAPI/index.html">cutPageRank</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
                 
-            
-                <li class="toctree-l3"><a href="#components">components</a></li>
                 
+                </ul>
             
-                <li class="toctree-l3"><a href="#deg">deg</a></li>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
                 
-            
-                <li class="toctree-l3"><a href="#diagmat">diagmat</a></li>
+                    <li >
+                        <a rel="next" href="../solvers/index.html">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../graphGeneratorsAPI/index.html">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
                 
-            
-                <li class="toctree-l3"><a href="#edgevertexmat">edgeVertexMat</a></li>
                 
-            
-                <li class="toctree-l3"><a href="#generalizednecklace">generalizedNecklace</a></li>
+                    <li>
+                        <a href="https://github.com/danspielman/Laplacians.jl">
+                            
+                                <i class="fa fa-github"></i>
+                            
+                            GitHub
+                        </a>
+                    </li>
                 
-            
-                <li class="toctree-l3"><a href="#generalizedring">generalizedRing</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#grid2">grid2</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#grid2coords">grid2coords</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#growngraph">grownGraph</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#growngraphd">grownGraphD</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#hypercube">hyperCube</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#joingraphs">joinGraphs</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#kruskal">kruskal</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#lap">lap</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#mapweight">mapweight</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#mattotree">matToTree</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#mattotreedepth">matToTreeDepth</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#maxflow">maxflow</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#nbri">nbri</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#nbrs">nbrs</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#pathgraph">pathGraph</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#pcg">pcg</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#plotgraph">plotGraph</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#ppr">ppr</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#pr">pr</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#prefattach">prefAttach</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#prn">prn</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#productgraph">productGraph</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#randmatching">randMatching</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#randregular">randRegular</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#readij">readIJ</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#ringgraph">ringGraph</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#setvalue">setValue</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#shortintgraph">shortIntGraph</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#shortestpaths">shortestPaths</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#spectralcoords">spectralCoords</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#spectraldrawing">spectralDrawing</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#subsampleedges">subsampleEdges</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#tarjanstretch">tarjanStretch</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#tounitvector">toUnitVector</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#twolift">twoLift</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#uniformweight">uniformWeight</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#unweight">unweight</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#vectocomps">vecToComps</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#weighti">weighti</a></li>
-                
-            
             </ul>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../generators/index.html">Generators</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../operations/index.html">Operations</a>
-        
-    </li>
-
-        
-    </ul>
-<li>
-          
-        </ul>
-      </div>
-      &nbsp;
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../about/index.html">Laplacians.jl</a>
-      </nav>
-
-      
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="../about/index.html">Docs</a> &raquo;</li>
-    
-      
-        
-          <li>API &raquo;</li>
-        
-      
-    
-    <li>Whole API</li>
-    <li class="wy-breadcrumbs-aside">
-      
-        
-          <a href="https://github.com/danspielman/Laplacians.jl" class="icon icon-github"> Edit on GitHub</a>
-        
-      
-    </li>
-  </ul>
-  <hr/>
+        </div>
+    </div>
 </div>
-          <div role="main">
-            <div class="section">
-              
-                <h3 id="laplacians">Laplacians</h3>
+
+        <div class="container">
+            
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#erdosrenyicluster">ErdosRenyiCluster</a></li>
+        
+    
+        <li class="main "><a href="#erdosrenyiclusterfix">ErdosRenyiClusterFix</a></li>
+        
+    
+        <li class="main "><a href="#laplacians">Laplacians</a></li>
+        
+    
+        <li class="main "><a href="#rootedtree">RootedTree</a></li>
+        
+    
+        <li class="main "><a href="#apr">apr</a></li>
+        
+    
+        <li class="main "><a href="#backindices">backIndices</a></li>
+        
+    
+        <li class="main "><a href="#biggestcomp">biggestComp</a></li>
+        
+    
+        <li class="main "><a href="#cg">cg</a></li>
+        
+    
+        <li class="main "><a href="#chimera">chimera</a></li>
+        
+    
+        <li class="main "><a href="#compdepth">compDepth</a></li>
+        
+    
+        <li class="main "><a href="#compstretches">compStretches</a></li>
+        
+    
+        <li class="main "><a href="#completebinarytree">completeBinaryTree</a></li>
+        
+    
+        <li class="main "><a href="#completegraph">completeGraph</a></li>
+        
+    
+        <li class="main "><a href="#components">components</a></li>
+        
+    
+        <li class="main "><a href="#deg">deg</a></li>
+        
+    
+        <li class="main "><a href="#diagmat">diagmat</a></li>
+        
+    
+        <li class="main "><a href="#edgevertexmat">edgeVertexMat</a></li>
+        
+    
+        <li class="main "><a href="#generalizednecklace">generalizedNecklace</a></li>
+        
+    
+        <li class="main "><a href="#generalizedring">generalizedRing</a></li>
+        
+    
+        <li class="main "><a href="#grid2">grid2</a></li>
+        
+    
+        <li class="main "><a href="#grid2coords">grid2coords</a></li>
+        
+    
+        <li class="main "><a href="#growngraph">grownGraph</a></li>
+        
+    
+        <li class="main "><a href="#growngraphd">grownGraphD</a></li>
+        
+    
+        <li class="main "><a href="#hypercube">hyperCube</a></li>
+        
+    
+        <li class="main "><a href="#joingraphs">joinGraphs</a></li>
+        
+    
+        <li class="main "><a href="#kruskal">kruskal</a></li>
+        
+    
+        <li class="main "><a href="#lap">lap</a></li>
+        
+    
+        <li class="main "><a href="#mapweight">mapweight</a></li>
+        
+    
+        <li class="main "><a href="#mattotree">matToTree</a></li>
+        
+    
+        <li class="main "><a href="#mattotreedepth">matToTreeDepth</a></li>
+        
+    
+        <li class="main "><a href="#maxflow">maxflow</a></li>
+        
+    
+        <li class="main "><a href="#nbri">nbri</a></li>
+        
+    
+        <li class="main "><a href="#nbrs">nbrs</a></li>
+        
+    
+        <li class="main "><a href="#pathgraph">pathGraph</a></li>
+        
+    
+        <li class="main "><a href="#pcg">pcg</a></li>
+        
+    
+        <li class="main "><a href="#plotgraph">plotGraph</a></li>
+        
+    
+        <li class="main "><a href="#ppr">ppr</a></li>
+        
+    
+        <li class="main "><a href="#pr">pr</a></li>
+        
+    
+        <li class="main "><a href="#prefattach">prefAttach</a></li>
+        
+    
+        <li class="main "><a href="#prn">prn</a></li>
+        
+    
+        <li class="main "><a href="#productgraph">productGraph</a></li>
+        
+    
+        <li class="main "><a href="#purerandomgraph">pureRandomGraph</a></li>
+        
+    
+        <li class="main "><a href="#randgenring">randGenRing</a></li>
+        
+    
+        <li class="main "><a href="#randmatching">randMatching</a></li>
+        
+    
+        <li class="main "><a href="#randregular">randRegular</a></li>
+        
+    
+        <li class="main "><a href="#randweight">randWeight</a></li>
+        
+    
+        <li class="main "><a href="#randperm">randperm</a></li>
+        
+    
+        <li class="main "><a href="#readij">readIJ</a></li>
+        
+    
+        <li class="main "><a href="#ringgraph">ringGraph</a></li>
+        
+    
+        <li class="main "><a href="#setvalue">setValue</a></li>
+        
+    
+        <li class="main "><a href="#shortintgraph">shortIntGraph</a></li>
+        
+    
+        <li class="main "><a href="#shortestpaths">shortestPaths</a></li>
+        
+    
+        <li class="main "><a href="#spectralcoords">spectralCoords</a></li>
+        
+    
+        <li class="main "><a href="#spectraldrawing">spectralDrawing</a></li>
+        
+    
+        <li class="main "><a href="#subsampleedges">subsampleEdges</a></li>
+        
+    
+        <li class="main "><a href="#tarjanstretch">tarjanStretch</a></li>
+        
+    
+        <li class="main "><a href="#tounitvector">toUnitVector</a></li>
+        
+    
+        <li class="main "><a href="#twolift">twoLift</a></li>
+        
+    
+        <li class="main "><a href="#uniformweight">uniformWeight</a></li>
+        
+    
+        <li class="main "><a href="#unweight">unweight</a></li>
+        
+    
+        <li class="main "><a href="#vectocomps">vecToComps</a></li>
+        
+    
+        <li class="main "><a href="#weighti">weighti</a></li>
+        
+    
+        <li class="main "><a href="#wtedchimera">wtedChimera</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h3 id="erdosrenyicluster">ErdosRenyiCluster</h3>
+<p>Generate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.</p>
+<pre><code class="julia">ErdosRenyiCluster(n::Integer, k::Integer)
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:319</p>
+<h3 id="erdosrenyiclusterfix">ErdosRenyiClusterFix</h3>
+<p>Like an Erdos-Renyi cluster, but add back a tree so it has n vertices</p>
+<pre><code class="julia">ErdosRenyiClusterFix(n::Integer, k::Integer)
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:332</p>
+<h3 id="laplacians">Laplacians</h3>
 <p>A package for graph computations related to graph Laplacians</p>
 <p>Graphs are represented by sparse adjacency matrices, etc.</p>
 <h3 id="rootedtree">RootedTree</h3>
@@ -360,6 +401,12 @@ kidsPtr  :: Array{Tind,1}
 </code></pre>
 
 <p>at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:22</p>
+<h3 id="biggestcomp">biggestComp</h3>
+<p>Return the biggest component in a graph</p>
+<pre><code class="julia">biggestComp(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:111</p>
 <h3 id="cg">cg</h3>
 <pre><code class="julia">cg(mat, b::Array{Float64,1})
 cg(mat, b::Array{Float32,1})
@@ -367,6 +414,14 @@ cg(mat, b)
 </code></pre>
 
 <p>at /Users/spielman/git/Laplacians.jl/src/pcg.jl:29</p>
+<h3 id="chimera">chimera</h3>
+<p>Builds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
+<p>Builds a chimeric graph on n vertices. The components come from pureRandomGraph, connected by joinGraphs, productGraph and generalizedNecklace</p>
+<pre><code class="julia">chimera(n::Integer)
+chimera(n::Integer, k::Integer)
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:392</p>
 <h3 id="compdepth">compDepth</h3>
 <pre><code class="julia">compDepth{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti})
 </code></pre>
@@ -383,13 +438,13 @@ compStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
 <pre><code class="julia">completeBinaryTree(n::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:276</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:119</p>
 <h3 id="completegraph">completeGraph</h3>
-<p>The complete graph </p>
+<p>The complete graph</p>
 <pre><code class="julia">completeGraph(n::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:310</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:54</p>
 <h3 id="components">components</h3>
 <pre><code class="julia">components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
@@ -405,19 +460,19 @@ compStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
 <pre><code class="julia">diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:210</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:214</p>
 <h3 id="edgevertexmat">edgeVertexMat</h3>
 <p>The signed edge-vertex adjacency matrix</p>
 <pre><code class="julia">edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:74</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:78</p>
 <h3 id="generalizednecklace">generalizedNecklace</h3>
 <p>Constructs a generalized necklace graph starting with two graphs A and H. The resulting new graph will be constructed by expanding each vertex in H to an instance of A. k random edges will be generated between components. Thus, the resulting graph may have weighted edges.</p>
 <pre><code class="julia">generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti&lt;:Integer}, k::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:230</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:234</p>
 <h3 id="generalizedring">generalizedRing</h3>
 <p>A generalization of a ring graph. The vertices are integers modulo n. Two are connected if their difference is in gens. For example, </p>
 <pre><code>generalizedRing(17, [1 5])
@@ -426,57 +481,56 @@ compStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
 <pre><code class="julia">generalizedRing(n::Int64, gens)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:89</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:75</p>
 <h3 id="grid2">grid2</h3>
 <p>An n-by-m grid graph.  iostropy is the weighting on edges in one direction.</p>
 <pre><code class="julia">grid2(n::Int64)
 grid2(n::Int64, m::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:296</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:139</p>
 <h3 id="grid2coords">grid2coords</h3>
 <p>Coordinates for plotting the vertices of the n-by-m grid graph</p>
 <pre><code class="julia">grid2coords(n::Int64, m::Int64)
 grid2coords(n)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:300</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:143</p>
 <h3 id="growngraph">grownGraph</h3>
 <p>Create a graph on n vertices. For each vertex, give it k edges to randomly chosen prior vertices. This is a variety of a preferential attachment graph.    </p>
 <pre><code class="julia">grownGraph(n::Int64, k::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:140</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:182</p>
 <h3 id="growngraphd">grownGraphD</h3>
 <p>Like a grownGraph, but it forces the edges to all be distinct. It starts out with a k+1 clique on the first k vertices</p>
 <pre><code class="julia">grownGraphD(n::Int64, k::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:172</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:214</p>
 <h3 id="hypercube">hyperCube</h3>
 <p>The d dimensional hypercube.  Has 2^d vertices</p>
 <pre><code class="julia">hyperCube(d::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:263</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:105</p>
 <h3 id="joingraphs">joinGraphs</h3>
 <p>create a disjoint union of graphs a and b,  and then put k random edges between them</p>
 <pre><code class="julia">joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:116</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:120</p>
 <h3 id="kruskal">kruskal</h3>
 <pre><code class="julia">kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:295</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:316</p>
 <h3 id="lap">lap</h3>
-<p>Create a Laplacian matrix from an adjacency matrix.</p>
-<p>We might want to do this differently, say by enforcing symmetry</p>
+<p>Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry</p>
 <pre><code class="julia">lap(a)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:35</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:39</p>
 <h3 id="mapweight">mapweight</h3>
 <p>Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write</p>
 <pre><code class="julia">b = mapweight(a, x-&gt;rand(1)[1])
@@ -485,7 +539,7 @@ grid2coords(n)
 <pre><code class="julia">mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:52</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:56</p>
 <h3 id="mattotree">matToTree</h3>
 <pre><code class="julia">matToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 matToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)
@@ -515,11 +569,11 @@ matToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)
 
 <p>at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:14</p>
 <h3 id="pathgraph">pathGraph</h3>
-<p>The path graph on n vertices </p>
+<p>The path graph on n vertices</p>
 <pre><code class="julia">pathGraph(n::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:315</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:45</p>
 <h3 id="pcg">pcg</h3>
 <pre><code class="julia">pcg(mat, b::Array{Float64,1}, pre)
 pcg(mat, b::Array{Float32,1}, pre)
@@ -533,7 +587,7 @@ pcg(mat, b, pre)
 plotGraph(gr, x, y, color)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:134</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:138</p>
 <h3 id="ppr">ppr</h3>
 <p>computes the personal page rank vector from a starting vector s and an alpha; operates with lazy walk matrix </p>
 <pre><code class="julia">ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64)
@@ -552,7 +606,7 @@ ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, niter
 <pre><code class="julia">prefAttach(n::Int64, k::Int64, p::Float64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:196</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:238</p>
 <h3 id="prn">prn</h3>
 <p>prn{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, v::Array{Int64,1}, phi::Float64, b::Int64)</p>
 <p>the PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper</p>
@@ -566,30 +620,63 @@ ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, niter
 <pre><code class="julia">productGraph(a0::SparseMatrixCSC{Tv,Ti&lt;:Integer}, a1::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:65</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:69</p>
+<h3 id="purerandomgraph">pureRandomGraph</h3>
+<p>Generate a random graph with n vertices from one of our natural distributions</p>
+<pre><code class="julia">pureRandomGraph(n::Integer)
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:347</p>
+<h3 id="randgenring">randGenRing</h3>
+<p>A random generalized ring graph of degree k. Gens always contains 1, and the other k-1 edge types are chosen from an exponential distribution</p>
+<pre><code class="julia">randGenRing(n::Int64, k::Integer)
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:98</p>
 <h3 id="randmatching">randMatching</h3>
 <p>A random matching on n vertices</p>
 <pre><code class="julia">randMatching(n::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:112</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:154</p>
 <h3 id="randregular">randRegular</h3>
 <p>A sum of k random matchings on n vertices</p>
 <pre><code class="julia">randRegular(n::Int64, k::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:125</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:167</p>
+<h3 id="randweight">randWeight</h3>
+<p>Applies one of a number of random weighting schemes to the edges of the graph</p>
+<pre><code class="julia">randWeight(a)
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:463</p>
+<h3 id="randperm">randperm</h3>
+<pre><code class="rst">..  randperm([rng,] n)
+
+Construct a random permutation of length ``n``. The optional ``rng`` argument
+specifies a random number generator, see :ref:`Random Numbers &lt;random-numbers&gt;`.
+</code></pre>
+
+<p>Randomly permutes the vertex indices</p>
+<pre><code class="julia">randperm(r::AbstractRNG, n::Integer)
+randperm(n::Integer)
+randperm(mat::AbstractArray{T,2})
+randperm(f::Expr)
+</code></pre>
+
+<p>at random.jl:1341</p>
 <h3 id="readij">readIJ</h3>
 <pre><code class="julia">readIJ(filename::AbstractString)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:34</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:7</p>
 <h3 id="ringgraph">ringGraph</h3>
 <p>The simple ring on n vertices</p>
 <pre><code class="julia">ringGraph(n::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:74</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:60</p>
 <h3 id="setvalue">setValue</h3>
 <pre><code class="julia">setValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)
 </code></pre>
@@ -605,25 +692,25 @@ ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, niter
 <pre><code class="julia">shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:101</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:122</p>
 <h3 id="spectralcoords">spectralCoords</h3>
 <p>Computes the spectral coordinates of a graph</p>
 <pre><code class="julia">spectralCoords(a)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:179</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:183</p>
 <h3 id="spectraldrawing">spectralDrawing</h3>
 <p>Computes spectral coordinates, and then uses plotGraph to draw</p>
 <pre><code class="julia">spectralDrawing(a)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:171</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:175</p>
 <h3 id="subsampleedges">subsampleEdges</h3>
 <p>Create a new graph from the old, but keeping edge edge with probability <code>p</code></p>
 <pre><code class="julia">subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:83</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:87</p>
 <h3 id="tarjanstretch">tarjanStretch</h3>
 <pre><code class="julia">tarjanStretch{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, depth::Array{Tv,1})
 </code></pre>
@@ -634,7 +721,7 @@ ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, niter
 <pre><code class="julia">toUnitVector(a::Array{Int64,1}, n)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:188</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:192</p>
 <h3 id="twolift">twoLift</h3>
 <p>Creats a 2-lift of a.  <code>flip</code> is a boolean indicating which edges cross</p>
 <pre><code class="julia">twoLift(a)
@@ -642,74 +729,79 @@ twoLift(a, flip::AbstractArray{Bool,1})
 twoLift(a, k::Integer)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:104</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:108</p>
 <h3 id="uniformweight">uniformWeight</h3>
 <p>Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight.</p>
 <pre><code class="julia">uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:61</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:65</p>
 <h3 id="unweight">unweight</h3>
 <p>Create a new graph in that is the same as the original, but with all edge weights 1</p>
 <pre><code class="julia">unweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:39</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:43</p>
 <h3 id="vectocomps">vecToComps</h3>
 <pre><code class="julia">vecToComps{Ti}(compvec::Array{Ti,1})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:89</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:88</p>
 <h3 id="weighti">weighti</h3>
 <pre><code class="julia">weighti{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti)
 </code></pre>
 
 <p>at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:13</p>
-              
-            </div>
-          </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../generators/index.html" class="btn btn-neutral float-right" title="Generators"/>Next <span class="icon icon-circle-arrow-right"></span></a>
-      
-      
-        <a href="../solvers/index.html" class="btn btn-neutral" title="Solvers"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-      
-    </div>
-  
+<h3 id="wtedchimera">wtedChimera</h3>
+<p>Builds the kth wted chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
+<p>Generate a chimera, and then apply a random weighting scheme</p>
+<pre><code class="julia">wtedChimera(n::Integer)
+wtedChimera(n::Integer, k::Integer)
+</code></pre>
 
-  <hr/>
-
-  <div role="contentinfo">
-    <!-- Copyright etc -->
-    
-  </div>
-
-  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-</footer>
-	  
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:528</p></div>
+            
         </div>
-      </div>
 
-    </section>
+        <footer class="col-md-12">
+            <hr>
+            
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
 
-  </div>
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+        <script src="../mathjaxhelper.js"></script>
 
-<div class="rst-versions" role="note" style="cursor: pointer">
-    <span class="rst-current-version" data-toggle="rst-current-version">
-      
-          <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
-      
-      
-        <span><a href="../solvers/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
-      
-      
-        <span style="margin-left: 15px"><a href="../generators/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
-      
-    </span>
-</div>
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            From here you can search these documents. Enter
+                            your search terms below.
+                        </p>
+                        <form role="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                            </div>
+                        </form>
+                        <div id="mkdocs-search-results"></div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
 
-</body>
+    </body>
 </html>

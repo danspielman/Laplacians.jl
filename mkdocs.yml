@@ -2,19 +2,31 @@ site_name: Laplacians.jl
 
 site_description: Graph analysis inspired by graph Laplacians and the needs of researchers at YINS
 
-theme: readthedocs
+theme: mkdocs
 
 repo_url: https://github.com/danspielman/Laplacians.jl
 
 pages:
-- [about.md, About]
-- [Julia.md, User Guide, Using Julia]
-- [Laplacians.md, User Guide, Overview]
-- [yinsGraph.md, User Guide, yinsGraph]
-- [solvers.md, User Guide, Solvers]
-- [wholeAPI.md, API, Whole API]
-- [generators.md, API, Generators]
-- [operations.md, API, Operations]
+- Home: 'index.md'
+- User Guide:
+    - 'Writing your docs': 'user-guide/writing-your-docs.md'
+    - 'Styling your docs': 'user-guide/styling-your-docs.md'
+- About:
+    - 'License': 'about/license.md'
+    - 'Release Notes': 'about/release-notes.md'
+
+pages:
+- About: 'about.md'
+- User Guide:
+    - Using Julia: 'Julia.md'
+    - Overview: 'Laplacians.md'
+    - Solvers: 'solvers.md'
+- API:
+    - Whole API: 'wholeAPI.md'
+    - graphGenerators: 'graphGeneratorsAPI.md'
+    - graphOps: 'graphOpsAPI.md'
+    - graphAlgs: 'graphAlgsAPI.md'
+    - cutPageRank: 'cutPageRankAPI.md'
 
 docs_dir: 'docs'
 

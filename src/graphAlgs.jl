@@ -84,17 +84,38 @@ function components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
   return comp
 end # function
 
-
 function vecToComps{Ti}(compvec::Array{Ti,1})
-  nc = maximum(compvec)
-  comps = Array(Array{Ti,1},nc)
-  for i in 1:nc
-    comps[i] = find(compvec.==i)
-  end
-  return comps
+    nc = maximum(compvec)
+    comps = Array(Array{Ti,1},nc)
+
+    sizes = zeros(Ti,nc)
+    for i in compvec
+        sizes[i] += 1
+    end
+
+     for i in 1:nc
+         comps[i] = zeros(Ti,sizes[i])
+     end
+
+    ptrs = zeros(Ti,nc)
+     for i in 1:length(compvec)
+        c = compvec[i]
+        ptrs[c] += 1
+        comps[c][ptrs[c]] = i
+    end
+    return comps
 end # vecToComps
 
-#end # module
+"""Return the biggest component in a graph"""
+function biggestComp(mat::SparseMatrixCSC)
+    cv = components(mat)
+    cs = vecToComps(cv)
+    sizes = map(x->length(x), cs)
+    jnk, ind = findmax(sizes)
+    return mat[cs[ind],cs[ind]]
+end
+
+
 
 
 function shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)

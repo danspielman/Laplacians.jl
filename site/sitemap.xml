@@ -4,7 +4,7 @@
     
     <url>
      <loc>None/about/index.html</loc>
-     <lastmod>2015-10-29</lastmod>
+     <lastmod>2015-11-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -13,25 +13,19 @@
         
     <url>
      <loc>None/Julia/index.html</loc>
-     <lastmod>2015-10-29</lastmod>
+     <lastmod>2015-11-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/Laplacians/index.html</loc>
-     <lastmod>2015-10-29</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>None/yinsGraph/index.html</loc>
-     <lastmod>2015-10-29</lastmod>
+     <lastmod>2015-11-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/solvers/index.html</loc>
-     <lastmod>2015-10-29</lastmod>
+     <lastmod>2015-11-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
@@ -40,20 +34,32 @@
     
         
     <url>
-     <loc>None/wholeApi/index.html</loc>
-     <lastmod>2015-10-29</lastmod>
+     <loc>None/wholeAPI/index.html</loc>
+     <lastmod>2015-11-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/generators/index.html</loc>
-     <lastmod>2015-10-29</lastmod>
+     <loc>None/graphGeneratorsAPI/index.html</loc>
+     <lastmod>2015-11-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/operations/index.html</loc>
-     <lastmod>2015-10-29</lastmod>
+     <loc>None/graphOpsAPI/index.html</loc>
+     <lastmod>2015-11-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/graphAlgsAPI/index.html</loc>
+     <lastmod>2015-11-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/cutPageRankAPI/index.html</loc>
+     <lastmod>2015-11-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         

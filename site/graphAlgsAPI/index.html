@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../../lambda2.ico">
         
 
-	<title>About - Laplacians.jl</title>
+	<title>graphAlgs - Laplacians.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -45,7 +45,7 @@
             
 
             <!-- Main title -->
-            <a class="navbar-brand" href="index.html">Laplacians.jl</a>
+            <a class="navbar-brand" href="../about/index.html">Laplacians.jl</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -55,8 +55,8 @@
                 <ul class="nav navbar-nav">
                 
                 
-                    <li class="active">
-                        <a href="index.html">About</a>
+                    <li >
+                        <a href="../about/index.html">About</a>
                     </li>
                 
                 
@@ -88,7 +88,7 @@
                 
                 
                 
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
@@ -111,8 +111,8 @@
 
                         
                             
-<li >
-    <a href="../graphAlgsAPI/index.html">graphAlgs</a>
+<li class="active">
+    <a href="index.html">graphAlgs</a>
 </li>
 
                         
@@ -136,13 +136,13 @@
                     </a>
                 </li>
                 
-                    <li class="disabled">
-                        <a rel="next" >
+                    <li >
+                        <a rel="next" href="../graphOpsAPI/index.html">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../Julia/index.html">
+                        <a rel="prev" href="../cutPageRankAPI/index.html">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -167,18 +167,22 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#about-laplaciansjl">About Laplacians.jl</a></li>
+        <li class="main active"><a href="#graphalgs">graphAlgs</a></li>
+        
+            <li><a href="#biggestcomp">biggestComp</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="about-laplaciansjl">About Laplacians.jl</h1>
-<p>Laplacians is a package containing graph algorithms, with an emphsasis on tasks related to spectral and algebraic graph theory.  It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.</p>
-<p>All graphs are represented by sparse adjacency matrices.
-This is both for speed, and because our main concerns are algebraic tasks.</p>
-<p>Laplacians.jl was started by Daniel A. Spielman.  Other contributors include Xiao Shi, Serban Stan and Jackson Thea.</p></div>
+<h1 id="graphalgs">graphAlgs</h1>
+<h3 id="biggestcomp">biggestComp</h3>
+<p>Return the biggest component in a graph</p>
+<pre><code class="julia">biggestComp(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
+</code></pre>
+
+<p>graphAlgs.jl:111</p></div>
             
         </div>
 

@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../../lambda2.ico">
         
 
-	<title>About - Laplacians.jl</title>
+	<title>cutPageRank - Laplacians.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -45,7 +45,7 @@
             
 
             <!-- Main title -->
-            <a class="navbar-brand" href="index.html">Laplacians.jl</a>
+            <a class="navbar-brand" href="../about/index.html">Laplacians.jl</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -55,8 +55,8 @@
                 <ul class="nav navbar-nav">
                 
                 
-                    <li class="active">
-                        <a href="index.html">About</a>
+                    <li >
+                        <a href="../about/index.html">About</a>
                     </li>
                 
                 
@@ -88,7 +88,7 @@
                 
                 
                 
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
@@ -117,8 +117,8 @@
 
                         
                             
-<li >
-    <a href="../cutPageRankAPI/index.html">cutPageRank</a>
+<li class="active">
+    <a href="index.html">cutPageRank</a>
 </li>
 
                         
@@ -136,13 +136,13 @@
                     </a>
                 </li>
                 
-                    <li class="disabled">
-                        <a rel="next" >
+                    <li >
+                        <a rel="next" href="../graphAlgsAPI/index.html">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../Julia/index.html">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -167,18 +167,49 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#about-laplaciansjl">About Laplacians.jl</a></li>
+        <li class="main active"><a href="#cutpagerank">cutPageRank</a></li>
+        
+            <li><a href="#pr">pr</a></li>
+        
+            <li><a href="#ppr">ppr</a></li>
+        
+            <li><a href="#apr">apr</a></li>
+        
+            <li><a href="#prn">prn</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="about-laplaciansjl">About Laplacians.jl</h1>
-<p>Laplacians is a package containing graph algorithms, with an emphsasis on tasks related to spectral and algebraic graph theory.  It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.</p>
-<p>All graphs are represented by sparse adjacency matrices.
-This is both for speed, and because our main concerns are algebraic tasks.</p>
-<p>Laplacians.jl was started by Daniel A. Spielman.  Other contributors include Xiao Shi, Serban Stan and Jackson Thea.</p></div>
+<h1 id="cutpagerank">cutPageRank</h1>
+<h3 id="pr">pr</h3>
+<p>computes a page rank vector satisfying p = a/n * 1 + (1 - a) * W * p</p>
+<pre><code class="julia">pr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, alpha::Float64)
+</code></pre>
+
+<p>cutPageRank.jl:20</p>
+<h3 id="ppr">ppr</h3>
+<p>computes the personal page rank vector from a starting vector s and an alpha; operates with lazy walk matrix </p>
+<pre><code class="julia">ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64)
+ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, niter::Int64)
+</code></pre>
+
+<p>cutPageRank.jl:38</p>
+<h3 id="apr">apr</h3>
+<p>computes an approximate page rank vector from a starting vector s, an alpha and an epsilon </p>
+<pre><code class="julia">apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, eps::Float64)
+</code></pre>
+
+<p>cutPageRank.jl:71</p>
+<h3 id="prn">prn</h3>
+<p>prn{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, v::Array{Int64,1}, phi::Float64, b::Int64)</p>
+<p>the PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper</p>
+<p>v is a set of vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]</p>
+<pre><code class="julia">prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, v::Array{Int64,1}, phi::Float64, b::Int64)
+</code></pre>
+
+<p>cutPageRank.jl:115</p></div>
             
         </div>
 
