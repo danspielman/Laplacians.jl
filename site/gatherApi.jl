@@ -52,25 +52,31 @@ strings = Array(AbstractString,n)
 for i in 1:length(nms)
     sym = nms[i]
     x = eval(sym)
+
     strings[i] = string(sym)
+
+    try
     
-    if isa(x,Function)
-      mt = methods(x)
-      file, line = functionloc(mt.defs)
-      fileins[i] = rsplit(file,"/")[end]
-      linenums[i] = line
-    end
+        if isa(x,Function)
+            mt = methods(x)
+            file, line = functionloc(mt.defs)
+            fileins[i] = rsplit(file,"/")[end]
+            linenums[i] = line
+        end
 
         
-    docmd = @doc(x)
-    
-    docstr = stringmime("text/plain", docmd )
-    if (length(docstr) < 23) || (docstr[1:23] != noDocString)
-        docstrs[i] = docstr;
-    end
+        docmd = @doc(x)
+        
+        docstr = stringmime("text/plain", docmd )
+        if (length(docstr) < 23) || (docstr[1:23] != noDocString)
+            docstrs[i] = docstr;
+        end
 
-    extras[i] = extraInfo(x)
-    
+        extras[i] = extraInfo(x)
+
+    catch
+    end
+        
 end
 
 

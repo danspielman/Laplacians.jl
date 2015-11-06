@@ -63,6 +63,18 @@ graphOps.jl:65
 
 
 
+### uniformWeight!
+Set the weight of every edge to 1
+
+
+```julia
+uniformWeight!(mat::SparseMatrixCSC{Tv,Ti<:Integer})
+```
+
+graphOps.jl:69
+
+
+
 ### productGraph
 The Cartesian product of two graphs.  When applied to two paths, it gives a grid.
 
@@ -71,7 +83,7 @@ The Cartesian product of two graphs.  When applied to two paths, it gives a grid
 productGraph(a0::SparseMatrixCSC{Tv,Ti<:Integer}, a1::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphOps.jl:69
+graphOps.jl:74
 
 
 
@@ -83,7 +95,7 @@ The signed edge-vertex adjacency matrix
 edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphOps.jl:78
+graphOps.jl:83
 
 
 
@@ -95,7 +107,7 @@ Create a new graph from the old, but keeping edge edge with probability `p`
 subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
 ```
 
-graphOps.jl:87
+graphOps.jl:92
 
 
 
@@ -109,7 +121,7 @@ twoLift(a, flip::AbstractArray{Bool,1})
 twoLift(a, k::Integer)
 ```
 
-graphOps.jl:108
+graphOps.jl:113
 
 
 
@@ -121,7 +133,7 @@ create a disjoint union of graphs a and b,  and then put k random edges between 
 joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
 ```
 
-graphOps.jl:120
+graphOps.jl:125
 
 
 
@@ -134,7 +146,7 @@ plotGraph(gr, x, y)
 plotGraph(gr, x, y, color)
 ```
 
-graphOps.jl:138
+graphOps.jl:143
 
 
 
@@ -146,7 +158,7 @@ Computes spectral coordinates, and then uses plotGraph to draw
 spectralDrawing(a)
 ```
 
-graphOps.jl:175
+graphOps.jl:180
 
 
 
@@ -158,7 +170,7 @@ Computes the spectral coordinates of a graph
 spectralCoords(a)
 ```
 
-graphOps.jl:183
+graphOps.jl:188
 
 
 
@@ -170,7 +182,7 @@ creates a unit vector of length n from a given set of integers, with weights bas
 toUnitVector(a::Array{Int64,1}, n)
 ```
 
-graphOps.jl:192
+graphOps.jl:197
 
 
 
@@ -182,7 +194,7 @@ returns the diagonal matrix(as a sparse matrix) of a graph
 diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 ```
 
-graphOps.jl:214
+graphOps.jl:219
 
 
 
@@ -194,7 +206,7 @@ Constructs a generalized necklace graph starting with two graphs A and H. The re
 generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti<:Integer}, k::Int64)
 ```
 
-graphOps.jl:234
+graphOps.jl:239
 
 
 

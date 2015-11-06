@@ -173,6 +173,18 @@ graphGenerators.jl:238
 
 
 
+### ErdosRenyi
+Generate a random graph on n vertices with m edges. The actual number of edges will probably be smaller, as we sample with replacement
+
+
+```julia
+ErdosRenyi(n::Integer, m::Integer)
+```
+
+graphGenerators.jl:317
+
+
+
 ### ErdosRenyiCluster
 Generate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.
 
@@ -181,7 +193,7 @@ Generate an ER graph with average degree k, and then return the largest componen
 ErdosRenyiCluster(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:319
+graphGenerators.jl:331
 
 
 
@@ -193,7 +205,7 @@ Like an Erdos-Renyi cluster, but add back a tree so it has n vertices
 ErdosRenyiClusterFix(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:332
+graphGenerators.jl:344
 
 
 
@@ -205,7 +217,7 @@ Generate a random graph with n vertices from one of our natural distributions
 pureRandomGraph(n::Integer)
 ```
 
-graphGenerators.jl:347
+graphGenerators.jl:359
 
 
 
@@ -220,7 +232,7 @@ chimera(n::Integer)
 chimera(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:392
+graphGenerators.jl:404
 
 
 
@@ -232,7 +244,7 @@ Applies one of a number of random weighting schemes to the edges of the graph
 randWeight(a)
 ```
 
-graphGenerators.jl:463
+graphGenerators.jl:475
 
 
 
@@ -247,7 +259,7 @@ wtedChimera(n::Integer)
 wtedChimera(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:528
+graphGenerators.jl:540
 
 
 

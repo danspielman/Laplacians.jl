@@ -73,13 +73,28 @@
                         
                             
 <li >
-    <a href="../Laplacians/index.html">Overview</a>
+    <a href="../Laplacians/index.html">Introduction</a>
 </li>
 
                         
                             
 <li >
     <a href="../solvers/index.html">Solvers</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developing <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../Developing/index.html">Devleoping Laplacians</a>
 </li>
 
                         
@@ -122,6 +137,12 @@
 </li>
 
                         
+                            
+<li >
+    <a href="../solversAPI/index.html">solvers</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -137,7 +158,7 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../solvers/index.html">
+                        <a rel="next" href="../Developing/index.html">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
@@ -167,7 +188,10 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#erdosrenyicluster">ErdosRenyiCluster</a></li>
+        <li class="main active"><a href="#erdosrenyi">ErdosRenyi</a></li>
+        
+    
+        <li class="main "><a href="#erdosrenyicluster">ErdosRenyiCluster</a></li>
         
     
         <li class="main "><a href="#erdosrenyiclusterfix">ErdosRenyiClusterFix</a></li>
@@ -180,6 +204,15 @@
         
     
         <li class="main "><a href="#apr">apr</a></li>
+        
+    
+        <li class="main "><a href="#augtreeprecon">augTreePrecon</a></li>
+        
+    
+        <li class="main "><a href="#augtreesolver">augTreeSolver</a></li>
+        
+    
+        <li class="main "><a href="#augmenttree">augmentTree</a></li>
         
     
         <li class="main "><a href="#backindices">backIndices</a></li>
@@ -246,6 +279,12 @@
         
     
         <li class="main "><a href="#lap">lap</a></li>
+        
+    
+        <li class="main "><a href="#lapchol">lapChol</a></li>
+        
+    
+        <li class="main "><a href="#lapwrapsolver">lapWrapSolver</a></li>
         
     
         <li class="main "><a href="#mapweight">mapweight</a></li>
@@ -344,6 +383,9 @@
         <li class="main "><a href="#uniformweight">uniformWeight</a></li>
         
     
+        <li class="main "><a href="#uniformweight_1">uniformWeight!</a></li>
+        
+    
         <li class="main "><a href="#unweight">unweight</a></li>
         
     
@@ -360,18 +402,24 @@
 </div></div>
                 <div class="col-md-9" role="main">
 
+<h3 id="erdosrenyi">ErdosRenyi</h3>
+<p>Generate a random graph on n vertices with m edges. The actual number of edges will probably be smaller, as we sample with replacement</p>
+<pre><code class="julia">ErdosRenyi(n::Integer, m::Integer)
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:317</p>
 <h3 id="erdosrenyicluster">ErdosRenyiCluster</h3>
 <p>Generate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.</p>
 <pre><code class="julia">ErdosRenyiCluster(n::Integer, k::Integer)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:319</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:331</p>
 <h3 id="erdosrenyiclusterfix">ErdosRenyiClusterFix</h3>
 <p>Like an Erdos-Renyi cluster, but add back a tree so it has n vertices</p>
 <pre><code class="julia">ErdosRenyiClusterFix(n::Integer, k::Integer)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:332</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:344</p>
 <h3 id="laplacians">Laplacians</h3>
 <p>A package for graph computations related to graph Laplacians</p>
 <p>Graphs are represented by sparse adjacency matrices, etc.</p>
@@ -395,6 +443,24 @@ kidsPtr  :: Array{Tind,1}
 </code></pre>
 
 <p>at /Users/spielman/git/Laplacians.jl/src/cutPageRank.jl:71</p>
+<h3 id="augtreeprecon">augTreePrecon</h3>
+<p>This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.</p>
+<pre><code class="julia">augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/solvers.jl:188</p>
+<h3 id="augtreesolver">augTreeSolver</h3>
+<p>This is the solver that calls augTreePrecon</p>
+<pre><code class="julia">augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/solvers.jl:210</p>
+<h3 id="augmenttree">augmentTree</h3>
+<p>Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch</p>
+<pre><code class="julia">augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/solvers.jl:138</p>
 <h3 id="backindices">backIndices</h3>
 <p>computes the back indices in a graph in O(M+N) </p>
 <pre><code class="julia">backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
@@ -402,11 +468,11 @@ kidsPtr  :: Array{Tind,1}
 
 <p>at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:22</p>
 <h3 id="biggestcomp">biggestComp</h3>
-<p>Return the biggest component in a graph</p>
+<p>Return the biggest component in a graph, as a graph</p>
 <pre><code class="julia">biggestComp(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:111</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:146</p>
 <h3 id="cg">cg</h3>
 <pre><code class="julia">cg(mat, b::Array{Float64,1})
 cg(mat, b::Array{Float32,1})
@@ -421,7 +487,7 @@ cg(mat, b)
 chimera(n::Integer, k::Integer)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:392</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:404</p>
 <h3 id="compdepth">compDepth</h3>
 <pre><code class="julia">compDepth{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti})
 </code></pre>
@@ -446,10 +512,27 @@ compStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
 
 <p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:54</p>
 <h3 id="components">components</h3>
+<p>Computes the connected components of a graph. Returns them as a vector of length equal to the number of vertices. The vector numbers the components from 1 through the maximum number. For example,</p>
+<pre><code class="julia">gr = ErdosRenyi(10,11)
+c = components(gr)
+
+10-element Array{Int64,1}:
+ 1
+ 1
+ 1
+ 1
+ 2
+ 1
+ 1
+ 1
+ 3
+ 2
+</code></pre>
+
 <pre><code class="julia">components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:43</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:65</p>
 <h3 id="deg">deg</h3>
 <pre><code class="julia">deg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)
 </code></pre>
@@ -460,19 +543,19 @@ compStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
 <pre><code class="julia">diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:214</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:219</p>
 <h3 id="edgevertexmat">edgeVertexMat</h3>
 <p>The signed edge-vertex adjacency matrix</p>
 <pre><code class="julia">edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:78</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:83</p>
 <h3 id="generalizednecklace">generalizedNecklace</h3>
 <p>Constructs a generalized necklace graph starting with two graphs A and H. The resulting new graph will be constructed by expanding each vertex in H to an instance of A. k random edges will be generated between components. Thus, the resulting graph may have weighted edges.</p>
 <pre><code class="julia">generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti&lt;:Integer}, k::Int64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:234</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:239</p>
 <h3 id="generalizedring">generalizedRing</h3>
 <p>A generalization of a ring graph. The vertices are integers modulo n. Two are connected if their difference is in gens. For example, </p>
 <pre><code>generalizedRing(17, [1 5])
@@ -519,18 +602,28 @@ grid2coords(n)
 <pre><code class="julia">joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:120</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:125</p>
 <h3 id="kruskal">kruskal</h3>
+<p>Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree. Set kind=:max if you want the max spanning tree. It returns it a a graph</p>
 <pre><code class="julia">kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:316</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:357</p>
 <h3 id="lap">lap</h3>
 <p>Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry</p>
 <pre><code class="julia">lap(a)
 </code></pre>
 
 <p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:39</p>
+<h3 id="lapchol">lapChol</h3>
+<h3 id="lapwrapsolver">lapWrapSolver</h3>
+<p>Takes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here</p>
+<pre><code class="julia">lapWrapSolver(solver)
+lapWrapSolver(solver, la::AbstractArray{T,2})
+lapWrapSolver(solver, la::AbstractArray{T,2}, b)
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/solvers.jl:108</p>
 <h3 id="mapweight">mapweight</h3>
 <p>Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write</p>
 <pre><code class="julia">b = mapweight(a, x-&gt;rand(1)[1])
@@ -587,7 +680,7 @@ pcg(mat, b, pre)
 plotGraph(gr, x, y, color)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:138</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:143</p>
 <h3 id="ppr">ppr</h3>
 <p>computes the personal page rank vector from a starting vector s and an alpha; operates with lazy walk matrix </p>
 <pre><code class="julia">ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64)
@@ -620,13 +713,13 @@ ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, niter
 <pre><code class="julia">productGraph(a0::SparseMatrixCSC{Tv,Ti&lt;:Integer}, a1::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:69</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:74</p>
 <h3 id="purerandomgraph">pureRandomGraph</h3>
 <p>Generate a random graph with n vertices from one of our natural distributions</p>
 <pre><code class="julia">pureRandomGraph(n::Integer)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:347</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:359</p>
 <h3 id="randgenring">randGenRing</h3>
 <p>A random generalized ring graph of degree k. Gens always contains 1, and the other k-1 edge types are chosen from an exponential distribution</p>
 <pre><code class="julia">randGenRing(n::Int64, k::Integer)
@@ -650,7 +743,7 @@ ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, niter
 <pre><code class="julia">randWeight(a)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:463</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:475</p>
 <h3 id="randperm">randperm</h3>
 <pre><code class="rst">..  randperm([rng,] n)
 
@@ -689,28 +782,29 @@ randperm(f::Expr)
 
 <p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:30</p>
 <h3 id="shortestpaths">shortestPaths</h3>
+<p>Computes the lenghts of shortest paths from <code>start</code>. Returns both a vector of the lenghts, and the parent array in the shortest path tree. DOC BETTER</p>
 <pre><code class="julia">shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:122</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:161</p>
 <h3 id="spectralcoords">spectralCoords</h3>
 <p>Computes the spectral coordinates of a graph</p>
 <pre><code class="julia">spectralCoords(a)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:183</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:188</p>
 <h3 id="spectraldrawing">spectralDrawing</h3>
 <p>Computes spectral coordinates, and then uses plotGraph to draw</p>
 <pre><code class="julia">spectralDrawing(a)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:175</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:180</p>
 <h3 id="subsampleedges">subsampleEdges</h3>
 <p>Create a new graph from the old, but keeping edge edge with probability <code>p</code></p>
 <pre><code class="julia">subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:87</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:92</p>
 <h3 id="tarjanstretch">tarjanStretch</h3>
 <pre><code class="julia">tarjanStretch{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, depth::Array{Tv,1})
 </code></pre>
@@ -721,7 +815,7 @@ randperm(f::Expr)
 <pre><code class="julia">toUnitVector(a::Array{Int64,1}, n)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:192</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:197</p>
 <h3 id="twolift">twoLift</h3>
 <p>Creats a 2-lift of a.  <code>flip</code> is a boolean indicating which edges cross</p>
 <pre><code class="julia">twoLift(a)
@@ -729,13 +823,19 @@ twoLift(a, flip::AbstractArray{Bool,1})
 twoLift(a, k::Integer)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:108</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:113</p>
 <h3 id="uniformweight">uniformWeight</h3>
 <p>Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight.</p>
 <pre><code class="julia">uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 </code></pre>
 
 <p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:65</p>
+<h3 id="uniformweight_1">uniformWeight!</h3>
+<p>Set the weight of every edge to 1</p>
+<pre><code class="julia">uniformWeight!(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
+</code></pre>
+
+<p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:69</p>
 <h3 id="unweight">unweight</h3>
 <p>Create a new graph in that is the same as the original, but with all edge weights 1</p>
 <pre><code class="julia">unweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
@@ -743,10 +843,19 @@ twoLift(a, k::Integer)
 
 <p>at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:43</p>
 <h3 id="vectocomps">vecToComps</h3>
+<p>This turns a component vector, like that generated by components, into an array of arrays of indices of vertices in each component.  For example,</p>
+<pre><code class="julia">comps = vecToComps(c)
+
+3-element Array{Array{Int64,1},1}:
+ [1,2,3,4,6,7,8]
+ [5,10]         
+ [9]   
+</code></pre>
+
 <pre><code class="julia">vecToComps{Ti}(compvec::Array{Ti,1})
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:88</p>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:123</p>
 <h3 id="weighti">weighti</h3>
 <pre><code class="julia">weighti{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti)
 </code></pre>
@@ -759,7 +868,7 @@ twoLift(a, k::Integer)
 wtedChimera(n::Integer, k::Integer)
 </code></pre>
 
-<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:528</p></div>
+<p>at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:540</p></div>
             
         </div>
 

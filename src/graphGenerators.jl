@@ -310,6 +310,18 @@ end
 randperm(f::Expr) = randperm(eval(f))
 
 
+"""Generate a random graph on n vertices with m edges.
+The actual number of edges will probably be smaller, as we sample
+with replacement"""
+function ErdosRenyi(n::Integer, m::Integer)
+    ai = rand(1:n, m)
+    aj = rand(1:n, m)
+    ind = (ai .!= aj)
+    mat = sparse(ai[ind],aj[ind],1,n,n)
+    uniformWeight!(mat)
+    return mat
+end
+
 """Generate an ER graph with average degree k,
 and then return the largest component.
 Will probably have fewer than n vertices.

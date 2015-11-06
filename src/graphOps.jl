@@ -64,6 +64,11 @@ end # mapweight
 """Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight."""
 uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}) = mapweight(a,x->rand(1)[1])
 
+"""Set the weight of every edge to 1"""
+function uniformWeight!(mat::SparseMatrixCSC)
+    mat.nzval = ones(length(mat.nzval))
+end
+
 """The Cartesian product of two graphs.  When applied to two paths, it gives a grid."""
 function productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
   n0 = size(a0)[1]

@@ -19,14 +19,17 @@ pages:
 - About: 'about.md'
 - User Guide:
     - Using Julia: 'Julia.md'
-    - Overview: 'Laplacians.md'
+    - Introduction: 'Laplacians.md'
     - Solvers: 'solvers.md'
+- Developing:
+    - Devleoping Laplacians: 'Developing.md'
 - API:
     - Whole API: 'wholeAPI.md'
     - graphGenerators: 'graphGeneratorsAPI.md'
     - graphOps: 'graphOpsAPI.md'
     - graphAlgs: 'graphAlgsAPI.md'
     - cutPageRank: 'cutPageRankAPI.md'
+    - solvers: 'solversAPI.md'
 
 docs_dir: 'docs'
 

@@ -55,6 +55,11 @@ function lapWrapSolver(solver, la::AbstractMatrix)
 end
 =#
 
+
+"""Takes a solver for solving nonsingular sdd systems,
+and returns a solver for solving Laplacian systems.
+The optional args tol and maxits are not necessarily taken by
+all solvers.  But, if they are, one can pass them here"""
 function lapWrapSolver(solver, la::AbstractMatrix; tol::Real=0, maxits::Integer=0)
     N = size(la)[1]
     lasub = la[1:(N-1),1:(N-1)]
@@ -107,6 +112,7 @@ function lapWrapSolver(solver; tol::Real=0, maxits::Integer=0)
 end
 
 
+"""lapChol uses cholesky factorization to solver systems in Laplacians"""    
 lapChol = lapWrapSolver(cholfact)
 
 #lapWrapSolver(solver, la::AbstractMatrix, b) = lapWrapSolver(solver,la)(b)    
@@ -123,8 +129,10 @@ lapWrapSolver(solver, la::AbstractMatrix, b; tol::Real=0, maxits::Integer=0) = l
 
 
 
-# add back the k edges of highest stretch,
-# and then sample an expected k edges by stretch
+"""Takes as input a tree and an adjacency matrix of a graph.
+It then computes the stretch of every edge of the graph wrt
+the tree.  It then adds back the k edges of highest stretch,
+and k edges sampled according to stretch"""
 function augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)
 
     st = compStretches(tree, mat)
@@ -170,13 +178,11 @@ end
 
 
     
-# this is an augmented spanning tree solver whose purpose is to never suck,
-# although it will probably never be great
-# 
-# it computes a randomishKruskall tree, and then adds back the
-# sqrt(n) edges of highest stretch and the sqrt(n) sampled according to stretch
-#
-# this is just the solver for the augmented tree
+"""This is an augmented spanning tree preconditioner for diagonally dominant
+linear systems.  It takes as optional input a tree growing algorithm.
+The default is a randomized variant of Kruskal.
+It adds back 2sqrt(n) edges via augmentTree.
+With the right tree, it should never be too bad."""
 function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishKruskal)
 
   adjmat = -triu(ddmat,1)
@@ -198,13 +204,7 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishKrus
 
 end
 
-# this is an augmented spanning tree solver whose purpose is to never suck,
-# although it will probably never be great
-# 
-# it computes a randomishKruskall tree, and then adds back the
-# sqrt(n) edges of highest stretch and the sqrt(n) sampled according to stretch
-#
-# it then wraps it all in pcg
+"""This is the solver that calls augTreePrecon"""
 function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, treeAlg=randishKruskal)
 
   F = augTreePrecon(ddmat, treeAlg=treeAlg)
