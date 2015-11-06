@@ -127,6 +127,11 @@ and exports the functions for which it seems appropriate.
   include("flow.jl")
 
   export maxflow
+ 
+  include("flowClustering.jl")
+ 
+  export localImprove
+  export localFlow
 
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver

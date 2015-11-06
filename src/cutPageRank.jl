@@ -14,7 +14,7 @@ function pushpr{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, u::Int64, alpha::Float64, p:
 
 end # pushpr
 
-" computes a page rank vector satisfying p = a/n * 1 + (1 - a) * W * p"
+" computes a page rank vector satisfying p = a/n * 1 + (1 - a) * W * p "
 function pr{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, alpha::Float64)
   # compute the walk matrix
   u,v,w = findnz(G)
@@ -35,10 +35,10 @@ end # pr
 function ppr{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, s::Array{Float64, 1}, alpha::Float64)
 
   # LW = 1/2 * (I + A * D^-1)
-  LW = 0.5 * (eye(G.n) + G * inv(full(diagmat(G))))
+  LW = 0.5 * (speye(G.n) + G * inv(full(diagmat(G))))
 
   # p = inv(I - (1 - alpha) * W) * alpha * s
-  p = \(((eye(G.n) - (1 - alpha) * LW) / alpha), s)
+  p = \(((speye(G.n) - (1 - alpha) * LW) / alpha), s)
 
   return p
 
@@ -47,7 +47,7 @@ end # ppr
 function ppr{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, s::Array{Float64, 1}, alpha::Float64, niter::Int64)
 
   # LW = 1/2 * (I + A * D^-1)
-  LW = 0.5 * (eye(G.n) + G * inv(full(diagmat(G))))
+  LW = 0.5 * (speye(G.n) + G * inv(full(diagmat(G))))
 
   # s is the vector of dried paint, r is the vector of wet paint
   r = copy(s)
