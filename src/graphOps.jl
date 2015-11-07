@@ -1,30 +1,3 @@
-#=
-
-Operations on graphs.
-Including transformations, combinations, and code for plotting.
-
-Started by Dan Spielman.
-Contributors: your name here.
-
-Contains:
-
-shortIntGraph - for converting the index type of a graph to an Int32.
-lap - to produce the laplacian of a graph
-unweight - change all the weights to 1
-mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind},f) - to apply the function f to the weight of every edge.
-uniformWeight : an example of mapweight.  It ignores the weight, and maps every weight to a random in [0,1]
-productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
-edgeVertexMat(mat::SparseMatrixCSC) - signed edge vertex matrix
-subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)-
-  produce a new graph that keeps each edge with probability p
-twoLift(a, flip::Array)
-function joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
-plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)
-spectralDrawing(a)
-toUnitVector(a::Array{Int64,1})
-diagmat{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti})
-
-=#
 
 "Convert the indices in a graph to 32-bit ints.  This takes less storage, but does not speed up much"
 shortIntGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int32}(convert(Int32,a.m), convert(Int32,a.n), convert(Array{Int32,1},a.colptr), convert(Array{Int32,1},a.rowval), a.nzval)

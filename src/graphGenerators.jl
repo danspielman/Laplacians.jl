@@ -385,7 +385,18 @@ function pureRandomGraph(n::Integer)
 
     i = sampleByWeight(wt)
 
+    # make sure get a connected graph
+    its = 0
     mat = eval(gr[i])
+
+    while (~isConnected(mat)) && (its < 100)
+        mat = eval(gr[i])
+        its += 1
+    end
+    if its == 100
+        error("Getting a disconnected graph from $(gr[i])")
+    end
+        
 
     return floatGraph(mat)
       
@@ -401,7 +412,7 @@ end
 The components come from pureRandomGraph,
 connected by joinGraphs, productGraph and generalizedNecklace"""
 function chimera(n::Integer)
-    if (n < 30) || (rand(1)[1] < .2)
+    if (n < 30) || (rand() < .2)
 
         gr = pureRandomGraph(n)
 
@@ -411,9 +422,9 @@ function chimera(n::Integer)
     if (n < 200) 
         # just join disjoint copies of graphs
 
-        n1 = 10 + floor(Integer,(n-20)*rand(1)[1])
+        n1 = 10 + floor(Integer,(n-20)*rand())
         n2 = n - n1
-        k = ceil(Integer,exp(rand(1)[1]*log(min(n1,n2)/2)))
+        k = ceil(Integer,exp(rand()*log(min(n1,n2)/2)))
 
         gr = joinGraphs(chimera(n1),chimera(n2),k)
 
@@ -422,28 +433,28 @@ function chimera(n::Integer)
 
     # split with probability .7
 
-    if (rand(1)[1] < .7)
-        n1 = ceil(Integer,10*exp(rand(1)[1]*log(n/20)))
+    if (rand() < .7)
+        n1 = ceil(Integer,10*exp(rand()*log(n/20)))
 
         n2 = n - n1
-        k = floor(Integer,1+exp(rand(1)[1]*log(min(n1,n2)/2)))
+        k = floor(Integer,1+exp(rand()*log(min(n1,n2)/2)))
 
         gr = joinGraphs(chimera(n1),chimera(n2),k)
 
         return gr
 
     else
-        n1 = floor(Integer,10*exp(rand(1)[1]*log(n/100)))
+        n1 = floor(Integer,10*exp(rand()*log(n/100)))
 
         n2 = floor(Integer, n / n1)
 
-        if (rand(1)[1] < .5)
+        if (rand() < .5)
 
             gr = productGraph(chimera(n1),chimera(n2))
 
         else
 
-            k = floor(Integer,1+exp(rand(1)[1]*log(min(n1,n2)/10)))
+            k = floor(Integer,1+exp(rand()*log(min(n1,n2)/10)))
             gr = generalizedNecklace(chimera(n1),chimera(n2),k)
 
 
@@ -472,7 +483,7 @@ end
 """Applies one of a number of random weighting schemes to the edges of the graph"""
 function randWeight(a)
 
-    if (rand(1)[1] < .1)
+    if (rand() < .1)
         return a
     end
     
@@ -482,17 +493,17 @@ function randWeight(a)
     
     # potentials or edge-based
 
-    if (rand(1)[1] < .3)
+    if (rand() < .3)
         w = rand(m)
 
     else
         v = randn(a.n)
 
         # mult by matrix ?
-        if (rand(1)[1] < .5)
+        if (rand() < .5)
 
             invdeg = spdiagm(1./(a*ones(size(a)[1])))
-            if (rand(1)[1] < .5)
+            if (rand() < .5)
                 for i in 1:10
                     v = a * (invdeg * v)
                     v = v - mean(v)
@@ -514,7 +525,7 @@ function randWeight(a)
     w[w.==0] = 1
     w[isnan(w)] = 1
 
-    if (rand(1)[1] < .5)
+    if (rand() < .5)
         w = 1./w
     end
 

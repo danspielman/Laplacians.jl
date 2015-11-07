@@ -99,9 +99,10 @@ and exports the functions for which it seems appropriate.
   export components
   export biggestComp
   export vecToComps
+  export isConnected
 
   export shortestPaths
-  export kruskal
+  export kruskal, prim
 
   include("treeAlgs.jl")
 
