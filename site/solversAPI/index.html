@@ -83,6 +83,12 @@
 </li>
 
                         
+                            
+<li >
+    <a href="../Examples/index.html">Examples</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -207,8 +213,8 @@
 <h3 id="lapwrapsolver">lapWrapSolver</h3>
 <p>Takes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here</p>
 <pre><code class="julia">lapWrapSolver(solver)
-lapWrapSolver(solver, la::AbstractArray{T,2})
-lapWrapSolver(solver, la::AbstractArray{T,2}, b)
+lapWrapSolver(solver, la::AbstractArray{T,N})
+lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 </code></pre>
 
 <p>solvers.jl:108</p>

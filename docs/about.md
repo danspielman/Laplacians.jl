@@ -7,4 +7,10 @@ This is both for speed, and because our main concerns are algebraic tasks.
 
 Laplacians.jl was started by Daniel A. Spielman.  Other contributors include Xiao Shi, Serban Stan and Jackson Thea.
 
+In this directory, you will find:
+
+* This documentation, in the site directory.  
+* The source code, in src
+* Example sessions of using Julia in jupyter notebooks, in notebooks.
+* Tests, in the directory tests
 

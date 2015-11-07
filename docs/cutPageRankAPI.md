@@ -1,6 +1,6 @@
 # cutPageRank
 ### pr
-computes a page rank vector satisfying p = a/n * 1 + (1 - a) * W * p
+computes a page rank vector satisfying p = a/n * 1 + (1 - a) * W * p 
 
 
 ```julia

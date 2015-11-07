@@ -26,6 +26,15 @@ push!(LOAD_PATH,"src")
 using Laplacians
 ~~~
 
+Instead of adding to the load path every time you use Julia, you could put the following line in a file called .juliarc.jl that lives in your home directory:
+
+~~~julia
+push!(LOAD_PATH,"[path_to_laplacians]/Laplacians.jl/src")
+~~~
+
+In my case, the path to laplacians is `/Users/spielman/git/`.
+Then, when you want to use the module, you just need to type `using Laplacians`.
+
 You may need to install matplotlib in python before PyPlot.
 Look at this page for more information: https://github.com/stevengj/PyPlot.jl
 

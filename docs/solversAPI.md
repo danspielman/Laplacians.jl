@@ -5,8 +5,8 @@ Takes a solver for solving nonsingular sdd systems, and returns a solver for sol
 
 ```julia
 lapWrapSolver(solver)
-lapWrapSolver(solver, la::AbstractArray{T,2})
-lapWrapSolver(solver, la::AbstractArray{T,2}, b)
+lapWrapSolver(solver, la::AbstractArray{T,N})
+lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 ```
 
 solvers.jl:108

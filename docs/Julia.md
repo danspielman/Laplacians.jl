@@ -76,6 +76,12 @@ To turn a notebook into html, you type something like
 ipython nbconvert Laplacians.ipynb
 ~~~
 
+or
+
+~~~
+ipython nbconvert --to markdown --stdout Sampler.ipynb > SamplerNotebook.md
+~~~
+
 ## Workflows
 
 Julia has an IDE called Juno.  Both Dan and Serban have encountered some trouble with it: we have both found that it sometimes refuses to reload .jl code that we have written.  Please document workflows that you have found useful here:

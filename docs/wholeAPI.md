@@ -102,7 +102,7 @@ augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k:
 
 
 ### backIndices
-computes the back indices in a graph in O(M+N) 
+computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph 
 
 
 ```julia
@@ -373,8 +373,8 @@ Takes a solver for solving nonsingular sdd systems, and returns a solver for sol
 
 ```julia
 lapWrapSolver(solver)
-lapWrapSolver(solver, la::AbstractArray{T,2})
-lapWrapSolver(solver, la::AbstractArray{T,2}, b)
+lapWrapSolver(solver, la::AbstractArray{T,N})
+lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 ```
 
  at /Users/spielman/git/Laplacians.jl/src/solvers.jl:108
@@ -491,7 +491,7 @@ ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, niter
 
 
 ### pr
-computes a page rank vector satisfying p = a/n * 1 + (1 - a) * W * p
+computes a page rank vector satisfying p = a/n * 1 + (1 - a) * W * p 
 
 
 ```julia
@@ -591,6 +591,24 @@ randWeight(a)
 ```
 
  at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:475
+
+
+### randishKruskal
+
+```julia
+randishKruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
+```
+
+ at /Users/spielman/git/Laplacians.jl/src/randTrees.jl:10
+
+
+### randishPrim
+
+```julia
+randishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})
+```
+
+ at /Users/spielman/git/Laplacians.jl/src/randTrees.jl:47
 
 
 ### randperm

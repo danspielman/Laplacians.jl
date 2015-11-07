@@ -83,6 +83,12 @@
 </li>
 
                         
+                            
+<li >
+    <a href="../Examples/index.html">Examples</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -225,6 +231,12 @@ In the directory where Laplacians resides, type the following:</p>
 using Laplacians
 </code></pre>
 
+<p>Instead of adding to the load path every time you use Julia, you could put the following line in a file called .juliarc.jl that lives in your home directory:</p>
+<pre><code class="julia">push!(LOAD_PATH,&quot;[path_to_laplacians]/Laplacians.jl/src&quot;)
+</code></pre>
+
+<p>In my case, the path to laplacians is <code>/Users/spielman/git/</code>.
+Then, when you want to use the module, you just need to type <code>using Laplacians</code>.</p>
 <p>You may need to install matplotlib in python before PyPlot.
 Look at this page for more information: https://github.com/stevengj/PyPlot.jl</p>
 <p>If you discover that you need any other packages, please list them above.</p>
