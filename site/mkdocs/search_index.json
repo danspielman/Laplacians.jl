@@ -2,12 +2,12 @@
     "docs": [
         {
             "location": "/about/index.html", 
-            "text": "About Laplacians.jl\n\n\nLaplacians is a package containing graph algorithms, with an emphsasis on tasks related to spectral and algebraic graph theory.  It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.\n\n\nAll graphs are represented by sparse adjacency matrices.\nThis is both for speed, and because our main concerns are algebraic tasks.\n\n\nLaplacians.jl was started by Daniel A. Spielman.  Other contributors include Xiao Shi, Serban Stan and Jackson Thea.\n\n\nIn this directory, you will find:\n\n\n\n\nThis documentation, in the site directory.  \n\n\nThe source code, in src\n\n\nExample sessions of using Julia in jupyter notebooks, in notebooks.\n\n\nTests, in the directory tests", 
+            "text": "About Laplacians.jl\n\n\nLaplacians is a package containing graph algorithms, with an emphsasis on tasks related to spectral and algebraic graph theory.  It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.\n\n\nAll graphs are represented by sparse adjacency matrices.\nThis is both for speed, and because our main concerns are algebraic tasks.  But, we do \nnot\n handle dynamic graphs.  It would be very slow to implement dynamic graphs this way.\n\n\nLaplacians.jl was started by Daniel A. Spielman.  Other contributors include Xiao Shi, Serban Stan and Jackson Thea.\n\n\nIn this directory, you will find:\n\n\n\n\nThis documentation, in the site directory.  \n\n\nThe source code, in src\n\n\nExample sessions of using Julia in jupyter notebooks, in notebooks.\n\n\nTests, in the directory tests", 
             "title": "About"
         }, 
         {
             "location": "/about/index.html#about-laplaciansjl", 
-            "text": "Laplacians is a package containing graph algorithms, with an emphsasis on tasks related to spectral and algebraic graph theory.  It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.  All graphs are represented by sparse adjacency matrices.\nThis is both for speed, and because our main concerns are algebraic tasks.  Laplacians.jl was started by Daniel A. Spielman.  Other contributors include Xiao Shi, Serban Stan and Jackson Thea.  In this directory, you will find:   This documentation, in the site directory.    The source code, in src  Example sessions of using Julia in jupyter notebooks, in notebooks.  Tests, in the directory tests", 
+            "text": "Laplacians is a package containing graph algorithms, with an emphsasis on tasks related to spectral and algebraic graph theory.  It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.  All graphs are represented by sparse adjacency matrices.\nThis is both for speed, and because our main concerns are algebraic tasks.  But, we do  not  handle dynamic graphs.  It would be very slow to implement dynamic graphs this way.  Laplacians.jl was started by Daniel A. Spielman.  Other contributors include Xiao Shi, Serban Stan and Jackson Thea.  In this directory, you will find:   This documentation, in the site directory.    The source code, in src  Example sessions of using Julia in jupyter notebooks, in notebooks.  Tests, in the directory tests", 
             "title": "About Laplacians.jl"
         }, 
         {
@@ -112,12 +112,12 @@
         }, 
         {
             "location": "/Examples/index.html", 
-            "text": "Examples\n\n\nThe following are links to html files of Julia notebooks.\nThese notebooks are also in the notebook directory, and can be open there so that you can run the code live.\n\n\n\n\nFirstNotebook\n\n\nSolvers\n\n\nSampler", 
+            "text": "Examples\n\n\nThe following are links to html files of Julia notebooks.\nThese notebooks are also in the notebook directory, and can be open there so that you can run the code live.\n\n\n\n\nFirstNotebook\n\n\nSolvers\n\n\nSampler\n\n\nLightGraphs\n - an example, with a speed test, of using LightGraphs.  At least it is easy.", 
             "title": "Examples"
         }, 
         {
             "location": "/Examples/index.html#examples", 
-            "text": "The following are links to html files of Julia notebooks.\nThese notebooks are also in the notebook directory, and can be open there so that you can run the code live.   FirstNotebook  Solvers  Sampler", 
+            "text": "The following are links to html files of Julia notebooks.\nThese notebooks are also in the notebook directory, and can be open there so that you can run the code live.   FirstNotebook  Solvers  Sampler  LightGraphs  - an example, with a speed test, of using LightGraphs.  At least it is easy.", 
             "title": "Examples"
         }, 
         {
