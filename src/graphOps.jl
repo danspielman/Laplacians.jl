@@ -62,10 +62,12 @@ end
 
 """Create a new graph from the old, but keeping edge edge with probability `p`"""
 function subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
-  (ai, aj, av) = findnz(a)
+  (ai, aj, av) = findnz(triu(a))
   n = size(a)[1]
   mask = map(x -> convert(Float64,x < p), rand(length(ai)))
-  return sparse(ai,aj,mask.*av,n,n)
+  as = sparse(ai,aj,mask.*av,n,n)
+  as = as + as'
+  return as
 
 end # subsampleEdges
 

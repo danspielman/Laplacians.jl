@@ -6,3 +6,4 @@ These notebooks are also in the notebook directory, and can be open there so tha
 * [FirstNotebook](../docs/FirstNotebook.html)
 * [Solvers](../docs/Solvers.html)
 * [Sampler](../docs/Sampler.html)
+* [LightGraphs](../docs/LightGraphs.html) - an example, with a speed test, of using LightGraphs.  At least it is easy.
