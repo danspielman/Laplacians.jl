@@ -21,6 +21,7 @@ pages:
     - Using Julia: 'Julia.md'
     - Introduction: 'Laplacians.md'
     - Solvers: 'solvers.md'
+    - Examples: 'Examples.md'
 - Developing:
     - Devleoping Laplacians: 'Developing.md'
 - API:

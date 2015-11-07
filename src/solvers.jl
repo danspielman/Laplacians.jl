@@ -7,9 +7,9 @@ Started by Dan Spielman
 Contributors: ???
 
   lapWrapSolver: takes a solver for DD systems, and uses it to solve a lap system in la
-  lapWrapSolver(solver, la::AbstractMatrix)
+  lapWrapSolver(solver, la::AbstractArray)
   lapWrapSolver(solver)
-  lapWrapSolver(solver, la::AbstractMatrix, b) = lapWrapSolver(solver,la)(b)    
+  lapWrapSolver(solver, la::AbstractArray, b) = lapWrapSolver(solver,la)(b)    
 
   For example, to make a Cholesky-based solver for Laplacians, we created
   lapChol = lapWrapSolver(cholfact)
@@ -60,7 +60,7 @@ end
 and returns a solver for solving Laplacian systems.
 The optional args tol and maxits are not necessarily taken by
 all solvers.  But, if they are, one can pass them here"""
-function lapWrapSolver(solver, la::AbstractMatrix; tol::Real=0, maxits::Integer=0)
+function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer=0)
     N = size(la)[1]
     lasub = la[1:(N-1),1:(N-1)]
 
@@ -104,9 +104,9 @@ function lapWrapSolver(solver)
 end
 =#
 
-function lapWrapSolver(solver; tol::Real=0, maxits::Integer=0)
-    f = function(la::AbstractMatrix)
-        return lapWrapSolver(solver, la, tol, maxits)
+function lapWrapSolver(solver; tol::Real=0.0, maxits::Integer=0)
+    f = function(la::AbstractArray)
+        return lapWrapSolver(solver, la, tol=tol, maxits=maxits)
     end
     return f
 end
@@ -117,7 +117,7 @@ lapChol = lapWrapSolver(cholfact)
 
 #lapWrapSolver(solver, la::AbstractMatrix, b) = lapWrapSolver(solver,la)(b)    
 
-lapWrapSolver(solver, la::AbstractMatrix, b; tol::Real=0, maxits::Integer=0) = lapWrapSolver(solver,la, tol, maxits)(b)    
+lapWrapSolver(solver, la::AbstractArray, b; tol::Real=0.0, maxits::Integer=0) = lapWrapSolver(solver,la, tol=tol, maxits=maxits)(b)    
     
 
 
