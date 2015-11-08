@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../lambda2.ico">
+        
+
+	<title>cutPageRank - Laplacians.jl</title>
+
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <link href="../css/base.css" rel="stylesheet">
+        <link href="../Laplacians.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="../about/index.html">Laplacians.jl</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            <!-- Main navigation -->
+            <ul class="nav navbar-nav">
+            
+            
+                <li >
+                    <a href="../about/index.html">About</a>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../Julia/index.html">Using Julia</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../Laplacians/index.html">Introduction</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../solvers/index.html">Solvers</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../Examples/index.html">Examples</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developing <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../Developing/index.html">Devleoping Laplacians</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li class="dropdown active">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../wholeAPI/index.html">Whole API</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../graphGeneratorsAPI/index.html">graphGenerators</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../graphOpsAPI/index.html">graphOps</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../graphAlgsAPI/index.html">graphAlgs</a>
+                        </li>
+                    
+                        <li class="active">
+                            <a href="index.html">cutPageRank</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../solversAPI/index.html">solvers</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            </ul>
+
+            <!-- Search, Navigation and Repo links -->
+            <ul class="nav navbar-nav navbar-right">
+                <li >
+                    <a rel="next" href="../graphAlgsAPI/index.html">
+                        <i class="fa fa-arrow-left"></i> Previous
+                    </a>
+                </li>
+                <li >
+                    <a rel="prev" href="../solversAPI/index.html">
+                        Next <i class="fa fa-arrow-right"></i>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://github.com/danspielman/Laplacians.jl">
+                        
+                            <i class="fa fa-github"></i>
+                        
+                        GitHub
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#cutpagerank">cutPageRank</a></li>
+        
+            <li><a href="#pr">pr</a></li>
+        
+            <li><a href="#ppr">ppr</a></li>
+        
+            <li><a href="#apr">apr</a></li>
+        
+            <li><a href="#prn">prn</a></li>
+        
+    
+    </ul>
+</div></div>
+            <div class="col-md-9" role="main">
+
+<h1 id="cutpagerank">cutPageRank</h1>
+<h3 id="pr">pr</h3>
+<p>computes a page rank vector satisfying p = a/n * 1 + (1 - a) * W * p </p>
+<pre><code class="julia">pr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, alpha::Float64)
+</code></pre>
+
+<p>cutPageRank.jl:20</p>
+<h3 id="ppr">ppr</h3>
+<p>computes the personal page rank vector from a starting vector s and an alpha; operates with lazy walk matrix </p>
+<pre><code class="julia">ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64)
+ppr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, niter::Int64)
+</code></pre>
+
+<p>cutPageRank.jl:38</p>
+<h3 id="apr">apr</h3>
+<p>computes an approximate page rank vector from a starting vector s, an alpha and an epsilon </p>
+<pre><code class="julia">apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, eps::Float64)
+</code></pre>
+
+<p>cutPageRank.jl:71</p>
+<h3 id="prn">prn</h3>
+<p>prn{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, v::Array{Int64,1}, phi::Float64, b::Int64)</p>
+<p>the PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper</p>
+<p>v is a set of vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]</p>
+<pre><code class="julia">prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, v::Array{Int64,1}, phi::Float64, b::Int64)
+</code></pre>
+
+<p>cutPageRank.jl:115</p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+            <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+        </footer>
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script src="../js/base.js"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+        <script src="../mathjaxhelper.js"></script>
+    </body>
+</html>

@@ -17,12 +17,13 @@ function setValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)
   mat.nzval[mat.colptr[v]+i-1] = a
 end
 
-" computes the back indices in a graph in O(M+N) "
+" computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph "
 function backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
   n = max(G.n, G.m)
 
   # initialize values
-  u,v,w = findnz(G)
+  u,v,w = findEntries(G)
+
   backInfo = sparse(u, v, [(0,0) for i in 1:length(u)])
   backIndices = sparse(u, v, [-1 for i in 1:length(u)])
   index = zeros(Ti, n)
@@ -50,5 +51,23 @@ function backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
   end
 
   return backIndices
+
+end
+
+" similar to findnz, but also returns 0 entries that have an edge in the sparse matrix "
+function findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
+
+  n = max(G.n, G.m)
+
+  u = copy(G.rowval)
+  v = zeros(Ti, length(u))
+  for i in 1:n
+    for j in (G.colptr[i]):(G.colptr[i + 1] - 1)
+      v[j] = i
+    end
+  end
+  w = copy(G.nzval)
+
+  return u,v,w
 
 end

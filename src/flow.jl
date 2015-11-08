@@ -5,10 +5,14 @@ function maxflow{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, s::Int64, t::Int64; justflo
 
   # initialize the capacity matrix
   C = copy(G)
-  BI = backIndices(G)
+  backInd = backIndices(G)
 
   Q = zeros(Ti, n)
   inQ = zeros(Bool, n)
+  #=
+   prev[i][1] = the vertex preceding vertex i in the BFS
+   prev[i][2] = the edge index of prev[i][1]; nbri(G, prev[i][1], prev[i][2]) = i
+  =#
   prev = [(0,0) for i in 1:n]
   totalflow = 0
 
@@ -47,32 +51,35 @@ function maxflow{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, s::Int64, t::Int64; justflo
       improve = true
 
       for i in 1:deg(G, t)
-        u = nbri(G, t, i)
+        # ignore a neighbor that isn't part of the BF-tree
+        if inQ[nbri(G, t, i)] == false
+          continue
+        end
 
-        currentflow = C[u, t]
+        # go through every neighbor of t and see the increase in flow
+        prev[t] = (nbri(G, t, i), weighti(backInd, t, i))
+        u = t
+
+        currentflow = typemax(Tv)
         while u != s
           prevU = prev[u][1]
           indexPrevU = prev[u][2]
-          currentflow = min(currentflow, weighti(BI, prevU, indexPrevU))
+          currentflow = min(currentflow, weighti(C, prevU, indexPrevU))
           u = prevU
         end
 
         if currentflow != 0
-          # let's consider that prev[t] = (u, i)
-          u = nbri(G, t, i)
-          prev[t] = (u, weighti(BI, t, i))
-          u = t
-
           #=
             prevU is the vertex immmediately before u on the path from s to t
             indexU is such that nbri(G, u, indexU) = prevU
             indexPrevU is such that nbri(G, prevU, indexPrevU) = u
             capPrevUU and capUPrevU have similar meanings
           =#
+          u = t
           while u != s
             prevU = prev[u][1]
             indexPrevU = prev[u][2]
-            indexU = weighti(BI, prevU, indexPrevU)
+            indexU = weighti(backInd, prevU, indexPrevU)
 
             capPrevUU = weighti(C, prevU, indexPrevU)
             capUPrevU = weighti(C, u, indexU)
@@ -126,7 +133,7 @@ function maxflow{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, s::Int64, t::Int64; justflo
     end
 
     cut = Tuple{Int64,Int64}[]
-    for (i in 1:right)
+    for i in 1:right
       u = Q[i]
       for j in 1:deg(G, u)
         v = nbri(G, u, j)

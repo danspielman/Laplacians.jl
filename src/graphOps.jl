@@ -1,36 +1,13 @@
-#=
-
-Operations on graphs.
-Including transformations, combinations, and code for plotting.
-
-Started by Dan Spielman.
-Contributors: your name here.
-
-Contains:
-
-shortIntGraph - for converting the index type of a graph to an Int32.
-lap - to produce the laplacian of a graph
-unweight - change all the weights to 1
-mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind},f) - to apply the function f to the weight of every edge.
-uniformWeight : an example of mapweight.  It ignores the weight, and maps every weight to a random in [0,1]
-productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
-edgeVertexMat(mat::SparseMatrixCSC) - signed edge vertex matrix
-subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)-
-  produce a new graph that keeps each edge with probability p
-twoLift(a, flip::Array)
-function joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
-plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)
-spectralDrawing(a)
-toUnitVector(a::Array{Int64,1})
-diagmat{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti})
-
-=#
 
 "Convert the indices in a graph to 32-bit ints.  This takes less storage, but does not speed up much"
 shortIntGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int32}(convert(Int32,a.m), convert(Int32,a.n), convert(Array{Int32,1},a.colptr), convert(Array{Int32,1},a.rowval), a.nzval)
 
-"""Create a Laplacian matrix from an adjacency matrix.
+"Convert the nonzero entries in a graph to Float64"
+floatGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int64}(a.m, a.n, a.colptr, a.rowval, convert(Array{Float64,1},a.nzval))
 
+
+
+"""Create a Laplacian matrix from an adjacency matrix.
 We might want to do this differently, say by enforcing symmetry"""
 lap(a) = spdiagm(a*ones(size(a)[1])) - a
 
@@ -60,6 +37,11 @@ end # mapweight
 """Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight."""
 uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}) = mapweight(a,x->rand(1)[1])
 
+"""Set the weight of every edge to 1"""
+function uniformWeight!(mat::SparseMatrixCSC)
+    mat.nzval = ones(length(mat.nzval))
+end
+
 """The Cartesian product of two graphs.  When applied to two paths, it gives a grid."""
 function productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
   n0 = size(a0)[1]
@@ -80,10 +62,12 @@ end
 
 """Create a new graph from the old, but keeping edge edge with probability `p`"""
 function subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
-  (ai, aj, av) = findnz(a)
+  (ai, aj, av) = findnz(triu(a))
   n = size(a)[1]
   mask = map(x -> convert(Float64,x < p), rand(length(ai)))
-  return sparse(ai,aj,mask.*av,n,n)
+  as = sparse(ai,aj,mask.*av,n,n)
+  as = as + as'
+  return as
 
 end # subsampleEdges
 

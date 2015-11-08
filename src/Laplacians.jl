@@ -28,8 +28,6 @@ and exports the functions for which it seems appropriate.
 
   using DataStructures
 
-#  using PyCall
-#  pygui(:qt);
   using PyPlot
 
   include("graphUtils.jl")
@@ -59,11 +57,22 @@ and exports the functions for which it seems appropriate.
   export grid2
   export grid2coords
 
+  export randGenRing
+  export randperm
+  export ErdosRenyi
+  export ErdosRenyiCluster
+  export ErdosRenyiClusterFix
+  export pureRandomGraph
+
+  export chimera
+  export randWeight
+  export wtedChimera
+
   include("graphOps.jl")
 
   export unweight
   export mapweight
-  export uniformWeight
+  export uniformWeight, uniformWeight!
 
   export edgeVertexMat
 
@@ -88,9 +97,12 @@ and exports the functions for which it seems appropriate.
   include("graphAlgs.jl")
 
   export components
+  export biggestComp
   export vecToComps
+  export isConnected
+
   export shortestPaths
-  export kruskal
+  export kruskal, prim
 
   include("treeAlgs.jl")
 
@@ -116,5 +128,21 @@ and exports the functions for which it seems appropriate.
   include("flow.jl")
 
   export maxflow
+
+#=
+  include("flowClustering.jl")
+ 
+  export localImprove
+  export localFlow
+=#
+
+  include("randTrees.jl")
+  export randishKruskal, randishPrim
+
+  include("solvers.jl")
+  export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
+
+
+
 
 end # module yinsGraph

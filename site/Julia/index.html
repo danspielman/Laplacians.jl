@@ -1,194 +1,190 @@
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Using Julia - Laplacians.jl</title>
-  
-
-  <link rel="shortcut icon" href="../lambda2.ico">
-  
-
-  
-  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
-
-  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
-  <link rel="stylesheet" href="../css/highlight.css">
-  <link href="../Laplacians.css" rel="stylesheet">
-
-  
-  <script>
-    // Current page data
-    var mkdocs_page_name = "Using Julia";
-  </script>
-  
-  <script src="../js/jquery-2.1.1.min.js"></script>
-  <script src="../js/modernizr-2.8.3.min.js"></script>
-  <script type="text/javascript" src="../js/highlight.pack.js"></script>
-  <script src="../js/theme.js"></script> 
-  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
-  <script src="../mathjaxhelper.js"></script>
-
-  
-</head>
-
-<body class="wy-body-for-nav" role="document">
-
-  <div class="wy-grid-for-nav">
-
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-      <div class="wy-side-nav-search">
-        <a href="../about/index.html" class="icon icon-home"> Laplacians.jl</a>
-        <div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-  </form>
-</div>
-      </div>
-
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-        <ul class="current">
-          
-            <li>
-    <li class="toctree-l1 ">
-        <a class="" href="../about/index.html">About</a>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-    </li>
-<li>
-          
-            <li>
-    <ul class="subnav">
-    <li><span>User Guide</span></li>
+        
+        
+        <link rel="shortcut icon" href="../lambda2.ico">
+        
+
+	<title>Using Julia - Laplacians.jl</title>
+
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <link href="../css/base.css" rel="stylesheet">
+        <link href="../Laplacians.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
 
         
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="../about/index.html">Laplacians.jl</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            <!-- Main navigation -->
+            <ul class="nav navbar-nav">
             
-    <li class="toctree-l1 current">
-        <a class="current" href="index.html">Using Julia</a>
-        
-            <ul>
             
-                <li class="toctree-l3"><a href="#using-julia">Using Julia</a></li>
-                
-                    <li><a class="toctree-l4" href="#converting-to-julia-04">Converting to Julia 0.4</a></li>
-                
-                    <li><a class="toctree-l4" href="#julia-notebooks">Julia Notebooks</a></li>
-                
-                    <li><a class="toctree-l4" href="#workflows">Workflows</a></li>
-                
-                    <li><a class="toctree-l4" href="#things-to-be-careful-of-common-bugs">Things to be careful of (common bugs)</a></li>
-                
-                    <li><a class="toctree-l4" href="#useful-julia-functions">Useful Julia functions</a></li>
-                
-                    <li><a class="toctree-l4" href="#optimizing-code-in-julia">Optimizing code in Julia</a></li>
-                
-                    <li><a class="toctree-l4" href="#how-should-julia-packages-be-organized">How should Julia packages be organized?</a></li>
-                
-                    <li><a class="toctree-l4" href="#how-should-notebooks-play-with-git">How should notebooks play with Git?</a></li>
-                
+                <li >
+                    <a href="../about/index.html">About</a>
+                </li>
+            
+            
+            
+                <li class="dropdown active">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li class="active">
+                            <a href="index.html">Using Julia</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../Laplacians/index.html">Introduction</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../solvers/index.html">Solvers</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../Examples/index.html">Examples</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developing <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../Developing/index.html">Devleoping Laplacians</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../wholeAPI/index.html">Whole API</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../graphGeneratorsAPI/index.html">graphGenerators</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../graphOpsAPI/index.html">graphOps</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../graphAlgsAPI/index.html">graphAlgs</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../cutPageRankAPI/index.html">cutPageRank</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../solversAPI/index.html">solvers</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
             
             </ul>
-        
-    </li>
 
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../Laplacians/index.html">Overview</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../yinsGraph/index.html">yinsGraph</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../solvers/index.html">Solvers</a>
-        
-    </li>
-
-        
-    </ul>
-<li>
-          
-            <li>
-    <ul class="subnav">
-    <li><span>API</span></li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../wholeApi/index.html">Whole API</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../generators/index.html">Generators</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../operations/index.html">Operations</a>
-        
-    </li>
-
-        
-    </ul>
-<li>
-          
-        </ul>
-      </div>
-      &nbsp;
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../about/index.html">Laplacians.jl</a>
-      </nav>
-
-      
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="../about/index.html">Docs</a> &raquo;</li>
-    
-      
-        
-          <li>User Guide &raquo;</li>
-        
-      
-    
-    <li>Using Julia</li>
-    <li class="wy-breadcrumbs-aside">
-      
-        
-          <a href="https://github.com/danspielman/Laplacians.jl" class="icon icon-github"> Edit on GitHub</a>
-        
-      
-    </li>
-  </ul>
-  <hr/>
+            <!-- Search, Navigation and Repo links -->
+            <ul class="nav navbar-nav navbar-right">
+                <li >
+                    <a rel="next" href="../about/index.html">
+                        <i class="fa fa-arrow-left"></i> Previous
+                    </a>
+                </li>
+                <li >
+                    <a rel="prev" href="../Laplacians/index.html">
+                        Next <i class="fa fa-arrow-right"></i>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://github.com/danspielman/Laplacians.jl">
+                        
+                            <i class="fa fa-github"></i>
+                        
+                        GitHub
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
 </div>
-          <div role="main">
-            <div class="section">
-              
-                <div class="toc">
+
+        <div class="container">
+            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#using-julia">Using Julia</a></li>
+        
+            <li><a href="#converting-to-julia-04">Converting to Julia 0.4</a></li>
+        
+            <li><a href="#julia-notebooks">Julia Notebooks</a></li>
+        
+            <li><a href="#workflows">Workflows</a></li>
+        
+            <li><a href="#things-to-be-careful-of-common-bugs">Things to be careful of (common bugs)</a></li>
+        
+            <li><a href="#useful-julia-functions">Useful Julia functions</a></li>
+        
+            <li><a href="#optimizing-code-in-julia">Optimizing code in Julia</a></li>
+        
+            <li><a href="#how-should-julia-packages-be-organized">How should Julia packages be organized?</a></li>
+        
+            <li><a href="#how-should-notebooks-play-with-git">How should notebooks play with Git?</a></li>
+        
+    
+    </ul>
+</div></div>
+            <div class="col-md-9" role="main">
+
+<div class="toc">
 <ul>
 <li><a href="#using-julia">Using Julia</a><ul>
 <li><a href="#converting-to-julia-04">Converting to Julia 0.4</a><ul>
@@ -223,7 +219,7 @@ conda install jupyter (the new notebooks package)
 conda install mathjax
 conda install matplotlib</p>
 <p>This repository contains projects implemented in Julia by Dan Spielman's group.  While organizing by language is strange, we are trying it to help us learn the language.</p>
-<p>There are two projects in here so far.  One, yinsGraph, is for doing graph theory and solving Laplacian systems.  It's documentation is at <a href="../yinsGraph/index.html">yinsGraph.md</a></p>
+<p>There are two projects in here so far.  One, yinsGraph, is for doing graph theory and solving Laplacian systems.  It's documentation is at <a href="yinsGraph.md">yinsGraph.md</a></p>
 <p>I would like to use the documentation pages in this root directory to discuss issues with how to get Julia to work well.  For now, I'll just ask some questions and write a little that I've figured out.  If you figure some out, please write it here.</p>
 <h2 id="converting-to-julia-04">Converting to Julia 0.4</h2>
 <p>A description of the changes made in Julia 0.4 appears to be here
@@ -267,6 +263,10 @@ Here are the relevent links:</p>
 </ul>
 <p>To turn a notebook into html, you type something like</p>
 <pre><code>ipython nbconvert Laplacians.ipynb
+</code></pre>
+
+<p>or</p>
+<pre><code>ipython nbconvert --to markdown --stdout Sampler.ipynb &gt; SamplerNotebook.md
 </code></pre>
 
 <h2 id="workflows">Workflows</h2>
@@ -394,52 +394,20 @@ elapsed time: 0.015894922 seconds (80 bytes allocated)
 <p>In yinsGraph, I decided to just make one big module called yinsGraph.jl.  It then includes a bunch of individual files, most of which contain many functions and types.  I think this is much nicer than making one file per functions, as some functions are very short.</p>
 <p>I put the export statements in the main module.  The reason for this is that while developing code in a file, I don't include that in the module.  This way I can reload it as I change it without having to restart the kernel.  This does not seem to work as well for types.  I'm not sure why.</p>
 <h2 id="how-should-notebooks-play-with-git">How should notebooks play with Git?</h2>
-<p>The great thing about the notebooks is that they contain live code, so that you can play with them.  But, sometimes you get a version that serves as great documentation, and you don't want to klobber it my mistake later (or evern worse, have someone else klobber it).  Presumably if someone accidently commits a messed up version we can unwind that.  But, is there a good way to keep track of this?</p>
-              
-            </div>
-          </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../Laplacians/index.html" class="btn btn-neutral float-right" title="Overview"/>Next <span class="icon icon-circle-arrow-right"></span></a>
-      
-      
-        <a href="../about/index.html" class="btn btn-neutral" title="About"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-      
-    </div>
-  
-
-  <hr/>
-
-  <div role="contentinfo">
-    <!-- Copyright etc -->
-    
-  </div>
-
-  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-</footer>
-	  
+<p>The great thing about the notebooks is that they contain live code, so that you can play with them.  But, sometimes you get a version that serves as great documentation, and you don't want to klobber it my mistake later (or evern worse, have someone else klobber it).  Presumably if someone accidently commits a messed up version we can unwind that.  But, is there a good way to keep track of this?</p></div>
         </div>
-      </div>
 
-    </section>
+        <footer class="col-md-12">
+            <hr>
+            
+            <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+        </footer>
 
-  </div>
-
-<div class="rst-versions" role="note" style="cursor: pointer">
-    <span class="rst-current-version" data-toggle="rst-current-version">
-      
-          <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
-      
-      
-        <span><a href="../about/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
-      
-      
-        <span style="margin-left: 15px"><a href="../Laplacians/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
-      
-    </span>
-</div>
-
-</body>
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script src="../js/base.js"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+        <script src="../mathjaxhelper.js"></script>
+    </body>
 </html>

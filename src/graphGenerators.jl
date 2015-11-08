@@ -1,33 +1,6 @@
 
-#=
 
-Started by Dan Spielman.
-Contributors: ???
-
-Code for reading graphs from files, and for constructing special graphs.
-
-Right now, it has:
-
- readIJ(filename::AbstractString)
- readIJV(filename::AbstractString)
- writeIJV(filename::AbstractString, mat)
- ringGraph(n::Int64)
- generalizedRing(n::Int64, gens)
- randMatching(n::Int64)
- randRegular(n::Int64, k::Int64)
- grownGraph(n::Int64, k::Int64)
- grownGraphD(n::Int64, k::Int64)
- prefAttach(n::Int64, k::Int64, p::Float64)
- hyperCube(d::Int64)
- completeBinaryTree(n::Int64)
- grid2(n::Int64)
- grid2(n::Int64, m::Int64; isotropy=1)
- grid2coords(n::Int64, m::Int64)
- generalizedNecklace(A::SparseMatrixCSC, H::SparseMatrixCSC, k::Int64)
- completeGraph(n::Int64)
- pathGraph(n::Int64)
-=#
-
+import Base.randperm
 
 # to read a simple edge list, each line being an (i, j) pair
 function readIJ(filename::AbstractString)
@@ -67,6 +40,19 @@ function writeIJV(filename::AbstractString, mat)
 
 end #write IJV
 
+"The path graph on n vertices"
+function pathGraph(n::Int64)
+  x = append!(collect(1:(n-1)), collect(2:n))
+  y = append!(collect(2:n), collect(1:(n-1)))
+  w = ones(2 * (n - 1))
+  return sparse(x, y, w)
+end # pathGraph
+
+
+"The complete graph" 
+function completeGraph(n::Int64)
+  return sparse(ones(n,n) - eye(n))
+end # completeGraph
 
 
 """The simple ring on n vertices"""
@@ -105,6 +91,62 @@ function generalizedRing(n::Int64, gens)
     #return ai, aj
 end
 
+"""A random generalized ring graph of degree k.
+Gens always contains 1, and the other k-1 edge types
+are chosen from an exponential distribution"""
+function randGenRing(n::Int64, k::Integer)
+  gens = [1; 1 + ceil(Integer,exp(rand(k-1)*log(n-1)))]
+  return generalizedRing(n, gens)
+end
+
+
+"""The d dimensional hypercube.  Has 2^d vertices"""
+function hyperCube(d::Int64)
+  a = sparse([0 1; 1 0])
+
+  for i = 1:(d-1)
+    k = 2^i
+    D = speye(k)
+    a = [a D; D a]
+  end
+
+  return a
+end # hyperCube
+
+"""The complete binary tree on n vertices"""
+function completeBinaryTree(n::Int64)
+
+  k = div(n-1,2)
+  a = sparse(collect(1:k),2*collect(1:k),1,n,n) + sparse(collect(1:k),2*collect(1:k)+1,1,n,n)
+
+  if 2*k+1 < n
+    a[n-1,n] = 1
+  end
+
+  a = a + a'
+
+  return a
+end # completeBinaryTree
+
+"""An n-by-m grid graph.  iostropy is the weighting on edges in one direction."""
+function grid2(n::Int64, m::Int64; isotropy=1)
+  a = kron(speye(n),spdiagm(ones(m-1),1,m,m))
+  a = a + isotropy*kron(spdiagm(ones(n-1),1,n,n), speye(m))
+  a = a + a'
+  return a
+end # grid2
+
+grid2(n::Int64) = grid2(n,n)
+
+"""Coordinates for plotting the vertices of the n-by-m grid graph"""
+function grid2coords(n::Int64, m::Int64)
+  x = kron(collect(1:n),ones(m))
+  y = kron(ones(n),collect(1:m))
+  return x, y
+end # grid2coords
+
+grid2coords(n) = grid2coords(n, n)
+
 
 """A random matching on n vertices"""
 function randMatching(n::Int64)
@@ -140,7 +182,7 @@ function grownGraph(n::Int64, k::Int64)
   a = spzeros(n,n)
 
   for i = 1:k
-    a = a + sparse(2:n,iceil(collect(1:n-1).*rand(n-1)),1,n,n)
+    a = a + sparse(2:n,ceil(Integer,collect(1:n-1).*rand(n-1)),1,n,n)
   end
 
   a = a + a'
@@ -154,10 +196,10 @@ function randSet(n::Integer,k::Integer)
         error("n must be at least k")
     else
 
-        s = sort(iceil(n*rand(k)))
+        s = sort(ceil(Integer,n*rand(k)))
         good = (minimum(s[2:end]-s[1:(end-1)]) > 0)
         while good == false
-            s = sort(iceil(n*rand(k)))
+            s = sort(ceil(Integer,n*rand(k)))
             good = (minimum(s[2:end]-s[1:(end-1)]) > 0)
         end
 
@@ -258,62 +300,254 @@ function prefAttach(n::Int64, k::Int64, p::Float64)
     end
 end
 
-"""The d dimensional hypercube.  Has 2^d vertices"""
-function hyperCube(d::Int64)
-  a = sparse([0 1; 1 0])
 
-  for i = 1:(d-1)
-    k = 2^i
-    D = speye(k)
-    a = [a D; D a]
-  end
+"""Randomly permutes the vertex indices"""
+function randperm(mat::AbstractMatrix)
+    perm = randperm(mat.n)
+    return mat[perm,perm]
+end
 
-  return a
-end # hyperCube
-
-"""The complete binary tree on n vertices"""
-function completeBinaryTree(n::Int64)
-  k = div(n-1,2)
-  a = sparse(collect(1:k),2*collect(1:k),1,n,n) + sparse(collect(1:k),2*collect(1:k)+1,1,n,n)
-
-  if 2*k+1 < n
-    a[n-1,n] = 1
-  end
-
-  a = a + a'
-
-  return a
-end # completeBinaryTree
-
-"""An n-by-m grid graph.  iostropy is the weighting on edges in one direction."""
-function grid2(n::Int64, m::Int64; isotropy=1)
-  a = kron(speye(n),spdiagm(ones(m-1),1,m,m))
-  a = a + isotropy*kron(spdiagm(ones(n-1),1,n,n), speye(m))
-  a = a + a'
-  return a
-end # grid2
-
-grid2(n::Int64) = grid2(n,n)
-
-"""Coordinates for plotting the vertices of the n-by-m grid graph"""
-function grid2coords(n::Int64, m::Int64)
-  x = kron(collect(1:n),ones(m))
-  y = kron(ones(n),collect(1:m))
-  return x, y
-end # grid2coords
-
-grid2coords(n) = grid2coords(n, n)
+randperm(f::Expr) = randperm(eval(f))
 
 
-" The complete graph " 
-function completeGraph(n::Int64)
-  return sparse(ones(n,n) - eye(n))
-end # completeGraph
+"""Generate a random graph on n vertices with m edges.
+The actual number of edges will probably be smaller, as we sample
+with replacement"""
+function ErdosRenyi(n::Integer, m::Integer)
+    ai = rand(1:n, m)
+    aj = rand(1:n, m)
+    ind = (ai .!= aj)
+    mat = sparse(ai[ind],aj[ind],1,n,n)
+    uniformWeight!(mat)
+    return mat
+end
 
-" The path graph on n vertices "
-function pathGraph(n::Int64)
-  x = append!(collect(1:(n-1)), collect(2:n))
-  y = append!(collect(2:n), collect(1:(n-1)))
-  w = ones(2 * (n - 1))
-  return sparse(x, y, w)
-end # pathGraph
+"""Generate an ER graph with average degree k,
+and then return the largest component.
+Will probably have fewer than n vertices.
+If you want to add a tree to bring it back to n,
+try ErdosRenyiClusterFix."""
+function ErdosRenyiCluster(n::Integer, k::Integer)
+    m = ceil(Integer,n*k/2)
+    ai = rand(1:n, m)
+    aj = rand(1:n, m)
+    ind = (ai .!= aj)
+    mat = sparse(ai[ind],aj[ind],1,n,n)
+    mat = mat + mat'
+   
+    return biggestComp(mat)
+end
+
+"""Like an Erdos-Renyi cluster, but add back a tree so
+it has n vertices"""
+function ErdosRenyiClusterFix(n::Integer, k::Integer)
+    m1 = ErdosRenyiCluster(n, k)
+    n2 = n - size(m1)[1]
+    if (n2 > 0)
+        m2 = completeBinaryTree(n2)
+        return joinGraphs(m1,m2,1)
+    else
+        return m1
+    end
+end
+
+    
+    
+"""Generate a random graph with n vertices from one of our natural distributions"""
+function pureRandomGraph(n::Integer)
+   
+    gr = []
+    wt = []
+    
+    push!(gr,:(pathGraph($n)))
+    push!(wt,1)
+
+    push!(gr,:(ringGraph($n)))
+    push!(wt,3)
+
+    push!(gr,:(completeBinaryTree($n)))
+    push!(wt,3)
+
+    push!(gr,:(grownGraph($n,2)))
+    push!(wt,6)
+
+    push!(gr,:(grid2(ceil(Integer,sqrt($n)))[1:$n,1:$n]))
+    push!(wt,6)
+
+    push!(gr,:(randRegular($n,3)))
+    push!(wt,6)
+
+    push!(gr,:(ErdosRenyiClusterFix($n,2)))
+    push!(wt,6)
+
+    push!(gr,:(randGenRing($n,4)))
+    push!(wt,6)
+
+    i = sampleByWeight(wt)
+
+    # make sure get a connected graph
+    its = 0
+    mat = eval(gr[i])
+
+    while (~isConnected(mat)) && (its < 100)
+        mat = eval(gr[i])
+        its += 1
+    end
+    if its == 100
+        error("Getting a disconnected graph from $(gr[i])")
+    end
+        
+
+    return floatGraph(mat)
+      
+end
+
+"""sample an index with probability proportional to its weight given here"""
+function sampleByWeight(wt)
+    r = rand(1)*sum(wt)
+    find(cumsum(wt) .> r)[1]
+end
+
+"""Builds a chimeric graph on n vertices.
+The components come from pureRandomGraph,
+connected by joinGraphs, productGraph and generalizedNecklace"""
+function chimera(n::Integer)
+    if (n < 30) || (rand() < .2)
+
+        gr = pureRandomGraph(n)
+
+        return gr
+    end
+
+    if (n < 200) 
+        # just join disjoint copies of graphs
+
+        n1 = 10 + floor(Integer,(n-20)*rand())
+        n2 = n - n1
+        k = ceil(Integer,exp(rand()*log(min(n1,n2)/2)))
+
+        gr = joinGraphs(chimera(n1),chimera(n2),k)
+
+        return gr
+    end
+
+    # split with probability .7
+
+    if (rand() < .7)
+        n1 = ceil(Integer,10*exp(rand()*log(n/20)))
+
+        n2 = n - n1
+        k = floor(Integer,1+exp(rand()*log(min(n1,n2)/2)))
+
+        gr = joinGraphs(chimera(n1),chimera(n2),k)
+
+        return gr
+
+    else
+        n1 = floor(Integer,10*exp(rand()*log(n/100)))
+
+        n2 = floor(Integer, n / n1)
+
+        if (rand() < .5)
+
+            gr = productGraph(chimera(n1),chimera(n2))
+
+        else
+
+            k = floor(Integer,1+exp(rand()*log(min(n1,n2)/10)))
+            gr = generalizedNecklace(chimera(n1),chimera(n2),k)
+
+
+        end
+
+        n3 = n - size(gr)[1]
+        if (n3 > 0)
+            gr = joinGraphs(gr,chimera(n3),2)
+        end
+
+        return gr
+        
+    end
+end
+
+"""Builds the kth chimeric graph on n vertices.
+It does this by resetting the random number generator seed.
+It should captute the state of the generator before that and then
+return it, but it does not yet."""
+function chimera(n::Integer, k::Integer)
+    srand(k)
+    g = chimera(n)
+    return g
+end
+
+"""Applies one of a number of random weighting schemes to the edges of the graph"""
+function randWeight(a)
+
+    if (rand() < .1)
+        return a
+    end
+    
+    n = a.n
+    (ai,aj) = findnz(a)
+    m = length(ai)
+    
+    # potentials or edge-based
+
+    if (rand() < .3)
+        w = rand(m)
+
+    else
+        v = randn(a.n)
+
+        # mult by matrix ?
+        if (rand() < .5)
+
+            invdeg = spdiagm(1./(a*ones(size(a)[1])))
+            if (rand() < .5)
+                for i in 1:10
+                    v = a * (invdeg * v)
+                    v = v - mean(v)
+                end
+            else
+                for i in 1:10
+                    v = v - a * (invdeg * v)
+                    v = v - mean(v)
+                end
+            end
+        end
+
+        w = abs(v[ai]-v[aj]) 
+
+    end
+
+    # reciprocate or not?
+
+    w[w.==0] = 1
+    w[isnan(w)] = 1
+
+    if (rand() < .5)
+        w = 1./w
+    end
+
+    w = w / mean(w)
+
+    ar = sparse(ai,aj,w,n,n)
+    ar = ar + ar';
+    return ar
+end
+
+"""Builds the kth wted chimeric graph on n vertices.
+It does this by resetting the random number generator seed.
+It should captute the state of the generator before that and then
+return it, but it does not yet."""
+function wtedChimera(n::Integer, k::Integer)
+    srand(k)
+    g = wtedChimera(n)
+    return g
+end
+
+"""Generate a chimera, and then apply a random weighting scheme"""
+function wtedChimera(n::Integer)
+    return randWeight(chimera(n))
+end
+
