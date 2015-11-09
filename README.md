@@ -1,9 +1,13 @@
-# GraphAnalysis.jl
-Graph analysis inspired by graph Laplacians.
+# Laplacians.jl
+Laplacians is a package containing graph algorithms, with an emphsasis on tasks related to spectral and algebraic graph theory. It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.
+
+All graphs are represented by sparse adjacency matrices. This is both for speed, and because our main concerns are algebraic tasks. It does not handle dynamic graphs. It would be very slow to implement dynamic graphs this way.
 
 The documentation may be found in
 [site/about/index.html](site/about/index.html).
-Right now, the right way to look at the docs is to clone the repository, and then to open them in your browser.
-Once we make the site public, we can use github pages to make the documentation appear nicely online.
+If you are using a Mac, you can access the documentation by typing
 
-The documentation was produced using mkdocs, which may be found at [http://www.mkdocs.org/](http://www.mkdocs.org/).  The instructions to mkdocs say that you should not put the site subtree into git, for some reason that I don't quite understand.  So, I have put it there anyway.  We can figure out if there is a better way to do it later.
+~~~
+open site/about/index.html
+~~~
+
