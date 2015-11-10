@@ -84,7 +84,7 @@ and exports the functions for which it seems appropriate.
 
   export plotGraph
 
-  export shortIntGraph
+  export shortIntGraph, floatGraph
 
   export lap
   export spectralCoords
@@ -101,7 +101,7 @@ and exports the functions for which it seems appropriate.
   export vecToComps
   export isConnected
 
-  export shortestPaths
+  export shortestPaths, shortestPathTree
   export kruskal, prim
 
   include("treeAlgs.jl")

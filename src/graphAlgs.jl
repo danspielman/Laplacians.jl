@@ -159,10 +159,11 @@ function biggestComp(mat::SparseMatrixCSC)
 end
 
 
-
 """Computes the lenghts of shortest paths from `start`.
 Returns both a vector of the lenghts, and the parent array
 in the shortest path tree.
+
+This algorithm treats edge weights as reciprocals of distances.
 DOC BETTER
 """
 function shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
@@ -202,6 +203,31 @@ function shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
 
 end # shortestPaths
 
+shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}) = shortestPaths(mat, one(Ti))
+
+"""Computes the shortest path tree, and returns it as a sparse matrix.
+Treats edge weights as reciprocals of lengths.
+For example:
+
+~~~julia
+a = [0 2 1; 2 0 3; 1 3 0]
+tr = full(shortestPathTree(sparse(a),1))
+
+3x3 Array{Float64,2}:
+ 0.0  2.0  0.0
+ 2.0  0.0  3.0
+ 0.0  3.0  0.0
+~~~
+"""
+function shortestPathTree(a,start) 
+    len, pa = shortestPaths(a,start)
+    o = ones(a.n)
+    o[start] = 0
+    tr = sparse(1:a.n, pa, 1, a.n, a.n)
+    tr = tr.*a
+    tr = (tr + tr');
+end
+    
 type intHeap{Tkey,Tind}
   keys::Array{Tkey,1}
   heap::Array{Tind,1}
