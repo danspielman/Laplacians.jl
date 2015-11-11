@@ -20,7 +20,7 @@ function getBoundary(mat::SparseMatrixCSC, cluster, vertexToCluster)
     end #for
   end #for
   return count
-end #getBoundary
+end #getBoundary 
 
 
 function normalizeEdgeWeights(mat::SparseMatrixCSC, kind)
