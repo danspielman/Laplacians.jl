@@ -112,11 +112,14 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
 
 
   for vInd in 1:nVertices
+    validVertex = true
     # println("vertex: ", vInd)
     if starts[vertexToCluster[vInd]] == vInd || !finalRoundClusterVertices[vInd]
       # println("is a start/not final round: ", vInd)
       continue
     end #if
+
+    # for 
 
     for i in 1:nClusters
       clusterNeighborCount[i] = 0
@@ -124,8 +127,32 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
 
     for eInd in mat.colptr[vInd]:(mat.colptr[vInd+1]-1) #eInd is the edge
       otherV = mat.rowval[eInd]
-      clusterNeighborCount[vertexToCluster[otherV]] += edgeWeights[eInd]
+      # clusterNeighborCount[vertexToCluster[otherV]] += edgeWeights[eInd]
+
+      clusterNeighborCount[vertexToCluster[otherV]] += 1.0
+
+      # if any of neighbors
+        # 1: in same cluster
+        # 2: have no other neighbors in that cluster
+        #   don’t shuffle vertex
+      if vertexToCluster[otherV] == vertexToCluster[vInd]
+        hasOtherNeighborsInOwnCluster = false
+        for otherEInd in mat.colptr[otherV]:(mat.colptr[otherV+1]-1)
+          otherOtherV = mat.rowval[otherEInd]
+          if otherOtherV != vInd && vertexToCluster[otherOtherV] == vertexToCluster[vInd]
+            hasOtherNeighborsInOwnCluster = true
+          end #if
+        end #for
+        if !hasOtherNeighborsInOwnCluster
+          validVertex = false
+        end
+      end #if
+
     end #for
+
+    if !validVertex
+      continue
+    end
 
     # println("vertex: ", vInd)
     # println("cluster count: ",clusterNeighborCount)
@@ -307,8 +334,8 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
 
   # println("finalRoundClusterVertices: ", finalRoundClusterVertices)
 
-  # return reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices)
-  return partitionQueue, vertexToCluster, starts, vertexToClusterLocation
+  return reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices)
+  # return partitionQueue, vertexToCluster, starts, vertexToClusterLocation
 end #partitionMatrix
 
 
@@ -337,6 +364,13 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
     for eInd in mat.colptr[vInd]:(mat.colptr[vInd+1]-1)
       otherVInd = mat.rowval[eInd]
       otherVIndInCluster = vertexToClusterLocation[otherVInd]
+
+
+      # if otherVInd == 506
+      #   println(vertexToCluster[otherVInd], " ", vertexToCluster[vInd])
+      # end 
+
+
       if vertexToCluster[otherVInd] == vertexToCluster[vInd] && !visited[otherVIndInCluster]
         newdist = dv + mat.nzval[eInd]
         if newdist < dists[otherVIndInCluster]
@@ -362,6 +396,18 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
       end #if
     end #for
   end #for 
+
+  #checking connectedness
+  for vInd in 1:length(visited)
+    if !visited[vInd]
+      println("for cluster: ", vertexToCluster[clusterQueue[vInd]], " vertex: ", clusterQueue[vInd], " is not connected")
+      println("vertex: ", clusterQueue[vInd], " is connected to: ")
+      for eInd in mat.colptr[clusterQueue[vInd]]:(mat.colptr[clusterQueue[vInd]+1]-1)
+        otherVInd = mat.rowval[eInd]
+        println("\t otherV: ", otherVInd, " in cluster: ", vertexToCluster[otherVInd])
+      end
+    end #if
+  end #for
 
   return newTreeInds
 end # shortestPaths
