@@ -38,6 +38,7 @@ and exports the functions for which it seems appropriate.
   export nbrs
   export setValue
   export backIndices
+  export findEntries
 
   include("graphGenerators.jl")
 
@@ -113,12 +114,12 @@ and exports the functions for which it seems appropriate.
   export compDepth
   export compStretches
 
-  include("cutPageRank.jl")
+  # include("cutPageRank.jl")
 
-  export pr
-  export ppr
-  export apr
-  export prn
+  # export prn
+  # export apr
+  # export pr
+  # export ppr
 
   include("pcg.jl")
 
@@ -134,6 +135,7 @@ and exports the functions for which it seems appropriate.
  
   export localImprove
   export localFlow
+  export compConductance
 =#
 
   include("randTrees.jl")
