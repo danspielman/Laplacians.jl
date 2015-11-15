@@ -1,12 +1,19 @@
 " the LocalImprove function, from the Orrechia-Zhu paper "
-function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, epsSigma::Float64, eps::Float64, err=1e-10) 
+function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10) 
   #=
     Notes: err < 1e-13 breaks the code. Precision is 1e-16, so 3 bits of precision are lost somewhere...
 
   =#
 
-  # show warning for epsSigma
-  minEpsSigma = getVolume(G, A) / getVolume(G, setdiff(collect(1:max(G.n, G.m)), A))
+  n = max(G.n, G.m)
+
+  # set epsSigma if it was not set
+  minEpsSigma = getVolume(G, A) / getVolume(G, setdiff(collect(1:n), A))
+  if epsSigma == -1
+    epsSigma = minEpsSigma
+  end
+
+  # show warnings for epsSigma
   if epsSigma < minEpsSigma
       print_with_color(:red, "eps-sigma should be greater than ")
       println(minEpsSigma)
@@ -86,18 +93,6 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
   return getCutSet(GPrime, s, t), totalflow
 
 end # localFlow
-
-" computes the volume of subset A in G "
-function getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})
-
-  vol = 0
-  for i in 1:length(A)
-    vol = vol + deg(G, A[i])
-  end
-
-  return vol
-
-end # getVolume
 
 " creates the GPrime graph, following Definition 3.1 "
 function createGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv, Ti}, A::Array{Int64, 1}, alpha::Float64, epsSigma::Float64)
@@ -304,28 +299,45 @@ end # getCutSet
 """
 function compConductance{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
-	n = max(G.n, G.m)
+  n = max(G.n, G.m)
 
-	volIn = getVolume(G, s)
-	volOut = getVolume(G, setdiff(collect(1:n), s))
+	vols = getVolume(G, s)
+	volvms = getVolume(G, setdiff(collect(1:n), s))
+  obound = getObound(G, s)
 
-	ins = zeros(Bool, n)
-	for u in s
-		ins[u] = true
-	end
-
-	obound = 0
-	for u in s
-		for i in 1:deg(G, u)
-			v = nbri(G, u, i)
-			if !ins[v]
-				obound = obound + 1
-			end
-		end
-	end
-
-	return obound / min(volIn, volOut)
+	return obound / min(vols, volvms)
 
 end # compConductance
+
+" computes the volume of subset s in an unweighted graph G "
+function getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+
+  vol = 0.0
+  for i in 1:length(s)
+    vol = vol + deg(G, s[i])
+  end
+
+  return vol
+
+end # getVolume
+
+" computes the number of edges leaving s "
+function getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+
+  sets = IntSet(s)
+
+  obound = 0
+  for u in s
+    for i in 1:deg(G, u)
+      v = nbri(G, u, i)
+      if !(v in sets)
+        obound = obound + weighti(G, u, i)
+      end
+    end
+  end
+
+  return obound
+
+end #getObound
 
 

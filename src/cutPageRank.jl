@@ -181,13 +181,3 @@ function ppr{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Floa
 
 end # ppr
 
-""" 
-  Returns the quality of the cut for a given graph and a given cut set.
-  Result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)
-"""
-function compConductance{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
-
-
-
-end # compConductance
-

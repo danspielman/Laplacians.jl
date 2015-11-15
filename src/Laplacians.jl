@@ -114,13 +114,6 @@ and exports the functions for which it seems appropriate.
   export compDepth
   export compStretches
 
-  # include("cutPageRank.jl")
-
-  # export prn
-  # export apr
-  # export pr
-  # export ppr
-
   include("pcg.jl")
 
   export cg
@@ -130,13 +123,24 @@ and exports the functions for which it seems appropriate.
 
   export maxflow
 
-#=
-  include("flowClustering.jl")
+  # include("cutPageRank.jl")
+
+  # export prn
+  # export apr
+  # export pr
+  # export ppr
+
+  # include("flowClustering.jl")
  
-  export localImprove
-  export localFlow
-  export compConductance
-=#
+  # export localImprove
+  # export localFlow
+  # export compConductance
+  # export getVolume
+  # export getObound
+
+  # include("cutHeuristics.jl")
+
+  # export refineCut
 
   include("randTrees.jl")
   export randishKruskal, randishPrim
