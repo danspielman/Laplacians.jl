@@ -1,78 +1,23 @@
-#returns volume = sum of all the degrees of nodes in cluster
-function getVolume(mat::SparseMatrixCSC, cluster)
-  count = 0.0
-  for v in cluster
-    for ind in mat.colptr[v]:(mat.colptr[v+1]-1)
-      count += 1.0
-    end #for
-  end #for
-  return count
-end #getVolume
+function normalizeEdgeWeights(mat::SparseMatrixCSC, kind, nEdges)
 
-#returns boundary = # edges leaving cluster
-function getBoundary(mat::SparseMatrixCSC, cluster, vertexToCluster)
-  count = 0.0
-  for v in cluster
-    for ind in mat.colptr[v]:(mat.colptr[v+1]-1)
-      if vertexToCluster[v] != vertexToCluster[mat.rowval[ind]]
-        count += 1.0
-      end #if
-    end #for
-  end #for
-  return count
-end #getBoundary 
-
-
-function normalizeEdgeWeights(mat::SparseMatrixCSC, kind)
-
-  # println(mat)
-  rows, columns, edgeWeights = findnz(mat)
   if (kind == :max)
-    edgeWeights = edgeWeights.\ 1.0
+    for eInd in 1:nEdges
+      mat.nzval[eInd] \= 1.0
+    end #for
   end #if
 
-  minEdgeWeight = minimum(edgeWeights)
-  edgeWeights = edgeWeights./ minEdgeWeight
+  minEdgeWeight = minimum(mat.nzval)
 
-  newMat = sparse(rows, columns, edgeWeights)
+  for eInd in 1:nEdges
+    mat.nzval[eInd] /= minEdgeWeight
+  end #for
 
-  # println(newMat)
-
-  # nVertices = mat.n
-
-  # for vInd in 1:nVertices
-  #   for eInd in mat.colptr[vInd]:(mat.colptr[vInd+1]-1)
-  #     if (kind == :max)
-  #       mat.rowval[eInd] \= 1.0
-  #     end #if
-
-  #     mat.rowval[eInd] /= minEdgeWeight
-  #   end #for
-  # end #for
-
-  # newMat = sparse(rows, columns, edgeWeights)
-
-  # println(mat)
-
-
-
-  # for vInd in 1:nVertices
-  #   for eInd in mat.colptr[vInd]:(mat.colptr[vInd+1]-1)
-  #     if mat[eInd] != newMat[eInd]
-  #       println("FALSE")
-  #       break
-  #     end #if
-  #   end #for
-  # end #for
-
-  return minEdgeWeight, newMat
+  return minEdgeWeight
 end #normalizeEdgeWeights
 
 
-function divideEdgesIntoClasses(mat::SparseMatrixCSC)
-  rows, columns, edgeWeights = findnz(mat)
+function divideEdgesIntoClasses(mat::SparseMatrixCSC, nEdges, rows, columns, edgeWeights)
   nVertices = mat.n
-  nEdges = nnz(mat)
   x = exp(sqrt(log(nVertices) * log(log(nVertices))))
   y = x * log(nVertices) #placeholder for testing
   edgeClasses = zeros(Int64, nEdges)
@@ -88,38 +33,23 @@ end #divideEdgesIntoClasses
 
 
 
-
-
 #could speed this up by creating linked list for clusterCount (cuz it'll usually be mostly zeros)
 #this makes partitionQueue potentially unsorted. Will that mess shit up..?
 # what if this removes a vertex that's crucial for the connection of a cluster? Then it'll divide into 2 clusters.
 #   but my code can't handle that... ------ suddenly they won't be connected, right?
 # what if it was the starting vertex for a cluster..?
 # should be greatest total weight! not just the greatest number of neighbors
-function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices)
+function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
   nVertices = mat.n
   visited = zeros(Bool, nVertices)
   nClusters = length(partitionQueue)
-  clusterNeighborCount = zeros(Float64, nClusters)
-  rows, columns, edgeWeights = findnz(mat)
-
-  # println(mat)
-
-  # println("partitionQueue: ", partitionQueue)
-  # println("vertexToCluster: ", vertexToCluster)
-  # println("starts: ", starts)
-  # println("vertexToClusterLocation: ", vertexToClusterLocation)
-
+  clusterNeighborCount = zeros(Int64, nClusters)
 
   for vInd in 1:nVertices
     validVertex = true
-    # println("vertex: ", vInd)
     if starts[vertexToCluster[vInd]] == vInd || !finalRoundClusterVertices[vInd]
-      # println("is a start/not final round: ", vInd)
       continue
     end #if
-
-    # for 
 
     for i in 1:nClusters
       clusterNeighborCount[i] = 0
@@ -127,9 +57,9 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
 
     for eInd in mat.colptr[vInd]:(mat.colptr[vInd+1]-1) #eInd is the edge
       otherV = mat.rowval[eInd]
-      # clusterNeighborCount[vertexToCluster[otherV]] += edgeWeights[eInd]
 
-      clusterNeighborCount[vertexToCluster[otherV]] += 1.0
+      # clusterNeighborCount[vertexToCluster[otherV]] += edgeWeights[eInd]
+      clusterNeighborCount[vertexToCluster[otherV]] += 1
 
       # if any of neighbors
         # 1: in same cluster
@@ -154,40 +84,30 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
       continue
     end
 
-    # println("vertex: ", vInd)
-    # println("cluster count: ",clusterNeighborCount)
-
     newCluster = indmax(clusterNeighborCount)
 
     if newCluster != vertexToCluster[vInd]
       
+      #remove vInd from it's old clusterQueue
+      partitionQueue[vertexToCluster[vInd]][vertexToClusterLocation[vInd]] = -1
+      # oldClusterSubQueue = zeros(Int64, length(partitionQueue[vertexToCluster[vInd]]) - 1)
+      # alreadyFoundIt = false
+      # for i in 1:length(partitionQueue[vertexToCluster[vInd]])
+      #   if partitionQueue[vertexToCluster[vInd]][i] != vInd
+      #     if alreadyFoundIt
+      #       oldClusterSubQueue[i-1] = partitionQueue[vertexToCluster[vInd]][i]
+      #     else
+      #       oldClusterSubQueue[i] = partitionQueue[vertexToCluster[vInd]][i]
+      #     end #if/else
+      #   else
+      #     alreadyFoundIt = true
+      #   end #if/else
+      # end #for
 
-      # println("SWITCHING Vertex: ", vInd, " from cluster ", vertexToCluster[vInd], " to ", newCluster)
-      #remove from old clusterQueue
-      oldClusterSubQueue = Int64[]
-      for i in partitionQueue[vertexToCluster[vInd]]
-        if i != vInd
-          push!(oldClusterSubQueue, i)
-        end #if
-      end #for
-
-      # println(partitionQueue)
-      # println(oldClusterSubQueue)
-      # println(vertexToCluster[vInd])
-
-      partitionQueue[vertexToCluster[vInd]] = oldClusterSubQueue
-
-      # println("HELLO")
-
+      # partitionQueue[vertexToCluster[vInd]] = oldClusterSubQueue
 
       #push to new clusterQueue
       push!(partitionQueue[newCluster], vInd)
-
-      # change in vertexToClusterLocation
-      # vertexToClusterLocation[vInd] = length(partitionQueue[vertexToCluster[vInd]])
-
-      # if was a start, change that
-      # starts[vertexToCluster[vInd]] = clusterQueue[vertexToCluster[vInd]][2]..?
 
       # change in vertexToCluster
       vertexToCluster[vInd] = newCluster
@@ -197,17 +117,11 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
   for i in 1:length(partitionQueue)
     sort!(partitionQueue[i])
     for j in 1:length(partitionQueue[i])
-      vertexToClusterLocation[partitionQueue[i][j]] = j
+      if partitionQueue[i][j] != -1
+        vertexToClusterLocation[partitionQueue[i][j]] = j
+      end
     end #for
   end #for
-
-  # partitionQueue
-
-  # println("partitionQueue: ", partitionQueue)
-  # println("vertexToCluster: ", vertexToCluster)
-  # println("starts: ", starts)
-  # println("vertexToClusterLocation: ", vertexToClusterLocation)
-
 
   return partitionQueue, vertexToCluster, starts, vertexToClusterLocation
 end #reshuffleClusters
@@ -221,7 +135,7 @@ end #reshuffleClusters
 
 
 # only shuffle vertices at the last level of BFS cluster Tree
-function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdgeMapReversed, bigMatNVertices)
+function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdgeMapReversed, bigMatNVertices, rows, columns, edgeWeights)
   nVertices = mat.n
   partitionQueue = Array{Int64, 1}[]
   nClusters = 0
@@ -248,38 +162,46 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
     x = 5.0
   end
 
+  lastLowestUnvisitedNode = 1
+
   # build all the clusters
   while (nAddedToClusters != nVertices)
     nClusters += 1
     push!(partitionQueue, Int64[])
 
     #select arbitrary unvisited node
-    start = 1
-    for node in 1:nVertices
-      if !visited[node]
-        start = node
-        push!(starts, start)
-        break
-      end #if
-    end #for
-    visited[start] = true
+    
+    # OR pick a random starting node between 1 and nVertices each time.. then loop around if it's greater
+
+    while visited[lastLowestUnvisitedNode]
+      lastLowestUnvisitedNode += 1
+    end #while
+
+    push!(starts, lastLowestUnvisitedNode)
+    visited[lastLowestUnvisitedNode] = true
 
     nNodesInCluster = 1
     nAddedToClusters += 1
 
-    push!(partitionQueue[nClusters], start)
-    vertexToCluster[start] = nClusters
-    vertexToClusterLocation[start] = nNodesInCluster
+    push!(partitionQueue[nClusters], lastLowestUnvisitedNode)
+    vertexToCluster[lastLowestUnvisitedNode] = nClusters
+    vertexToClusterLocation[lastLowestUnvisitedNode] = nNodesInCluster
 
     lastnNodesInCluster = 0
+
+    calculatedVolume = 0.0
+    calculatedBoundary = 0.0
+
+    for eInd in mat.colptr[lastLowestUnvisitedNode]:(mat.colptr[lastLowestUnvisitedNode+1]-1)
+      calculatedVolume += 1.0
+      calculatedBoundary += 1.0
+    end #for
+
 
     #building a single cluster
     while !(nAddedToClusters == nVertices)
 
-      volume = getVolume(mat, partitionQueue[nClusters])
-      boundary = getBoundary(mat, partitionQueue[nClusters], vertexToCluster)
-
-      if (volume / boundary >= x) || lastnNodesInCluster == nNodesInCluster
+      if (calculatedVolume / calculatedBoundary >= x) || lastnNodesInCluster == nNodesInCluster
         break
       end #if
 
@@ -309,20 +231,30 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
         end #for
       end #for
 
-      # println("adding: ", newVertices," (", nNewVertices, ") to cluster: ", nClusters)
-
       for nthNewVertex in 1:nNewVertices
-        push!(partitionQueue[nClusters], newVertices[nthNewVertex])
-        vertexToCluster[newVertices[nthNewVertex]] = nClusters
+        newV = newVertices[nthNewVertex]
+        push!(partitionQueue[nClusters], newV)
+        vertexToCluster[newV] = nClusters
         nAddedToClusters += 1
         nNodesInCluster += 1
-        vertexToClusterLocation[newVertices[nthNewVertex]] = nNodesInCluster
-        visited[newVertices[nthNewVertex]] = true
-      end #for
+        vertexToClusterLocation[newV] = nNodesInCluster
+        visited[newV] = true
 
-      # for i in 1:nNewVertices
-      #   newVerticesArray[newVertices[i]] = 0
-      # end #for
+        #updating boundary and volume
+        for eInd in mat.colptr[newV]:(mat.colptr[newV+1]-1)
+          otherV = mat.rowval[eInd]
+          if vertexToCluster[otherV] == vertexToCluster[newV]
+            calculatedBoundary -= 1.0
+
+            #LEAVE THIS IN IF Vol = sum of degrees of nodes. Take out of Vol = # edges
+            calculatedVolume += 1.0 
+          else
+            calculatedVolume += 1.0
+            calculatedBoundary += 1.0
+          end #if
+        end #for
+
+      end #for
 
     end #while
 
@@ -334,7 +266,7 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
 
   # println("finalRoundClusterVertices: ", finalRoundClusterVertices)
 
-  return reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices)
+  return reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
   # return partitionQueue, vertexToCluster, starts, vertexToClusterLocation
 end #partitionMatrix
 
@@ -353,6 +285,7 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
   pArrayNonZeros = Int64[]
 
   intHeapAdd!(nh, vertexToClusterLocation[start], 0.0)
+
   pArray[vertexToClusterLocation[start]] = vertexToClusterLocation[start]
 
   while nh.nitems > 0
@@ -361,14 +294,14 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
 
     dv = dists[vIndInCluster]
     vInd = clusterQueue[vIndInCluster]
+
+    if vInd == -1
+      continue
+    end
+
     for eInd in mat.colptr[vInd]:(mat.colptr[vInd+1]-1)
       otherVInd = mat.rowval[eInd]
       otherVIndInCluster = vertexToClusterLocation[otherVInd]
-
-
-      # if otherVInd == 506
-      #   println(vertexToCluster[otherVInd], " ", vertexToCluster[vInd])
-      # end 
 
 
       if vertexToCluster[otherVInd] == vertexToCluster[vInd] && !visited[otherVIndInCluster]
@@ -398,29 +331,27 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
   end #for 
 
   #checking connectedness
-  for vInd in 1:length(visited)
-    if !visited[vInd]
-      println("for cluster: ", vertexToCluster[clusterQueue[vInd]], " vertex: ", clusterQueue[vInd], " is not connected")
-      println("vertex: ", clusterQueue[vInd], " is connected to: ")
-      for eInd in mat.colptr[clusterQueue[vInd]]:(mat.colptr[clusterQueue[vInd]+1]-1)
-        otherVInd = mat.rowval[eInd]
-        println("\t otherV: ", otherVInd, " in cluster: ", vertexToCluster[otherVInd])
-      end
-    end #if
-  end #for
+  # for vInd in 1:length(visited)
+  #   if !visited[vInd]
+  #     println("for cluster: ", vertexToCluster[clusterQueue[vInd]], " vertex: ", clusterQueue[vInd], " is not connected")
+  #     println("vertex: ", clusterQueue[vInd], " is connected to: ")
+  #     for eInd in mat.colptr[clusterQueue[vInd]]:(mat.colptr[clusterQueue[vInd]+1]-1)
+  #       otherVInd = mat.rowval[eInd]
+  #       println("\t otherV: ", otherVInd, " in cluster: ", vertexToCluster[otherVInd])
+  #     end
+  #   end #if
+  # end #for
 
   return newTreeInds
 end # shortestPaths
 
 
-function collapsePartition(mat::SparseMatrixCSC, partitionQueue, map)
+function collapsePartition(mat::SparseMatrixCSC, partitionQueue, map, nEdges, rows, columns, edgeWeights)
 
   nClusters = length(partitionQueue)
-  nEdges = nnz(mat)
   newRows = Int64[]
   newColumns = Int64[]
   newEdgeWeights = Float64[]
-  rows, columns, edgeWeights = findnz(mat)
   for i in 1:nEdges
     if map[rows[i]] != map[columns[i]]
       push!(newRows, map[rows[i]]) 
@@ -435,34 +366,52 @@ function collapsePartition(mat::SparseMatrixCSC, partitionQueue, map)
 end #collapsePartition
 
 
-function getBigEdgeMapReversed(mat, newMat, bigMapD)
-  nEdges = nnz(mat)
-  rows, columns, edgeWeights = findnz(mat)
-
-  newNEdges = nnz(newMat)
-  newRows, newColumns, newEdgeWeights = findnz(newMat)
+function getBigEdgeMapReversed(mat, newMat, bigMapD, nEdges, rows, columns, edgeWeights, newNEdges, newRows, newColumns, newEdgeWeights)
 
   bigEdgeMapReversed = zeros(Int64, newNEdges)
 
   for eInd in 1:nEdges
     c = columns[eInd]
     r = rows[eInd]
+    # e = newMat.colptr[bigMapD[c]]
+    # bigEdgeMapReversed[e] = eInd
     for e in newMat.colptr[bigMapD[c]]:(newMat.colptr[bigMapD[c]+1]-1) #eInd is the edge
-      otherV = newMat.rowval[e] #this gives us the other vertex
-      if otherV == bigMapD[r] && (bigEdgeMapReversed[e] == 0 || edgeWeights[eInd] < edgeWeights[bigEdgeMapReversed[e]])
+      # otherV = newMat.rowval[e] #this gives us the other vertex
+      if newMat.rowval[e] == bigMapD[r] && (bigEdgeMapReversed[e] == 0 || edgeWeights[eInd] < edgeWeights[bigEdgeMapReversed[e]])
         bigEdgeMapReversed[e] = eInd
+        # break
       end #if
     end #for
   end #for
 
+
+  # for eInd in 1:newNEdges
+  #   nc = newColumns[eInd]
+  #   nr = newRows[eInd]
+  #   for e in mat.colptr[]
+  # end
+
   return bigEdgeMapReversed
 end #getBigEdgeMapReversed
+
+function denormalizeEdgeWeights(oldMinEdgeWeight, mat, kind, nEdges)
+  for eInd in 1:nEdges
+    mat.nzval[eInd] *= oldMinEdgeWeight
+  end #for
+
+  if (kind == :max)
+    for eInd in 1:nEdges
+      mat.nzval[eInd] \= 1.0
+    end #for
+  end #if
+end #denormalizeEdgeWeights
 
 
 function sparseMatrixFromTreeIndices(mat, treeInds)
   nVertices = mat.n
 
   rows, columns, edgeWeights = findnz(mat)
+
   nRows = Int64[]
   nColumns = Int64[]
   nEdgeWeights = Float64[]
@@ -482,16 +431,18 @@ function sparseMatrixFromTreeIndices(mat, treeInds)
 end #sparseMatrixFromTreeIndices
 
 
-function akpw(mat::SparseMatrixCSC; kind=:min)
+function akpw(mat::SparseMatrixCSC; kind=:max)
   println("Starting up AKPW...")
 
   nVertices = mat.n
   nEdges = nnz(mat)
 
-  unNormalizedMat = mat
+  oldMinEdgeWeight = normalizeEdgeWeights(mat, kind, nEdges)
+  rows, columns, edgeWeights = findnz(mat)
 
-  oldMinEdgeWeight, mat = normalizeEdgeWeights(mat, kind)
   newMat = mat
+  newNEdges = nEdges
+  newRows, newColumns, newEdgeWeights = rows, columns, edgeWeights
 
   bigMapD = zeros(Int64, nVertices) #assuming map does C->D, bigMapD does A->D.
   for i in 1:nVertices #the first iteration maps to iself
@@ -504,11 +455,11 @@ function akpw(mat::SparseMatrixCSC; kind=:min)
   end #for
 
   treeInds = zeros(Bool, nEdges)
-  edgeClasses = divideEdgesIntoClasses(mat)
+  edgeClasses = divideEdgesIntoClasses(mat, nEdges, rows, columns, edgeWeights)
 
   bigIteration = 1
   while (true)
-    partitionQueue, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, nVertices)
+    partitionQueue, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, nVertices, newRows, newColumns, newEdgeWeights)
 
     println("nClusters ", length(partitionQueue))
 
@@ -516,17 +467,12 @@ function akpw(mat::SparseMatrixCSC; kind=:min)
       bigMapD[i] = vertexToCluster[bigMapD[i]]
     end #for
 
-    
-    # time = 0
-
 
     #this, for each cluster, creates its own sparse matrix and runs shortest paths on that, then returns the 
     # original mapped edges corresponding to that shortest paths tree. Then it adds those indices to treeInds
     for cInd in 1:length(partitionQueue)
 
-      # tic()
       newTreeInds = shortestPathsForCluster(newMat, partitionQueue[cInd], vertexToCluster, starts[cInd], vertexToClusterLocation)
-      # time += toq()
 
       for i in newTreeInds
         treeInds[bigEdgeMapReversed[i]] = true
@@ -539,15 +485,19 @@ function akpw(mat::SparseMatrixCSC; kind=:min)
       break
     end #if
 
-    newMat = collapsePartition(newMat, partitionQueue, vertexToCluster)
+    newMat = collapsePartition(newMat, partitionQueue, vertexToCluster, newNEdges, newRows, newColumns, newEdgeWeights)
+    newNEdges = nnz(newMat)
+    newRows, newColumns, newEdgeWeights = findnz(newMat)
 
-    bigEdgeMapReversed = getBigEdgeMapReversed(mat, newMat, bigMapD)
+    bigEdgeMapReversed = getBigEdgeMapReversed(mat, newMat, bigMapD, nEdges, rows, columns, edgeWeights, newNEdges, newRows, newColumns, newEdgeWeights)
 
     bigIteration += 1
   end #while
 
+  denormalizeEdgeWeights(oldMinEdgeWeight, mat, kind, nEdges)
+  # println(mat)
 
-  finalTree = sparseMatrixFromTreeIndices(unNormalizedMat, treeInds)
+  finalTree = sparseMatrixFromTreeIndices(mat, treeInds)
 
   return finalTree
 end #akpw
@@ -569,166 +519,3 @@ end #akpw
 #run against compute stretches code!
 
 
-
-
-
-
-
-
-
-
-# type intHeap{Tkey,Tind}
-#   keys::Array{Tkey,1}
-#   heap::Array{Tind,1}
-#   index::Array{Tind,1}
-#   nitems::Tind
-# end #intHeap
-
-# intHeap(n::Int64) = intHeap(Inf*ones(Float64,n),-ones(Int64,n),zeros(Int64,n),0)
-# intHeap(n::Int32) = intHeap(Inf*ones(Float32,n),-ones(Int32,n),zeros(Int32,n),0)
-
-# function intHeapAdd!{Tkey,Tind}(nh::intHeap, node::Tind, key::Tkey)
-#   if nh.index[node] > 0 # if already in the heap
-#     if key < nh.keys[node]
-#       intHeapSet!(nh, node, key)
-#     end
-
-#   else # if it really is new
-
-#     nhp = nh.nitems+1
-
-#     nh.keys[node] = key
-#     nh.heap[nhp] = node
-#     nh.index[node] = nhp
-#     nh.nitems = nhp
-
-#     intHeapUp!(nh, node)
-
-#   end
-# end # intHeapAdd!
-
-# function intHeapDown!{Tind}(nh::intHeap, node::Tind)
-#   pos = nh.index[node]
-#   key = nh.keys[node]
-#   leftPos = pos*2
-#   moved = true
-#   @inbounds while (leftPos <= nh.nitems) && moved
-#     moved = false
-#     rightPos = pos*2+1
-
-#     if rightPos > nh.nitems
-#       childPos = leftPos
-#       childNode = nh.heap[childPos]
-#       childKey = nh.keys[childNode]
-#     else
-#       leftNode = nh.heap[leftPos]
-#       leftKey = nh.keys[leftNode]
-#       rightNode = nh.heap[rightPos]
-#       rightKey = nh.keys[rightNode]
-
-#       if leftKey < rightKey
-#         childPos = leftPos
-#         childNode = leftNode
-#         childKey = leftKey
-#       else
-#         childPos = rightPos
-#         childNode = rightNode
-#         childKey = rightKey
-#       end
-#     end
-
-#     if childKey < key
-#       nh.heap[childPos] = node
-#       nh.heap[pos] = childNode
-#       nh.index[node] = childPos
-#       nh.index[childNode] = pos
-
-#       pos = childPos
-#       leftPos = pos*2
-#       moved = true
-#     end
-
-#   end #while
-# end # intHeapDown!
-
-# function intHeapPop!(nh::intHeap)
-#   minNode = nh.heap[1]
-
-#   nh.index[minNode] = 0
-
-#   @inbounds if (nh.nitems > 1)
-#     node = nh.heap[nh.nitems]
-#     nh.heap[1] = node
-#     nh.index[node] = 1
-#     intHeapDown!(nh, node)
-#   end
-#   nh.nitems = nh.nitems - 1
-
-#   return minNode
-# end # intHeapPop!
-
-# function intHeapUp!{Tind}(nh::intHeap, node::Tind)
-#   pos = nh.index[node]
-#   moved = true
-
-#   @inbounds while (pos > 1) && moved
-#     key = nh.keys[node]
-
-#     parentPos = div(pos,2)
-#     parentNode = nh.heap[parentPos]
-#     parentKey = nh.keys[parentNode]
-
-#     moved = false
-
-#     if (parentKey > key)
-#       nh.heap[parentPos] = node
-#       nh.heap[pos] = parentNode
-#       nh.index[node] = parentPos
-#       nh.index[parentNode] = pos
-#       pos = parentPos
-#       moved = true
-#     end
-#   end
-
-# end # intHeapUp!
-
-# function intHeapSort(x::Array{Float64,1})
-#   n = length(x)
-#   nh = intHeap(n)
-
-#   @inbounds for i in 1:n
-#     intHeapAdd!(nh, i, x[i])
-#   end
-
-#   out = zeros(Float64,n)
-#   @inbounds for i in 1:n
-#     out[i] = nh.keys[intHeapPop!(nh)]
-#   end
-
-#   return out
-
-# end # intHeapSort
-
-
-# function intHeapSort(nh::intHeap)
-#   n = length(nh.keys)
-
-#   out = zeros(Float64,n)
-#   for i in 1:n
-#     out[i] = nh.keys[intHeapPop!(nh)]
-#   end
-
-#   return out
-
-# end # intHeapSort
-
-# function intHeapSet!{Tkey,Tind}(nh::intHeap, node::Tind, key::Tkey)
-#   oldKey = nh.keys[node]
-#   nh.keys[node] = key
-
-#   if (key < oldKey)
-#     intHeapUp!(nh,node)
-#   else
-#     intHeapDown!(nh,node)
-#   end
-# end # intHeapSet!
