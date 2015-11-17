@@ -33,6 +33,23 @@ end #divideEdgesIntoClasses
 
 
 
+function unsortedArray(n)
+  permutation = zeros(Int64, n)
+  for i in 1:n
+    permutation[i] = i
+  end
+
+  for i in 1:n
+    j = rand(1:i)
+    # println(j)
+    permutation[i] = permutation[j]
+    permutation[j] = i
+  end #for
+
+  return permutation
+end #unsortedArray
+
+
 #could speed this up by creating linked list for clusterCount (cuz it'll usually be mostly zeros)
 #this makes partitionQueue potentially unsorted. Will that mess shit up..?
 # what if this removes a vertex that's crucial for the connection of a cluster? Then it'll divide into 2 clusters.
@@ -55,11 +72,18 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
       clusterNeighborCount[i] = 0
     end #for
 
+    newCluster = vertexToCluster[vInd]
+    newClusterCount = 0
+
     for eInd in mat.colptr[vInd]:(mat.colptr[vInd+1]-1) #eInd is the edge
       otherV = mat.rowval[eInd]
 
       # clusterNeighborCount[vertexToCluster[otherV]] += edgeWeights[eInd]
       clusterNeighborCount[vertexToCluster[otherV]] += 1
+      if clusterNeighborCount[vertexToCluster[otherV]] > newClusterCount
+        newClusterCount = clusterNeighborCount[vertexToCluster[otherV]]
+        newCluster = vertexToCluster[otherV]
+      end
 
       # if any of neighbors
         # 1: in same cluster
@@ -84,27 +108,12 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
       continue
     end
 
-    newCluster = indmax(clusterNeighborCount)
+    # newCluster = indmax(clusterNeighborCount)
 
     if newCluster != vertexToCluster[vInd]
       
       #remove vInd from it's old clusterQueue
       partitionQueue[vertexToCluster[vInd]][vertexToClusterLocation[vInd]] = -1
-      # oldClusterSubQueue = zeros(Int64, length(partitionQueue[vertexToCluster[vInd]]) - 1)
-      # alreadyFoundIt = false
-      # for i in 1:length(partitionQueue[vertexToCluster[vInd]])
-      #   if partitionQueue[vertexToCluster[vInd]][i] != vInd
-      #     if alreadyFoundIt
-      #       oldClusterSubQueue[i-1] = partitionQueue[vertexToCluster[vInd]][i]
-      #     else
-      #       oldClusterSubQueue[i] = partitionQueue[vertexToCluster[vInd]][i]
-      #     end #if/else
-      #   else
-      #     alreadyFoundIt = true
-      #   end #if/else
-      # end #for
-
-      # partitionQueue[vertexToCluster[vInd]] = oldClusterSubQueue
 
       #push to new clusterQueue
       push!(partitionQueue[newCluster], vInd)
@@ -135,7 +144,7 @@ end #reshuffleClusters
 
 
 # only shuffle vertices at the last level of BFS cluster Tree
-function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdgeMapReversed, bigMatNVertices, rows, columns, edgeWeights)
+function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdgeMapReversed, rows, columns, edgeWeights, randomClusters)
   nVertices = mat.n
   partitionQueue = Array{Int64, 1}[]
   nClusters = 0
@@ -147,6 +156,10 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
   newVertices = zeros(Int64, nVertices)
   nNewVertices = 0
   newVerticesArray = zeros(Bool, nVertices)
+
+  if (randomClusters != :no)
+    unsortedNodes = unsortedArray(nVertices)
+  end
 
   finalRoundClusterVertices = zeros(Bool, nVertices)
 
@@ -162,37 +175,42 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
     x = 5.0
   end
 
-  lastLowestUnvisitedNode = 1
+  lowestUnvisitedUnsortedIndex = 1
 
-  # build all the clusters
   while (nAddedToClusters != nVertices)
     nClusters += 1
     push!(partitionQueue, Int64[])
 
-    #select arbitrary unvisited node
-    
-    # OR pick a random starting node between 1 and nVertices each time.. then loop around if it's greater
+    # pick a random starting node between 1 and nVertices each time
+    if (randomClusters != :no)
+      while visited[unsortedNodes[lowestUnvisitedUnsortedIndex]]
+        lowestUnvisitedUnsortedIndex += 1
+      end #while
+      start = unsortedNodes[lowestUnvisitedUnsortedIndex]
+    else
+      # OR (if not random), just select next unvisited node
+      while visited[lowestUnvisitedUnsortedIndex]
+        lowestUnvisitedUnsortedIndex += 1
+      end #while
+      start = lowestUnvisitedUnsortedIndex
+    end
 
-    while visited[lastLowestUnvisitedNode]
-      lastLowestUnvisitedNode += 1
-    end #while
-
-    push!(starts, lastLowestUnvisitedNode)
-    visited[lastLowestUnvisitedNode] = true
+    push!(starts, start)
+    visited[start] = true
 
     nNodesInCluster = 1
     nAddedToClusters += 1
 
-    push!(partitionQueue[nClusters], lastLowestUnvisitedNode)
-    vertexToCluster[lastLowestUnvisitedNode] = nClusters
-    vertexToClusterLocation[lastLowestUnvisitedNode] = nNodesInCluster
+    push!(partitionQueue[nClusters], start)
+    vertexToCluster[start] = nClusters
+    vertexToClusterLocation[start] = nNodesInCluster
 
     lastnNodesInCluster = 0
 
     calculatedVolume = 0.0
     calculatedBoundary = 0.0
 
-    for eInd in mat.colptr[lastLowestUnvisitedNode]:(mat.colptr[lastLowestUnvisitedNode+1]-1)
+    for eInd in mat.colptr[start]:(mat.colptr[start+1]-1)
       calculatedVolume += 1.0
       calculatedBoundary += 1.0
     end #for
@@ -263,8 +281,6 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
     end #for 
 
   end #while
-
-  # println("finalRoundClusterVertices: ", finalRoundClusterVertices)
 
   return reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
   # return partitionQueue, vertexToCluster, starts, vertexToClusterLocation
@@ -374,27 +390,17 @@ function getBigEdgeMapReversed(mat, newMat, bigMapD, nEdges, rows, columns, edge
     c = columns[eInd]
     r = rows[eInd]
 
+    # this makes this function MUCH MUCH faster -> usually O(E) rather than O(E^2)... sort of
     if bigMapD[c] == bigMapD[r]
       continue
     end
-    
-    # e = newMat.colptr[bigMapD[c]]
-    # bigEdgeMapReversed[e] = eInd
+
     for e in newMat.colptr[bigMapD[c]]:(newMat.colptr[bigMapD[c]+1]-1) #eInd is the edge
-      # otherV = newMat.rowval[e] #this gives us the other vertex
       if newMat.rowval[e] == bigMapD[r] && (bigEdgeMapReversed[e] == 0 || edgeWeights[eInd] < edgeWeights[bigEdgeMapReversed[e]])
         bigEdgeMapReversed[e] = eInd
-        # break
       end #if
     end #for
   end #for
-
-
-  # for eInd in 1:newNEdges
-  #   nc = newColumns[eInd]
-  #   nr = newRows[eInd]
-  #   for e in mat.colptr[]
-  # end
 
   return bigEdgeMapReversed
 end #getBigEdgeMapReversed
@@ -436,7 +442,7 @@ function sparseMatrixFromTreeIndices(mat, treeInds)
 end #sparseMatrixFromTreeIndices
 
 
-function akpw(mat::SparseMatrixCSC; kind=:max)
+function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no)
   println("Starting up AKPW...")
 
   nVertices = mat.n
@@ -464,7 +470,7 @@ function akpw(mat::SparseMatrixCSC; kind=:max)
 
   bigIteration = 1
   while (true)
-    partitionQueue, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, nVertices, newRows, newColumns, newEdgeWeights)
+    partitionQueue, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, newRows, newColumns, newEdgeWeights, randomClusters)
 
     println("nClusters ", length(partitionQueue))
 
@@ -476,15 +482,12 @@ function akpw(mat::SparseMatrixCSC; kind=:max)
     #this, for each cluster, creates its own sparse matrix and runs shortest paths on that, then returns the 
     # original mapped edges corresponding to that shortest paths tree. Then it adds those indices to treeInds
     for cInd in 1:length(partitionQueue)
-
       newTreeInds = shortestPathsForCluster(newMat, partitionQueue[cInd], vertexToCluster, starts[cInd], vertexToClusterLocation)
 
       for i in newTreeInds
         treeInds[bigEdgeMapReversed[i]] = true
       end #for
-
     end #for
-    # println(time)
 
     if (length(partitionQueue) == 1)
       break
@@ -500,27 +503,9 @@ function akpw(mat::SparseMatrixCSC; kind=:max)
   end #while
 
   denormalizeEdgeWeights(oldMinEdgeWeight, mat, kind, nEdges)
-  # println(mat)
 
   finalTree = sparseMatrixFromTreeIndices(mat, treeInds)
-
   return finalTree
 end #akpw
-
-
-
-
-
-
-
-
-
-
-#to replace array of linkedLists (pushing to arrays)
-# clusters = zeros(n, 1)
-# clusters [1][2]...[n1][n1+1]...[n1+n2]... -> if n1 nodes in cluster 1, n2 nodes in cluster 2
-  # saving time
-
-#run against compute stretches code!
 
 
