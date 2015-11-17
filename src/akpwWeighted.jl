@@ -373,6 +373,11 @@ function getBigEdgeMapReversed(mat, newMat, bigMapD, nEdges, rows, columns, edge
   for eInd in 1:nEdges
     c = columns[eInd]
     r = rows[eInd]
+
+    if bigMapD[c] == bigMapD[r]
+      continue
+    end
+    
     # e = newMat.colptr[bigMapD[c]]
     # bigEdgeMapReversed[e] = eInd
     for e in newMat.colptr[bigMapD[c]]:(newMat.colptr[bigMapD[c]+1]-1) #eInd is the edge
