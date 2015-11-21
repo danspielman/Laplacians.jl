@@ -25,7 +25,6 @@ function divideEdgesIntoClasses(mat::SparseMatrixCSC, nEdges, rows, columns, edg
   for eInd in 1:nEdges
     edgeClasses[eInd] = floor(log(y, edgeWeights[eInd])) + 1
   end #for
-  
 
   return edgeClasses
 
@@ -80,6 +79,7 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
 
       # clusterNeighborCount[vertexToCluster[otherV]] += edgeWeights[eInd]
       clusterNeighborCount[vertexToCluster[otherV]] += 1
+
       if clusterNeighborCount[vertexToCluster[otherV]] > newClusterCount
         newClusterCount = clusterNeighborCount[vertexToCluster[otherV]]
         newCluster = vertexToCluster[otherV]
@@ -107,8 +107,6 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
     if !validVertex
       continue
     end
-
-    # newCluster = indmax(clusterNeighborCount)
 
     if newCluster != vertexToCluster[vInd]
       
@@ -144,7 +142,7 @@ end #reshuffleClusters
 
 
 # only shuffle vertices at the last level of BFS cluster Tree
-function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdgeMapReversed, rows, columns, edgeWeights, randomClusters)
+function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdgeMapReversed, bigMatNVertices, rows, columns, edgeWeights, randomClusters, shuffleClusters)
   nVertices = mat.n
   partitionQueue = Array{Int64, 1}[]
   nClusters = 0
@@ -169,8 +167,7 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
       # x = exp(sqrt(log(nVertices) * log(log(nVertices))))
       x = log(nVertices+1)/log(2)
       # x = log(nVertices)
-      # x = 2.0*exp(sqrt(log(nNodesInCluster) * log(log(nNodesInCluster))))
-      # x = 5.0
+      # x = 2.0*exp(sqrt(log(bigMatNVertices) * log(log(bigMatNVertices))))
   else
     x = 5.0
   end
@@ -234,6 +231,7 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
         for eInd in mat.colptr[v]:(mat.colptr[v+1]-1) #eInd is the edge
 
           if edgeClasses[bigEdgeMapReversed[eInd]] <= bigIteration
+            # println("HELLO")
             otherV = mat.rowval[eInd] #this gives us the other vertex
             #doing this step before for boundary... maybe can combine?
             if !visited[otherV]
@@ -282,9 +280,58 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
 
   end #while
 
-  return reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
-  # return partitionQueue, vertexToCluster, starts, vertexToClusterLocation
+  if shuffleClusters == :yes
+    return reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
+  end
+
+  return partitionQueue, vertexToCluster, starts, vertexToClusterLocation
 end #partitionMatrix
+
+
+function metisPartition(mat, nClusters)
+  nVertices = mat.n
+  g = Graph(mat)
+
+  if nVertices == 2
+    vertexToCluster = ones(Int64, nVertices)
+    nClusters = 1
+  else 
+    vertexToCluster = partGraphRecursive(g, nClusters)[2]
+    while minimum(vertexToCluster) > 1
+      vertexToCluster = vertexToCluster.- 1
+      nClusters -= 1
+    end
+  end #if
+
+  vertexToClusterLocation = zeros(Int64, nVertices)
+  starts = zeros(Int64, nClusters)
+  partitionQueue = Array{Int64, 1}[]
+
+  for i in 1:nClusters
+    push!(partitionQueue, Int64[])
+  end
+
+
+  for i in 1:nVertices
+    thisCluster = vertexToCluster[i]
+    push!(partitionQueue[thisCluster], i)
+    nVerticesInCluster = length(partitionQueue[thisCluster])
+    vertexToClusterLocation[i] = nVerticesInCluster
+    if nVerticesInCluster == 1
+      starts[thisCluster] = i
+    end #if
+  end #for
+
+  for i in 1:nClusters
+    if starts[i] == 0
+      println("************start[", i, "] = 0")
+      println(partitionQueue[i])
+    end
+  end
+
+
+  return partitionQueue, vertexToCluster, starts, vertexToClusterLocation, nClusters
+end #metisPartition
 
 
 
@@ -319,7 +366,6 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
       otherVInd = mat.rowval[eInd]
       otherVIndInCluster = vertexToClusterLocation[otherVInd]
 
-
       if vertexToCluster[otherVInd] == vertexToCluster[vInd] && !visited[otherVIndInCluster]
         newdist = dv + mat.nzval[eInd]
         if newdist < dists[otherVIndInCluster]
@@ -340,23 +386,26 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
     for eInd in mat.colptr[bigMatVInd]:(mat.colptr[bigMatVInd+1]-1) #all edges connecting to vertex j
       otherV = mat.rowval[eInd]
       clusterIndOtherV = vertexToClusterLocation[otherV]
-      if clusterIndOtherV == pArray[vInd]
+      if clusterIndOtherV == pArray[vInd] && vertexToCluster[otherV] == vertexToCluster[bigMatVInd]
         push!(newTreeInds, eInd)
       end #if
     end #for
   end #for 
 
-  #checking connectedness
-  # for vInd in 1:length(visited)
-  #   if !visited[vInd]
-  #     println("for cluster: ", vertexToCluster[clusterQueue[vInd]], " vertex: ", clusterQueue[vInd], " is not connected")
-  #     println("vertex: ", clusterQueue[vInd], " is connected to: ")
-  #     for eInd in mat.colptr[clusterQueue[vInd]]:(mat.colptr[clusterQueue[vInd]+1]-1)
-  #       otherVInd = mat.rowval[eInd]
-  #       println("\t otherV: ", otherVInd, " in cluster: ", vertexToCluster[otherVInd])
-  #     end
-  #   end #if
-  # end #for
+  # checking connectedness
+  for vInd in 1:length(visited)
+    if !visited[vInd]
+      if clusterQueue[vInd] == -1
+        continue
+      end
+      println("for cluster: ", vertexToCluster[clusterQueue[vInd]], " vertex: ", clusterQueue[vInd], " is not connected")
+      println("vertex: ", clusterQueue[vInd], " is connected to: ")
+      for eInd in mat.colptr[clusterQueue[vInd]]:(mat.colptr[clusterQueue[vInd]+1]-1)
+        otherVInd = mat.rowval[eInd]
+        println("\t otherV: ", otherVInd, " in cluster: ", vertexToCluster[otherVInd])
+      end
+    end #if
+  end #for
 
   return newTreeInds
 end # shortestPaths
@@ -442,7 +491,7 @@ function sparseMatrixFromTreeIndices(mat, treeInds)
 end #sparseMatrixFromTreeIndices
 
 
-function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no)
+function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClustering=:no, shuffleClusters=:yes)
   println("Starting up AKPW...")
 
   nVertices = mat.n
@@ -470,9 +519,15 @@ function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no)
 
   bigIteration = 1
   while (true)
-    partitionQueue, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, newRows, newColumns, newEdgeWeights, randomClusters)
+    if (metisClustering == :no)
+      partitionQueue, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, nVertices, newRows, newColumns, newEdgeWeights, randomClusters, shuffleClusters)
+      nClusters = length(partitionQueue)
+    else
+      nClusters = Int64(floor(log((newMat.n)+1)/log(2)))
+      partitionQueue, vertexToCluster, starts, vertexToClusterLocation, nClusters = metisPartition(newMat, nClusters)
+    end
 
-    println("nClusters ", length(partitionQueue))
+    println("nClusters ", nClusters)
 
     for i = 1:length(bigMapD)
       bigMapD[i] = vertexToCluster[bigMapD[i]]
@@ -481,7 +536,7 @@ function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no)
 
     #this, for each cluster, creates its own sparse matrix and runs shortest paths on that, then returns the 
     # original mapped edges corresponding to that shortest paths tree. Then it adds those indices to treeInds
-    for cInd in 1:length(partitionQueue)
+    for cInd in 1:nClusters
       newTreeInds = shortestPathsForCluster(newMat, partitionQueue[cInd], vertexToCluster, starts[cInd], vertexToClusterLocation)
 
       for i in newTreeInds
@@ -489,7 +544,7 @@ function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no)
       end #for
     end #for
 
-    if (length(partitionQueue) == 1)
+    if (nClusters == 1)
       break
     end #if
 
