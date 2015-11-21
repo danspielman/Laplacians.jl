@@ -27,6 +27,7 @@ pages:
 - API:
     - Whole API: 'wholeAPI.md'
     - graphGenerators: 'graphGeneratorsAPI.md'
+    - IO: 'IOAPI.md'
     - graphOps: 'graphOpsAPI.md'
     - graphAlgs: 'graphAlgsAPI.md'
     - cutPageRank: 'cutPageRankAPI.md'

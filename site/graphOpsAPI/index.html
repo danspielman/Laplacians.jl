@@ -108,6 +108,10 @@
                             <a href="../graphGeneratorsAPI/index.html">graphGenerators</a>
                         </li>
                     
+                        <li >
+                            <a href="../IOAPI/index.html">IO</a>
+                        </li>
+                    
                         <li class="active">
                             <a href="index.html">graphOps</a>
                         </li>
@@ -133,7 +137,7 @@
             <!-- Search, Navigation and Repo links -->
             <ul class="nav navbar-nav navbar-right">
                 <li >
-                    <a rel="next" href="../graphGeneratorsAPI/index.html">
+                    <a rel="next" href="../IOAPI/index.html">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
@@ -164,6 +168,8 @@
         <li class="main active"><a href="#graphops">graphOps</a></li>
         
             <li><a href="#shortintgraph">shortIntGraph</a></li>
+        
+            <li><a href="#floatgraph">floatGraph</a></li>
         
             <li><a href="#lap">lap</a></li>
         
@@ -208,19 +214,25 @@
 <pre><code class="julia">shortIntGraph(a::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>graphOps.jl:30</p>
+<p>graphOps.jl:3</p>
+<h3 id="floatgraph">floatGraph</h3>
+<p>Convert the nonzero entries in a graph to Float64</p>
+<pre><code class="julia">floatGraph(a::SparseMatrixCSC{Tv,Ti&lt;:Integer})
+</code></pre>
+
+<p>graphOps.jl:6</p>
 <h3 id="lap">lap</h3>
 <p>Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry</p>
 <pre><code class="julia">lap(a)
 </code></pre>
 
-<p>graphOps.jl:39</p>
+<p>graphOps.jl:12</p>
 <h3 id="unweight">unweight</h3>
 <p>Create a new graph in that is the same as the original, but with all edge weights 1</p>
 <pre><code class="julia">unweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 </code></pre>
 
-<p>graphOps.jl:43</p>
+<p>graphOps.jl:16</p>
 <h3 id="mapweight">mapweight</h3>
 <p>Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write</p>
 <pre><code class="julia">b = mapweight(a, x-&gt;rand(1)[1])
@@ -229,37 +241,37 @@
 <pre><code class="julia">mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)
 </code></pre>
 
-<p>graphOps.jl:56</p>
+<p>graphOps.jl:29</p>
 <h3 id="uniformweight">uniformWeight</h3>
 <p>Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight.</p>
 <pre><code class="julia">uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 </code></pre>
 
-<p>graphOps.jl:65</p>
+<p>graphOps.jl:38</p>
 <h3 id="uniformweight_1">uniformWeight!</h3>
 <p>Set the weight of every edge to 1</p>
 <pre><code class="julia">uniformWeight!(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>graphOps.jl:69</p>
+<p>graphOps.jl:42</p>
 <h3 id="productgraph">productGraph</h3>
 <p>The Cartesian product of two graphs.  When applied to two paths, it gives a grid.</p>
 <pre><code class="julia">productGraph(a0::SparseMatrixCSC{Tv,Ti&lt;:Integer}, a1::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>graphOps.jl:74</p>
+<p>graphOps.jl:47</p>
 <h3 id="edgevertexmat">edgeVertexMat</h3>
 <p>The signed edge-vertex adjacency matrix</p>
 <pre><code class="julia">edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>graphOps.jl:83</p>
+<p>graphOps.jl:56</p>
 <h3 id="subsampleedges">subsampleEdges</h3>
 <p>Create a new graph from the old, but keeping edge edge with probability <code>p</code></p>
 <pre><code class="julia">subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
 </code></pre>
 
-<p>graphOps.jl:92</p>
+<p>graphOps.jl:65</p>
 <h3 id="twolift">twoLift</h3>
 <p>Creats a 2-lift of a.  <code>flip</code> is a boolean indicating which edges cross</p>
 <pre><code class="julia">twoLift(a)
@@ -267,50 +279,50 @@ twoLift(a, flip::AbstractArray{Bool,1})
 twoLift(a, k::Integer)
 </code></pre>
 
-<p>graphOps.jl:113</p>
+<p>graphOps.jl:88</p>
 <h3 id="joingraphs">joinGraphs</h3>
 <p>create a disjoint union of graphs a and b,  and then put k random edges between them</p>
 <pre><code class="julia">joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
 </code></pre>
 
-<p>graphOps.jl:125</p>
+<p>graphOps.jl:100</p>
 <h3 id="plotgraph">plotGraph</h3>
 <p>Plots graph gr with coordinates (x,y)</p>
 <pre><code class="julia">plotGraph(gr, x, y)
 plotGraph(gr, x, y, color)
 </code></pre>
 
-<p>graphOps.jl:143</p>
+<p>graphOps.jl:118</p>
 <h3 id="spectraldrawing">spectralDrawing</h3>
 <p>Computes spectral coordinates, and then uses plotGraph to draw</p>
 <pre><code class="julia">spectralDrawing(a)
 </code></pre>
 
-<p>graphOps.jl:180</p>
+<p>graphOps.jl:155</p>
 <h3 id="spectralcoords">spectralCoords</h3>
 <p>Computes the spectral coordinates of a graph</p>
 <pre><code class="julia">spectralCoords(a)
 </code></pre>
 
-<p>graphOps.jl:188</p>
+<p>graphOps.jl:163</p>
 <h3 id="tounitvector">toUnitVector</h3>
 <p>creates a unit vector of length n from a given set of integers, with weights based on the number of occurences</p>
 <pre><code class="julia">toUnitVector(a::Array{Int64,1}, n)
 </code></pre>
 
-<p>graphOps.jl:197</p>
+<p>graphOps.jl:172</p>
 <h3 id="diagmat">diagmat</h3>
 <p>returns the diagonal matrix(as a sparse matrix) of a graph</p>
 <pre><code class="julia">diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>graphOps.jl:219</p>
+<p>graphOps.jl:194</p>
 <h3 id="generalizednecklace">generalizedNecklace</h3>
 <p>Constructs a generalized necklace graph starting with two graphs A and H. The resulting new graph will be constructed by expanding each vertex in H to an instance of A. k random edges will be generated between components. Thus, the resulting graph may have weighted edges.</p>
 <pre><code class="julia">generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti&lt;:Integer}, k::Int64)
 </code></pre>
 
-<p>graphOps.jl:239</p></div>
+<p>graphOps.jl:214</p></div>
         </div>
 
         <footer class="col-md-12">

@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../lambda2.ico">
         
 
-	<title>solvers - Laplacians.jl</title>
+	<title>IO - Laplacians.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -108,8 +108,8 @@
                             <a href="../graphGeneratorsAPI/index.html">graphGenerators</a>
                         </li>
                     
-                        <li >
-                            <a href="../IOAPI/index.html">IO</a>
+                        <li class="active">
+                            <a href="index.html">IO</a>
                         </li>
                     
                         <li >
@@ -124,8 +124,8 @@
                             <a href="../cutPageRankAPI/index.html">cutPageRank</a>
                         </li>
                     
-                        <li class="active">
-                            <a href="index.html">solvers</a>
+                        <li >
+                            <a href="../solversAPI/index.html">solvers</a>
                         </li>
                     
                     </ul>
@@ -137,12 +137,12 @@
             <!-- Search, Navigation and Repo links -->
             <ul class="nav navbar-nav navbar-right">
                 <li >
-                    <a rel="next" href="../cutPageRankAPI/index.html">
+                    <a rel="next" href="../graphGeneratorsAPI/index.html">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
-                <li class="disabled">
-                    <a rel="prev" >
+                <li >
+                    <a rel="prev" href="../graphOpsAPI/index.html">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -165,48 +165,49 @@
             <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#solvers">solvers</a></li>
+        <li class="main active"><a href="#io">IO</a></li>
         
-            <li><a href="#lapwrapsolver">lapWrapSolver</a></li>
+            <li><a href="#readij">readIJ</a></li>
         
-            <li><a href="#augmenttree">augmentTree</a></li>
+            <li><a href="#readijv">readIJV</a></li>
         
-            <li><a href="#augtreeprecon">augTreePrecon</a></li>
-        
-            <li><a href="#augtreesolver">augTreeSolver</a></li>
+            <li><a href="#writeijv">writeIJV</a></li>
         
     
     </ul>
 </div></div>
             <div class="col-md-9" role="main">
 
-<h1 id="solvers">solvers</h1>
-<h3 id="lapwrapsolver">lapWrapSolver</h3>
-<p>Takes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here</p>
-<pre><code class="julia">lapWrapSolver(solver)
-lapWrapSolver(solver, la::AbstractArray{T,N})
-lapWrapSolver(solver, la::AbstractArray{T,N}, b)
+<h1 id="io">IO</h1>
+<h3 id="readij">readIJ</h3>
+<p>to read a simple edge list, each line being an (i, j) pair</p>
+<pre><code class="julia">readIJ(filename::AbstractString)
 </code></pre>
 
-<p>solvers.jl:108</p>
-<h3 id="augmenttree">augmentTree</h3>
-<p>Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch</p>
-<pre><code class="julia">augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)
+<p>IO.jl:4</p>
+<h3 id="readijv">readIJV</h3>
+<p>to read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this</p>
+<pre><code>&gt;&gt; [ai,aj,av] = find(triu(a));
+&gt;&gt; dlmwrite('graph.txt',[ai,aj,av],'precision',9);
 </code></pre>
 
-<p>solvers.jl:138</p>
-<h3 id="augtreeprecon">augTreePrecon</h3>
-<p>This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.</p>
-<pre><code class="julia">augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+<pre><code class="julia">readIJV(filename::AbstractString)
 </code></pre>
 
-<p>solvers.jl:188</p>
-<h3 id="augtreesolver">augTreeSolver</h3>
-<p>This is the solver that calls augTreePrecon</p>
-<pre><code class="julia">augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+<p>IO.jl:25</p>
+<h3 id="writeijv">writeIJV</h3>
+<p>Writes the upper portion of a matrix in ijv format, one row for each edge, separated by commas.  Only writes the upper triangular portion. The result can be read from Matlab like this:</p>
+<pre><code>&gt;&gt; dl = dlmread('graph.txt');
+&gt;&gt; a = sparse(dl(:,1),dl(:,2),dl(:,3));
+&gt;&gt; n = max(size(a))
+&gt;&gt; a(n,n) = 0;
+&gt;&gt; a = a + a';
 </code></pre>
 
-<p>solvers.jl:210</p></div>
+<pre><code class="julia">writeIJV(filename::AbstractString, mat)
+</code></pre>
+
+<p>IO.jl:52</p></div>
         </div>
 
         <footer class="col-md-12">
