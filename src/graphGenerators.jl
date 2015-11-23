@@ -2,43 +2,6 @@
 
 import Base.randperm
 
-# to read a simple edge list, each line being an (i, j) pair
-function readIJ(filename::AbstractString)
-  edlist = readdlm(filename,',')
-  n = maximum(edlist)
-  m = size(edlist)
-  edlist = convert(Array{Int64,2}, edlist)
-  a = sparse(edlist[:,1],edlist[:,2],ones(m[1]),n,n)
-  a = a + a'
-
-  return a
-end # readIJ
-
-function readIJV(filename::AbstractString)
-  data = readdlm(filename,',')
-  n = maximum(data[:,1:2])
-  m = size(data)
-  edlist = convert(Array{Int64,2}, data[:,1:2])
-  wts = convert(Array{Float64,1}, data[:,3])
-
-  a = sparse(edlist[:,1],edlist[:,2],wts,n,n)
-  a = a + a'
-
-  return a
-end # readIJV
-
-
-# just writes the upper triangular portion of it
-function writeIJV(filename::AbstractString, mat)
-
-  (ai,aj,av) = findnz(triu(mat))
-  fh = open(filename,"w")
-  for i in 1:length(ai)
-    write(fh, "$(ai[i]),$(aj[i]),$(av[i])\n")
-  end
-  close(fh)
-
-end #write IJV
 
 "The path graph on n vertices"
 function pathGraph(n::Int64)

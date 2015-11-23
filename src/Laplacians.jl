@@ -69,6 +69,9 @@ and exports the functions for which it seems appropriate.
   export randWeight
   export wtedChimera
 
+  include("IO.jl")
+  export readIJ, readIJV, writeIJV
+
   include("graphOps.jl")
 
   export unweight

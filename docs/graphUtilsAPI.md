@@ -11,3 +11,15 @@ graphUtils.jl:22
 
 
 
+### findEntries
+similar to findnz, but also returns 0 entries that have an edge in the sparse matrix 
+
+
+```julia
+findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
+```
+
+graphUtils.jl:60
+
+
+

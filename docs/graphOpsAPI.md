@@ -7,7 +7,19 @@ Convert the indices in a graph to 32-bit ints.  This takes less storage, but doe
 shortIntGraph(a::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphOps.jl:30
+graphOps.jl:3
+
+
+
+### floatGraph
+Convert the nonzero entries in a graph to Float64
+
+
+```julia
+floatGraph(a::SparseMatrixCSC{Tv,Ti<:Integer})
+```
+
+graphOps.jl:6
 
 
 
@@ -19,7 +31,7 @@ Create a Laplacian matrix from an adjacency matrix. We might want to do this dif
 lap(a)
 ```
 
-graphOps.jl:39
+graphOps.jl:12
 
 
 
@@ -31,7 +43,7 @@ Create a new graph in that is the same as the original, but with all edge weight
 unweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 ```
 
-graphOps.jl:43
+graphOps.jl:16
 
 
 
@@ -47,7 +59,7 @@ b = mapweight(a, x->rand(1)[1])
 mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)
 ```
 
-graphOps.jl:56
+graphOps.jl:29
 
 
 
@@ -59,7 +71,7 @@ Put a uniform [0,1] weight on every edge.  This is an example of how to use mapw
 uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 ```
 
-graphOps.jl:65
+graphOps.jl:38
 
 
 
@@ -71,7 +83,7 @@ Set the weight of every edge to 1
 uniformWeight!(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphOps.jl:69
+graphOps.jl:42
 
 
 
@@ -83,7 +95,7 @@ The Cartesian product of two graphs.  When applied to two paths, it gives a grid
 productGraph(a0::SparseMatrixCSC{Tv,Ti<:Integer}, a1::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphOps.jl:74
+graphOps.jl:47
 
 
 
@@ -95,7 +107,7 @@ The signed edge-vertex adjacency matrix
 edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphOps.jl:83
+graphOps.jl:56
 
 
 
@@ -107,7 +119,7 @@ Create a new graph from the old, but keeping edge edge with probability `p`
 subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
 ```
 
-graphOps.jl:92
+graphOps.jl:65
 
 
 
@@ -121,7 +133,7 @@ twoLift(a, flip::AbstractArray{Bool,1})
 twoLift(a, k::Integer)
 ```
 
-graphOps.jl:113
+graphOps.jl:88
 
 
 
@@ -133,7 +145,7 @@ create a disjoint union of graphs a and b,  and then put k random edges between 
 joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
 ```
 
-graphOps.jl:125
+graphOps.jl:100
 
 
 
@@ -146,7 +158,7 @@ plotGraph(gr, x, y)
 plotGraph(gr, x, y, color)
 ```
 
-graphOps.jl:143
+graphOps.jl:118
 
 
 
@@ -158,7 +170,7 @@ Computes spectral coordinates, and then uses plotGraph to draw
 spectralDrawing(a)
 ```
 
-graphOps.jl:180
+graphOps.jl:155
 
 
 
@@ -170,7 +182,7 @@ Computes the spectral coordinates of a graph
 spectralCoords(a)
 ```
 
-graphOps.jl:188
+graphOps.jl:163
 
 
 
@@ -182,7 +194,7 @@ creates a unit vector of length n from a given set of integers, with weights bas
 toUnitVector(a::Array{Int64,1}, n)
 ```
 
-graphOps.jl:197
+graphOps.jl:172
 
 
 
@@ -194,7 +206,7 @@ returns the diagonal matrix(as a sparse matrix) of a graph
 diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 ```
 
-graphOps.jl:219
+graphOps.jl:194
 
 
 
@@ -206,7 +218,7 @@ Constructs a generalized necklace graph starting with two graphs A and H. The re
 generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti<:Integer}, k::Int64)
 ```
 
-graphOps.jl:239
+graphOps.jl:214
 
 
 
