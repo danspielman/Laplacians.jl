@@ -42,7 +42,7 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
 		# try to add a new vertex into the set
 		u,contrib = Base.Collections.peek(pq_in)
-		if !inset[u] && contrib < 0
+		if !inset[u] && contrib <= 0
 			inset[u] = true
 			improve = true
 

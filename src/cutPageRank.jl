@@ -16,7 +16,7 @@ function prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, v::Array{Int64,1}, phi::Float64,
   if (!(0 < phi && phi <= 1))
     print_with_color(:red, "phi should be in (0, 1]\n")
   end
-  if (!(1 <= b && b <= log(m)))
+  if (!(1 <= b && b <= round(Int64, log(m))))
     print_with_color(:red, string("b should be in [1, ", string(round(Int64, log(m))), "]\n"))
   end
 

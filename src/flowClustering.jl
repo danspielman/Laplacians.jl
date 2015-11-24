@@ -24,6 +24,8 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
   while alphaMax - err > alphaMin
     alpha = (alphaMin + alphaMax) / 2
 
+    # println(localFlow(G, A, alpha, epsSigma)[2], " ", getVolume(G, A))
+
     if abs(localFlow(G, A, alpha, epsSigma)[2] - getVolume(G, A)) < err
       alphaMin = alpha
     else
@@ -99,9 +101,9 @@ function createGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv, Ti}, A::Array{Int64, 1}, alp
 
   u,v,w = findEntries(G)
 
-  # set costs of edges to 0
+  # set costs of edges to 1/alpha
   for i in 1:length(w)
-    w[i] = 1 / alpha
+    w[i] = w[i] / alpha
   end
 
   # we'll consider the source to be n+1, and the sink to be n+2
@@ -116,11 +118,17 @@ function createGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv, Ti}, A::Array{Int64, 1}, alp
 
     push!(u, s)
     push!(v, A[i])
-    push!(w, deg(G, A[i]))
+    # push!(w, deg(G, A[i]))
+    deggai=0
+    for j in 1:deg(G,A[i])
+      deggai=deggai+weighti(G,A[i],j)
+    end
+    push!(w, deggai)
 
     push!(u, A[i])
     push!(v, s)
-    push!(w, deg(G, A[i]))
+    # push!(w, deg(G, A[i]))
+    push!(w, deggai)
   end
 
   # add edges from V-A to t with weight epsSigma * deg()
@@ -128,11 +136,17 @@ function createGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv, Ti}, A::Array{Int64, 1}, alp
     if inA[i] == 0
       push!(u, t)
       push!(v, i)
-      push!(w, epsSigma * deg(G, i))
+      # push!(w, epsSigma * deg(G, i))
+      degi=0
+      for j in 1:deg(G,i)
+        degi=degi+weighti(G,i,j)
+      end
+      push!(w, epsSigma * degi)
 
       push!(u, i)
       push!(v, t)
-      push!(w, epsSigma * deg(G, i))
+      # push!(w, epsSigma * deg(G, i))
+      push!(w, epsSigma * degi)
     end
   end
 
@@ -302,10 +316,9 @@ function compConductance{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
   n = max(G.n, G.m)
 
 	vols = getVolume(G, s)
-	volvms = getVolume(G, setdiff(collect(1:n), s))
   obound = getObound(G, s)
 
-	return obound / min(vols, volvms)
+	return obound / vols
 
 end # compConductance
 
@@ -314,7 +327,12 @@ function getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
   vol = 0.0
   for i in 1:length(s)
-    vol = vol + deg(G, s[i])
+    deggsi = 0
+    for j in 1:deg(G, s[i])
+      deggsi = deggsi + weighti(G,s[i],j)
+    end
+    # vol = vol + deg(G, s[i])
+    vol = vol + deggsi
   end
 
   return vol
