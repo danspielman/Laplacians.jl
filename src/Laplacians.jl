@@ -151,7 +151,11 @@ and exports the functions for which it seems appropriate.
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
 
+  include("toposort.jl")
+  export toposort, dirEdgeVertexMat
 
+  # include("isotonicIPM.jl")
+  # export isotonicIPM, isotonicIPMrelEps
 
 
 end # module yinsGraph
