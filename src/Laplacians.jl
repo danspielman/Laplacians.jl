@@ -144,6 +144,7 @@ and exports the functions for which it seems appropriate.
   # include("cutHeuristics.jl")
 
   # export refineCut
+  # export dumb
 
   include("randTrees.jl")
   export randishKruskal, randishPrim

@@ -16,23 +16,27 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
 	# pq_in - costs are maintained to add elements to the set
 	# pq_out - costs are maintained to remove elements from the set
-	pq_in = Collections.PriorityQueue{Int64,Int64,Base.Order.ForwardOrdering}()
-	pq_out = Collections.PriorityQueue{Int64,Int64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}(Base.Order.Reverse)
+	pq_in = Collections.PriorityQueue{Int64,Int64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}(Base.Order.Reverse) 
+	pq_out = Collections.PriorityQueue{Int64,Int64,Base.Order.ForwardOrdering}()
 
 	for u in 1:n
 		cost = 0
 
 		for i in 1:deg(G,u)
 			v = nbri(G,u,i)
-			if !inset[v]
+			if inset[v]
 				cost = cost + weighti(G,u,i)
 			else
 				cost = cost - weighti(G,u,i)
 			end
 		end
 
-		pq_in[u] = cost
-		pq_out[u] = cost
+		if inset[u] == false
+			pq_in[u] = cost
+		end
+		if inset[u] == true
+			pq_out[u] = cost
+		end
 	end
 
 	improve = true
@@ -41,37 +45,44 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 		improve = false
 
 		# try to add a new vertex into the set
-		u,contrib = Base.Collections.peek(pq_in)
-		if !inset[u] && contrib <= 0
-			inset[u] = true
-			improve = true
+		if !isempty(pq_in)
+			u,contrib = Base.Collections.peek(pq_in)
 
-			for i in 1:deg(G,u)
-				v = nbri(G,u,i)
-				pq_in[v] = pq_in[v] - weighti(G,u,i)
-				pq_out[v] = pq_out[v] - weighti(G,u,i)
+			if contrib >= 0
+				improve = true
+				Collections.dequeue!(pq_in)
+				inset[u] = true
+
+				for i in 1:deg(G,u)
+					v = nbri(G,u,i)
+					if v in keys(pq_in)
+						pq_in[v] = pq_in[v] + weighti(G,u,i)
+					end
+					if v in keys(pq_out)
+						pq_out[v] = pq_out[v] + weighti(G,u,i)
+					end
+				end
 			end
-
-			Collections.dequeue!(pq_in)
-			pq_out[u] = typemax(Int64)
-			Collections.dequeue!(pq_out)
 		end
 
 		# try to remove a vertex from the set
-		u,contrib = Base.Collections.peek(pq_out)
-		if inset[u] && contrib > 0
-			inset[u] = false
-			improve = true
+		if !isempty(pq_out)
+			u,contrib = Base.Collections.peek(pq_out)
+			if contrib < 0
+				improve = true
+				Collections.dequeue!(pq_out)
+				inset[u] = false
 
-			for i in 1:deg(G,u)
-				v = nbri(G,u,i)
-				pq_in[v] = pq_in[v] + weighti(G,u,i)
-				pq_out[v] = pq_out[v] + weighti(G,u,i)
+				for i in 1:deg(G,u)
+					v = nbri(G,u,i)
+					if v in keys(pq_in)
+						pq_in[v] = pq_in[v] + weighti(G,u,i)
+					end
+					if v in keys(pq_out)
+						pq_out[v] = pq_out[v] + weighti(G,u,i)
+					end
+				end
 			end
-
-			Collections.dequeue!(pq_out)
-			pq_in[u] = typemin(Int64)
-			Collections.dequeue!(pq_in)
 		end
 	end
 
@@ -83,4 +94,39 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 	end
 
 	return news
+end
+
+function dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+
+	n = max(G.n, G.m)
+
+	news = copy(s)
+
+	for v in 1:n
+		nrbsA = 0
+		nrbsnotA = 0
+		for i in 1:deg(G, v)
+			u = nbri(G, v, i)
+			if u in news
+				nrbsA = nrbsA + weighti(G, v, i)
+			else
+				nrbsnotA = nrbsnotA + weighti(G, v, i)
+			end
+		end
+
+		if nrbsA >= nrbsnotA
+			push!(news, v)
+		else
+			for i in 1:length(news)
+				if news[i] == v
+					news[i] = news[length(news)]
+					pop!(news)
+					break
+				end
+			end
+		end
+	end
+
+	return news
+
 end

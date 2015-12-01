@@ -109,7 +109,7 @@ end # function
 
 """Returns true if graph is connected.  Calls components."""
 function isConnected(mat::SparseMatrixCSC)
-    # the maximum function errors out if there are no components in a
+    # the maximum function errors out if there are no components in mat
     if isempty(mat)
       return false
     end
