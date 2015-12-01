@@ -55,6 +55,8 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
 				for i in 1:deg(G,u)
 					v = nbri(G,u,i)
+					toadd = weighti(G,u,i)
+
 					if v in keys(pq_in)
 						pq_in[v] = pq_in[v] + weighti(G,u,i)
 					end
@@ -76,10 +78,10 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 				for i in 1:deg(G,u)
 					v = nbri(G,u,i)
 					if v in keys(pq_in)
-						pq_in[v] = pq_in[v] + weighti(G,u,i)
+						pq_in[v] = pq_in[v] - weighti(G,u,i)
 					end
 					if v in keys(pq_out)
-						pq_out[v] = pq_out[v] + weighti(G,u,i)
+						pq_out[v] = pq_out[v] - weighti(G,u,i)
 					end
 				end
 			end
