@@ -76,7 +76,7 @@ function prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, v::Array{Int64,1}, phi::Float64,
 end # prnibble
 
 " computes an approximate page rank vector from a starting vector s, an alpha and an epsilon "
-function apr{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, eps::Float64)
+function apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Float64,1}, alpha::Float64, eps::Float64)
 
   p = zeros(length(s))
   r = copy(s)
