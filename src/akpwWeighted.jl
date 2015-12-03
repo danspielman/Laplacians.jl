@@ -164,10 +164,10 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
   x::Float64
 
   if nVertices > 2
-      # x = exp(sqrt(log(nVertices) * log(log(nVertices))))
-      x = log(nVertices+1)/log(2)
-      # x = log(nVertices)
-      # x = 2.0*exp(sqrt(log(bigMatNVertices) * log(log(bigMatNVertices))))
+    # x = exp(sqrt(log(nVertices) * log(log(nVertices))))
+    x = log(nVertices+1)/log(2)
+    # x = log(nVertices)
+    # x = 2.0*exp(sqrt(log(bigMatNVertices) * log(log(bigMatNVertices))))
   else
     x = 5.0
   end
@@ -231,14 +231,12 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
         for eInd in mat.colptr[v]:(mat.colptr[v+1]-1) #eInd is the edge
 
           if edgeClasses[bigEdgeMapReversed[eInd]] <= bigIteration
-            # println("HELLO")
             otherV = mat.rowval[eInd] #this gives us the other vertex
             #doing this step before for boundary... maybe can combine?
             if !visited[otherV]
               if !newVerticesArray[otherV]
                 nNewVertices += 1
                 newVertices[nNewVertices] = otherV
-                # push!(newVertices, otherV)
               end #if
               newVerticesArray[otherV] = true
             end #if
@@ -288,11 +286,90 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
 end #partitionMatrix
 
 
+# for a single cluster, updates vertexToCluster to include another cluster for each extra component
+# inside the original cluster
+function updateVertexToCluster{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, nVertices, vertexToCluster, c, nClusters, partitionQueue) 
+  nVerticesInCluster = length(partitionQueue[c]) 
+  visited = zeros(Bool, nVertices)
+  compList = Array{Int64, 1}[]
+  order = Array(Int64, nVertices)
+
+  numComps = 0
+
+  for clusterInd in 1:nVerticesInCluster
+    vInd = partitionQueue[c][clusterInd]
+    if !visited[vInd]
+      numComps += 1
+      visited[vInd] = true
+      if numComps > 1
+        vertexToCluster[vInd] = nClusters + numComps-1
+      end
+
+      if mat.colptr[vInd+1] > mat.colptr[vInd]
+        ptr = 1
+        orderLen = 2
+        order[ptr] = vInd
+
+        while ptr < orderLen
+          curNode = order[ptr]
+
+          for ind in mat.colptr[curNode]:(mat.colptr[curNode+1]-1)
+            nbr = mat.rowval[ind]
+            if vertexToCluster[nbr] == c && !visited[nbr]
+              visited[nbr] = true
+              if numComps > 1
+                vertexToCluster[nbr] = nClusters + numComps-1
+              end
+              order[orderLen] = nbr
+              orderLen += 1
+            end # if
+          end # for
+          ptr += 1
+        end # while
+      end # if
+    end
+  end #for
+
+  if numComps > 1
+    nClusters += numComps-1
+  end
+
+  # return nClusters
+  return nClusters
+  # return maximum(vertexToCluster)
+
+end #clusterComponents
+
+
+
+function partitionListFromMap(nVertices, nClusters, vertexToCluster)
+  vertexToClusterLocation = zeros(Int64, nVertices)
+  starts = zeros(Int64, nClusters)
+  partitionQueue = Array{Int64, 1}[]
+
+  for i in 1:nClusters
+    push!(partitionQueue, Int64[])
+  end
+
+  for i in 1:nVertices
+    thisCluster = vertexToCluster[i]
+    push!(partitionQueue[thisCluster], i)
+    nVerticesInCluster = length(partitionQueue[thisCluster])
+    vertexToClusterLocation[i] = nVerticesInCluster
+    if nVerticesInCluster == 1
+      starts[thisCluster] = i
+    end #if
+  end
+
+  return vertexToClusterLocation, starts, partitionQueue
+end #partitionListFromMap
+
+
 function metisPartition(mat, nClusters)
   nVertices = mat.n
   g = Graph(mat)
 
-  if nVertices == 2
+  if nVertices == 2 || nClusters >= nVertices || nClusters <= 2
     vertexToCluster = ones(Int64, nVertices)
     nClusters = 1
   else 
@@ -303,31 +380,22 @@ function metisPartition(mat, nClusters)
     end
   end #if
 
-  vertexToClusterLocation = zeros(Int64, nVertices)
-  starts = zeros(Int64, nClusters)
-  partitionQueue = Array{Int64, 1}[]
-
-  for i in 1:nClusters
-    push!(partitionQueue, Int64[])
+  vertexToClusterLocation, starts, partitionQueue = partitionListFromMap(nVertices, nClusters, vertexToCluster)
+  for c in 1:nClusters
+    nClusters = updateVertexToCluster(mat, nVertices, vertexToCluster, c, nClusters, partitionQueue) #what if cluster comps is a list of lists?
+    # if nClusters != maximum(vertexToCluster)
+    #   println("ERROR! in metisPartition: nClusters = ", nClusters, ", but should equal:", maximum(vertexToCluster))
+    # end
   end
 
+  vertexToClusterLocation, starts, partitionQueue = partitionListFromMap(nVertices, nClusters, vertexToCluster)
 
-  for i in 1:nVertices
-    thisCluster = vertexToCluster[i]
-    push!(partitionQueue[thisCluster], i)
-    nVerticesInCluster = length(partitionQueue[thisCluster])
-    vertexToClusterLocation[i] = nVerticesInCluster
-    if nVerticesInCluster == 1
-      starts[thisCluster] = i
-    end #if
-  end #for
-
-  for i in 1:nClusters
-    if starts[i] == 0
-      println("************start[", i, "] = 0")
-      println(partitionQueue[i])
-    end
-  end
+  # for i in 1:nClusters
+  #   if starts[i] == 0
+  #     println("************start[", i, "] = 0")
+  #     println(partitionQueue[i])
+  #   end
+  # end
 
 
   return partitionQueue, vertexToCluster, starts, vertexToClusterLocation, nClusters
@@ -394,10 +462,7 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
 
   # checking connectedness
   for vInd in 1:length(visited)
-    if !visited[vInd]
-      if clusterQueue[vInd] == -1
-        continue
-      end
+    if !visited[vInd] && clusterQueue[vInd] != -1
       println("for cluster: ", vertexToCluster[clusterQueue[vInd]], " vertex: ", clusterQueue[vInd], " is not connected")
       println("vertex: ", clusterQueue[vInd], " is connected to: ")
       for eInd in mat.colptr[clusterQueue[vInd]]:(mat.colptr[clusterQueue[vInd]+1]-1)
@@ -523,13 +588,15 @@ function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClusteri
       partitionQueue, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, nVertices, newRows, newColumns, newEdgeWeights, randomClusters, shuffleClusters)
       nClusters = length(partitionQueue)
     else
-      nClusters = Int64(floor(log((newMat.n)+1)/log(2)))
+      nClusters = Int64(floor((newMat.n)/900)+2)
+      # nClusters = Int64(floor(log((newMat.n)+1)/log(2)))
       partitionQueue, vertexToCluster, starts, vertexToClusterLocation, nClusters = metisPartition(newMat, nClusters)
     end
 
+
     println("nClusters ", nClusters)
 
-    for i = 1:length(bigMapD)
+    for i in 1:length(bigMapD)
       bigMapD[i] = vertexToCluster[bigMapD[i]]
     end #for
 
@@ -560,7 +627,134 @@ function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClusteri
   denormalizeEdgeWeights(oldMinEdgeWeight, mat, kind, nEdges)
 
   finalTree = sparseMatrixFromTreeIndices(mat, treeInds)
+
   return finalTree
 end #akpw
+
+
+
+
+
+
+
+
+function isTree(gr::SparseMatrixCSC)
+  isConnected(gr) && (nnz(gr) == 2*(gr.n-1))
+end #isTree
+
+
+# assume each vertex pair has at most ONE unique edge
+function isSubsetOfEdges(subset::SparseMatrixCSC, superset::SparseMatrixCSC, marginOfError)
+  nSubsetVertices = subset.n
+
+  for vInd in 1:nSubsetVertices
+    for eSubInd in subset.colptr[vInd]:(subset.colptr[vInd+1]-1)
+      for eSupInd in superset.colptr[vInd]:(superset.colptr[vInd+1]-1)
+        if superset.rowval[eSupInd] == subset.rowval[eSubInd]
+          if abs(superset.nzval[eSupInd] - subset.nzval[eSubInd]) > marginOfError
+            println("edge: v1: ", vInd, " v2: ", subset.rowval[eSubInd], " edgeWeight: ", subset.nzval[eSubInd])
+            println("\t=/= edge: v1: ", vInd, " v2: ", superset.rowval[eSupInd], " edgeWeight: ", superset.nzval[eSupInd])
+            return false
+          end
+
+          break
+        end
+      end
+    end
+  end #for
+
+  return true
+
+end #isSubsetOfEdges
+
+
+# Test Function
+
+# uses four different types of graphs: 
+# dim will increase by "iterationsize" each time for each number of iterations
+function testAKPW(startingDim, iterationSize, numIterations; metisClusteringVar=:no, kindVar=:max, marginOfError=.0000001)
+
+  dim = startingDim
+
+  for i in 1:numIterations
+
+    a = grid2(dim)
+    n = size(a)[1]
+    (ai,aj,av) = findnz(triu(a))
+    gridGraph = sparse(ai,aj,rand(size(av)),n,n)
+    gridGraph = gridGraph + gridGraph';
+
+
+    a = productGraph(generalizedRing(dim,[1 5]), grownGraphD(dim,3));
+    n = size(a)[1]
+    (ai,aj,av) = findnz(triu(a))
+    productGraph1 = sparse(ai,aj,rand(size(av)),n,n)
+    productGraph1 = productGraph1 + productGraph1'
+
+    a = generalizedNecklace(generalizedRing(dim,[1 5]), grownGraphD(dim,3),5);
+    n = size(a)[1]
+    (ai,aj,av) = findnz(triu(a))
+    necklaceGraph = sparse(ai,aj,rand(size(av)),n,n)
+    necklaceGraph = necklaceGraph + necklaceGraph'
+
+    chimGraph = wtedChimera(dim^2)
+
+    rows, columns, edgeWeights = findnz(gridGraph)
+    akpwTreeGrid = akpw(gridGraph, kind=kindVar, metisClustering = metisClusteringVar)
+    oldGrid = sparse(rows, columns, edgeWeights)
+
+    rows, columns, edgeWeights = findnz(productGraph1)
+    akpwTreeProduct = akpw(productGraph1, kind=kindVar, metisClustering = metisClusteringVar)
+    oldProductGraph = sparse(rows, columns, edgeWeights)
+
+    rows, columns, edgeWeights = findnz(necklaceGraph)
+    akpwTreeNecklace = akpw(necklaceGraph, kind=kindVar, metisClustering = metisClusteringVar)
+    oldNecklace = sparse(rows, columns, edgeWeights)
+
+    rows, columns, edgeWeights = findnz(chimGraph)
+    akpwTreeChim = akpw(chimGraph, kind=kindVar, metisClustering = metisClusteringVar)
+    oldChimera = sparse(rows, columns, edgeWeights)
+
+    if !isTree(akpwTreeGrid)
+      write(STDERR, "Grid is not a tree\n")
+    end
+
+    if !isSubsetOfEdges(akpwTreeGrid, oldGrid, marginOfError)
+      write(STDERR, "akpwTreeGrid is not a subset of the edges in gridGraph\n")
+    end
+
+
+    if !isTree(akpwTreeProduct)
+      write(STDERR, "productGraph is not a tree\n")
+    end
+
+    if !isSubsetOfEdges(akpwTreeProduct, oldProductGraph, marginOfError)
+      write(STDERR, "akpwTreeProduct is not a subset of the edges in productGraph\n")
+    end
+
+
+    if !isTree(akpwTreeNecklace)
+      write(STDERR, "necklace is not a tree\n")
+    end
+
+    if !isSubsetOfEdges(akpwTreeNecklace, oldNecklace, marginOfError)
+      write(STDERR, "akpwTreeNecklace is not a subset of the edges in necklaceGraph\n")
+    end
+
+
+    if !isTree(akpwTreeChim)
+      write(STDERR, "chimera is not a tree\n")
+    end
+
+    if !isSubsetOfEdges(akpwTreeChim, oldChimera, marginOfError)
+      write(STDERR, "akpwTreeChim is not a subset of the edges in chimGraph\n")
+    end
+
+
+    dim += iterationSize
+
+  end#for
+  
+end #testAKPW
 
 
