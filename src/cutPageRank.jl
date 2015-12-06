@@ -9,8 +9,7 @@
 """
 function prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, v::Array{Int64,1}, phi::Float64, b::Int64)
 
-  g = findnz(G)
-  m = length(g[1]) / 2
+  m = div(nnz(G), 2)
 
   # show warnings
   if (!(0 < phi && phi <= 1))
