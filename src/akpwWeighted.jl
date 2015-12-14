@@ -40,7 +40,6 @@ function unsortedArray(n)
 
   for i in 1:n
     j = rand(1:i)
-    # println(j)
     permutation[i] = permutation[j]
     permutation[j] = i
   end #for
@@ -50,15 +49,12 @@ end #unsortedArray
 
 
 #could speed this up by creating linked list for clusterCount (cuz it'll usually be mostly zeros)
-#this makes partitionQueue potentially unsorted. Will that mess shit up..?
-# what if this removes a vertex that's crucial for the connection of a cluster? Then it'll divide into 2 clusters.
-#   but my code can't handle that... ------ suddenly they won't be connected, right?
-# what if it was the starting vertex for a cluster..?
+#this makes partitionList potentially unsorted. Will that mess shit up..?
 # should be greatest total weight! not just the greatest number of neighbors
-function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
+function reshuffleClusters(mat, partitionList, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
   nVertices = mat.n
   visited = zeros(Bool, nVertices)
-  nClusters = length(partitionQueue)
+  nClusters = length(partitionList)
   clusterNeighborCount = zeros(Int64, nClusters)
 
   for vInd in 1:nVertices
@@ -67,9 +63,7 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
       continue
     end #if
 
-    for i in 1:nClusters
-      clusterNeighborCount[i] = 0
-    end #for
+    clusterNeighborCount = Dict{Int64, Int64}()
 
     newCluster = vertexToCluster[vInd]
     newClusterCount = 0
@@ -78,7 +72,11 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
       otherV = mat.rowval[eInd]
 
       # clusterNeighborCount[vertexToCluster[otherV]] += edgeWeights[eInd]
-      clusterNeighborCount[vertexToCluster[otherV]] += 1
+      if haskey(clusterNeighborCount, vertexToCluster[otherV])
+        clusterNeighborCount[vertexToCluster[otherV]] += 1
+      else
+        clusterNeighborCount[vertexToCluster[otherV]] = 1
+      end #if
 
       if clusterNeighborCount[vertexToCluster[otherV]] > newClusterCount
         newClusterCount = clusterNeighborCount[vertexToCluster[otherV]]
@@ -110,27 +108,27 @@ function reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexT
 
     if newCluster != vertexToCluster[vInd]
       
-      #remove vInd from it's old clusterQueue
-      partitionQueue[vertexToCluster[vInd]][vertexToClusterLocation[vInd]] = -1
+      #remove vInd from it's old clusterList
+      partitionList[vertexToCluster[vInd]][vertexToClusterLocation[vInd]] = -1
 
-      #push to new clusterQueue
-      push!(partitionQueue[newCluster], vInd)
+      #push to new clusterList
+      push!(partitionList[newCluster], vInd)
 
       # change in vertexToCluster
       vertexToCluster[vInd] = newCluster
     end #if
   end #for
 
-  for i in 1:length(partitionQueue)
-    sort!(partitionQueue[i])
-    for j in 1:length(partitionQueue[i])
-      if partitionQueue[i][j] != -1
-        vertexToClusterLocation[partitionQueue[i][j]] = j
+  for i in 1:length(partitionList)
+    sort!(partitionList[i])
+    for j in 1:length(partitionList[i])
+      if partitionList[i][j] != -1
+        vertexToClusterLocation[partitionList[i][j]] = j
       end
     end #for
   end #for
 
-  return partitionQueue, vertexToCluster, starts, vertexToClusterLocation
+  return partitionList, vertexToCluster, starts, vertexToClusterLocation
 end #reshuffleClusters
 
 
@@ -144,12 +142,12 @@ end #reshuffleClusters
 # only shuffle vertices at the last level of BFS cluster Tree
 function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdgeMapReversed, bigMatNVertices, rows, columns, edgeWeights, randomClusters, shuffleClusters)
   nVertices = mat.n
-  partitionQueue = Array{Int64, 1}[]
+  partitionList = Array{Int64, 1}[]
   nClusters = 0
   visited = zeros(Bool, nVertices)
   nAddedToClusters = 0
   vertexToCluster = zeros(Int64, nVertices)
-  vertexToClusterLocation = zeros(Int64, nVertices) #returns the index where the vertex is located inside clusterQueue
+  vertexToClusterLocation = zeros(Int64, nVertices) #returns the index where the vertex is located inside clusterList
   starts = Int64[]
   newVertices = zeros(Int64, nVertices)
   nNewVertices = 0
@@ -176,7 +174,7 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
 
   while (nAddedToClusters != nVertices)
     nClusters += 1
-    push!(partitionQueue, Int64[])
+    push!(partitionList, Int64[])
 
     # pick a random starting node between 1 and nVertices each time
     if (randomClusters != :no)
@@ -198,7 +196,7 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
     nNodesInCluster = 1
     nAddedToClusters += 1
 
-    push!(partitionQueue[nClusters], start)
+    push!(partitionList[nClusters], start)
     vertexToCluster[start] = nClusters
     vertexToClusterLocation[start] = nNodesInCluster
 
@@ -227,7 +225,7 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
       end #for
 
       nNewVertices = 0
-      for v in partitionQueue[nClusters] #for each vertex in the current cluster
+      for v in partitionList[nClusters] #for each vertex in the current cluster
         for eInd in mat.colptr[v]:(mat.colptr[v+1]-1) #eInd is the edge
 
           if edgeClasses[bigEdgeMapReversed[eInd]] <= bigIteration
@@ -247,7 +245,7 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
 
       for nthNewVertex in 1:nNewVertices
         newV = newVertices[nthNewVertex]
-        push!(partitionQueue[nClusters], newV)
+        push!(partitionList[nClusters], newV)
         vertexToCluster[newV] = nClusters
         nAddedToClusters += 1
         nNodesInCluster += 1
@@ -279,17 +277,17 @@ function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdg
   end #while
 
   if shuffleClusters == :yes
-    return reshuffleClusters(mat, partitionQueue, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
+    return reshuffleClusters(mat, partitionList, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
   end
 
-  return partitionQueue, vertexToCluster, starts, vertexToClusterLocation
+  return partitionList, vertexToCluster, starts, vertexToClusterLocation
 end #partitionMatrix
 
 
 # for a single cluster, updates vertexToCluster to include another cluster for each extra component
 # inside the original cluster
-function updateVertexToCluster{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, nVertices, vertexToCluster, c, nClusters, partitionQueue) 
-  nVerticesInCluster = length(partitionQueue[c]) 
+function updateVertexToCluster{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, nVertices, vertexToCluster, c, nClusters, partitionList) 
+  nVerticesInCluster = length(partitionList[c]) 
   visited = zeros(Bool, nVertices)
   compList = Array{Int64, 1}[]
   order = Array(Int64, nVertices)
@@ -297,7 +295,7 @@ function updateVertexToCluster{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, nVertices, ve
   numComps = 0
 
   for clusterInd in 1:nVerticesInCluster
-    vInd = partitionQueue[c][clusterInd]
+    vInd = partitionList[c][clusterInd]
     if !visited[vInd]
       numComps += 1
       visited[vInd] = true
@@ -334,7 +332,6 @@ function updateVertexToCluster{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, nVertices, ve
     nClusters += numComps-1
   end
 
-  # return nClusters
   return nClusters
   # return maximum(vertexToCluster)
 
@@ -345,23 +342,23 @@ end #clusterComponents
 function partitionListFromMap(nVertices, nClusters, vertexToCluster)
   vertexToClusterLocation = zeros(Int64, nVertices)
   starts = zeros(Int64, nClusters)
-  partitionQueue = Array{Int64, 1}[]
+  partitionList = Array{Int64, 1}[]
 
   for i in 1:nClusters
-    push!(partitionQueue, Int64[])
+    push!(partitionList, Int64[])
   end
 
   for i in 1:nVertices
     thisCluster = vertexToCluster[i]
-    push!(partitionQueue[thisCluster], i)
-    nVerticesInCluster = length(partitionQueue[thisCluster])
+    push!(partitionList[thisCluster], i)
+    nVerticesInCluster = length(partitionList[thisCluster])
     vertexToClusterLocation[i] = nVerticesInCluster
     if nVerticesInCluster == 1
       starts[thisCluster] = i
     end #if
   end
 
-  return vertexToClusterLocation, starts, partitionQueue
+  return vertexToClusterLocation, starts, partitionList
 end #partitionListFromMap
 
 
@@ -380,32 +377,32 @@ function metisPartition(mat, nClusters)
     end
   end #if
 
-  vertexToClusterLocation, starts, partitionQueue = partitionListFromMap(nVertices, nClusters, vertexToCluster)
+  vertexToClusterLocation, starts, partitionList = partitionListFromMap(nVertices, nClusters, vertexToCluster)
   for c in 1:nClusters
-    nClusters = updateVertexToCluster(mat, nVertices, vertexToCluster, c, nClusters, partitionQueue) #what if cluster comps is a list of lists?
+    nClusters = updateVertexToCluster(mat, nVertices, vertexToCluster, c, nClusters, partitionList) #what if cluster comps is a list of lists?
     # if nClusters != maximum(vertexToCluster)
     #   println("ERROR! in metisPartition: nClusters = ", nClusters, ", but should equal:", maximum(vertexToCluster))
     # end
   end
 
-  vertexToClusterLocation, starts, partitionQueue = partitionListFromMap(nVertices, nClusters, vertexToCluster)
+  vertexToClusterLocation, starts, partitionList = partitionListFromMap(nVertices, nClusters, vertexToCluster)
 
   # for i in 1:nClusters
   #   if starts[i] == 0
   #     println("************start[", i, "] = 0")
-  #     println(partitionQueue[i])
+  #     println(partitionList[i])
   #   end
   # end
 
 
-  return partitionQueue, vertexToCluster, starts, vertexToClusterLocation, nClusters
+  return partitionList, vertexToCluster, starts, vertexToClusterLocation, nClusters
 end #metisPartition
 
 
 
-function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vertexToClusterLocation)
+function shortestPathsForCluster(mat, clusterList, vertexToCluster, start, vertexToClusterLocation)
   nVerticesInMat = mat.n
-  nVerticesInCluster = length(clusterQueue)
+  nVerticesInCluster = length(clusterList)
 
   visited = zeros(Bool, nVerticesInCluster) 
 
@@ -424,7 +421,7 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
     visited[vIndInCluster] = true
 
     dv = dists[vIndInCluster]
-    vInd = clusterQueue[vIndInCluster]
+    vInd = clusterList[vIndInCluster]
 
     if vInd == -1
       continue
@@ -450,7 +447,7 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
   newTreeInds = Int64[]
 
   for vInd in pArrayNonZeros
-    bigMatVInd = clusterQueue[vInd]
+    bigMatVInd = clusterList[vInd]
     for eInd in mat.colptr[bigMatVInd]:(mat.colptr[bigMatVInd+1]-1) #all edges connecting to vertex j
       otherV = mat.rowval[eInd]
       clusterIndOtherV = vertexToClusterLocation[otherV]
@@ -460,25 +457,28 @@ function shortestPathsForCluster(mat, clusterQueue, vertexToCluster, start, vert
     end #for
   end #for 
 
+
+  # helpful for debugging a bug that causes a non-connected tree
+
   # checking connectedness
-  for vInd in 1:length(visited)
-    if !visited[vInd] && clusterQueue[vInd] != -1
-      println("for cluster: ", vertexToCluster[clusterQueue[vInd]], " vertex: ", clusterQueue[vInd], " is not connected")
-      println("vertex: ", clusterQueue[vInd], " is connected to: ")
-      for eInd in mat.colptr[clusterQueue[vInd]]:(mat.colptr[clusterQueue[vInd]+1]-1)
-        otherVInd = mat.rowval[eInd]
-        println("\t otherV: ", otherVInd, " in cluster: ", vertexToCluster[otherVInd])
-      end
-    end #if
-  end #for
+  # for vInd in 1:length(visited)
+  #   if !visited[vInd] && clusterList[vInd] != -1
+  #     println("for cluster: ", vertexToCluster[clusterList[vInd]], " vertex: ", clusterList[vInd], " is not connected")
+  #     println("vertex: ", clusterList[vInd], " is connected to: ")
+  #     for eInd in mat.colptr[clusterList[vInd]]:(mat.colptr[clusterList[vInd]+1]-1)
+  #       otherVInd = mat.rowval[eInd]
+  #       println("\t otherV: ", otherVInd, " in cluster: ", vertexToCluster[otherVInd])
+  #     end
+  #   end #if
+  # end #for
 
   return newTreeInds
 end # shortestPaths
 
 
-function collapsePartition(mat::SparseMatrixCSC, partitionQueue, map, nEdges, rows, columns, edgeWeights)
+function collapsePartition(mat::SparseMatrixCSC, partitionList, map, nEdges, rows, columns, edgeWeights)
 
-  nClusters = length(partitionQueue)
+  nClusters = length(partitionList)
   newRows = Int64[]
   newColumns = Int64[]
   newEdgeWeights = Float64[]
@@ -555,8 +555,52 @@ function sparseMatrixFromTreeIndices(mat, treeInds)
 
 end #sparseMatrixFromTreeIndices
 
+"""
+Constructs a low stretch tree using the Alon, Karp, Peleg, West algorithm. This version (akpw! instead of akpw)
+modifies the graph slightly changing the edges weights, then changing them back, which may lead to floating
+point imprecisions. akpw! is faster (about 10-20%), but akpw doesn't have float imprecisions.
 
-function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClustering=:no, shuffleClusters=:yes)
+The function has a few options:
+
+kind: default is :max, which regards each edge weight as the inverse of its length (just like kruskal). If this is
+  set to anything else (e.g. :min), it will regard edge weight as length
+
+randomClusters: default is :no. This means the partition function searches for the beginning of the next cluster
+  in node order, rather than randomly choosing nodes. If this is set to anything else, (e.g. :yes), it will
+  randomly choose the next node. This slows down akpw, but may produce better stretch.
+
+metisClustering: default is :no. If this is set to anything else, (e.g. :yes), the graph will be partitioned
+  each time by metis, rather than by the akpw partitioning method.
+
+shuffleClusters: default is :yes. This preserves the "reshuffleClusters" method after each each graph is
+  partitioned into clusters. If set to anything else (e.g. :no), the function will skip this step. May be faster
+  but have worse stretch.
+
+
+EXAMPLE:
+
+[2, 1]  =  0.631273
+[3, 1]  =  0.40103
+[1, 2]  =  0.631273
+[4, 2]  =  0.147018
+[1, 3]  =  0.40103
+[4, 3]  =  0.772661
+[2, 4]  =  0.147018
+[3, 4]  =  0.772661
+
+      |
+      |
+      V
+
+[2, 1]  =  0.631273
+[3, 1]  =  0.40103
+[1, 2]  =  0.631273
+[1, 3]  =  0.40103
+[4, 3]  =  0.772661
+[3, 4]  =  0.772661
+"""
+function akpw!(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClustering=:no, shuffleClusters=:yes)
+  # useful for debugging!
   println("Starting up AKPW...")
 
   nVertices = mat.n
@@ -585,15 +629,15 @@ function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClusteri
   bigIteration = 1
   while (true)
     if (metisClustering == :no)
-      partitionQueue, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, nVertices, newRows, newColumns, newEdgeWeights, randomClusters, shuffleClusters)
-      nClusters = length(partitionQueue)
+      partitionList, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, nVertices, newRows, newColumns, newEdgeWeights, randomClusters, shuffleClusters)
+      nClusters = length(partitionList)
     else
       nClusters = Int64(floor((newMat.n)/900)+2)
       # nClusters = Int64(floor(log((newMat.n)+1)/log(2)))
-      partitionQueue, vertexToCluster, starts, vertexToClusterLocation, nClusters = metisPartition(newMat, nClusters)
+      partitionList, vertexToCluster, starts, vertexToClusterLocation, nClusters = metisPartition(newMat, nClusters)
     end
 
-
+    # useful for debugging!
     println("nClusters ", nClusters)
 
     for i in 1:length(bigMapD)
@@ -604,7 +648,7 @@ function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClusteri
     #this, for each cluster, creates its own sparse matrix and runs shortest paths on that, then returns the 
     # original mapped edges corresponding to that shortest paths tree. Then it adds those indices to treeInds
     for cInd in 1:nClusters
-      newTreeInds = shortestPathsForCluster(newMat, partitionQueue[cInd], vertexToCluster, starts[cInd], vertexToClusterLocation)
+      newTreeInds = shortestPathsForCluster(newMat, partitionList[cInd], vertexToCluster, starts[cInd], vertexToClusterLocation)
 
       for i in newTreeInds
         treeInds[bigEdgeMapReversed[i]] = true
@@ -615,7 +659,7 @@ function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClusteri
       break
     end #if
 
-    newMat = collapsePartition(newMat, partitionQueue, vertexToCluster, newNEdges, newRows, newColumns, newEdgeWeights)
+    newMat = collapsePartition(newMat, partitionList, vertexToCluster, newNEdges, newRows, newColumns, newEdgeWeights)
     newNEdges = nnz(newMat)
     newRows, newColumns, newEdgeWeights = findnz(newMat)
 
@@ -629,132 +673,17 @@ function akpw(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClusteri
   finalTree = sparseMatrixFromTreeIndices(mat, treeInds)
 
   return finalTree
+end #akpw!
+
+"""
+This is a wrapper for akpw!. It's slower, but won't modify the original graph. See akpw! documentation for more
+details.
+"""
+function akpw(origMat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClustering=:no, shuffleClusters=:yes)
+  rows, columns, edgeWeights = findnz(origMat)
+  mat = sparse(rows, columns, edgeWeights)
+
+  return akpw!(mat, kind=kind, randomClusters=randomClusters, metisClustering=metisClustering, shuffleClusters=shuffleClusters)
 end #akpw
-
-
-
-
-
-
-
-
-function isTree(gr::SparseMatrixCSC)
-  isConnected(gr) && (nnz(gr) == 2*(gr.n-1))
-end #isTree
-
-
-# assume each vertex pair has at most ONE unique edge
-function isSubsetOfEdges(subset::SparseMatrixCSC, superset::SparseMatrixCSC, marginOfError)
-  nSubsetVertices = subset.n
-
-  for vInd in 1:nSubsetVertices
-    for eSubInd in subset.colptr[vInd]:(subset.colptr[vInd+1]-1)
-      for eSupInd in superset.colptr[vInd]:(superset.colptr[vInd+1]-1)
-        if superset.rowval[eSupInd] == subset.rowval[eSubInd]
-          if abs(superset.nzval[eSupInd] - subset.nzval[eSubInd]) > marginOfError
-            println("edge: v1: ", vInd, " v2: ", subset.rowval[eSubInd], " edgeWeight: ", subset.nzval[eSubInd])
-            println("\t=/= edge: v1: ", vInd, " v2: ", superset.rowval[eSupInd], " edgeWeight: ", superset.nzval[eSupInd])
-            return false
-          end
-
-          break
-        end
-      end
-    end
-  end #for
-
-  return true
-
-end #isSubsetOfEdges
-
-
-# Test Function
-
-# uses four different types of graphs: 
-# dim will increase by "iterationsize" each time for each number of iterations
-function testAKPW(startingDim, iterationSize, numIterations; metisClusteringVar=:no, kindVar=:max, marginOfError=.0000001)
-
-  dim = startingDim
-
-  for i in 1:numIterations
-
-    a = grid2(dim)
-    n = size(a)[1]
-    (ai,aj,av) = findnz(triu(a))
-    gridGraph = sparse(ai,aj,rand(size(av)),n,n)
-    gridGraph = gridGraph + gridGraph';
-
-
-    a = productGraph(generalizedRing(dim,[1 5]), grownGraphD(dim,3));
-    n = size(a)[1]
-    (ai,aj,av) = findnz(triu(a))
-    productGraph1 = sparse(ai,aj,rand(size(av)),n,n)
-    productGraph1 = productGraph1 + productGraph1'
-
-    a = generalizedNecklace(generalizedRing(dim,[1 5]), grownGraphD(dim,3),5);
-    n = size(a)[1]
-    (ai,aj,av) = findnz(triu(a))
-    necklaceGraph = sparse(ai,aj,rand(size(av)),n,n)
-    necklaceGraph = necklaceGraph + necklaceGraph'
-
-    chimGraph = wtedChimera(dim^2)
-
-    rows, columns, edgeWeights = findnz(gridGraph)
-    akpwTreeGrid = akpw(gridGraph, kind=kindVar, metisClustering = metisClusteringVar)
-    oldGrid = sparse(rows, columns, edgeWeights)
-
-    rows, columns, edgeWeights = findnz(productGraph1)
-    akpwTreeProduct = akpw(productGraph1, kind=kindVar, metisClustering = metisClusteringVar)
-    oldProductGraph = sparse(rows, columns, edgeWeights)
-
-    rows, columns, edgeWeights = findnz(necklaceGraph)
-    akpwTreeNecklace = akpw(necklaceGraph, kind=kindVar, metisClustering = metisClusteringVar)
-    oldNecklace = sparse(rows, columns, edgeWeights)
-
-    rows, columns, edgeWeights = findnz(chimGraph)
-    akpwTreeChim = akpw(chimGraph, kind=kindVar, metisClustering = metisClusteringVar)
-    oldChimera = sparse(rows, columns, edgeWeights)
-
-    if !isTree(akpwTreeGrid)
-      write(STDERR, "Grid is not a tree\n")
-    end
-
-    if !isSubsetOfEdges(akpwTreeGrid, oldGrid, marginOfError)
-      write(STDERR, "akpwTreeGrid is not a subset of the edges in gridGraph\n")
-    end
-
-
-    if !isTree(akpwTreeProduct)
-      write(STDERR, "productGraph is not a tree\n")
-    end
-
-    if !isSubsetOfEdges(akpwTreeProduct, oldProductGraph, marginOfError)
-      write(STDERR, "akpwTreeProduct is not a subset of the edges in productGraph\n")
-    end
-
-
-    if !isTree(akpwTreeNecklace)
-      write(STDERR, "necklace is not a tree\n")
-    end
-
-    if !isSubsetOfEdges(akpwTreeNecklace, oldNecklace, marginOfError)
-      write(STDERR, "akpwTreeNecklace is not a subset of the edges in necklaceGraph\n")
-    end
-
-
-    if !isTree(akpwTreeChim)
-      write(STDERR, "chimera is not a tree\n")
-    end
-
-    if !isSubsetOfEdges(akpwTreeChim, oldChimera, marginOfError)
-      write(STDERR, "akpwTreeChim is not a subset of the edges in chimGraph\n")
-    end
-
-
-    dim += iterationSize
-
-  end#for
-  
-end #testAKPW
 
 

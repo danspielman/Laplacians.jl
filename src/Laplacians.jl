@@ -126,6 +126,11 @@ and exports the functions for which it seems appropriate.
 
   export maxflow
 
+  include("akpwWeighted.jl")
+
+  export akpw
+  export akpw!
+
   # include("cutPageRank.jl")
 
   # export prn
