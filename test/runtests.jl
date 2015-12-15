@@ -157,6 +157,8 @@ function testAKPW(startingDim, iterationSize, numIterations; kindVar=:max, rando
     dim += iterationSize
 
   end#for
+
+  println("Tests PASS!")
   
 end #testAKPW
 

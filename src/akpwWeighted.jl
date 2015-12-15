@@ -51,7 +51,17 @@ end #unsortedArray
 #could speed this up by creating linked list for clusterCount (cuz it'll usually be mostly zeros)
 #this makes partitionList potentially unsorted. Will that mess shit up..?
 # should be greatest total weight! not just the greatest number of neighbors
-function reshuffleClusters(mat, partitionList, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
+function reshuffleClusters(
+  mat,
+  partitionList,
+  vertexToCluster, 
+  starts, 
+  vertexToClusterLocation, 
+  finalRoundClusterVertices, 
+  rows, 
+  columns, 
+  edgeWeights
+)
   nVertices = mat.n
   visited = zeros(Bool, nVertices)
   nClusters = length(partitionList)
@@ -140,7 +150,19 @@ end #reshuffleClusters
 
 
 # only shuffle vertices at the last level of BFS cluster Tree
-function partitionMatrix(mat::SparseMatrixCSC, bigIteration, edgeClasses, bigEdgeMapReversed, bigMatNVertices, rows, columns, edgeWeights, randomClusters, shuffleClusters)
+function partitionMatrix(
+  mat::SparseMatrixCSC,
+  bigIteration,
+  edgeClasses,
+  bigEdgeMapReversed,
+  bigMatNVertices,
+  rows,
+  columns,
+  edgeWeights,
+  randomClusters,
+  shuffleClusters
+)
+
   nVertices = mat.n
   partitionList = Array{Int64, 1}[]
   nClusters = 0
@@ -286,7 +308,15 @@ end #partitionMatrix
 
 # for a single cluster, updates vertexToCluster to include another cluster for each extra component
 # inside the original cluster
-function updateVertexToCluster{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, nVertices, vertexToCluster, c, nClusters, partitionList) 
+function updateVertexToCluster{Tv,Ti}(
+  mat::SparseMatrixCSC{Tv,Ti},
+  nVertices,
+  vertexToCluster,
+  c,
+  nClusters,
+  partitionList
+)
+
   nVerticesInCluster = length(partitionList[c]) 
   visited = zeros(Bool, nVertices)
   compList = Array{Int64, 1}[]
@@ -496,7 +526,19 @@ function collapsePartition(mat::SparseMatrixCSC, partitionList, map, nEdges, row
 end #collapsePartition
 
 
-function getBigEdgeMapReversed(mat, newMat, bigMapD, nEdges, rows, columns, edgeWeights, newNEdges, newRows, newColumns, newEdgeWeights)
+function getBigEdgeMapReversed(
+  mat,
+  newMat,
+  bigMapD,
+  nEdges,
+  rows,
+  columns,
+  edgeWeights,
+  newNEdges,
+  newRows,
+  newColumns,
+  newEdgeWeights
+)
 
   bigEdgeMapReversed = zeros(Int64, newNEdges)
 
@@ -599,9 +641,16 @@ EXAMPLE:
 [4, 3]  =  0.772661
 [3, 4]  =  0.772661
 """
-function akpw!(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClustering=:no, shuffleClusters=:yes)
+function akpw!(
+  mat::SparseMatrixCSC;
+  kind=:max,
+  randomClusters=:no,
+  metisClustering=:no,
+  shuffleClusters=:yes
+)
+
   # useful for debugging!
-  println("Starting up AKPW...")
+  # println("Starting up AKPW...")
 
   nVertices = mat.n
   nEdges = nnz(mat)
@@ -638,7 +687,7 @@ function akpw!(mat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisCluster
     end
 
     # useful for debugging!
-    println("nClusters ", nClusters)
+    # println("nClusters ", nClusters)
 
     for i in 1:length(bigMapD)
       bigMapD[i] = vertexToCluster[bigMapD[i]]
@@ -679,7 +728,14 @@ end #akpw!
 This is a wrapper for akpw!. It's slower, but won't modify the original graph. See akpw! documentation for more
 details.
 """
-function akpw(origMat::SparseMatrixCSC; kind=:max, randomClusters=:no, metisClustering=:no, shuffleClusters=:yes)
+function akpw(
+  origMat::SparseMatrixCSC;
+  kind=:max,
+  randomClusters=:no,
+  metisClustering=:no,
+  shuffleClusters=:yes
+)
+
   rows, columns, edgeWeights = findnz(origMat)
   mat = sparse(rows, columns, edgeWeights)
 
