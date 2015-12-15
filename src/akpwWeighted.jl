@@ -65,7 +65,6 @@ function reshuffleClusters(
   nVertices = mat.n
   visited = zeros(Bool, nVertices)
   nClusters = length(partitionList)
-  clusterNeighborCount = zeros(Int64, nClusters)
 
   for vInd in 1:nVertices
     validVertex = true
@@ -430,6 +429,15 @@ end #metisPartition
 
 
 
+
+# immutable DijkstraHeapEntry{T}
+#   vertex::Int
+#   dist::T
+# end
+
+# isless(e1::DijkstraHeapEntry, e2::DijkstraHeapEntry) = e1.dist < e2.dist
+
+
 function shortestPathsForCluster(mat, clusterList, vertexToCluster, start, vertexToClusterLocation)
   nVerticesInMat = mat.n
   nVerticesInCluster = length(clusterList)
@@ -441,6 +449,8 @@ function shortestPathsForCluster(mat, clusterList, vertexToCluster, start, verte
 
   pArray = zeros(Int64, nVerticesInCluster)
   pArrayNonZeros = Int64[]
+
+  # sizehint!(nh, nVerticesInCluster)
 
   intHeapAdd!(nh, vertexToClusterLocation[start], 0.0)
 
@@ -473,6 +483,64 @@ function shortestPathsForCluster(mat, clusterList, vertexToCluster, start, verte
     end # for
 
   end # while
+
+
+
+
+  #trying the lightgraphs heap
+
+  # dists = fill(Inf, nVerticesInCluster)
+  # visited = zeros(Bool, nVerticesInCluster) 
+  # pArray = zeros(Int64, nVerticesInCluster)
+  # H = Vector{Float64}()
+  # dists[vertexToClusterLocation[start]] = 0.0
+
+  # sizehint!(H, nVerticesInCluster)
+
+
+  # heappush!(H, DijkstraHeapEntry(vertexToClusterLocation[start], dists[vertexToClusterLocation[start]]))
+
+
+  # while !isempty(H)
+  #   hentry = heappop!(H)
+  #   vIndInCluster = hentry.vertex
+  #   vInd = clusterList[vIndInCluster]
+  #   dv = dists[vIndInCluster]
+
+  #   if vInd == -1
+  #     continue
+  #   end
+  #   # vIndInCluster
+  #   for eInd in mat.colptr[vInd]:(mat.colptr[vInd+1]-1)
+  #     otherVInd = mat.rowval[eInd]
+  #     otherVIndInCluster = vertexToClusterLocation[otherVInd]
+
+  #     if !visited[otherVIndInCluster]
+  #       dists[otherVIndInCluster] = dv
+  #       pArray[otherVIndInCluster] = vIndInCluster
+  #       visited[otherVIndInCluster] = true
+  #       heappush!(H, DijkstraHeapEntry{T}(otherVIndInCluster, alt))
+  #     else
+  #       if dv < dists[otherVIndInCluster]
+  #         dists[otherVIndInCluster] = dv
+  #         pArray[otherVIndInCluster] = vIndInCluster
+  #         heappush!(H, DijkstraHeapEntry{T}(otherVIndInCluster, dv))
+  #       end
+  #       if dv == dists[otherVIndInCluster]
+  #           pathcounts[otherVIndInCluster] += pathcounts[vIndInCluster]
+  #       end #if
+  #     end #if/else
+  #   end #for
+  # end #while
+
+
+
+
+
+
+
+
+
 
   newTreeInds = Int64[]
 
@@ -651,6 +719,7 @@ function akpw!(
 
   # useful for debugging!
   # println("Starting up AKPW...")
+  # info("Starting up AKPW...")
 
   nVertices = mat.n
   nEdges = nnz(mat)
