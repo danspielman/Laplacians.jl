@@ -30,6 +30,10 @@ and exports the functions for which it seems appropriate.
 
   using PyPlot
 
+  using LightGraphs #for akpw
+
+  using Metis #for akpw
+
   include("graphUtils.jl")
 
   export deg
