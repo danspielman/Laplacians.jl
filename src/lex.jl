@@ -6,77 +6,135 @@
 # Started by xiao.shi@yale.edu on Sep 22, 2015
 # Contributers:
 
-include("graphGenerators.jl")
-include("graphAlg.jl")
-
-# takes an array of terminal values (null means non-terminal nodes)
-# and returns an array of (node, value) pairs
-function termValsToPairs(T::Array)
-  n = size(T, 1)
-  termPairs = Array[]
-  for i = 1:n
-    if (T[i] != null)
-      push!(termPairs, [i, T[i]])
-    end
-  end
-  return termPairs
-end
+LEX_DEBUG = true # debug flag for the lex module
+LEX_EPS = 1e-12 # default error tolerance
 
 #=
-numIter: number of iterations
+Simulate IterLex on Uniformly Weighted Graphs
 
-A: n by n adjacency matrix of the graph
+numIter: number of iterations;
 
-initVal: 1 by n matrix of initial voltage assignments
+A: n by n adjacency matrix of the graph;
 
-isTerm: 1 by n boolean matrix of whether each vertex is a terminal
-(value cannot change)
+isTerm: boolean array[n] of whether each vertex is a terminal;
+
+initVal: array[n] of initial voltage assignments;
 
 =#
-function sim(numIter, A, initVal, isTerm)
-  # A should be square
-  (n, m) = size(A)
+function simIterLexUnwtd{Tv, Ti}(numIter::Int64,
+                                 A::SparseMatrixCSC{Tv, Ti},
+                                 isTerm::Array{Bool, 1},
+                                 initVal::Array{Float64, 1}, )
+  n = A.n
   val = copy(initVal)
-  maxV = maximum(initVal)
-  minV = minimum(initVal)
+  nextVal = zeros(Float64, n)
 
-  for i = 1:numIter
-    nextVal = copy(val)
+  for t = 1:numIter
+    # if the bits representation of val and nextVal are the same for
+    # ever vertex, then there is no point in keeping iterating.
+    progress = false
     for u = 1:n
       if (!isTerm[u])
-        maxNeighbor = minV
-        minNeighbor = maxV
-        for v = 1:n
-          if (A[u,v] != 0)
-            maxNeighbor = max(maxNeighbor, val[v])
-            minNeighbor = min(minNeighbor, val[v])
-          end
-        end
+        nbrs = A.rowval[A.colptr[u]:(A.colptr[u + 1] - 1)]
+        maxNeighbor = maximum(val[nbrs])
+        minNeighbor = minimum(val[nbrs])
         nextVal[u] = minNeighbor + (maxNeighbor - minNeighbor) / 2.0
+        if (bits(val[u]) != bits(nextVal[u]))
+          progress = true
+        end
+      else
+        nextVal[u] = val[u]
       end
     end
+
+    if (!progress)
+      @printf("INFO: simIterLexUnwtd: terminating early after %d iterations, as numerical error prevents further progress.\n", t)
+      return val
+    end
+
+    tmp = val
     val = nextVal
+    nextVal = tmp
   end
   return val
 end
 
-function testIterLexOnPath(n, numIter)
-  IterLexPathCheckN(n)
-j
+
+#=
+check the correctness of lex assignment for uniformly weighted graphs
+
+lex: the assignment to check;
+
+eps: absolute error tolerance;
+
+fatal: if true, throws error and halt; if false, return false;
+
+=#
+function checkLexUnwtd{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti},
+                               isTerm::Array{Bool, 1},
+                               initVal::Array{Float64, 1},
+                               lex::Array{Float64, 1};
+                               eps::Float64 = LEX_EPS,
+                               fatal::Bool = true)
+  n = A.n
+  correct = true
+  for i in 1:n
+    if (isTerm[i])
+      expected = initVal[i]
+    else
+      nbrs = A.rowval[A.colptr[i]:A.colptr[i+1]-1]
+      maxval = maximum(lex[nbrs])
+      minval = minimum(lex[nbrs])
+      expected = minval + (maxval - minval) / 2.0
+    end
+    if (abs(lex[i] - expected) > eps)
+      if (fatal)
+        error(@sprintf("The average of the max and min neighbors is %f at vertex %d, but got %f\n", expected, i, lex[i]))
+      end
+      return false
+    end
+  end
+  return true
+end
+
+#==========
+ LEX TESTS
+===========#
+
+function simIterLexTest()
+  simIterLexTestPath(4)
+  simIterLexTestPath(40)
+end
+
+function simIterLexTestPath(n::Int64)
+  if (n < 3)
+    error("n must be at least 3.")
+  end
+
+  numIter = 1000 * n * n
+
   # path graph with n verticies
-  A = grid2(1, n)
+  Pn = pathGraph(n)
   # terminal assignments
-  isTerm = falses(n)
+  isTerm = zeros(Bool, n)
   isTerm[1] = true
   isTerm[n] = true
 
-  termVal = zeros(1,n)
-  termVal[n] = 1
+  initVal = zeros(Float64, n)
+  initVal[n] = n - 1
 
-  # initial assignments
-  initVal = copy(termVal)
+  val = simIterLexUnwtd(numIter, Pn, isTerm, initVal)
+  # correct = checkLexUnwtd(Pn, isTerm, initVal, val, fatal=false)
 
-  return sim(numIter, A, initVal, isTerm)
+  correct = true
+  for i in 1:n
+    expected = (i - 1)
+    if (abs(val[i] - expected) > LEX_EPS)
+      println(val[i], expected)
+      println(val)
+      error("simIterLex is not correct.")
+    end
+  end
 end
 
 #=
