@@ -1,7 +1,7 @@
 
 """to read a simple edge list, each line being an (i, j) pair"""
-function readIJ(filename::AbstractString)
-  edlist = readdlm(filename,',')
+function readIJ(filename::AbstractString, sep=',')
+  edlist = readdlm(filename, sep)
   n = maximum(edlist)
   m = size(edlist)
   edlist = convert(Array{Int64,2}, edlist)
