@@ -4,7 +4,7 @@
   the PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper\n
   s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]
 
-  phi is a bound on the quality of the conductance of the cut - the smaller the p, the higher the quality
+  phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality
   b is used to handle precision throughout the algorithm - the higher the b, the smaller the eps
 """
 function prn_local{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
@@ -86,7 +86,9 @@ function apr_local{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::F
     r[u] = 1 / length(s)^2 - eps * deg(G,u)
   end
 
-  while Base.Collections.peek(r)[2] >= 0
+  # we are moving mass from a node u only if it has more mass than eps * deg(G,u)
+  # making the inequality strictly greater than 0 deals with u being an isolated node
+  while Base.Collections.peek(r)[2] > 0
 
     u,ru = Base.Collections.peek(r)
     ru = ru + eps * deg(G,u)
@@ -106,7 +108,7 @@ function apr_local{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::F
 
       # check if v is in the priority queue for r
       if v in relems == false
-        r[v] = -eps * deg(G,v) # this means it's et to 0
+        r[v] = -eps * deg(G,v) # this means it's set to 0
         push!(relems, v)
       end
 
