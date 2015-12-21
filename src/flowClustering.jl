@@ -1,5 +1,5 @@
 " the LocalImprove function, from the Orrechia-Zhu paper "
-function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10) 
+function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)) 
   #=
     Notes: err < 1e-13 breaks the code. Precision is 1e-16, so 3 bits of precision are lost somewhere...
 
@@ -24,21 +24,23 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
   while alphaMax - err > alphaMin
     alpha = (alphaMin + alphaMax) / 2
 
+    println(alpha, " ", length(localFlow(G, A, alpha, epsSigma, maxSize)[1]), " ", abs(localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G, A)))
+
     # println(localFlow(G, A, alpha, epsSigma)[2], " ", getVolume(G, A))
 
-    if abs(localFlow(G, A, alpha, epsSigma)[2] - getVolume(G, A)) < err
+    if abs(localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G, A)) < err
       alphaMin = alpha
     else
       alphaMax = alpha
     end
   end
 
-  return localFlow(G, A, alphaMax, epsSigma)
+  return localFlow(G, A, alphaMax, epsSigma, maxSize)
 
 end # localImprove
 
 " the LocalFlow function, from the Orecchia-Zhu paper "
-function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::Float64, epsSigma::Float64)
+function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::Float64, epsSigma::Float64, maxSize = max(G.n, G.m))
 
   # compute the number of vertices
   n = max(G.n, G.m)
@@ -83,16 +85,22 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
     # update the total flow
     totalflow = totalflow + flowInc
 
-    # update the vertices consiedered for the flow
+    # update the vertices considered for the flow
+    aux = copy(considered)
     for u in saturated
       for i in 1:deg(GPrime, u)
         v = nbri(GPrime, u, i)
         considered[v] = 1
       end
     end
+
+    if (sum(considered) > maxSize)
+      considered = copy(aux)
+      return getCutSet(GPrime, s, t, considered), getVolume(G, A)
+    end
   end
 
-  return getCutSet(GPrime, s, t), totalflow
+  return getCutSet(GPrime, s, t, considered), totalflow
 
 end # localFlow
 
@@ -269,7 +277,7 @@ function localBlockFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, backInd::SparseMatrixC
 end # localBlockFlow
 
 " get the min cut from the source - return all vertices in the cut besides the source "
-function getCutSet{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Int64, t::Int64)
+function getCutSet{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Int64, t::Int64, considered::Array{Bool,1})
 
   n = max(G.n, G.m)
   Q = zeros(Int64, n)
@@ -287,7 +295,7 @@ function getCutSet{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Int64, t::Int64)
     for i in 1:deg(G, u)
       v = nbri(G, u, i)
 
-      if inQ[v] == 0 && weighti(G, u, i) > 0
+      if inQ[v] == 0 && weighti(G, u, i) > 0 && considered[v]
         right = right + 1
         Q[right] = v
         inQ[v] = 1
