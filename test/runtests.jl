@@ -56,7 +56,7 @@ testAKPW runs tests on akpw to make sure it runs correctly. It takes a few param
 startingDim is the dimension of the first set of graphs it will test (the number of nodes is dim squared)
 iterationsize is the amount that dim will grow each iteration
 numIterations is the number of iterations
-kindVar, randomClustersVar, metisClusteringVar, and shuffleClustersVar each pertain to the equivalent options for akpw
+kindVar, randomClustersVar, metisClusteringVar, exponentialX, and shuffleClustersVar each pertain to the equivalent options for akpw
 marginOfError is the allowable margin of error for running edgeSubset tests (if the difference in edge weights between the tree and graph is above this margin, it will not pass the test)
 
 In each iteration, 4 graphs (one grid, one product, one necklace and one chimera) each with
@@ -70,7 +70,7 @@ for example:
   testAKPW(4, 2, 3) should 3 sets of four (grid, product, necklace and chimera) graphs: with 16, 36, and 64 nodes.
   None should produce any errors
 """
-function testAKPW(startingDim, iterationSize, numIterations; kindVar=:max, randomClustersVar=:no, metisClusteringVar=:no, shuffleClustersVar=:yes, marginOfError=.0000001)
+function testAKPW(startingDim, iterationSize, numIterations; kindVar=:max, randomClustersVar=false, metisClusteringVar=false, shuffleClustersVar=true, exponentialX=true, marginOfError=.0000001)
 
   if startingDim < 4
     println("please choose a higher startingDim (min: 4)")
@@ -103,19 +103,19 @@ function testAKPW(startingDim, iterationSize, numIterations; kindVar=:max, rando
     chimGraph = wtedChimera(dim^2)
 
     rows, columns, edgeWeights = findnz(gridGraph)
-    akpwTreeGrid = akpw(gridGraph, kind=kindVar, metisClustering = metisClusteringVar, randomClusters = randomClustersVar, shuffleClusters = shuffleClustersVar)
+    akpwTreeGrid = akpw(gridGraph, kind=kindVar, metisClustering = metisClusteringVar, randomClusters = randomClustersVar, shuffleClusters = shuffleClustersVar, exponentialX = exponentialX)
     oldGrid = sparse(rows, columns, edgeWeights)
 
     rows, columns, edgeWeights = findnz(productGraph1)
-    akpwTreeProduct = akpw(productGraph1, kind=kindVar, metisClustering = metisClusteringVar, randomClusters = randomClustersVar, shuffleClusters = shuffleClustersVar)
+    akpwTreeProduct = akpw(productGraph1, kind=kindVar, metisClustering = metisClusteringVar, randomClusters = randomClustersVar, shuffleClusters = shuffleClustersVar, exponentialX = exponentialX)
     oldProductGraph = sparse(rows, columns, edgeWeights)
 
     rows, columns, edgeWeights = findnz(necklaceGraph)
-    akpwTreeNecklace = akpw(necklaceGraph, kind=kindVar, metisClustering = metisClusteringVar, randomClusters = randomClustersVar, shuffleClusters = shuffleClustersVar)
+    akpwTreeNecklace = akpw(necklaceGraph, kind=kindVar, metisClustering = metisClusteringVar, randomClusters = randomClustersVar, shuffleClusters = shuffleClustersVar, exponentialX = exponentialX)
     oldNecklace = sparse(rows, columns, edgeWeights)
 
     rows, columns, edgeWeights = findnz(chimGraph)
-    akpwTreeChim = akpw(chimGraph, kind=kindVar, metisClustering = metisClusteringVar, randomClusters = randomClustersVar, shuffleClusters = shuffleClustersVar)
+    akpwTreeChim = akpw(chimGraph, kind=kindVar, metisClustering = metisClusteringVar, randomClusters = randomClustersVar, shuffleClusters = shuffleClustersVar, exponentialX = exponentialX)
     oldChimera = sparse(rows, columns, edgeWeights)
 
     if !isTree(akpwTreeGrid)

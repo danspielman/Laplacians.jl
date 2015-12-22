@@ -1,3 +1,16 @@
+#=
+Written by Jackson Thea for CPSC 490 Fall 2015
+
+Provides
+  akpw! and akpw (a wrapper for akpw!)
+
+AKPW is an algorithm published by Alon, Karp, Peleg and West in 1995 to produce low stretch spanning trees. This
+is my implementation of the algorithm. For more information on how to run AKPW, see the doc string above akpw!'s
+function declaration.
+=#
+
+
+
 function normalizeEdgeWeights(mat::SparseMatrixCSC, kind, nEdges)
 
   if (kind == :max)
@@ -159,7 +172,8 @@ function partitionMatrix(
   columns,
   edgeWeights,
   randomClusters,
-  shuffleClusters
+  shuffleClusters,
+  exponentialX
 )
 
   nVertices = mat.n
@@ -174,7 +188,7 @@ function partitionMatrix(
   nNewVertices = 0
   newVerticesArray = zeros(Bool, nVertices)
 
-  if (randomClusters != :no)
+  if randomClusters
     unsortedNodes = unsortedArray(nVertices)
   end
 
@@ -183,10 +197,11 @@ function partitionMatrix(
   x::Float64
 
   if nVertices > 2
-    # x = exp(sqrt(log(nVertices) * log(log(nVertices))))
-    x = log(nVertices+1)/log(2)
-    # x = log(nVertices)
-    # x = 2.0*exp(sqrt(log(bigMatNVertices) * log(log(bigMatNVertices))))
+    if exponentialX
+      x = exp(sqrt(log(nVertices) * log(log(nVertices))))
+    else
+      x = log(nVertices+1)/log(2)
+    end
   else
     x = 5.0
   end
@@ -198,7 +213,7 @@ function partitionMatrix(
     push!(partitionList, Int64[])
 
     # pick a random starting node between 1 and nVertices each time
-    if (randomClusters != :no)
+    if randomClusters
       while visited[unsortedNodes[lowestUnvisitedUnsortedIndex]]
         lowestUnvisitedUnsortedIndex += 1
       end #while
@@ -297,7 +312,7 @@ function partitionMatrix(
 
   end #while
 
-  if shuffleClusters == :yes
+  if shuffleClusters
     return reshuffleClusters(mat, partitionList, vertexToCluster, starts, vertexToClusterLocation, finalRoundClusterVertices, rows, columns, edgeWeights)
   end
 
@@ -409,26 +424,16 @@ function metisPartition(mat, nClusters)
   vertexToClusterLocation, starts, partitionList = partitionListFromMap(nVertices, nClusters, vertexToCluster)
   for c in 1:nClusters
     nClusters = updateVertexToCluster(mat, nVertices, vertexToCluster, c, nClusters, partitionList) #what if cluster comps is a list of lists?
-    # if nClusters != maximum(vertexToCluster)
-    #   println("ERROR! in metisPartition: nClusters = ", nClusters, ", but should equal:", maximum(vertexToCluster))
-    # end
   end
 
   vertexToClusterLocation, starts, partitionList = partitionListFromMap(nVertices, nClusters, vertexToCluster)
-
-  # for i in 1:nClusters
-  #   if starts[i] == 0
-  #     println("************start[", i, "] = 0")
-  #     println(partitionList[i])
-  #   end
-  # end
-
 
   return partitionList, vertexToCluster, starts, vertexToClusterLocation, nClusters
 end #metisPartition
 
 
 
+#definitions for a potentially faster lightgraphs heap
 
 # immutable DijkstraHeapEntry{T}
 #   vertex::Int
@@ -675,16 +680,19 @@ The function has a few options:
 kind: default is :max, which regards each edge weight as the inverse of its length (just like kruskal). If this is
   set to anything else (e.g. :min), it will regard edge weight as length
 
-randomClusters: default is :no. This means the partition function searches for the beginning of the next cluster
-  in node order, rather than randomly choosing nodes. If this is set to anything else, (e.g. :yes), it will
+randomClusters: default is false. This means the partition function searches for the beginning of the next cluster
+  in node order, rather than randomly choosing nodes. If this is set to false, it will
   randomly choose the next node. This slows down akpw, but may produce better stretch.
 
-metisClustering: default is :no. If this is set to anything else, (e.g. :yes), the graph will be partitioned
+metisClustering: default is false. If this is set to false, the graph will be partitioned
   each time by metis, rather than by the akpw partitioning method.
 
-shuffleClusters: default is :yes. This preserves the "reshuffleClusters" method after each each graph is
-  partitioned into clusters. If set to anything else (e.g. :no), the function will skip this step. May be faster
+shuffleClusters: default is true. This preserves the "reshuffleClusters" method after each each graph is
+  partitioned into clusters. If set to false, the function will skip this step. May be faster
   but have worse stretch.
+
+exponentialX: default is true, where the funciton exp(sqrt(log(nVertices) * log(log(nVertices)))) is used for X.
+  If set fo false, the function log(nVertices+1)/log(2) will be used for X instead. 
 
 
 EXAMPLE:
@@ -712,9 +720,10 @@ EXAMPLE:
 function akpw!(
   mat::SparseMatrixCSC;
   kind=:max,
-  randomClusters=:no,
-  metisClustering=:no,
-  shuffleClusters=:yes
+  randomClusters= false,
+  metisClustering= false,
+  shuffleClusters= true,
+  exponentialX= true
 )
 
   # useful for debugging!
@@ -746,8 +755,8 @@ function akpw!(
 
   bigIteration = 1
   while (true)
-    if (metisClustering == :no)
-      partitionList, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, nVertices, newRows, newColumns, newEdgeWeights, randomClusters, shuffleClusters)
+    if !metisClustering
+      partitionList, vertexToCluster, starts, vertexToClusterLocation = partitionMatrix(newMat, bigIteration, edgeClasses, bigEdgeMapReversed, nVertices, newRows, newColumns, newEdgeWeights, randomClusters, shuffleClusters, exponentialX)
       nClusters = length(partitionList)
     else
       nClusters = Int64(floor((newMat.n)/900)+2)
@@ -800,15 +809,16 @@ details.
 function akpw(
   origMat::SparseMatrixCSC;
   kind=:max,
-  randomClusters=:no,
-  metisClustering=:no,
-  shuffleClusters=:yes
+  randomClusters=false,
+  metisClustering=false,
+  shuffleClusters=true,
+  exponentialX=true
 )
 
   rows, columns, edgeWeights = findnz(origMat)
   mat = sparse(rows, columns, edgeWeights)
 
-  return akpw!(mat, kind=kind, randomClusters=randomClusters, metisClustering=metisClustering, shuffleClusters=shuffleClusters)
+  return akpw!(mat, kind=kind, randomClusters=randomClusters, metisClustering=metisClustering, shuffleClusters=shuffleClusters, exponentialX=exponentialX)
 end #akpw
 
 
