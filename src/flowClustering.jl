@@ -24,7 +24,7 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
   while alphaMax - err > alphaMin
     alpha = (alphaMin + alphaMax) / 2
 
-    println(alpha, " ", length(localFlow(G, A, alpha, epsSigma, maxSize)[1]), " ", abs(localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G, A)))
+    # println(alpha, " ", length(localFlow(G, A, alpha, epsSigma, maxSize)[1]), " ", abs(localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G, A)))
 
     # println(localFlow(G, A, alpha, epsSigma)[2], " ", getVolume(G, A))
 
@@ -314,56 +314,4 @@ function getCutSet{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Int64, t::Int64, conside
   return cut
 
 end # getCutSet
-
-""" 
-  Returns the quality of the cut for a given *unweighted* graph and a given cut set.
-  Result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)
-"""
-function compConductance{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
-
-  n = max(G.n, G.m)
-
-	vols = getVolume(G, s)
-  obound = getObound(G, s)
-
-	return obound / vols
-
-end # compConductance
-
-" computes the volume of subset s in an unweighted graph G "
-function getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
-
-  vol = 0.0
-  for i in 1:length(s)
-    deggsi = 0
-    for j in 1:deg(G, s[i])
-      deggsi = deggsi + weighti(G,s[i],j)
-    end
-    # vol = vol + deg(G, s[i])
-    vol = vol + deggsi
-  end
-
-  return vol
-
-end # getVolume
-
-" computes the number of edges leaving s "
-function getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
-
-  sets = IntSet(s)
-
-  obound = 0
-  for u in s
-    for i in 1:deg(G, u)
-      v = nbri(G, u, i)
-      if !(v in sets)
-        obound = obound + weighti(G, u, i)
-      end
-    end
-  end
-
-  return obound
-
-end #getObound
-
 

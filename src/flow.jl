@@ -1,4 +1,7 @@
-" implementation of Dinic's algorithm. computes the maximum flow and min-cut in G between s and t. we consider the adjacency matrix to be the capacity matrix "
+""" 
+  implementation of Dinic's algorithm. computes the maximum flow and min-cut in G between s and t 
+  we consider the adjacency matrix to be the capacity matrix 
+"""
 function maxflow{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti}, s::Int64, t::Int64; justflow = true)
 
   n = max(G.n, G.m)

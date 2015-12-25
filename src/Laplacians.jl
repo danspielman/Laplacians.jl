@@ -36,9 +36,13 @@ and exports the functions for which it seems appropriate.
   export nbri
   export weighti
   export nbrs
+  export wdeg
   export setValue
   export backIndices
   export findEntries
+  export compConductance
+  export getVolume
+  export getObound
 
   include("graphGenerators.jl")
 
