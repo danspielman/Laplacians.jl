@@ -353,7 +353,7 @@ end # getCutSet
 
 
 """
-  prn_local{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
+  prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 
   The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper\n
   s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]
@@ -361,7 +361,7 @@ end # getCutSet
   phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality
   b is used to handle precision throughout the algorithm - the higher the b, the smaller the eps
 """
-function prn_local{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
+function prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 
   m = div(nnz(G), 2)
 
@@ -376,7 +376,7 @@ function prn_local{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Flo
   alpha = phi * phi / (225 * log(100 * sqrt(m)))
   eps = 1 / (2^b * 48 * log(m))
 
-  p = apr_local(G, s, alpha, eps)
+  p = apr(G, s, alpha, eps)
 
   # iterate through support set and find a cut-set S that fits our constraints
   S = Set(Int64[])
@@ -425,7 +425,7 @@ end # prn_local
   computes an approximate page rank vector from a starting set s, an alpha and an epsilon
   algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's notes
 """
-function apr_local{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
+function apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
 
   # p is ordered by p[i] / deg(i) (ordering required for prn)
   # r is oredered by r[i] - eps * deg(G,u). r is initially mimicking the unit vector
