@@ -67,6 +67,46 @@ function backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 
 end # backIndices
 
+" same as the above, but now the graph is in adjacency list form "
+function backIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})
+  n = length(G)
+
+  # initialize values
+  backInfo = [Tuple{Int64,Int64}[] for i in 1:n]
+  backIndices = [(Int64)[] for i in 1:n]
+  for u in 1:length(G)
+    listU = G[u]
+    backInfo[u] = [(0,0) for i in 1:length(listU)]
+    backIndices[u] = [-1 for i in 1:length(listU)]
+  end
+  index = zeros(Int64, n)
+
+  # compute for each vertex the incoming edges
+  for u in 1:n
+    for i in 1:length(G[u])
+      v,w = G[u][i]
+      index[v] = index[v] + 1
+      backInfo[v][index[v]] = (u, i)
+    end
+  end
+
+  # create the back edges
+  incoming = zeros(Int64, n)
+  for u in 1:n
+    for i in 1:length(G[u])
+      incoming[backInfo[u][i][1]] = backInfo[u][i][2]
+    end
+
+    for i in 1:length(G[u])
+      v,w = G[u][i]
+      backIndices[v][incoming[v]] = i
+    end
+  end
+
+  return backIndices
+
+end # backIndices
+
 
 " similar to findnz, but also returns 0 entries that have an edge in the sparse matrix "
 function findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
