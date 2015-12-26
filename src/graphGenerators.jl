@@ -420,6 +420,11 @@ function pureRandomGraph(n::Integer)
         error("Getting a disconnected graph from $(gr[i])")
     end
 
+    if (sum(diag(mat)) > 0)
+        error("nonzero diag from $(gr[i])")
+    end
+
+    
     return floatGraph(mat)
       
 end
@@ -434,6 +439,13 @@ end
 The components come from pureRandomGraph,
 connected by joinGraphs, productGraph and generalizedNecklace"""
 function chimera(n::Integer)
+
+    if (n < 2)
+        gr = sparse([0.0])
+
+        return gr
+    end
+
     if (n < 30) || (rand() < .2)
 
         gr = pureRandomGraph(n)
@@ -479,12 +491,12 @@ function chimera(n::Integer)
             k = floor(Integer,1+exp(rand()*log(min(n1,n2)/10)))
             gr = generalizedNecklace(chimera(n1),chimera(n2),k)
 
-
         end
 
         n3 = n - size(gr)[1]
         if (n3 > 0)
             gr = joinGraphs(gr,chimera(n3),2)
+
         end
 
         return gr
