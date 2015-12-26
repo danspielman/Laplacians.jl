@@ -132,7 +132,7 @@ and exports the functions for which it seems appropriate.
 
 
   using LightGraphs #for akpw
-  using Metis #for akpw
+  # using Metis #for akpw
 
   include("akpwWeighted.jl")
 
