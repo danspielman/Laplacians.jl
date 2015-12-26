@@ -154,10 +154,16 @@ and exports the functions for which it seems appropriate.
   # export getVolume
   # export getObound
 
-  # include("cutHeuristics.jl")
+  include("localClustering.jl")
 
-  # export refineCut
-  # export dumb
+  export prn
+  export apr
+  export localImprove
+
+  include("cutHeuristics.jl")
+
+  export refineCut
+  export dumb
 
   include("randTrees.jl")
   export randishKruskal, randishPrim

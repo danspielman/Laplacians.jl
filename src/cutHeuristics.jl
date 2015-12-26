@@ -121,7 +121,7 @@ function dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 			for i in 1:length(news)
 				if news[i] == v
 					news[i] = news[length(news)]
-					pop!(news)
+					Base.pop!(news)
 					break
 				end
 			end
