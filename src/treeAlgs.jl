@@ -167,37 +167,45 @@ function matToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)
 end
 
 
+# put the nodes of a tree in a dfs order,
+# so the first node we see is a leaf,
+# the last is the root,
+# and each subtree is completed before a parallel subtree
+#
+# we need this for the non-recursive tarjanLCA
+function dfsOrder(t::RootedTree)
 
-
-#=
-# this was designed for a different RootedTree structure
-
-function dfsOrder{Tv,Ti}(t::RootedTree{Tv,Ti})
-    n = length(t.parent)
-    order = zeros(Ti,n)
-
-    stack = zeros(Ti,n)
-    stack[1] = t.root
-
-    stackPos::Ti = 2
-    orderPos::Ti = 1
-
-    while stackPos > 1
-        stackPos = stackPos - 1
-        v = stack[stackPos]
-        order[orderPos] = v
-        orderPos = orderPos + 1
-
-        for ch in t.children[v]
-            stack[stackPos] = ch
-            stackPos = stackPos + 1
-        end
+    n = size(t.children,1)
+    
+    sz = ones(Int64,n);
+    for vi in n:-1:2
+        v = t.children[vi]
+        par = t.parent[v]
+        sz[par] += sz[v]
     end
 
-    return order
+    numLeft = zeros(Int64,n)
+    for ui in 1:n
+        u = t.children[ui]
+        cnt = numLeft[u]
+        for vi in t.kidsPtr[u]:(t.numKids[u] + t.kidsPtr[u] - 1)
+            v = t.children[vi]
+            numLeft[v] = cnt
+            cnt += sz[v]
+        end
+    end
     
-end # dfsTree
-=#
+    ordInd = numLeft + sz
+
+    ord = zeros(Int64,n)
+    for i in 1:n
+        ord[ordInd[i]] = i
+    end
+
+    return ord
+    
+end
+
 
 # this is intended to be used with a tree
 function bfsOrder{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
@@ -272,7 +280,7 @@ function tarjanStretch{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti},
     n = length(t.parent)
     su = IntDisjointSets(n)
 
-    ancestor = zeros(Ti,n)
+    ancestor = collect(1:n)
 
     answer = zeros(Tv,nnz(mat))
 
@@ -291,26 +299,37 @@ end # tarjanStretch
 function tarjanStretchSub{Tv,Ti}(u::Ti, t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, ancestor::Array{Ti,1},
                                  answer::Array{Tv,1}, seen::Array{Bool,1}, su::IntDisjointSets, depth::Array{Tv,1})    
 
-        ancestor[u] = u
+    ord = dfsOrder(t)
 
-        for i in t.kidsPtr[u]:(t.numKids[u] + t.kidsPtr[u] - 1)
-            v = t.children[i]
+    # traverse nodes from leaves back to root
+    for v in ord
 
-            tarjanStretchSub(v, t, mat, ancestor, answer, seen, su, depth)
-            DataStructures.union!(su, u, v)
-            ancestor[DataStructures.find_root(su, u)] = u
+        par = t.parent[v]
+
+        # just for debugging
+        if seen[par]
+            error("saw parent!")
         end
 
-        seen[u] = true
+        seen[v] = true
 
-        for ind in mat.colptr[u]:(mat.colptr[u+1]-1)
-            v = mat.rowval[ind]
-            if seen[v]
-                answer[ind] = mat.nzval[ind]*(depth[u] + depth[v] - 2*depth[ancestor[DataStructures.find_root(su,v)]])
+        # ancestor[DataStructures.find_root(su, v)] = par
+        
+        for ind in mat.colptr[v]:(mat.colptr[v+1]-1)
+            w = mat.rowval[ind]
+            if seen[w]
+                answer[ind] = mat.nzval[ind]*(depth[v] + depth[w] - 2*depth[ancestor[DataStructures.find_root(su,w)]])
                 # println(u, " ", v, " : ", answer[ind])
             end # can fill u-v query
         end # over queries
 
+        DataStructures.union!(su, par, v)
+        
+        ancestor[DataStructures.find_root(su, par)] = par
+        
+
+     end # for vi, v
+        
 end # TarjanStretchSub
 
 
