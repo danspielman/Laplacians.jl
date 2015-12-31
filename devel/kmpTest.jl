@@ -32,6 +32,34 @@ function solveTree(elims,b)
     
 end
 
+# Must be in DFS order
+# marked is 1 if flagged for possible elimination,
+# and set to 2 if we do eliminate it
+function elimDeg1(t, marked)
+    n = t.n
+
+    deg = Array{Int64}(n)
+    for v in 1:n
+        deg[v] = t.colptr[v+1] - t.colptr[v]
+    end
+
+    elims1 = Array{elimTreeNode}(0)
+
+    for v in n:-1:2
+
+        if (deg[v] == 1 && marked[v] == 1)
+            parent = t.rowval[t.colptr[v]];
+            wt = t.nzval[t.colptr[v]];
+            push!(elims1,elimTreeNode(v,parent,wt))
+
+            deg[parent] = deg[parent] - 1
+            marked[v] = 2
+        end
+    end
+    return elims1
+end
+
+
 
 
 function testKMP(a; t=akpw(a), frac1=1/5, frac2=1/20)
