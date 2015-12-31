@@ -39,7 +39,7 @@ function testKMP(a; t=akpw(a), frac1=1/5, frac2=1/20)
     [minimum(dat) , mean(dat), median(dat), maximum(dat)]
 end
 
-function testAtSize(n; frac1=1/3, frac2 = 1/15)
+function testAtSize(n, results; frac1=1/3, frac2 = 1/15)
     mxval = 0
     mxi = 0
 
@@ -52,7 +52,9 @@ function testAtSize(n; frac1=1/3, frac2 = 1/15)
             mxval = maximum(x)
         end
 
-        println(i , " : ", mxval )
+        println("on iter " , i , ". Max was ", mxi, " : ", mxval )
+
+	push!(results,maximum(x))
 
         i = i + 1
     end
