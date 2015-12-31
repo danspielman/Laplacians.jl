@@ -1,3 +1,38 @@
+immutable elimTreeNode
+    nodeid::Int64
+    parent::Int64
+    wtDeg::Float64
+end
+
+function makeElimList(t)
+    tr = matToTree(t)
+    n = size(tr.children,1)  
+    
+    elims = Array{elimTreeNode}(0)
+    for vi in n:-1:2
+        v = tr.children[vi]
+        push!(elims,elimTreeNode(v,tr.parent[v],tr.weights[vi]))
+    end
+    
+    return elims
+end
+
+function solveTree(elims,b)
+    cumb = copy(b)
+    n = size(b,1)
+    for i in 1:(n-1)
+        cumb[elims[i].parent] += cumb[elims[i].nodeid]
+    end
+    x = zeros(Float64,n)
+    for i in (n-1):-1:1
+        node = elims[i].nodeid
+        x[node] = x[elims[i].parent] + cumb[node]/elims[i].wtDeg
+    end
+    return x
+    
+end
+
+
 
 function testKMP(a; t=akpw(a), frac1=1/5, frac2=1/20)
     st = compStretches(t,a);
