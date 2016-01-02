@@ -109,7 +109,7 @@ and exports the functions for which it seems appropriate.
   export vecToComps
   export isConnected
 
-  export shortestPaths, shortestPathTree
+  export shortestPaths, shortestPathTree, pathFromParents
   export kruskal, prim
 
   include("treeAlgs.jl")
@@ -147,7 +147,7 @@ and exports the functions for which it seems appropriate.
   # export ppr
 
   # include("flowClustering.jl")
- 
+
   # export localImprove
   # export localFlow
   # export compConductance
