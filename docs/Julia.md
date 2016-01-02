@@ -6,6 +6,8 @@ To use the julia notebooks, you will need ipython and the IJulia package.  You s
 To install IJulia, you type `Pkg.add("IJulia")` from Julia.
 Then, you just need to type `using IJulia` once.  This will tell jupyter about the Julia kernel.  To run Julia notebooks, you now type `jupyter notebook`.  You can select the kernel your new notebook is using.
 
+Each time you upgrade Julia (by installing verison 0.4.x+1), you should run `Pkg.build("IJulia")` so that the notebooks will be able to access the new kernel.
+
 Dan recommends installing the anaconda distribution of python.
 You will then need to install some things from that, like
 conda install jupyter (the new notebooks package)
@@ -39,7 +41,7 @@ push!(LOAD_PATH,"/Users/[your_username]/git/julia/yinsGraph")
 To overcome this issue, you can add the above line to the end of the julia.rc file, found in
 
 ~~~julia
-/Applications/Julia-0.4.0-rc4.app/Contents/Resources/julia/etc/julia
+/Applications/Julia-0.4.2.app/Contents/Resources/julia/etc/julia
 ~~~
 
 Julia 0.4 lets you take advantage of docstrings.
@@ -58,7 +60,7 @@ This will mess up the indentation when calling '?func_name'.
 
 ## Julia Notebooks
 To get the Julia notebooks working, I presently type `jupyter notebook`.
-I then select the kernel to be Julia-0.3.11.
+I then select the kernel to be Julia-0.4.2.
 It seems important to run this command from a directory that contains all the directories
 that have notebooks that you will use.  In particular, I advise against "uploading" notebooks
 from other directories.  That has only given me trouble.
