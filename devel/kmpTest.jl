@@ -1,3 +1,66 @@
+immutable elimTreeNode
+    nodeid::Int64
+    parent::Int64
+    wtDeg::Float64
+end
+
+function makeElimList(t)
+    tr = matToTree(t)
+    n = size(tr.children,1)  
+    
+    elims = Array{elimTreeNode}(0)
+    for vi in n:-1:2
+        v = tr.children[vi]
+        push!(elims,elimTreeNode(v,tr.parent[v],tr.weights[vi]))
+    end
+    
+    return elims
+end
+
+function solveTree(elims,b)
+    cumb = copy(b)
+    n = size(b,1)
+    for i in 1:(n-1)
+        cumb[elims[i].parent] += cumb[elims[i].nodeid]
+    end
+    x = zeros(Float64,n)
+    for i in (n-1):-1:1
+        node = elims[i].nodeid
+        x[node] = x[elims[i].parent] + cumb[node]/elims[i].wtDeg
+    end
+    return x
+    
+end
+
+# Must be in DFS order
+# marked is 1 if flagged for possible elimination,
+# and set to 2 if we do eliminate it
+function elimDeg1(t, marked)
+    n = t.n
+
+    deg = Array{Int64}(n)
+    for v in 1:n
+        deg[v] = t.colptr[v+1] - t.colptr[v]
+    end
+
+    elims1 = Array{elimTreeNode}(0)
+
+    for v in n:-1:2
+
+        if (deg[v] == 1 && marked[v] == 1)
+            parent = t.rowval[t.colptr[v]];
+            wt = t.nzval[t.colptr[v]];
+            push!(elims1,elimTreeNode(v,parent,wt))
+
+            deg[parent] = deg[parent] - 1
+            marked[v] = 2
+        end
+    end
+    return elims1
+end
+
+
+
 
 function testKMP(a; t=akpw(a), frac1=1/5, frac2=1/20)
     st = compStretches(t,a);
@@ -39,7 +102,7 @@ function testKMP(a; t=akpw(a), frac1=1/5, frac2=1/20)
     [minimum(dat) , mean(dat), median(dat), maximum(dat)]
 end
 
-function testAtSize(n; frac1=1/3, frac2 = 1/15)
+function testAtSize(n, results; frac1=1/3, frac2 = 1/15)
     mxval = 0
     mxi = 0
 
@@ -52,7 +115,9 @@ function testAtSize(n; frac1=1/3, frac2 = 1/15)
             mxval = maximum(x)
         end
 
-        println(i , " : ", mxval )
+        println("on iter " , i , ". Max was ", mxi, " : ", mxval )
+
+	push!(results,maximum(x))
 
         i = i + 1
     end

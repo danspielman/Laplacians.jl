@@ -167,36 +167,98 @@ function matToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)
 end
 
 
+import Base.pop!
 
-
-#=
-# this was designed for a different RootedTree structure
-
-function dfsOrder{Tv,Ti}(t::RootedTree{Tv,Ti})
-    n = length(t.parent)
-    order = zeros(Ti,n)
-
-    stack = zeros(Ti,n)
-    stack[1] = t.root
-
-    stackPos::Ti = 2
-    orderPos::Ti = 1
-
-    while stackPos > 1
-        stackPos = stackPos - 1
-        v = stack[stackPos]
-        order[orderPos] = v
-        orderPos = orderPos + 1
-
-        for ch in t.children[v]
-            stack[stackPos] = ch
-            stackPos = stackPos + 1
+# put the nodes of a tree in a dfs order,
+# so the last node we see is a leaf,
+# the first is the root,
+# and each subtree is completed before a parallel subtree
+#
+# we need this for the non-recursive tarjanLCA
+function dfsOrder(tr::RootedTree)
+    ord = Array{Int64}(0)
+    stk = Array{Int64}(0)
+    push!(stk,tr.root)
+    while ~isempty(stk)
+        u = pop!(stk)
+        push!(ord,u)
+        for  vi in tr.kidsPtr[u]:(tr.numKids[u] + tr.kidsPtr[u] - 1)
+            v = tr.children[vi]
+            push!(stk,v)
         end
     end
+    return ord
 
-    return order
+end
+
+
+# put the nodes of a tree in a dfs order,
+# so the last node we see is a leaf,
+# the first is the root,
+# and each subtree is completed before a parallel subtree
+#
+# this matrix should be the adj matrix of a tree
+function dfsOrder(t::SparseMatrixCSC)
+    n = size(t,1)
+    seen = zeros(Bool,n)
+    ord = Array{Int64}(0)
+    stk = Array{Int64}(0)
+    push!(stk,1)
+    while ~isempty(stk)
+        u = pop!(stk)
+        push!(ord,u)
+        seen[u] = true
+        for vi in t.colptr[u]:(t.colptr[u+1]-1)
+            v = t.rowval[vi]
+            if !seen[v]
+                push!(stk,v)
+            end
+        end
+    end
+    return ord
+
+end
+
+
+# put the nodes of a tree in a dfs order,
+# so the first node we see is a leaf,
+# the last is the root,
+# and each subtree is completed before a parallel subtree
+#
+# we need this for the non-recursive tarjanLCA
+#=
+function dfsOrder(t::RootedTree)
+
+    n = size(t.children,1)
     
-end # dfsTree
+    sz = ones(Int64,n);
+    for vi in n:-1:2
+        v = t.children[vi]
+        par = t.parent[v]
+        sz[par] += sz[v]
+    end
+
+    numLeft = zeros(Int64,n)
+    for ui in 1:n
+        u = t.children[ui]
+        cnt = numLeft[u]
+        for vi in t.kidsPtr[u]:(t.numKids[u] + t.kidsPtr[u] - 1)
+            v = t.children[vi]
+            numLeft[v] = cnt
+            cnt += sz[v]
+        end
+    end
+    
+    ordInd = numLeft + sz
+
+    ord = zeros(Int64,n)
+    for i in 1:n
+        ord[ordInd[i]] = i
+    end
+
+    return ord
+    
+end
 =#
 
 # this is intended to be used with a tree
@@ -272,7 +334,7 @@ function tarjanStretch{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti},
     n = length(t.parent)
     su = IntDisjointSets(n)
 
-    ancestor = zeros(Ti,n)
+    ancestor = collect(1:n)
 
     answer = zeros(Tv,nnz(mat))
 
@@ -291,26 +353,38 @@ end # tarjanStretch
 function tarjanStretchSub{Tv,Ti}(u::Ti, t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, ancestor::Array{Ti,1},
                                  answer::Array{Tv,1}, seen::Array{Bool,1}, su::IntDisjointSets, depth::Array{Tv,1})    
 
-        ancestor[u] = u
+    ord = dfsOrder(t)
 
-        for i in t.kidsPtr[u]:(t.numKids[u] + t.kidsPtr[u] - 1)
-            v = t.children[i]
+    # traverse nodes from leaves back to root
+    for vi in size(ord,1):-1:1
+        v = ord[vi]
 
-            tarjanStretchSub(v, t, mat, ancestor, answer, seen, su, depth)
-            DataStructures.union!(su, u, v)
-            ancestor[DataStructures.find_root(su, u)] = u
+        par = t.parent[v]
+
+        # just for debugging
+        if seen[par]
+            error("saw parent!")
         end
 
-        seen[u] = true
+        seen[v] = true
 
-        for ind in mat.colptr[u]:(mat.colptr[u+1]-1)
-            v = mat.rowval[ind]
-            if seen[v]
-                answer[ind] = mat.nzval[ind]*(depth[u] + depth[v] - 2*depth[ancestor[DataStructures.find_root(su,v)]])
+        # ancestor[DataStructures.find_root(su, v)] = par
+        
+        for ind in mat.colptr[v]:(mat.colptr[v+1]-1)
+            w = mat.rowval[ind]
+            if seen[w]
+                answer[ind] = mat.nzval[ind]*(depth[v] + depth[w] - 2*depth[ancestor[DataStructures.find_root(su,w)]])
                 # println(u, " ", v, " : ", answer[ind])
             end # can fill u-v query
         end # over queries
 
+        DataStructures.union!(su, par, v)
+        
+        ancestor[DataStructures.find_root(su, par)] = par
+        
+
+     end # for vi, v
+        
 end # TarjanStretchSub
 
 
@@ -325,6 +399,10 @@ function compStretches{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
 
 end # compStretches
 
+"""Compute the stretched of every edge in `mat` with respect to the tree `tree`.
+Returns the answer as a sparse matrix with the same nonzero structure as `mat`.
+Assumes that `mat` is symmetric.
+`tree` should be the adjacency matrix of a spanning tree."""
 function compStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
 
     t, depth = matToTreeDepth(tree)
@@ -333,6 +411,86 @@ function compStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC
     return stretches
     
 end # compStretches
+
+
+"""Compute the vector of depths in a tree that is in DFS order,
+*with the root at the first position, and the leaves at the end*
+"""
+function treeDepthDFS{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti})
+    n = tree.n
+
+    depth = zeros(Tv,n)
+    root = 1
+    kids = tree.rowval[tree.colptr[root]:(tree.colptr[root+1]-1)]
+    wts =  tree.nzval[tree.colptr[root]:(tree.colptr[root+1]-1)]    
+    depth[kids] = 1./wts
+
+    for v in 2:n
+
+        for ind in (tree.colptr[v]+1):(tree.colptr[v+1]-1)
+            kid = tree.rowval[ind]
+            depth[kid] = depth[v] + 1/tree.nzval[ind]
+        end
+    end
+
+    return depth
+end
+
+
+"""Compute the stretched of every edge in `mat` with respect to the tree `tree`.
+Returns the answer as a sparse matrix with the same nonzero structure as `mat`.
+Assumes that `mat` is symmetric.
+`tree` should be the adjacency matrix of a spanning tree, 
+*ordered by DFS so that every parent comes before its children in the order*"""
+function compStretchesDFS{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
+
+
+    n = size(tree,1)
+    su = IntDisjointSets(n)
+
+    ancestor = collect(1:n)
+    answer = zeros(Tv,nnz(mat))
+    seen = zeros(Bool, n)
+
+    depth = treeDepthDFS(tree)
+    
+    # traverse nodes from leaves back to root
+    for v in n:-1:1
+
+        if v > 1
+            par = tree.rowval[tree.colptr[v]]
+        else
+            par = 1
+        end
+
+        # just for debugging
+        if seen[par]
+            error("saw parent!")
+        end
+
+        seen[v] = true
+
+        for ind in mat.colptr[v]:(mat.colptr[v+1]-1)
+            w = mat.rowval[ind]
+            if seen[w]
+                answer[ind] = mat.nzval[ind]*(depth[v] + depth[w] - 2*depth[ancestor[DataStructures.find_root(su,w)]])
+            end # can fill u-v query
+        end # over queries
+
+        DataStructures.union!(su, par, v)
+        
+        ancestor[DataStructures.find_root(su, par)] = par
+        
+
+    end # for v
+
+    stretches = copy(mat)
+    stretches.nzval = answer
+    stretches = stretches + stretches'
+
+    return stretches
+    
+end # compStretchesDFS
 
 
 
