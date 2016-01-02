@@ -12,6 +12,10 @@ import Laplacians.intHeapAdd!, Laplacians.intHeapPop!
 LEX_DEBUG = false # debug flag for the lex module
 LEX_EPS = 1e-12 # default error tolerance
 
+function setLexDebugFlag(f::Bool)
+  global LEX_DEBUG = f
+end
+
 #=
 Simulate IterLex on Uniformly Weighted Graphs
 
@@ -475,8 +479,11 @@ function StarSteepestPath(T, v, d)
     error("The dimensions of T, v, and d do not match!")
   end
 
-  if (numT <= 1)
-    error("Less than two terminals in the star graph, cannot process!")
+  if (numT < 1)
+    error("No terminal in the star graph, cannot process!")
+  end
+  if (numT == 1)
+    return (T[1], T[1])
   end
   if (numT == 2)
     return (v[1] > v[2])? (T[1],T[2]) : (T[2], T[1])
@@ -561,7 +568,7 @@ function VertexSteepestPath(A, cpnts, isTerm, val, x)
       end
     end
     if (LEX_DEBUG)
-      println(x, "filter = ", find(filter))
+      println(x, "; filter = ", find(filter))
     end
 
     t1, t2 = StarSteepestPath(find(filter), val[filter], d[filter])
@@ -597,9 +604,12 @@ function gradOfPath(A, isTerm, val, path)
 end # gradOfPath
 
 function SteepestPath(A, cpnts, isTerm, val, vert=collect(1:n))
+
   n = A.n
 
-  #randomly pick an edge (x1, x2), and a vertex x3
+  # do the following in each component, recurse at the same time
+
+  # randomly pick an edge (x1, x2), and a vertex x3
   ind = rand(1:A.colptr[end]-1)
   x1 = findfirst(x -> x > ind, A.colptr) - 1
   x2 = A.rowval[ind]
@@ -607,7 +617,6 @@ function SteepestPath(A, cpnts, isTerm, val, vert=collect(1:n))
 
   maxPath = VertexSteepestPath(A, cpnts, isTerm, val, x1)
   if (LEX_DEBUG)
-    println(full(A))
     println(isTerm)
   end
   if (LEX_DEBUG)
@@ -738,19 +747,14 @@ function CompLexMin(A, isTerm, initVal)
   # we keep going until every vertex has an assignment
   while (findfirst(visited, false) != 0)
     # remove terminal to terminal edges
-    terms = find(visited)
-
-    for u in terms
-      for v in terms
-        B[u,v] = 0.0
-        B[v,u] = 0.0
-      end
-    end
+    removeTerm2TermEdges!(B, visited, val)
 
     cpnts = components(B)
     p = SteepestPath(B, cpnts, visited, val)
+
     # visited will change here:
     fixPath!(B, visited, val, p)
+
     if (LEX_DEBUG)
       print("[CompLexMin] found steepest path: ")
       println(p')
