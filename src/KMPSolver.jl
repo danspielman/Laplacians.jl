@@ -3,6 +3,24 @@
 An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
 =#
 
+
+type IJVS
+    i::Array{Int64,1}
+    j::Array{Int64,1}
+    v::Array{Float64,1}  # wt of edge
+    s::Array{Float64,1}  # stretch of edge
+end
+
+
+type KMPparams
+    frac::Float64  # fraction to decrease at each level
+    iters::Int64   # iters of PCG to apply between levels
+    treeScale::Float64 # scale tree by treeScale*log_2 (n) * aveStretch
+    n0::Int64 # the number of edges at which to go direct
+end
+
+defaultKMPparams = KMPparams(1/10, 8, 2, 200)
+
 immutable elimLeafNode
     nodeid::Int64
     parent::Int64
@@ -67,6 +85,8 @@ function elimDeg12(t, marked)
 
     # make sure root is not marked
     marked[1] = 0
+
+    n = size(t,1)
 
     deg = Array{Int64}(n)
     for v in 1:n
@@ -185,37 +205,56 @@ function backSolve(x, y, elims1, elims2)
 
 end
 
-type IJVS
-    i::Array{Int64,1}
-    j::Array{Int64,1}
-    v::Array{Float64,1}  # wt of edge
-    s::Array{Float64,1}  # stretch of edge
-end
 
 
-type KMPparams
-    frac::Float64  # fraction to decrease at each level
-    iters::Int64   # iters of PCG to apply between levels
-    treeScale::Float64 # scale tree by treeScale*log_2 (n) * aveStretch
-    n0::Int64 # the number of edges at which to go direct
-    targetStretch::Float64
-end
-
-defaultKMPparams(targetStretch) = KMPparams(1/10, 8, 2, 200, targetStretch)
-
-
-function KMPLapPrecon(a, t=akpw(a))
+function KMPLapSolver(a; tree=akpw(a), tol::Real=1e-6, maxits::Integer=100,  params::KMPparams=defaultKMPparams)
     n = size(a,1);
 
-    rest = a-t;
+    ord = Laplacians.dfsOrder(t)
 
-    st = compStretches(t,rest);
+    # these lines could be MUCH faster
+    aord = a[ord,ord]
+    tord = tree[ord,ord]
+    
+    la = lap(aord)
+
+    fsub = KMPLapPrecon(aord, tord, params=params)
+
+#    f = function(b; tol::Real=tol, maxits::Integer=maxits)
+    f = function(b)
+        bord = b[ord]
+        
+        xord = pcg(la, bord, fsub, tol=tol, maxits=maxits)
+
+        x = zeros(n)
+        x[ord] = xord
+        x = x - mean(x)
+    end
+
+    return f
+
+end
+
+
+
+function KMPLapPrecon(a, t=akpw(a), params::KMPparams=defaultKMPparams)
+    n = size(a,1);
+
+    ord = Laplacians.dfsOrder(t)
+
+    # these lines could be MUCH faster
+    aord = a[ord,ord]
+    tord = t[ord,ord]
+    
+    rest = aord-tord;
+
+    st = compStretches(tord,rest);
     aveStretch = sum(st)/nnz(rest)
 
-    targetStretch = 1/(2*log(n)/log(2))
+    targetStretch = 1/(params.treeScale*log(n)/log(2))
 
     fac = aveStretch/targetStretch
-    tree = fac*t;
+    tree = fac*tord;
 
     (ai,aj,av) = findnz(triu(rest))
     (si,sj,sv) = findnz(triu(st))
@@ -223,18 +262,28 @@ function KMPLapPrecon(a, t=akpw(a))
 
     ijvs = IJVS(ai,aj,av,sv)
 
-    params = defaultKMPparams(targetStretch)
-
-    f = KMPLapPreconSub(tree, ijvs, 0, params)
+    fsub = KMPLapPreconSub(tree, ijvs, targetStretch, 0, params)
     
+    f = function(b)
+        bord = b[ord]
+        xord = fsub(bord)
+        x = zeros(n)
+        x[ord] = xord
+        x = x - mean(x)
+    end
+
+    return f
 end
 
 
-function KMPLapPreconSub(tree, ijvs::IJVS, level::Int64, params::KMPparams)
-    @show m = size(ijvs.i,1)
-    @show n = size(tree,1)
+function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::KMPparams)
 
-#    println(m , ", " , n)
+
+    m = size(ijvs.i,1)
+    n = size(tree,1)
+
+    println("level : ", level)
+    println(m , ", " , n)
 
     # if is nothing in ijvs
     if m == 0
@@ -253,7 +302,7 @@ function KMPLapPreconSub(tree, ijvs::IJVS, level::Int64, params::KMPparams)
         
     else
 
-        ijvs1 = stretchSample(ijvs,targetStretch,frac1)
+        ijvs1 = stretchSample(ijvs,targetStretch,params.frac)
 
         marked = ones(Int64,n)
         marked[ijvs1.i] = 0
@@ -266,9 +315,9 @@ function KMPLapPreconSub(tree, ijvs::IJVS, level::Int64, params::KMPparams)
         ijvs1.i = map[ijvs1.i]
         ijvs1.j = map[ijvs1.j]
 
-        fsub = KMPLapPreconSub(subtree, ijvs1, level+1, params)
-        
-        f = function(b)
+        fsub = KMPLapPreconSub(subtree, ijvs1, targetStretch, level+1, params)
+
+        f1 = function(b)
             b = b - mean(b)
             y = forwardSolve(b, elims1, elims2)
             ys = y[ind]
@@ -278,9 +327,11 @@ function KMPLapPreconSub(tree, ijvs::IJVS, level::Int64, params::KMPparams)
             x[ind] = xs
 
             backSolve(x, y, elims1, elims2)
+            x = x - mean(x)
             return x
         end
         
+        f(b) = pcg(la, b, f1, tol=0, maxits=params.iters)
 
     end
     return f
@@ -303,7 +354,7 @@ function stretchSample(ijvs::IJVS,stretchTarget::Float64,frac::Float64)
     sampv = Array{Float64}(0)
     samps = Array{Float64}(0)
 
-    @show m = size(ijvs.i,1)
+    m = size(ijvs.i,1)
 
     stot = sum(ijvs.s)
 

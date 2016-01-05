@@ -242,6 +242,32 @@ function testAtSize(n, results; frac1=1/3, frac2 = 1/15)
     
 end
 
+# makes the spine heavy graph, to test out the preconditioner
+function makeHeavy(a; t=akpw(a),  params::KMPparams=defaultKMPparams)
+   n = size(a,1);
+
+    ord = Laplacians.dfsOrder(t)
+
+    aord = a[ord,ord]
+    tord = t[ord,ord]
+
+    rest = aord-tord;
+
+    st = compStretches(tord,rest);
+    aveStretch = sum(st)/nnz(rest)
+
+    targetStretch = 1/(params.treeScale*log(n)/log(2))
+
+    fac = aveStretch/targetStretch
+    tree = fac*t;
+
+    heavy = rest + tree;
+
+    return heavy
+end
+
+
+
 function vecstats(s)
     println("length : ", size(s,1), ", min : ", minimum(s), ", mean : ", mean(s), ", max : ", maximum(s), ", sum : ", sum(s))
 end
