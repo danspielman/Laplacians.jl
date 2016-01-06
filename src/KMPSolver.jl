@@ -290,7 +290,7 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
 
     # if is nothing in ijvs
     if m == 0
-        la = lap(rest + rest' + tree)
+        la = lap(tree)
         return lapWrapSolver(cholfact, la)
     end
         
