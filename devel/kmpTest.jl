@@ -271,3 +271,48 @@ end
 function vecstats(s)
     println("length : ", size(s,1), ", min : ", minimum(s), ", mean : ", mean(s), ", max : ", maximum(s), ", sum : ", sum(s))
 end
+
+
+function manyRuns(n,numruns,pList)
+    tot = zeros(length(pList))
+    for it in 1:numruns
+        a = chimera(n,n+it)
+        b = randn(n)
+        b = b - mean(b)
+        for i in 1:length(pList)
+            fsub =  KMPLapPrecon(a, akpw(a), pList[i])
+            tic()
+            xh = fsub(b)
+            tot[i] += toq()
+        end
+
+    end
+
+            
+    for i in 1:length(pList)
+        println(string(pList[i]), " : ", tot[i])
+    end
+
+    return tot
+end
+
+function manyRunsW(n,numruns,pList)
+    tot = zeros(length(pList))
+    for it in 1:numruns
+        a = wtedChimera(n,n+it)
+        b = randn(n)
+        b = b - mean(b)
+        for i in 1:length(pList)
+            fsub =  KMPLapPrecon(a, akpw(a), pList[i])
+            tic()
+            xh = fsub(b)
+            tot[i] += toq()
+        end
+        
+    end
+    
+    for i in 1:length(pList)
+        println(string(pList[i]), " : ", tot[i])
+    end
+    return tot
+end

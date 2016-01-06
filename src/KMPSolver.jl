@@ -3,6 +3,7 @@
 An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
 =#
 
+global KMP_LOGGING=false
 
 type IJVS
     i::Array{Int64,1}
@@ -282,8 +283,10 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
     m = size(ijvs.i,1)
     n = size(tree,1)
 
-    println("level : ", level)
-    println(m , ", " , n)
+    if KMP_LOGGING
+        println("level : ", level)
+        println(m , ", " , n)
+    end
 
     # if is nothing in ijvs
     if m == 0
