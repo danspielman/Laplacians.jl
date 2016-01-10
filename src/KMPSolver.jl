@@ -4,6 +4,10 @@ An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
 =#
 
 global KMP_LOGGING=false
+global KMP_SAVEMATS=false
+
+global KMP_MATS=[]
+global KMP_FS=[]
 
 type IJVS
     i::Array{Int64,1}
@@ -206,12 +210,19 @@ function backSolve(x, y, elims1, elims2)
 
 end
 
+function subMean(x::Array{Float64,1})
+    n = size(x,1)
+    mn = mean(x)
+    for i in 1:n,
+        x[i] = x[i] - mn
+    end
+end
 
 
 function KMPLapSolver(a; tree=akpw(a), tol::Real=1e-6, maxits::Integer=100,  params::KMPparams=defaultKMPparams)
     n = size(a,1);
 
-    ord = Laplacians.dfsOrder(t)
+    ord::Array{Int64,1} = Laplacians.dfsOrder(tree)
 
     # these lines could be MUCH faster
     aord = a[ord,ord]
@@ -219,73 +230,79 @@ function KMPLapSolver(a; tree=akpw(a), tol::Real=1e-6, maxits::Integer=100,  par
     
     la = lap(aord)
 
-    fsub = KMPLapPrecon(aord, tord, params=params)
 
-#    f = function(b; tol::Real=tol, maxits::Integer=maxits)
-    f = function(b)
+    if KMP_SAVEMATS
+        KMP_MATS = []
+        push!(KMP_MATS,la)
+    end
+
+
+    fsub = KMPLapPrecon(aord, tord, params)
+
+#    f = function(b::Array{Float64,1}; tol::Real=tol, maxits::Integer=maxits)
+    f = function(b::Array{Float64,1})
         bord = b[ord]
         
         xord = pcg(la, bord, fsub, tol=tol, maxits=maxits)
 
-        x = zeros(n)
+        x = zeros(Float64,n)
         x[ord] = xord
-        x = x - mean(x)
+        subMean(x) # x = x - mean(x)
+        return x
     end
 
+    if KMP_SAVEMATS
+        KMP_FS = []
+        push!(KMP_FS,f)
+    end
+
+        
     return f
 
 end
 
 
 
-function KMPLapPrecon(a, t=akpw(a), params::KMPparams=defaultKMPparams)
+function KMPLapPrecon(a, t, params)
     n = size(a,1);
 
-    ord = Laplacians.dfsOrder(t)
+    rest = a-t;
 
-    # these lines could be MUCH faster
-    aord = a[ord,ord]
-    tord = t[ord,ord]
-    
-    rest = aord-tord;
-
-    st = compStretches(tord,rest);
+    st = compStretches(t,rest);
     aveStretch = sum(st)/nnz(rest)
 
     targetStretch = 1/(params.treeScale*log(n)/log(2))
 
     fac = aveStretch/targetStretch
-    tree = fac*tord;
+    tree = fac*t;
 
+    if KMP_LOGGING
+        println("aveStretch : ", aveStretch, " fac : ", fac)
+    end
+    
     (ai,aj,av) = findnz(triu(rest))
     (si,sj,sv) = findnz(triu(st))
     sv = sv ./ fac
 
     ijvs = IJVS(ai,aj,av,sv)
 
-    fsub = KMPLapPreconSub(tree, ijvs, targetStretch, 0, params)
+    f = KMPLapPreconSub(tree, ijvs, targetStretch, 0, params)
     
-    f = function(b)
-        bord = b[ord]
-        xord = fsub(bord)
-        x = zeros(n)
-        x[ord] = xord
-        x = x - mean(x)
-    end
-
     return f
 end
 
 
 function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::KMPparams)
 
+    # problem: are forming la before sampling.  should be other way around, at least for top level!
+    # that is, we are constructing Heavy, and I don't want to!
 
     m = size(ijvs.i,1)
     n = size(tree,1)
 
     if KMP_LOGGING
         println("level : ", level)
-        println(m , ", " , n)
+        println("rest : ", m , ", dim : " , n)
     end
 
     # if is nothing in ijvs
@@ -293,50 +310,71 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
         la = lap(tree)
         return lapWrapSolver(cholfact, la)
     end
-        
-    # build laplacian
-    rest = sparse(ijvs.i,ijvs.j,ijvs.v,n,n)
-    la = lap(rest + rest' + tree)
 
-    if (m <= params.n0)
+
+    ijvs1 = stretchSample(ijvs,targetStretch,params.frac)
+    if KMP_LOGGING
+        println("Sample by ", params.frac, ". From : ", length(ijvs.i), " to : ", length(ijvs1.i));
+    end
+
+
+
+    
+
+    if (length(ijvs1.i) <= params.n0)
 
         # solve directly
+
+        rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
+        la = lap(rest + rest' + tree)
+
         f = lapWrapSolver(cholfact, la)
         
     else
-
-        ijvs1 = stretchSample(ijvs,targetStretch,params.frac)
 
         marked = ones(Int64,n)
         marked[ijvs1.i] = 0
         marked[ijvs1.j] = 0
 
-        elims1, elims2, ind, subtree = elimDeg12(tree, marked)
+        elims1, elims2, ind::Array{Int64,1}, subtree = elimDeg12(tree, marked)
 
         map = zeros(Int64,n)
-        map[ind] = collect(1:length(ind))
+
+        n1 = length(ind)
+        
+        map[ind] = collect(1:n1)
         ijvs1.i = map[ijvs1.i]
         ijvs1.j = map[ijvs1.j]
 
+        rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n1,n1)
+        la1 = lap(rest + rest' + subtree)
+
         fsub = KMPLapPreconSub(subtree, ijvs1, targetStretch, level+1, params)
 
-        f1 = function(b)
-            b = b - mean(b)
+        f = function(b::Array{Float64,1})
+            subMean(b) # b = b - mean(b)
+
             y = forwardSolve(b, elims1, elims2)
             ys = y[ind]
-            xs = fsub(ys)
+
+            xs = pcg(la1, ys, fsub, tol=0, maxits=params.iters)
             
-            x = zeros(n)
+            x = zeros(Float64,n)
             x[ind] = xs
 
             backSolve(x, y, elims1, elims2)
-            x = x - mean(x)
+            subMean(x) # x = x - mean(x)
+
             return x
         end
         
-        f(b) = pcg(la, b, f1, tol=0, maxits=params.iters)
 
     end
+
+    if KMP_SAVEMATS
+        push!(KMP_FS,f)
+    end
+
     return f
 
     

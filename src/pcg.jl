@@ -7,6 +7,8 @@ Contributors:
 
 =#
 
+global KMP_LOGGING=false
+
 
 #=
 """
@@ -175,9 +177,11 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
     p = copy(z)
 
     rho = dot(r, z) # BLAS.dot does not seem faster
-    
+
+    itcnt = 0
     for iter in 1:maxits
-    
+        itcnt = itcnt+1
+        
         q = mat*p
 
         al = rho/dot(p, q)
@@ -210,6 +214,11 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
 
        
       end
+    
+    if KMP_LOGGING
+        println("PCG finished after ", itcnt, " iterations")
+    end
+
     return x
 end
 
