@@ -7,7 +7,11 @@ Contributors:
 
 =#
 
-global KMP_LOGGING=false
+# KMP_LOGGING=false
+# KMP_PCGITERS=0
+
+# export KMP_LOGGING
+# export KMP_PCGITERS
 
 
 #=
@@ -214,11 +218,17 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
 
        
       end
-    
+
+    #=
     if KMP_LOGGING
-        println("PCG finished after ", itcnt, " iterations")
+        KMP_PCGITERS = itcnt
+        println("ITERS : ", itcnt)
     end
 
+    println(KMP_LOGGING)
+    println("iters : ", itcnt)
+    =#
+    
     return x
 end
 
