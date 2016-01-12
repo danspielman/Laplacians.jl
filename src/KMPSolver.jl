@@ -222,6 +222,16 @@ end
 function KMPLapSolver(a; tree=akpw(a), tol::Real=1e-6, maxits::Integer=100,  params::KMPparams=defaultKMPparams)
     n = size(a,1);
 
+    # if for some reason the graph is a tree, this will fail
+    # because the stretches will sum to zero
+    # so, default to a direct method
+
+    if (nnz(tree) == nnz(a))
+        return lapWrapSolver(cholfact, lap(a))
+    end
+
+
+
     ord::Array{Int64,1} = Laplacians.dfsOrder(tree)
 
     # these lines could be MUCH faster
