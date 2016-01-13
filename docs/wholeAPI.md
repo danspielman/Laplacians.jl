@@ -6,7 +6,7 @@ Generate a random graph on n vertices with m edges. The actual number of edges w
 ErdosRenyi(n::Integer, m::Integer)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:280
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:337
 
 
 ### ErdosRenyiCluster
@@ -17,7 +17,7 @@ Generate an ER graph with average degree k, and then return the largest componen
 ErdosRenyiCluster(n::Integer, k::Integer)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:294
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:351
 
 
 ### ErdosRenyiClusterFix
@@ -28,7 +28,7 @@ Like an Erdos-Renyi cluster, but add back a tree so it has n vertices
 ErdosRenyiClusterFix(n::Integer, k::Integer)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:307
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:364
 
 
 ### Laplacians
@@ -57,6 +57,63 @@ kidsPtr  :: Array{Tind,1}
 ```
 
 
+### akpw
+This is a wrapper for akpw!. It's slower, but won't modify the original graph. See akpw! documentation for more details.
+
+
+```julia
+akpw(origMat::SparseMatrixCSC{Tv,Ti<:Integer})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/akpwWeighted.jl:818
+
+
+### akpw!
+Constructs a low stretch tree using the Alon, Karp, Peleg, West algorithm. This version (akpw! instead of akpw) modifies the graph slightly changing the edges weights, then changing them back, which may lead to floating point imprecisions. akpw! is faster (about 10-20%), but akpw doesn't have float imprecisions.
+
+The function has a few options:
+
+kind: default is :max, which regards each edge weight as the inverse of its length (just like kruskal). If this is   set to anything else (e.g. :min), it will regard edge weight as length
+
+randomClusters: default is false. This means the partition function searches for the beginning of the next cluster   in node order, rather than randomly choosing nodes. If this is set to false, it will   randomly choose the next node. This slows down akpw, but may produce better stretch.
+
+metisClustering: default is false. If this is set to false, the graph will be partitioned   each time by metis, rather than by the akpw partitioning method.
+
+shuffleClusters: default is true. This preserves the "reshuffleClusters" method after each each graph is   partitioned into clusters. If set to false, the function will skip this step. May be faster   but have worse stretch.
+
+exponentialX: default is true, where the funciton exp(sqrt(log(nVertices) * log(log(nVertices)))) is used for X.   If set fo false, the function log(nVertices+1)/log(2) will be used for X instead. 
+
+EXAMPLE:
+
+[2, 1]  =  0.631273 [3, 1]  =  0.40103 [1, 2]  =  0.631273 [4, 2]  =  0.147018 [1, 3]  =  0.40103 [4, 3]  =  0.772661 [2, 4]  =  0.147018 [3, 4]  =  0.772661
+
+```
+  |
+  |
+  V
+```
+
+[2, 1]  =  0.631273 [3, 1]  =  0.40103 [1, 2]  =  0.631273 [1, 3]  =  0.40103 [4, 3]  =  0.772661 [3, 4]  =  0.772661
+
+
+```julia
+akpw!(mat::SparseMatrixCSC{Tv,Ti<:Integer})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/akpwWeighted.jl:733
+
+
+### apr
+computes an approximate page rank vector from a starting set s, an alpha and an epsilon   algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's notes
+
+
+```julia
+apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/localClustering.jl:432
+
+
 ### augTreePrecon
 This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.
 
@@ -65,7 +122,7 @@ This is an augmented spanning tree preconditioner for diagonally dominant linear
 augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/solvers.jl:188
+ at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:188
 
 
 ### augTreeSolver
@@ -76,7 +133,7 @@ This is the solver that calls augTreePrecon
 augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/solvers.jl:210
+ at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:210
 
 
 ### augmentTree
@@ -87,18 +144,21 @@ Takes as input a tree and an adjacency matrix of a graph. It then computes the s
 augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/solvers.jl:138
+ at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:138
 
 
 ### backIndices
+same as the above, but now the graph is in adjacency list form 
+
 computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph 
 
 
 ```julia
 backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
+backIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:22
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:35
 
 
 ### biggestComp
@@ -109,7 +169,7 @@ Return the biggest component in a graph, as a graph
 biggestComp(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:154
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:159
 
 
 ### cg
@@ -120,7 +180,7 @@ cg(mat, b::Array{Float32,1})
 cg(mat, b)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/pcg.jl:29
+ at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:29
 
 
 ### chimera
@@ -134,7 +194,18 @@ chimera(n::Integer)
 chimera(n::Integer, k::Integer)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:378
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:443
+
+
+### compConductance
+returns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)
+
+
+```julia
+compConductance{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:136
 
 
 ### compDepth
@@ -143,17 +214,19 @@ chimera(n::Integer, k::Integer)
 compDepth{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/treeAlgs.jl:249
+ at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:311
 
 
 ### compStretches
+Compute the stretched of every edge in `mat` with respect to the tree `tree`. Returns the answer as a sparse matrix with the same nonzero structure as `mat`. Assumes that `mat` is symmetric. `tree` should be the adjacency matrix of a spanning tree.
+
 
 ```julia
 compStretches{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
 compStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/treeAlgs.jl:319
+ at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:393
 
 
 ### completeBinaryTree
@@ -164,7 +237,7 @@ The complete binary tree on n vertices
 completeBinaryTree(n::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:82
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:139
 
 
 ### completeGraph
@@ -175,7 +248,7 @@ The complete graph
 completeGraph(n::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:17
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:17
 
 
 ### components
@@ -203,7 +276,7 @@ c = components(gr)
 components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:65
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:65
 
 
 ### deg
@@ -212,7 +285,7 @@ components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 deg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:11
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:11
 
 
 ### diagmat
@@ -223,7 +296,27 @@ returns the diagonal matrix(as a sparse matrix) of a graph
 diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:194
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:194
+
+
+### dirEdgeVertexMat
+The signed edge-vertex adjacency matrix
+
+
+```julia
+dirEdgeVertexMat(A::SparseMatrixCSC{Tv,Ti<:Integer})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/toposort.jl:49
+
+
+### dumb
+
+```julia
+dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/cutHeuristics.jl:102
 
 
 ### edgeVertexMat
@@ -234,7 +327,7 @@ The signed edge-vertex adjacency matrix
 edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:56
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:56
 
 
 ### findEntries
@@ -245,7 +338,7 @@ similar to findnz, but also returns 0 entries that have an edge in the sparse ma
 findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:60
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:114
 
 
 ### floatGraph
@@ -256,7 +349,7 @@ Convert the nonzero entries in a graph to Float64
 floatGraph(a::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:6
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:6
 
 
 ### generalizedNecklace
@@ -267,7 +360,7 @@ Constructs a generalized necklace graph starting with two graphs A and H. The re
 generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti<:Integer}, k::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:214
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:214
 
 
 ### generalizedRing
@@ -282,7 +375,29 @@ generalizedRing(17, [1 5])
 generalizedRing(n::Int64, gens)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:38
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:38
+
+
+### getObound
+computes the number of edges leaving s 
+
+
+```julia
+getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:167
+
+
+### getVolume
+computes the volume of subset s in an unweighted graph G 
+
+
+```julia
+getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:149
 
 
 ### grid2
@@ -294,7 +409,7 @@ grid2(n::Int64)
 grid2(n::Int64, m::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:102
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:159
 
 
 ### grid2coords
@@ -306,7 +421,7 @@ grid2coords(n::Int64, m::Int64)
 grid2coords(n)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:106
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:163
 
 
 ### grownGraph
@@ -317,7 +432,7 @@ Create a graph on n vertices. For each vertex, give it k edges to randomly chose
 grownGraph(n::Int64, k::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:145
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:202
 
 
 ### grownGraphD
@@ -328,7 +443,7 @@ Like a grownGraph, but it forces the edges to all be distinct. It starts out wit
 grownGraphD(n::Int64, k::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:177
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:234
 
 
 ### hyperCube
@@ -339,7 +454,7 @@ The d dimensional hypercube.  Has 2^d vertices
 hyperCube(d::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:68
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:125
 
 
 ### isConnected
@@ -350,7 +465,7 @@ Returns true if graph is connected.  Calls components.
 isConnected(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:112
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:113
 
 
 ### joinGraphs
@@ -361,7 +476,7 @@ create a disjoint union of graphs a and b,  and then put k random edges between 
 joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:100
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:100
 
 
 ### kruskal
@@ -372,7 +487,7 @@ Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree. Set ki
 kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:391
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:407
 
 
 ### lap
@@ -383,7 +498,7 @@ Create a Laplacian matrix from an adjacency matrix. We might want to do this dif
 lap(a)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:12
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:12
 
 
 ### lapChol
@@ -399,7 +514,22 @@ lapWrapSolver(solver, la::AbstractArray{T,N})
 lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/solvers.jl:108
+ at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:108
+
+
+### localImprove
+localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)
+
+The LocalImprove function, from the Orrechia-Zhu paper 
+
+G is the given graph, A is the initial set    epsSigma is a measure of the quality of the returning set (the smaller the better)   err is the numerical error considered throughout the algorithm   maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm
+
+
+```julia
+localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/localClustering.jl:16
 
 
 ### mapweight
@@ -414,7 +544,7 @@ b = mapweight(a, x->rand(1)[1])
 mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:29
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:29
 
 
 ### matToTree
@@ -424,7 +554,7 @@ matToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 matToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/treeAlgs.jl:32
+ at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:32
 
 
 ### matToTreeDepth
@@ -434,18 +564,18 @@ matToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 matToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/treeAlgs.jl:98
+ at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:98
 
 
 ### maxflow
-implementation of Dinic's algorithm. computes the maximum flow and min-cut in G between s and t. we consider the adjacency matrix to be the capacity matrix 
+implementation of Dinic's algorithm. computes the maximum flow and min-cut in G between s and t    we consider the adjacency matrix to be the capacity matrix 
 
 
 ```julia
 maxflow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Int64, t::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/flow.jl:4
+ at /Users/spielman/.julia/v0.4/Laplacians/src/flow.jl:7
 
 
 ### nbri
@@ -454,7 +584,7 @@ maxflow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Int64, t::Int64)
 nbri{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:12
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:12
 
 
 ### nbrs
@@ -463,7 +593,16 @@ nbri{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti)
 nbrs{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:14
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:14
+
+
+### pathFromParents
+
+```julia
+pathFromParents(parents, y)
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:215
 
 
 ### pathGraph
@@ -474,7 +613,7 @@ The path graph on n vertices
 pathGraph(n::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:8
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:8
 
 
 ### pcg
@@ -485,7 +624,7 @@ pcg(mat, b::Array{Float32,1}, pre)
 pcg(mat, b, pre)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/pcg.jl:42
+ at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:42
 
 
 ### plotGraph
@@ -497,7 +636,7 @@ plotGraph(gr, x, y)
 plotGraph(gr, x, y, color)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:118
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:118
 
 
 ### prefAttach
@@ -508,7 +647,7 @@ A preferential attachment graph in which each vertex has k edges to those that c
 prefAttach(n::Int64, k::Int64, p::Float64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:201
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:258
 
 
 ### prim
@@ -517,7 +656,24 @@ prefAttach(n::Int64, k::Int64, p::Float64)
 prim(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:422
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:438
+
+
+### prn
+prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
+
+The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper
+
+s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]
+
+phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality   b is used to handle precision throughout the algorithm - the higher the b, the smaller the eps
+
+
+```julia
+prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/localClustering.jl:366
 
 
 ### productGraph
@@ -528,7 +684,7 @@ The Cartesian product of two graphs.  When applied to two paths, it gives a grid
 productGraph(a0::SparseMatrixCSC{Tv,Ti<:Integer}, a1::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:47
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:47
 
 
 ### pureRandomGraph
@@ -539,7 +695,7 @@ Generate a random graph with n vertices from one of our natural distributions
 pureRandomGraph(n::Integer)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:322
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:379
 
 
 ### randGenRing
@@ -550,7 +706,7 @@ A random generalized ring graph of degree k. Gens always contains 1, and the oth
 randGenRing(n::Int64, k::Integer)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:61
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:62
 
 
 ### randMatching
@@ -561,7 +717,7 @@ A random matching on n vertices
 randMatching(n::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:117
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:174
 
 
 ### randRegular
@@ -572,7 +728,7 @@ A sum of k random matchings on n vertices
 randRegular(n::Int64, k::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:130
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:187
 
 
 ### randWeight
@@ -583,7 +739,7 @@ Applies one of a number of random weighting schemes to the edges of the graph
 randWeight(a)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:449
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:520
 
 
 ### randishKruskal
@@ -592,7 +748,7 @@ randWeight(a)
 randishKruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/randTrees.jl:10
+ at /Users/spielman/.julia/v0.4/Laplacians/src/randTrees.jl:10
 
 
 ### randishPrim
@@ -601,7 +757,7 @@ randishKruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 randishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/randTrees.jl:47
+ at /Users/spielman/.julia/v0.4/Laplacians/src/randTrees.jl:47
 
 
 ### randperm
@@ -631,9 +787,10 @@ to read a simple edge list, each line being an (i, j) pair
 
 ```julia
 readIJ(filename::AbstractString)
+readIJ(filename::AbstractString, sep)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/IO.jl:4
+ at /Users/spielman/.julia/v0.4/Laplacians/src/IO.jl:4
 
 
 ### readIJV
@@ -649,7 +806,22 @@ to read a simple edge list, each line being an (i, j, v) pair. The parens should
 readIJV(filename::AbstractString)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/IO.jl:25
+ at /Users/spielman/.julia/v0.4/Laplacians/src/IO.jl:25
+
+
+### refineCut
+```
+Modifies a cluster by adding/removing vertices based on Deg_external - Deg_Internal
+Each vertex can be added in/removed only once
+Uses O(M + N) memory
+```
+
+
+```julia
+refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/cutHeuristics.jl:9
 
 
 ### ringGraph
@@ -660,16 +832,18 @@ The simple ring on n vertices
 ringGraph(n::Int64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:23
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:23
 
 
 ### setValue
+sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing 
+
 
 ```julia
 setValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:17
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:29
 
 
 ### shortIntGraph
@@ -680,7 +854,7 @@ Convert the indices in a graph to 32-bit ints.  This takes less storage, but doe
 shortIntGraph(a::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:3
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:3
 
 
 ### shortestPathTree
@@ -701,7 +875,7 @@ tr = full(shortestPathTree(sparse(a),1))
 shortestPathTree(a, start)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:223
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:239
 
 
 ### shortestPaths
@@ -715,7 +889,7 @@ shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
 shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:170
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:175
 
 
 ### spectralCoords
@@ -726,7 +900,7 @@ Computes the spectral coordinates of a graph
 spectralCoords(a)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:163
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:163
 
 
 ### spectralDrawing
@@ -737,7 +911,7 @@ Computes spectral coordinates, and then uses plotGraph to draw
 spectralDrawing(a)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:155
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:155
 
 
 ### subsampleEdges
@@ -748,7 +922,7 @@ Create a new graph from the old, but keeping edge edge with probability `p`
 subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:65
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:65
 
 
 ### tarjanStretch
@@ -757,7 +931,7 @@ subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
 tarjanStretch{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, depth::Array{Tv,1})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/treeAlgs.jl:272
+ at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:334
 
 
 ### toUnitVector
@@ -768,7 +942,16 @@ creates a unit vector of length n from a given set of integers, with weights bas
 toUnitVector(a::Array{Int64,1}, n)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:172
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:172
+
+
+### toposort
+
+```julia
+toposort{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/toposort.jl:13
 
 
 ### twoLift
@@ -781,7 +964,7 @@ twoLift(a, flip::AbstractArray{Bool,1})
 twoLift(a, k::Integer)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:88
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:88
 
 
 ### uniformWeight
@@ -792,7 +975,7 @@ Put a uniform [0,1] weight on every edge.  This is an example of how to use mapw
 uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:38
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:38
 
 
 ### uniformWeight!
@@ -803,7 +986,7 @@ Set the weight of every edge to 1
 uniformWeight!(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:42
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:42
 
 
 ### unweight
@@ -814,7 +997,7 @@ Create a new graph in that is the same as the original, but with all edge weight
 unweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphOps.jl:16
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:16
 
 
 ### vecToComps
@@ -825,8 +1008,8 @@ comps = vecToComps(c)
 
 3-element Array{Array{Int64,1},1}:
  [1,2,3,4,6,7,8]
- [5,10]         
- [9]   
+ [5,10]
+ [9]
 ```
 
 
@@ -834,7 +1017,18 @@ comps = vecToComps(c)
 vecToComps{Ti}(compvec::Array{Ti,1})
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphAlgs.jl:131
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:136
+
+
+### wdeg
+finds the weighted degree of a vertex in the graph 
+
+
+```julia
+wdeg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:19
 
 
 ### weighti
@@ -843,7 +1037,7 @@ vecToComps{Ti}(compvec::Array{Ti,1})
 weighti{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphUtils.jl:13
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:13
 
 
 ### writeIJV
@@ -862,7 +1056,7 @@ Writes the upper portion of a matrix in ijv format, one row for each edge, separ
 writeIJV(filename::AbstractString, mat)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/IO.jl:52
+ at /Users/spielman/.julia/v0.4/Laplacians/src/IO.jl:52
 
 
 ### wtedChimera
@@ -876,6 +1070,6 @@ wtedChimera(n::Integer)
 wtedChimera(n::Integer, k::Integer)
 ```
 
- at /Users/spielman/git/Laplacians.jl/src/graphGenerators.jl:514
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:585
 
 

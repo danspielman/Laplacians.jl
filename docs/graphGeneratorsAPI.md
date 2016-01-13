@@ -59,7 +59,7 @@ A random generalized ring graph of degree k. Gens always contains 1, and the oth
 randGenRing(n::Int64, k::Integer)
 ```
 
-graphGenerators.jl:61
+graphGenerators.jl:62
 
 
 
@@ -71,7 +71,7 @@ The d dimensional hypercube.  Has 2^d vertices
 hyperCube(d::Int64)
 ```
 
-graphGenerators.jl:68
+graphGenerators.jl:125
 
 
 
@@ -83,7 +83,7 @@ The complete binary tree on n vertices
 completeBinaryTree(n::Int64)
 ```
 
-graphGenerators.jl:82
+graphGenerators.jl:139
 
 
 
@@ -96,7 +96,7 @@ grid2(n::Int64)
 grid2(n::Int64, m::Int64)
 ```
 
-graphGenerators.jl:102
+graphGenerators.jl:159
 
 
 
@@ -109,7 +109,7 @@ grid2coords(n::Int64, m::Int64)
 grid2coords(n)
 ```
 
-graphGenerators.jl:106
+graphGenerators.jl:163
 
 
 
@@ -121,7 +121,7 @@ A random matching on n vertices
 randMatching(n::Int64)
 ```
 
-graphGenerators.jl:117
+graphGenerators.jl:174
 
 
 
@@ -133,7 +133,7 @@ A sum of k random matchings on n vertices
 randRegular(n::Int64, k::Int64)
 ```
 
-graphGenerators.jl:130
+graphGenerators.jl:187
 
 
 
@@ -145,7 +145,7 @@ Create a graph on n vertices. For each vertex, give it k edges to randomly chose
 grownGraph(n::Int64, k::Int64)
 ```
 
-graphGenerators.jl:145
+graphGenerators.jl:202
 
 
 
@@ -157,7 +157,7 @@ Like a grownGraph, but it forces the edges to all be distinct. It starts out wit
 grownGraphD(n::Int64, k::Int64)
 ```
 
-graphGenerators.jl:177
+graphGenerators.jl:234
 
 
 
@@ -169,7 +169,7 @@ A preferential attachment graph in which each vertex has k edges to those that c
 prefAttach(n::Int64, k::Int64, p::Float64)
 ```
 
-graphGenerators.jl:201
+graphGenerators.jl:258
 
 
 
@@ -181,7 +181,7 @@ Generate a random graph on n vertices with m edges. The actual number of edges w
 ErdosRenyi(n::Integer, m::Integer)
 ```
 
-graphGenerators.jl:280
+graphGenerators.jl:337
 
 
 
@@ -193,7 +193,7 @@ Generate an ER graph with average degree k, and then return the largest componen
 ErdosRenyiCluster(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:294
+graphGenerators.jl:351
 
 
 
@@ -205,7 +205,7 @@ Like an Erdos-Renyi cluster, but add back a tree so it has n vertices
 ErdosRenyiClusterFix(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:307
+graphGenerators.jl:364
 
 
 
@@ -217,7 +217,7 @@ Generate a random graph with n vertices from one of our natural distributions
 pureRandomGraph(n::Integer)
 ```
 
-graphGenerators.jl:322
+graphGenerators.jl:379
 
 
 
@@ -232,7 +232,7 @@ chimera(n::Integer)
 chimera(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:378
+graphGenerators.jl:443
 
 
 
@@ -244,7 +244,7 @@ Applies one of a number of random weighting schemes to the edges of the graph
 randWeight(a)
 ```
 
-graphGenerators.jl:449
+graphGenerators.jl:520
 
 
 
@@ -259,7 +259,7 @@ wtedChimera(n::Integer)
 wtedChimera(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:514
+graphGenerators.jl:585
 
 
 

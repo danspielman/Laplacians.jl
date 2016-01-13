@@ -36,7 +36,7 @@ Returns true if graph is connected.  Calls components.
 isConnected(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphAlgs.jl:112
+graphAlgs.jl:113
 
 
 
@@ -48,8 +48,8 @@ comps = vecToComps(c)
 
 3-element Array{Array{Int64,1},1}:
  [1,2,3,4,6,7,8]
- [5,10]         
- [9]   
+ [5,10]
+ [9]
 ```
 
 
@@ -57,7 +57,7 @@ comps = vecToComps(c)
 vecToComps{Ti}(compvec::Array{Ti,1})
 ```
 
-graphAlgs.jl:131
+graphAlgs.jl:136
 
 
 
@@ -69,7 +69,7 @@ Return the biggest component in a graph, as a graph
 biggestComp(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphAlgs.jl:154
+graphAlgs.jl:159
 
 
 
@@ -84,7 +84,7 @@ shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
 shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 ```
 
-graphAlgs.jl:170
+graphAlgs.jl:175
 
 
 
@@ -106,7 +106,7 @@ tr = full(shortestPathTree(sparse(a),1))
 shortestPathTree(a, start)
 ```
 
-graphAlgs.jl:223
+graphAlgs.jl:239
 
 
 
@@ -118,7 +118,7 @@ Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree. Set ki
 kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 ```
 
-graphAlgs.jl:391
+graphAlgs.jl:407
 
 
 

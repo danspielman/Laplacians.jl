@@ -5,6 +5,7 @@ to read a simple edge list, each line being an (i, j) pair
 
 ```julia
 readIJ(filename::AbstractString)
+readIJ(filename::AbstractString, sep)
 ```
 
 IO.jl:4

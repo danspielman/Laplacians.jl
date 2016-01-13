@@ -247,87 +247,87 @@
 <pre><code class="julia">randGenRing(n::Int64, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:61</p>
+<p>graphGenerators.jl:62</p>
 <h3 id="hypercube">hyperCube</h3>
 <p>The d dimensional hypercube.  Has 2^d vertices</p>
 <pre><code class="julia">hyperCube(d::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:68</p>
+<p>graphGenerators.jl:125</p>
 <h3 id="completebinarytree">completeBinaryTree</h3>
 <p>The complete binary tree on n vertices</p>
 <pre><code class="julia">completeBinaryTree(n::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:82</p>
+<p>graphGenerators.jl:139</p>
 <h3 id="grid2">grid2</h3>
 <p>An n-by-m grid graph.  iostropy is the weighting on edges in one direction.</p>
 <pre><code class="julia">grid2(n::Int64)
 grid2(n::Int64, m::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:102</p>
+<p>graphGenerators.jl:159</p>
 <h3 id="grid2coords">grid2coords</h3>
 <p>Coordinates for plotting the vertices of the n-by-m grid graph</p>
 <pre><code class="julia">grid2coords(n::Int64, m::Int64)
 grid2coords(n)
 </code></pre>
 
-<p>graphGenerators.jl:106</p>
+<p>graphGenerators.jl:163</p>
 <h3 id="randmatching">randMatching</h3>
 <p>A random matching on n vertices</p>
 <pre><code class="julia">randMatching(n::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:117</p>
+<p>graphGenerators.jl:174</p>
 <h3 id="randregular">randRegular</h3>
 <p>A sum of k random matchings on n vertices</p>
 <pre><code class="julia">randRegular(n::Int64, k::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:130</p>
+<p>graphGenerators.jl:187</p>
 <h3 id="growngraph">grownGraph</h3>
 <p>Create a graph on n vertices. For each vertex, give it k edges to randomly chosen prior vertices. This is a variety of a preferential attachment graph.    </p>
 <pre><code class="julia">grownGraph(n::Int64, k::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:145</p>
+<p>graphGenerators.jl:202</p>
 <h3 id="growngraphd">grownGraphD</h3>
 <p>Like a grownGraph, but it forces the edges to all be distinct. It starts out with a k+1 clique on the first k vertices</p>
 <pre><code class="julia">grownGraphD(n::Int64, k::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:177</p>
+<p>graphGenerators.jl:234</p>
 <h3 id="prefattach">prefAttach</h3>
 <p>A preferential attachment graph in which each vertex has k edges to those that come before.  These are chosen with probability p to be from a random vertex, and with probability 1-p to come from the endpoint of a random edge. It begins with a k-clique on the first k+1 vertices.</p>
 <pre><code class="julia">prefAttach(n::Int64, k::Int64, p::Float64)
 </code></pre>
 
-<p>graphGenerators.jl:201</p>
+<p>graphGenerators.jl:258</p>
 <h3 id="erdosrenyi">ErdosRenyi</h3>
 <p>Generate a random graph on n vertices with m edges. The actual number of edges will probably be smaller, as we sample with replacement</p>
 <pre><code class="julia">ErdosRenyi(n::Integer, m::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:280</p>
+<p>graphGenerators.jl:337</p>
 <h3 id="erdosrenyicluster">ErdosRenyiCluster</h3>
 <p>Generate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.</p>
 <pre><code class="julia">ErdosRenyiCluster(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:294</p>
+<p>graphGenerators.jl:351</p>
 <h3 id="erdosrenyiclusterfix">ErdosRenyiClusterFix</h3>
 <p>Like an Erdos-Renyi cluster, but add back a tree so it has n vertices</p>
 <pre><code class="julia">ErdosRenyiClusterFix(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:307</p>
+<p>graphGenerators.jl:364</p>
 <h3 id="purerandomgraph">pureRandomGraph</h3>
 <p>Generate a random graph with n vertices from one of our natural distributions</p>
 <pre><code class="julia">pureRandomGraph(n::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:322</p>
+<p>graphGenerators.jl:379</p>
 <h3 id="chimera">chimera</h3>
 <p>Builds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
 <p>Builds a chimeric graph on n vertices. The components come from pureRandomGraph, connected by joinGraphs, productGraph and generalizedNecklace</p>
@@ -335,13 +335,13 @@ grid2coords(n)
 chimera(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:378</p>
+<p>graphGenerators.jl:443</p>
 <h3 id="randweight">randWeight</h3>
 <p>Applies one of a number of random weighting schemes to the edges of the graph</p>
 <pre><code class="julia">randWeight(a)
 </code></pre>
 
-<p>graphGenerators.jl:449</p>
+<p>graphGenerators.jl:520</p>
 <h3 id="wtedchimera">wtedChimera</h3>
 <p>Builds the kth wted chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
 <p>Generate a chimera, and then apply a random weighting scheme</p>
@@ -349,7 +349,7 @@ chimera(n::Integer, k::Integer)
 wtedChimera(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:514</p></div>
+<p>graphGenerators.jl:585</p></div>
         </div>
 
         <footer class="col-md-12">
