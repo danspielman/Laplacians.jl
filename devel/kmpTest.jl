@@ -1,21 +1,3 @@
-immutable elimTreeNode
-    nodeid::Int64
-    parent::Int64
-    wtDeg::Float64
-end
-
-function makeElimList(t)
-    tr = matToTree(t)
-    n = size(tr.children,1)  
-    
-    elims = Array{elimTreeNode}(0)
-    for vi in n:-1:2
-        v = tr.children[vi]
-        push!(elims,elimTreeNode(v,tr.parent[v],tr.weights[vi]))
-    end
-    
-    return elims
-end
 
 function solveTree(elims,b)
     cumb = copy(b)
@@ -32,31 +14,166 @@ function solveTree(elims,b)
     
 end
 
-# Must be in DFS order
-# marked is 1 if flagged for possible elimination,
-# and set to 2 if we do eliminate it
-function elimDeg1(t, marked)
-    n = t.n
 
-    deg = Array{Int64}(n)
-    for v in 1:n
-        deg[v] = t.colptr[v+1] - t.colptr[v]
+
+function recTest1(t,b, marked)
+
+    n = length(b)
+
+    elims1 = elimDeg1(t, marked)
+
+    cumb = copy(b)
+
+    for i in 1:length(elims1)
+        cumb[elims1[i].parent] += cumb[elims1[i].nodeid]
     end
 
-    elims1 = Array{elimTreeNode}(0)
+    ind = find(marked.<2)
+    cumbs = cumb[ind]
 
-    for v in n:-1:2
+    @show sum(cumbs)
 
-        if (deg[v] == 1 && marked[v] == 1)
-            parent = t.rowval[t.colptr[v]];
-            wt = t.nzval[t.colptr[v]];
-            push!(elims1,elimTreeNode(v,parent,wt))
+    ts = t[ind,ind];
+    lts = lap(ts)
 
-            deg[parent] = deg[parent] - 1
-            marked[v] = 2
-        end
+    xs = pinv(full(lts))*cumbs
+    
+    @show norm(lts*xs-cumbs)
+
+    x = zeros(n)
+    x[ind] = xs
+    for i in length(elims1):-1:1
+        node = elims1[i].nodeid
+        x[node] = x[elims1[i].parent] + cumb[node]/elims1[i].wtDeg
     end
-    return elims1
+
+    return x
+    
+end
+
+
+function recTest12(t,b, marked)
+
+    n = length(b)
+
+    elims1, elims2, ind, subt = elimDeg12(t, marked)
+
+    @show length(elims1)
+    #@show elims2
+
+    cumb = copy(b)
+
+    for i in 1:length(elims1)
+        cumb[elims1[i].parent] += cumb[elims1[i].nodeid]
+    end
+
+    for i in 1:length(elims2)
+        wtsum = elims2[i].wt1 + elims2[i].wt2
+        cumb[elims2[i].nbr1] += cumb[elims2[i].nodeid]*elims2[i].wt1 / wtsum
+        cumb[elims2[i].nbr2] += cumb[elims2[i].nodeid]*elims2[i].wt2 / wtsum
+    end
+
+    
+    cumbs = cumb[ind]
+
+    @show sum(cumbs)
+
+    # this is not the right elim for deg2
+    
+    lts = lap(subt)
+
+    xs = pinv(full(lts))*cumbs
+    
+    @show norm(lts*xs-cumbs)
+
+    x = zeros(n)
+    x[ind] = xs
+
+    for i in length(elims2):-1:1
+        node = elims2[i].nodeid
+        wtsum = elims2[i].wt1 + elims2[i].wt2
+
+        x[node] = (elims2[i].wt1*x[elims2[i].nbr1] + elims2[i].wt2*x[elims2[i].nbr2] + cumb[node])/wtsum
+    end
+
+    
+    for i in length(elims1):-1:1
+        node = elims1[i].nodeid
+        x[node] = x[elims1[i].parent] + cumb[node]/elims1[i].wtDeg
+    end
+
+    return x
+    
+end
+
+
+function recTest12x(t,b, marked)
+
+    n = length(b)
+
+    elims1, elims2, ind, subt = elimDeg12(t, marked)
+
+    lts = lap(subt)
+    lts[1,1] = lts[1,1] + 1
+    
+    F = factorize(lts)
+
+
+    y = forwardSolve(b, elims1, elims2)
+
+    ys = y[ind]
+
+
+    xs = F \ ys
+    
+    x = zeros(n)
+    x[ind] = xs
+
+    backSolve(x, y, elims1, elims2)
+    
+    return x
+    
+end
+
+
+
+function testSampler(a; t=akpw(a), frac1=1/5)
+
+
+    n = size(a,1);
+
+    rest = a-t;
+
+    st = compStretches(t,rest);
+    aveStretch = sum(st)/nnz(rest)
+    @show aveStretch
+    
+
+    targetStretch = 1/(2*log(n)/log(2))
+
+    fac = aveStretch/targetStretch
+    heavy = rest+fac*t;
+
+    (ai,aj,av) = findnz(triu(rest))
+    (si,sj,sv) = findnz(triu(st))
+    sv = sv ./ fac
+
+    ijvs = IJVS(ai,aj,av,sv)
+
+    ijvs1 = stretchSample(ijvs,targetStretch,frac1)
+    ijvs2 = stretchSample(ijvs1,targetStretch,frac1)
+    
+    samp1 = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
+    samp1 = samp1 + samp1';
+    
+    samp2 = sparse(ijvs2.i,ijvs2.j,ijvs2.v,n,n)
+    samp2 = samp2 + samp2';
+    
+    add = speye(n)/10^6;
+    e1 = maximum(eigs(lap(heavy)+add,lap(samp1+t*fac)+add, nev=1)[1]);
+    e2 = maximum(eigs(lap(samp1+t*fac)+add,lap(samp2+t*fac)+add, nev=1)[1]);
+
+    return [e1,e2]
 end
 
 
@@ -123,4 +240,34 @@ function testAtSize(n, results; frac1=1/3, frac2 = 1/15)
     end
 
     
+end
+
+# makes the spine heavy graph, to test out the preconditioner
+function makeHeavy(a; t=akpw(a),  params::KMPparams=defaultKMPparams)
+   n = size(a,1);
+
+    ord = Laplacians.dfsOrder(t)
+
+    aord = a[ord,ord]
+    tord = t[ord,ord]
+
+    rest = aord-tord;
+
+    st = compStretches(tord,rest);
+    aveStretch = sum(st)/nnz(rest)
+
+    targetStretch = 1/(params.treeScale*log(n)/log(2))
+
+    fac = aveStretch/targetStretch
+    tree = fac*t;
+
+    heavy = rest + tree;
+
+    return heavy
+end
+
+
+
+function vecstats(s)
+    println("length : ", size(s,1), ", min : ", minimum(s), ", mean : ", mean(s), ", max : ", maximum(s), ", sum : ", sum(s))
 end
