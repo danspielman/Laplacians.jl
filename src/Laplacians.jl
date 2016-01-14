@@ -1,3 +1,5 @@
+__precompile__()
+
 """A package for graph computations related to graph Laplacians
 
 Graphs are represented by sparse adjacency matrices, etc.
