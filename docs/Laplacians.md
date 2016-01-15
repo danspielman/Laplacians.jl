@@ -5,44 +5,6 @@
 
 
 
-## Installation
-
-First, you will need Julia.
-You will also need a number of Julia packages.  
-You install these like
-
-~~~julia
-Pkg.add("PyPlot")
-Pkg.add("DataStructures")
-~~~
-
-Once these are installed, you can use Laplacians.
-Right now, Laplacians is a module, not a package.
-So, we will need to do a little more to get it started.
-In the directory where Laplacians resides, type the following:
-
-~~~julia
-push!(LOAD_PATH,"src")
-using Laplacians
-~~~
-
-Instead of adding to the load path every time you use Julia, you could put the following line in a file called .juliarc.jl that lives in your home directory:
-
-~~~julia
-push!(LOAD_PATH,"[path_to_laplacians]/Laplacians.jl/src")
-~~~
-
-In my case, the path to laplacians is `/Users/spielman/git/`.
-Then, when you want to use the module, you just need to type `using Laplacians`.
-
-You may need to install matplotlib in python before PyPlot.
-Look at this page for more information: https://github.com/stevengj/PyPlot.jl
-
-If you discover that you need any other packages, please list them above.
-
-Other recommended (but not necessary) packages are:
-
-* Optim
 
 To see if it is working, try something like this:
 

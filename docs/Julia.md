@@ -2,47 +2,6 @@
 
 # Using Julia
 
-To use the julia notebooks, you will need ipython and the IJulia package.  You should also get `jupyter`, which you should be able to install from ipython.
-To install IJulia, you type `Pkg.add("IJulia")` from Julia.
-Then, you just need to type `using IJulia` once.  This will tell jupyter about the Julia kernel.  To run Julia notebooks, you now type `jupyter notebook`.  You can select the kernel your new notebook is using.
-
-Each time you upgrade Julia (by installing verison 0.4.x+1), you should run `Pkg.build("IJulia")` so that the notebooks will be able to access the new kernel.
-
-Dan recommends installing the anaconda distribution of python.
-You will then need to install some things from that, like
-conda install jupyter (the new notebooks package)
-conda install mathjax
-conda install matplotlib
-
-This repository contains projects implemented in Julia by Dan Spielman's group.  While organizing by language is strange, we are trying it to help us learn the language.
-
-There are two projects in here so far.  One, yinsGraph, is for doing graph theory and solving Laplacian systems.  It's documentation is at [yinsGraph.md](yinsGraph.md)
-
-I would like to use the documentation pages in this root directory to discuss issues with how to get Julia to work well.  For now, I'll just ask some questions and write a little that I've figured out.  If you figure some out, please write it here.
-
-## Converting to Julia 0.4
-
-A description of the changes made in Julia 0.4 appears to be here
-[https://github.com/JuliaLang/julia/blob/release-0.4/NEWS.md]
-(https://github.com/JuliaLang/julia/blob/release-0.4/NEWS.md)
-
-The first problem you will encounter when using Julia 0.4 is that it is stingier about its load path.  It won't load something from the current directory unless it is in the load path.  You can add a directory to the load path like
-
-~~~julia
-push!(LOAD_PATH,".")
-~~~
-
-or
-
-~~~julia
-push!(LOAD_PATH,"/Users/[your_username]/git/julia/yinsGraph")
-~~~
-
-To overcome this issue, you can add the above line to the end of the julia.rc file, found in
-
-~~~julia
-/Applications/Julia-0.4.2.app/Contents/Resources/julia/etc/julia
-~~~
 
 Julia 0.4 lets you take advantage of docstrings.
 For example, `?ringGraph` produces
@@ -53,10 +12,6 @@ The simple ring on n vertices
 
 When having a multiline comment, make sure that lines don't have starting and trailing spaces.
 This will mess up the indentation when calling '?func_name'.
-
-### Small details
-
-* Julia 0.4 is trying to wean you off Matlab-like notation.  You should no longer create vectors like `[1:n]`.  Instead, you should type `collect(1:n)`
 
 ## Julia Notebooks
 To get the Julia notebooks working, I presently type `jupyter notebook`.
@@ -205,11 +160,7 @@ elapsed time: 0.015894922 seconds (80 bytes allocated)
 
 One reason that `a += b` was slow was that it seems to allocate a lot of memory.
 
-## How should Julia packages be organized?
 
-In yinsGraph, I decided to just make one big module called yinsGraph.jl.  It then includes a bunch of individual files, most of which contain many functions and types.  I think this is much nicer than making one file per functions, as some functions are very short.
-
-I put the export statements in the main module.  The reason for this is that while developing code in a file, I don't include that in the module.  This way I can reload it as I change it without having to restart the kernel.  This does not seem to work as well for types.  I'm not sure why.
 
 ## How should notebooks play with Git?
 
