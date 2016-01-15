@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../lambda2.ico">
         
 
-	<title>Introduction - Laplacians.jl</title>
+	<title>localClustering - Laplacians.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -58,24 +58,24 @@
             
             
             
-                <li class="dropdown active">
+                <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
                     <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../Installation/index.html">Installation</a>
+                        </li>
                     
                         <li >
                             <a href="../Julia/index.html">Using Julia</a>
                         </li>
                     
-                        <li class="active">
-                            <a href="index.html">Introduction</a>
+                        <li >
+                            <a href="../Examples/index.html">Examples</a>
                         </li>
                     
                         <li >
                             <a href="../solvers/index.html">Solvers</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../Examples/index.html">Examples</a>
                         </li>
                     
                     </ul>
@@ -96,7 +96,7 @@
             
             
             
-                <li class="dropdown">
+                <li class="dropdown active">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                     
@@ -121,11 +121,23 @@
                         </li>
                     
                         <li >
+                            <a href="../graphUtilsAPI/index.html">graphUtils</a>
+                        </li>
+                    
+                        <li >
                             <a href="../cutPageRankAPI/index.html">cutPageRank</a>
                         </li>
                     
                         <li >
                             <a href="../solversAPI/index.html">solvers</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../cutHeuristicsAPI/index.html">cutHeuristics</a>
+                        </li>
+                    
+                        <li class="active">
+                            <a href="index.html">localClustering</a>
                         </li>
                     
                     </ul>
@@ -137,12 +149,12 @@
             <!-- Search, Navigation and Repo links -->
             <ul class="nav navbar-nav navbar-right">
                 <li >
-                    <a rel="next" href="../Julia/index.html">
+                    <a rel="next" href="../cutHeuristicsAPI/index.html">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
-                <li >
-                    <a rel="prev" href="../solvers/index.html">
+                <li class="disabled">
+                    <a rel="prev" >
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -165,74 +177,43 @@
             <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#laplacians">Laplacians</a></li>
+        <li class="main active"><a href="#localclustering">localClustering</a></li>
         
-            <li><a href="#installation">Installation</a></li>
+            <li><a href="#localimprove">localImprove</a></li>
         
-            <li><a href="#to-use-laplacians">To use Laplacians</a></li>
+            <li><a href="#prn">prn</a></li>
+        
+            <li><a href="#apr">apr</a></li>
         
     
     </ul>
 </div></div>
             <div class="col-md-9" role="main">
 
-<div class="toc">
-<ul>
-<li><a href="#laplacians">Laplacians</a><ul>
-<li><a href="#installation">Installation</a></li>
-<li><a href="#to-use-laplacians">To use Laplacians</a></li>
-</ul>
-</li>
-</ul>
-</div>
-<h1 id="laplacians">Laplacians</h1>
-<h2 id="installation">Installation</h2>
-<p>First, you will need Julia.
-You will also need a number of Julia packages.<br />
-You install these like</p>
-<pre><code class="julia">Pkg.add(&quot;PyPlot&quot;)
-Pkg.add(&quot;DataStructures&quot;)
+<h1 id="localclustering">localClustering</h1>
+<h3 id="localimprove">localImprove</h3>
+<p>localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)</p>
+<p>The LocalImprove function, from the Orrechia-Zhu paper </p>
+<p>G is the given graph, A is the initial set    epsSigma is a measure of the quality of the returning set (the smaller the better)   err is the numerical error considered throughout the algorithm   maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm</p>
+<pre><code class="julia">localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})
 </code></pre>
 
-<p>Once these are installed, you can use Laplacians.
-Right now, Laplacians is a module, not a package.
-So, we will need to do a little more to get it started.
-In the directory where Laplacians resides, type the following:</p>
-<pre><code class="julia">push!(LOAD_PATH,&quot;src&quot;)
-using Laplacians
+<p>localClustering.jl:16</p>
+<h3 id="prn">prn</h3>
+<p>prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)</p>
+<p>The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper</p>
+<p>s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]</p>
+<p>phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality   b is used to handle precision throughout the algorithm - the higher the b, the smaller the eps</p>
+<pre><code class="julia">prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 </code></pre>
 
-<p>Instead of adding to the load path every time you use Julia, you could put the following line in a file called .juliarc.jl that lives in your home directory:</p>
-<pre><code class="julia">push!(LOAD_PATH,&quot;[path_to_laplacians]/Laplacians.jl/src&quot;)
+<p>localClustering.jl:366</p>
+<h3 id="apr">apr</h3>
+<p>computes an approximate page rank vector from a starting set s, an alpha and an epsilon   algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's notes</p>
+<pre><code class="julia">apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
 </code></pre>
 
-<p>In my case, the path to laplacians is <code>/Users/spielman/git/</code>.
-Then, when you want to use the module, you just need to type <code>using Laplacians</code>.</p>
-<p>You may need to install matplotlib in python before PyPlot.
-Look at this page for more information: https://github.com/stevengj/PyPlot.jl</p>
-<p>If you discover that you need any other packages, please list them above.</p>
-<p>Other recommended (but not necessary) packages are:</p>
-<ul>
-<li>Optim</li>
-</ul>
-<p>To see if it is working, try something like this:</p>
-<pre><code class="julia">a = chimera(100,6)
-spectralDrawing(a)
-</code></pre>
-
-<p>or</p>
-<pre><code class="julia">a = generalizedNecklace(grid2(6),grid2(3),2)
-spectralDrawing(a)
-</code></pre>
-
-<h2 id="to-use-laplacians">To use Laplacians</h2>
-<p>Examples of how to do many things in yinsGraph may be found in the IJulia notebooks.  These have the extensions .ipynb.  When they look nice, I think it makes sense to convert them to .html.</p>
-<p>Right now, the notebooks worth looking at are:</p>
-<ul>
-<li><a href="../yinsGraph.html">yinsGraph</a> - usage, demo, and speed tests (Laplacians was previously called yinsGraph)</li>
-<li><a href="../solvers/index.html">Solvers</a> - code for solving equations.  How to use direct methods, conjugate gradient, and a preconditioned augmented spanning tree solver.</li>
-</ul>
-<p>(I suggest that you open the html in your browser)</p></div>
+<p>localClustering.jl:432</p></div>
         </div>
 
         <footer class="col-md-12">

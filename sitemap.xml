@@ -12,25 +12,25 @@
     
         
     <url>
+     <loc>None/Installation/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
      <loc>None/Julia/index.html</loc>
      <lastmod>2016-01-14</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/Laplacians/index.html</loc>
+     <loc>None/Examples/index.html</loc>
      <lastmod>2016-01-14</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/solvers/index.html</loc>
-     <lastmod>2016-01-14</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>None/Examples/index.html</loc>
      <lastmod>2016-01-14</lastmod>
      <changefreq>daily</changefreq>
     </url>
@@ -80,6 +80,12 @@
     </url>
         
     <url>
+     <loc>None/graphUtilsAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
      <loc>None/cutPageRankAPI/index.html</loc>
      <lastmod>2016-01-14</lastmod>
      <changefreq>daily</changefreq>
@@ -87,6 +93,18 @@
         
     <url>
      <loc>None/solversAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/cutHeuristicsAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/localClusteringAPI/index.html</loc>
      <lastmod>2016-01-14</lastmod>
      <changefreq>daily</changefreq>
     </url>

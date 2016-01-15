@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../lambda2.ico">
         
 
-	<title>Examples - Laplacians.jl</title>
+	<title>Installation - Laplacians.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -62,16 +62,16 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                     
-                        <li >
-                            <a href="../Installation/index.html">Installation</a>
+                        <li class="active">
+                            <a href="index.html">Installation</a>
                         </li>
                     
                         <li >
                             <a href="../Julia/index.html">Using Julia</a>
                         </li>
                     
-                        <li class="active">
-                            <a href="index.html">Examples</a>
+                        <li >
+                            <a href="../Examples/index.html">Examples</a>
                         </li>
                     
                         <li >
@@ -149,12 +149,12 @@
             <!-- Search, Navigation and Repo links -->
             <ul class="nav navbar-nav navbar-right">
                 <li >
-                    <a rel="next" href="../Julia/index.html">
+                    <a rel="next" href="../about/index.html">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
                 <li >
-                    <a rel="prev" href="../solvers/index.html">
+                    <a rel="prev" href="../Julia/index.html">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -177,22 +177,81 @@
             <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#examples">Examples</a></li>
+        <li class="main active"><a href="#installation">Installation</a></li>
+        
+            <li><a href="#python">Python</a></li>
+        
+            <li><a href="#julia">Julia</a></li>
+        
+            <li><a href="#laplacians">Laplacians</a></li>
+        
+            <li><a href="#using-laplacians">Using Laplacians</a></li>
         
     
     </ul>
 </div></div>
             <div class="col-md-9" role="main">
 
-<h1 id="examples">Examples</h1>
-<p>The following are links to html files of Julia notebooks.
-These notebooks are also in the notebook directory, and can be open there so that you can run the code live.</p>
+<div class="toc">
 <ul>
-<li><a href="../FirstNotebook.html">FirstNotebook</a></li>
-<li><a href="../Solvers.html">Solvers</a></li>
-<li><a href="../Sampler.html">Sampler</a></li>
-<li><a href="../LightGraphs.html">LightGraphs</a> - an example, with a speed test, of using LightGraphs.  At least it is easy.</li>
-</ul></div>
+<li><a href="#installation">Installation</a><ul>
+<li><a href="#python">Python</a></li>
+<li><a href="#julia">Julia</a></li>
+<li><a href="#laplacians">Laplacians</a></li>
+<li><a href="#using-laplacians">Using Laplacians</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h1 id="installation">Installation</h1>
+<p>Before you can use Laplacians, you need Julia.
+So, we'll begin with instructions for installing Julia.  I (Dan S.) found that it worked best if I installed Python first.  So, I'll suggest that you do the same.</p>
+<p>All of these instruction assume you are using a Mac.  </p>
+<h2 id="python">Python</h2>
+<p>Install python.  I recommend the anaconda distribution <a href="https://www.continuum.io/downloads">https://www.continuum.io/downloads</a>.</p>
+<p>Once you install python, you are going to want two packages: a plotting package that Julia will use, and jupyter notebooks for interacting with Julia.  Install them like</p>
+<pre><code>conda install matplotlib
+conda install mathjax
+conda install jupyter
+</code></pre>
+
+<h2 id="julia">Julia</h2>
+<p>You can get Julia from 
+<a href="http://julialang.org/">http://julialang.org/</a>.  I haven't had much luck with Juno, so I recommend the plain Julia installation.</p>
+<p>Once you have this, you will want Julia notebooks.  To install this, run <code>julia</code> and type</p>
+<pre><code class="julia">julia&gt; Pkg.add(&quot;IJulia&quot;)
+julia&gt; using IJulia
+</code></pre>
+
+<p>This will install the package, and put the current julia kernel into <a href="http://jupyter.org/">jupyter</a>.  In the future, you can launch the Julia notebook by typing (in a terminal)</p>
+<pre><code>jupyter notebook
+</code></pre>
+
+<h2 id="laplacians">Laplacians</h2>
+<p>In theory, all you need to do now is type either</p>
+<pre><code class="julia">julia&gt; Pkg.clone(&quot;git://github.com/danspielman/Laplacians.jl.git&quot;)
+</code></pre>
+
+<p>Or, in a few days,</p>
+<pre><code class="julia">julia&gt; Pkg.add(&quot;Laplacians&quot;)
+</code></pre>
+
+<p>This should add all the packages upon which Laplacians explicitly depends.  </p>
+<p>Some of the options for the routine <code>akpw</code> require LightGraphs and Metis.  But, you probably don't want to use these, so don't worry about them for now.</p>
+<h2 id="using-laplacians">Using Laplacians</h2>
+<p>To actually use the Laplacians package in a Julia session, you must type</p>
+<pre><code class="julia">julia&gt; using Laplacians 
+</code></pre>
+
+<p>To see if Laplacians is working, try typing</p>
+<pre><code class="julia">a = chimera(100,6)
+spectralDrawing(a)
+</code></pre>
+
+<p>or</p>
+<pre><code class="julia">a = generalizedNecklace(grid2(6),grid2(3),2)
+spectralDrawing(a)
+</code></pre></div>
         </div>
 
         <footer class="col-md-12">

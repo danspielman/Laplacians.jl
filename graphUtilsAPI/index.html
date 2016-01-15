@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../lambda2.ico">
         
 
-	<title>Examples - Laplacians.jl</title>
+	<title>graphUtils - Laplacians.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -58,7 +58,7 @@
             
             
             
-                <li class="dropdown active">
+                <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                     
@@ -70,8 +70,8 @@
                             <a href="../Julia/index.html">Using Julia</a>
                         </li>
                     
-                        <li class="active">
-                            <a href="index.html">Examples</a>
+                        <li >
+                            <a href="../Examples/index.html">Examples</a>
                         </li>
                     
                         <li >
@@ -96,7 +96,7 @@
             
             
             
-                <li class="dropdown">
+                <li class="dropdown active">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                     
@@ -120,8 +120,8 @@
                             <a href="../graphAlgsAPI/index.html">graphAlgs</a>
                         </li>
                     
-                        <li >
-                            <a href="../graphUtilsAPI/index.html">graphUtils</a>
+                        <li class="active">
+                            <a href="index.html">graphUtils</a>
                         </li>
                     
                         <li >
@@ -149,12 +149,12 @@
             <!-- Search, Navigation and Repo links -->
             <ul class="nav navbar-nav navbar-right">
                 <li >
-                    <a rel="next" href="../Julia/index.html">
+                    <a rel="next" href="../graphAlgsAPI/index.html">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
                 <li >
-                    <a rel="prev" href="../solvers/index.html">
+                    <a rel="prev" href="../cutPageRankAPI/index.html">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -177,22 +177,72 @@
             <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#examples">Examples</a></li>
+        <li class="main active"><a href="#graphutils">graphUtils</a></li>
+        
+            <li><a href="#wdeg">wdeg</a></li>
+        
+            <li><a href="#setvalue">setValue</a></li>
+        
+            <li><a href="#backindices">backIndices</a></li>
+        
+            <li><a href="#findentries">findEntries</a></li>
+        
+            <li><a href="#compconductance">compConductance</a></li>
+        
+            <li><a href="#getvolume">getVolume</a></li>
+        
+            <li><a href="#getobound">getObound</a></li>
         
     
     </ul>
 </div></div>
             <div class="col-md-9" role="main">
 
-<h1 id="examples">Examples</h1>
-<p>The following are links to html files of Julia notebooks.
-These notebooks are also in the notebook directory, and can be open there so that you can run the code live.</p>
-<ul>
-<li><a href="../FirstNotebook.html">FirstNotebook</a></li>
-<li><a href="../Solvers.html">Solvers</a></li>
-<li><a href="../Sampler.html">Sampler</a></li>
-<li><a href="../LightGraphs.html">LightGraphs</a> - an example, with a speed test, of using LightGraphs.  At least it is easy.</li>
-</ul></div>
+<h1 id="graphutils">graphUtils</h1>
+<h3 id="wdeg">wdeg</h3>
+<p>finds the weighted degree of a vertex in the graph </p>
+<pre><code class="julia">wdeg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)
+</code></pre>
+
+<p>graphUtils.jl:19</p>
+<h3 id="setvalue">setValue</h3>
+<p>sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing </p>
+<pre><code class="julia">setValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)
+</code></pre>
+
+<p>graphUtils.jl:29</p>
+<h3 id="backindices">backIndices</h3>
+<p>same as the above, but now the graph is in adjacency list form </p>
+<p>computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph </p>
+<pre><code class="julia">backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
+backIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})
+</code></pre>
+
+<p>graphUtils.jl:35</p>
+<h3 id="findentries">findEntries</h3>
+<p>similar to findnz, but also returns 0 entries that have an edge in the sparse matrix </p>
+<pre><code class="julia">findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>graphUtils.jl:114</p>
+<h3 id="compconductance">compConductance</h3>
+<p>returns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)</p>
+<pre><code class="julia">compConductance{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+</code></pre>
+
+<p>graphUtils.jl:136</p>
+<h3 id="getvolume">getVolume</h3>
+<p>computes the volume of subset s in an unweighted graph G </p>
+<pre><code class="julia">getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+</code></pre>
+
+<p>graphUtils.jl:149</p>
+<h3 id="getobound">getObound</h3>
+<p>computes the number of edges leaving s </p>
+<pre><code class="julia">getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+</code></pre>
+
+<p>graphUtils.jl:167</p></div>
         </div>
 
         <footer class="col-md-12">

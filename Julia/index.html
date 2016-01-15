@@ -62,20 +62,20 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                     
+                        <li >
+                            <a href="../Installation/index.html">Installation</a>
+                        </li>
+                    
                         <li class="active">
                             <a href="index.html">Using Julia</a>
                         </li>
                     
                         <li >
-                            <a href="../Laplacians/index.html">Introduction</a>
+                            <a href="../Examples/index.html">Examples</a>
                         </li>
                     
                         <li >
                             <a href="../solvers/index.html">Solvers</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../Examples/index.html">Examples</a>
                         </li>
                     
                     </ul>
@@ -121,11 +121,23 @@
                         </li>
                     
                         <li >
+                            <a href="../graphUtilsAPI/index.html">graphUtils</a>
+                        </li>
+                    
+                        <li >
                             <a href="../cutPageRankAPI/index.html">cutPageRank</a>
                         </li>
                     
                         <li >
                             <a href="../solversAPI/index.html">solvers</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../cutHeuristicsAPI/index.html">cutHeuristics</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../localClusteringAPI/index.html">localClustering</a>
                         </li>
                     
                     </ul>
@@ -137,12 +149,12 @@
             <!-- Search, Navigation and Repo links -->
             <ul class="nav navbar-nav navbar-right">
                 <li >
-                    <a rel="next" href="../about/index.html">
+                    <a rel="next" href="../Installation/index.html">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
                 <li >
-                    <a rel="prev" href="../Laplacians/index.html">
+                    <a rel="prev" href="../Examples/index.html">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -167,8 +179,6 @@
     
         <li class="main active"><a href="#using-julia">Using Julia</a></li>
         
-            <li><a href="#converting-to-julia-04">Converting to Julia 0.4</a></li>
-        
             <li><a href="#julia-notebooks">Julia Notebooks</a></li>
         
             <li><a href="#workflows">Workflows</a></li>
@@ -178,8 +188,6 @@
             <li><a href="#useful-julia-functions">Useful Julia functions</a></li>
         
             <li><a href="#optimizing-code-in-julia">Optimizing code in Julia</a></li>
-        
-            <li><a href="#how-should-julia-packages-be-organized">How should Julia packages be organized?</a></li>
         
             <li><a href="#how-should-notebooks-play-with-git">How should notebooks play with Git?</a></li>
         
@@ -191,10 +199,6 @@
 <div class="toc">
 <ul>
 <li><a href="#using-julia">Using Julia</a><ul>
-<li><a href="#converting-to-julia-04">Converting to Julia 0.4</a><ul>
-<li><a href="#small-details">Small details</a></li>
-</ul>
-</li>
 <li><a href="#julia-notebooks">Julia Notebooks</a></li>
 <li><a href="#workflows">Workflows</a><ul>
 <li><a href="#dans-current-workflow">Dan's current workflow:</a></li>
@@ -207,41 +211,12 @@
 <li><a href="#vectorization-is-bad">Vectorization is Bad.</a></li>
 </ul>
 </li>
-<li><a href="#how-should-julia-packages-be-organized">How should Julia packages be organized?</a></li>
 <li><a href="#how-should-notebooks-play-with-git">How should notebooks play with Git?</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <h1 id="using-julia">Using Julia</h1>
-<p>To use the julia notebooks, you will need ipython and the IJulia package.  You should also get <code>jupyter</code>, which you should be able to install from ipython.
-To install IJulia, you type <code>Pkg.add("IJulia")</code> from Julia.
-Then, you just need to type <code>using IJulia</code> once.  This will tell jupyter about the Julia kernel.  To run Julia notebooks, you now type <code>jupyter notebook</code>.  You can select the kernel your new notebook is using.</p>
-<p>Each time you upgrade Julia (by installing verison 0.4.x+1), you should run <code>Pkg.build("IJulia")</code> so that the notebooks will be able to access the new kernel.</p>
-<p>Dan recommends installing the anaconda distribution of python.
-You will then need to install some things from that, like
-conda install jupyter (the new notebooks package)
-conda install mathjax
-conda install matplotlib</p>
-<p>This repository contains projects implemented in Julia by Dan Spielman's group.  While organizing by language is strange, we are trying it to help us learn the language.</p>
-<p>There are two projects in here so far.  One, yinsGraph, is for doing graph theory and solving Laplacian systems.  It's documentation is at <a href="yinsGraph.md">yinsGraph.md</a></p>
-<p>I would like to use the documentation pages in this root directory to discuss issues with how to get Julia to work well.  For now, I'll just ask some questions and write a little that I've figured out.  If you figure some out, please write it here.</p>
-<h2 id="converting-to-julia-04">Converting to Julia 0.4</h2>
-<p>A description of the changes made in Julia 0.4 appears to be here
-[https://github.com/JuliaLang/julia/blob/release-0.4/NEWS.md]
-(https://github.com/JuliaLang/julia/blob/release-0.4/NEWS.md)</p>
-<p>The first problem you will encounter when using Julia 0.4 is that it is stingier about its load path.  It won't load something from the current directory unless it is in the load path.  You can add a directory to the load path like</p>
-<pre><code class="julia">push!(LOAD_PATH,&quot;.&quot;)
-</code></pre>
-
-<p>or</p>
-<pre><code class="julia">push!(LOAD_PATH,&quot;/Users/[your_username]/git/julia/yinsGraph&quot;)
-</code></pre>
-
-<p>To overcome this issue, you can add the above line to the end of the julia.rc file, found in</p>
-<pre><code class="julia">/Applications/Julia-0.4.2.app/Contents/Resources/julia/etc/julia
-</code></pre>
-
 <p>Julia 0.4 lets you take advantage of docstrings.
 For example, <code>?ringGraph</code> produces</p>
 <pre><code>The simple ring on n vertices
@@ -249,10 +224,6 @@ For example, <code>?ringGraph</code> produces</p>
 
 <p>When having a multiline comment, make sure that lines don't have starting and trailing spaces.
 This will mess up the indentation when calling '?func_name'.</p>
-<h3 id="small-details">Small details</h3>
-<ul>
-<li>Julia 0.4 is trying to wean you off Matlab-like notation.  You should no longer create vectors like <code>[1:n]</code>.  Instead, you should type <code>collect(1:n)</code></li>
-</ul>
 <h2 id="julia-notebooks">Julia Notebooks</h2>
 <p>To get the Julia notebooks working, I presently type <code>jupyter notebook</code>.
 I then select the kernel to be Julia-0.4.2.
@@ -395,9 +366,6 @@ elapsed time: 0.015894922 seconds (80 bytes allocated)
 </code></pre>
 
 <p>One reason that <code>a += b</code> was slow was that it seems to allocate a lot of memory.</p>
-<h2 id="how-should-julia-packages-be-organized">How should Julia packages be organized?</h2>
-<p>In yinsGraph, I decided to just make one big module called yinsGraph.jl.  It then includes a bunch of individual files, most of which contain many functions and types.  I think this is much nicer than making one file per functions, as some functions are very short.</p>
-<p>I put the export statements in the main module.  The reason for this is that while developing code in a file, I don't include that in the module.  This way I can reload it as I change it without having to restart the kernel.  This does not seem to work as well for types.  I'm not sure why.</p>
 <h2 id="how-should-notebooks-play-with-git">How should notebooks play with Git?</h2>
 <p>The great thing about the notebooks is that they contain live code, so that you can play with them.  But, sometimes you get a version that serves as great documentation, and you don't want to klobber it my mistake later (or evern worse, have someone else klobber it).  Presumably if someone accidently commits a messed up version we can unwind that.  But, is there a good way to keep track of this?</p></div>
         </div>
