@@ -6,7 +6,7 @@ All graphs are represented by sparse adjacency matrices. This is both for speed,
 _Most of this package is not ready for use. The routines that are ready are the graph generators (chimera and wtedChimera), and the routines for computing the stretch of spanning trees.  As soon as we release the package, we expect to discover that many things are broken._
 
 The documentation may be found in
-[http://danspielman.github.io/Laplacians.jl](http://danspielman.github.io/Laplacians.jl).
+[http://danspielman.github.io/Laplacians.jl/about/index.html](http://danspielman.github.io/Laplacians.jl/about/index.html).
 
 This includes instructions for installing Julia, and some tips for how to start using it.  It also includes guidelines for Dan Spielman's collaborators.
 
