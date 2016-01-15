@@ -1,5 +1,6 @@
 # Developing Laplacians.jl
 
+[TOC]
 
 Just go for it.
 Don't worry about writing fast code at first.
@@ -133,12 +134,33 @@ include("docs/build.jl")
 
 * Run `mkdocs build` in the root directory to regenerate the documentation from the Markdown.
 
-* To upload the documentation, run
+* Once you like the documentation, you can upload it with 
 
 ~~~
 mkdocs gh-deploy --clean -b gh-pages
 ~~~
 
+* If you create a Julia notebook that you would like to include as documentation.   You should
+   * put it in the notebooks directory (.julia/v0.4/Laplacians/notebooks) 
+   * convert it to html and then put the html in the docs directory.
+
+~~~
+ipython nbconvert MyNotebook.ipynb
+mv MyNotebook.html ../docs
+~~~
+
+   
+
+   * move the html into the gh-pages branch.  You do this by switching to the gh-pages branch, grabbing the file from the master branch (if that's where it was), and the committing.  Like this
+
+~~~
+git checkout gh-pages
+git checkout master -- docs/FirstNotebook.html
+git commit
+git push origin gh-pages
+git checkout master      
+~~~
+   
 ### Parametric Types
 
 A sparse matrix has two types associated with it: the types of its indices (some sort of integer) and the types of its values (some sort of number).  Most of the code has been written so that once these types are fixed, the type of everything else in the function has been too.  This is accomplished by putting curly braces after a function name, with the names of the types that we want to use in the braces.  For example,
