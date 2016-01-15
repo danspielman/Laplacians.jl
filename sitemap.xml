@@ -40,6 +40,34 @@
     
         
     <url>
+     <loc>None/FirstNotebook/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/Solvers/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/Sampler/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/LightGraphs/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    
+
+    
+        
+    <url>
      <loc>None/Developing/index.html</loc>
      <lastmod>2016-01-14</lastmod>
      <changefreq>daily</changefreq>

@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../lambda2.ico">
         
 
-	<title>Solvers - Laplacians.jl</title>
+	<title>Sampler - Laplacians.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -91,12 +91,12 @@
                             <a href="../FirstNotebook/index.html">FirstNotebook</a>
                         </li>
                     
-                        <li class="active">
-                            <a href="index.html">Solvers</a>
+                        <li >
+                            <a href="../Solvers/index.html">Solvers</a>
                         </li>
                     
-                        <li >
-                            <a href="../Sampler/index.html">Sampler</a>
+                        <li class="active">
+                            <a href="index.html">Sampler</a>
                         </li>
                     
                         <li >
@@ -174,12 +174,12 @@
             <!-- Search, Navigation and Repo links -->
             <ul class="nav navbar-nav navbar-right">
                 <li >
-                    <a rel="next" href="../FirstNotebook/index.html">
+                    <a rel="next" href="../Solvers/index.html">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
                 <li >
-                    <a rel="prev" href="../Sampler/index.html">
+                    <a rel="prev" href="../LightGraphs/index.html">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -209,7 +209,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>Solvers</title>
+<title>Sampler</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 
@@ -385,15 +385,12 @@ MathJax.Hub.Config({
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This is a demo/instructions for solving equations in Laplacian and SDD matrices.
-The sections are:</p>
-<ul>
-<li><a href="#direct">Direct solvers for SDD systems</a></li>
-<li><a href="#lap">Solving Laplacian systems</a></li>
-<li><a href="#cg">Using Conjugate Gradient</a></li>
-<li><a href="#stretch">Computing Stretch</a></li>
-<li><a href="#precon">A preconditioned spanning tree solver</a></li>
-</ul>
+<p>This is a demo/doc of the Sampler class.
+It enables you to sample integers with probability in proportion to provided weights.
+That is, for each integer in 1 to n, you push it with a weight.
+It then samples them with probability proportional to that weight.
+It can also pop them with that probability.
+Here are some demos of using it.</p>
 
 </div>
 
@@ -415,95 +412,7 @@ The sections are:</p>
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Direct-solvers-for-SDD-systems"><a name="direct">Direct solvers for SDD systems</a><a class="anchor-link" href="#Direct-solvers-for-SDD-systems">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We first generate a SDD, Positive Definite, system, and solve it using a direct solver.  This uses the amd ordering, and is very fast.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">grid2</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="n">F</span> <span class="o">=</span> <span class="n">cholfact</span><span class="p">(</span><span class="n">la</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[2]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>Base.SparseMatrix.CHOLMOD.Factor{Float64}
-type:          LLt
-method: simplicial
-maxnnz:        102
-nnz:           102
-</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We can now use F to solve systems in this matrix, la.  It is a complex structure that encodes a cholesky factorization, but it is much more than that.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">a</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">F</span> \ <span class="n">b</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[3]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>5.143087378554464e-15</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Let's poke around to see what F has inside it.</p></p>
+<p>The sampler class is not exported from Laplacians, because it is meant for internal use.  We could change that at some point.  In the meantime, if you want to use it then you need to import all of the methods that you want to use, like this.</p></p>
 <p></div>
 </div>
 </div>
@@ -512,29 +421,10 @@ nnz:           102
 <div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">F</span>
+<div class=" highlight hl-julia"><pre><span class="k">import</span> <span class="n">Laplacians</span><span class="p">:</span> <span class="n">Sampler</span><span class="p">,</span> <span class="n">push</span><span class="o">!</span><span class="p">,</span> <span class="n">remove</span><span class="o">!</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">pop</span><span class="o">!</span>
 </pre></div></p>
 <p></div>
 </div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[4]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>Base.SparseMatrix.CHOLMOD.Factor{Float64}
-type:          LLt
-method: simplicial
-maxnnz:        102
-nnz:           102
-</pre>
-</div>
-
-</div>
-
-<p></div>
 </div></p>
 <p></div>
 <div class="cell border-box-sizing code_cell rendered">
@@ -542,7 +432,7 @@ nnz:           102
 <div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">super</span><span class="p">(</span><span class="nb">typeof</span><span class="p">(</span><span class="n">F</span><span class="p">))</span>
+<div class=" highlight hl-julia"><pre><span class="n">s</span> <span class="o">=</span> <span class="n">Sampler</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
 </pre></div></p>
 <p></div>
 </div>
@@ -554,7 +444,7 @@ nnz:           102
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>Factorization{Float64}</pre>
+<pre>Laplacians.Sampler([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],0,7)</pre>
 </div>
 
 </div>
@@ -567,7 +457,8 @@ nnz:           102
 <div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="nb">isa</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">Factorization</span><span class="p">)</span>
+<div class=" highlight hl-julia"><pre><span class="n">push</span><span class="o">!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">s</span>
 </pre></div></p>
 <p></div>
 </div>
@@ -579,7 +470,7 @@ nnz:           102
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>true</pre>
+<pre>Laplacians.Sampler([1.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0],1,7)</pre>
 </div>
 
 </div>
@@ -592,7 +483,8 @@ nnz:           102
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">fieldnames</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+<div class=" highlight hl-julia"><pre><span class="n">push</span><span class="o">!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">s</span>
 </pre></div></p>
 <p></div>
 </div>
@@ -604,8 +496,7 @@ nnz:           102
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1-element Array{Symbol,1}:
- :p</pre>
+<pre>Laplacians.Sampler([1.5,0.0,1.5,0.0,0.0,1.0,0.5,0.0,0.0,0.0,0.0,0.0,1.0],2,7)</pre>
 </div>
 
 </div>
@@ -618,16 +509,7 @@ nnz:           102
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Testing-the-speed-of-that">Testing the speed of that<a class="anchor-link" href="#Testing-the-speed-of-that">&#182;</a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Let's see how long this will take on biggish grids, and on random regular graphs (which will have a lot of fill)</p></p>
+<p>A uniform distribution</p></p>
 <p></div>
 </div>
 </div>
@@ -636,11 +518,17 @@ nnz:           102
 <div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>
-<span class="n">a</span> <span class="o">=</span> <span class="n">grid2</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">F</span> <span class="o">=</span> <span class="n">cholfact</span><span class="p">(</span><span class="n">la</span><span class="p">);</span>
+<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Sampler</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+    <span class="n">push</span><span class="o">!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="mi">1000</span>
+    <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">.==</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="n">n</span><span class="p">]</span>
 </pre></div></p>
 <p></div>
 </div>
@@ -648,23 +536,29 @@ nnz:           102
 <div class="output_wrapper">
 <div class="output">
 
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>  </pre>
-</div>
+<div class="output_area"><div class="prompt output_prompt">Out[8]:</div>
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>5-element Array{Any,1}:
+ 255
+ 263
+ 243
+ 239
+   0</pre>
 </div>
 
 </div>
 
-</div>
-
+<p></div>
+</div></p>
 <p></div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>For a 500-by-500 grid, it took 1.5 seconds.  We will now see that to use the solver, it takes 0.4 seconds.</p></p>
+<p>Sampling with probability proportional to i</p></p>
 <p></div>
 </div>
 </div>
@@ -673,29 +567,35 @@ nnz:           102
 <div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">N</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">la</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">F</span> \ <span class="n">b</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
+<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Sampler</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+    <span class="n">push</span><span class="o">!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="c"># @show pop!(s)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="mi">1000</span>
+    <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">.==</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="n">n</span><span class="p">]</span>
 </pre></div></p>
 <p></div>
 </div>
 </div></p>
 <div class="output_wrapper">
 <div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>1.527121 seconds (205 allocations: 256.844 MB, 6.59% gc time)
-  </pre>
-</div>
-</div>
 
 <div class="output_area"><div class="prompt output_prompt">Out[9]:</div>
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>2.976278365938353e-10</pre>
+<pre>5-element Array{Any,1}:
+ 100
+ 204
+ 297
+ 399
+   0</pre>
 </div>
 
 </div>
@@ -703,25 +603,22 @@ nnz:           102
 <p></div>
 </div></p>
 <p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>For a random regular graph, we hit 1.5 seconds at around 20k vertices.</p></p>
-<p></div>
-</div>
-</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">N</span> <span class="o">=</span> <span class="mi">20000</span><span class="p">;</span>
-<span class="n">a</span> <span class="o">=</span> <span class="n">randRegular</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">F</span> <span class="o">=</span> <span class="n">cholfact</span><span class="p">(</span><span class="n">la</span><span class="p">);</span>
+<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Sampler</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+    <span class="n">push</span><span class="o">!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="n">k</span>
+    <span class="p">@</span><span class="n">show</span> <span class="n">pop</span><span class="o">!</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="p">@</span><span class="n">show</span> <span class="n">s</span>
+<span class="k">end</span>
+<span class="n">pop</span><span class="o">!</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 </pre></div></p>
 <p></div>
 </div>
@@ -731,22 +628,44 @@ nnz:           102
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.377724 seconds (19 allocations: 7.634 MB, 1.35% gc time)
-  </pre>
+<pre>pop!(s) = 4</pre>
 </div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_text output_error">
+<pre>
+LoadError: No items to pop
+while loading In[10], in expression starting on line 11
+
+ in pop! at /Users/spielman/git/Laplacians.jl/src/Sampler.jl:88</pre>
 </div>
 
 </div>
 
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+s = Laplacians.Sampler([6.0,1.0,5.0,0.0,1.0,2.0,3.0,0.0,0.0],3,5)
+pop!(s) = 3
+s = Laplacians.Sampler([3.0,1.0,2.0,0.0,1.0,2.0,0.0,0.0,0.0],2,5)
+pop!(s) = 2
+s = Laplacians.Sampler([1.0,1.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0],1,5)
+pop!(s) = 1
+s = Laplacians.Sampler([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],0,5)
+</pre>
+</div>
 </div>
 
+<p></div>
+</div></p>
 <p></div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The time required for the solve is then around 0.05 seconds.</p></p>
+<p>If you try to push an item that it already there, you will get an error.</p></p>
 <p></div>
 </div>
 </div>
@@ -755,50 +674,9 @@ nnz:           102
 <div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">F</span> \ <span class="n">b</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[11]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>2.069855996116447e-12</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="What-about-just-using-\-?">What about just using \ ?<a class="anchor-link" href="#What-about-just-using-\-?">&#182;</a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>
-<span class="n">a</span> <span class="o">=</span> <span class="n">grid2</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="n">N</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">la</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">la</span> \ <span class="n">b</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
+<div class=" highlight hl-julia"><pre><span class="n">s</span> <span class="o">=</span> <span class="n">Sampler</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">push</span><span class="o">!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">push</span><span class="o">!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 </pre></div></p>
 <p></div>
 </div>
@@ -807,18 +685,12 @@ nnz:           102
 <div class="output">
 
 <div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>1.434061 seconds (59 allocations: 259.422 MB, 0.89% gc time)
-  0.053558 seconds (19 allocations: 648.281 KB)
-  </pre>
-</div>
-</div>
+<div class="output_subarea output_text output_error">
+<pre>
+LoadError: pushed item 3 is already in the sampler.
+while loading In[11], in expression starting on line 3
 
-<div class="output_area"><div class="prompt output_prompt">Out[12]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>3.047155955006307e-10</pre>
+ in push! at /Users/spielman/git/Laplacians.jl/src/Sampler.jl:43</pre>
 </div>
 
 </div>
@@ -831,26 +703,7 @@ nnz:           102
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Just using \ appears to be right, so it is probably using cholfact.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Solving-Laplacian-Systems"><a name="lap">Solving Laplacian Systems</a><a class="anchor-link" href="#Solving-Laplacian-Systems">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We solve Laplacian systems by solving a system in the induced submatrix.
-Here are the steps, which I will then put into a wrapper function.  It works by solving in a submatrix, like this:</p></p>
+<p>You can also bulk load a vector of probabilities</p></p>
 <p></div>
 </div>
 </div>
@@ -859,13 +712,25 @@ Here are the steps, which I will then put into a wrapper function.  It works by 
 <div class="prompt input_prompt">In&nbsp;[13]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">grid2</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span>
-<span class="n">N</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">la</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">lasub</span> <span class="o">=</span> <span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">:(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="mi">1</span><span class="p">:(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
-<span class="n">Fsub</span> <span class="o">=</span> <span class="n">cholfact</span><span class="p">(</span><span class="n">lasub</span><span class="p">);</span>
+<div class=" highlight hl-julia"><pre><span class="n">v</span> <span class="o">=</span> <span class="n">collect</span><span class="p">(</span><span class="mf">1.0</span><span class="p">:</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Sampler</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 </pre></div></p>
 <p></div>
 </div>
+</div></p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area"><div class="prompt output_prompt">Out[13]:</div>
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Laplacians.Sampler([15.0,10.0,5.0,9.0,1.0,2.0,3.0,4.0,5.0],5,5)</pre>
+</div>
+
+</div>
+
+<p></div>
 </div></p>
 <p></div>
 <div class="cell border-box-sizing code_cell rendered">
@@ -873,188 +738,28 @@ Here are the steps, which I will then put into a wrapper function.  It works by 
 <div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">mean</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-<span class="n">bs</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">:(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
-<span class="n">xs</span> <span class="o">=</span> <span class="n">Fsub</span> \ <span class="n">bs</span><span class="p">;</span>
-<span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">xs</span><span class="p">;</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
+<div class=" highlight hl-julia"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="mi">1000</span>
+    <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">.==</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
 </pre></div></p>
 <p></div>
 </div>
 </div></p>
 <div class="output_wrapper">
 <div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>1.980881 seconds (139.37 k allocations: 274.019 MB, 4.79% gc time)
-</pre>
-</div>
-</div>
 
 <div class="output_area"><div class="prompt output_prompt">Out[14]:</div>
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>5.809541011026003e-9</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The following wraps a solver for SDD systems into a solver for Laplacian systems.  We really need to work on the types of solver, and actually for everything else inside.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Let's see this work.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">lapWrapSolver</span><span class="p">(</span><span class="n">cholfact</span><span class="p">,</span><span class="n">la</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">a</span><span class="p">)[</span><span class="mi">1</span><span class="p">]);</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">mean</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">f</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[15]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>2.621755646216747e-9</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We now make two more versions: one that just takes the solver, and one that takes b as well.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">lapChol2</span> <span class="o">=</span> <span class="n">lapWrapSolver</span><span class="p">(</span><span class="n">cholfact</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[16]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>(anonymous function)</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">f</span> <span class="o">=</span> <span class="n">lapChol</span><span class="p">(</span><span class="n">la</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[17]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>(anonymous function)</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">f</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[18]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>2.621755646216747e-9</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">lapWrapSolver</span><span class="p">(</span><span class="n">cholfact</span><span class="p">,</span><span class="n">la</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[19]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>2.621755646216747e-9</pre>
+<pre>5-element Array{Any,1}:
+  74
+ 139
+ 185
+ 257
+ 345</pre>
 </div>
 
 </div>
@@ -1071,882 +776,6 @@ Here are the steps, which I will then put into a wrapper function.  It works by 
 </pre></div></p>
 <p></div>
 </div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>I really like the fact that Julia lets me type the following.  It still needs reasonable types.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Using-Conjugate-Gradient"><a name="cg">Using Conjugate Gradient</a><a class="anchor-link" href="#Using-Conjugate-Gradient">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Here are examples of how to solve systems using the Conjugate Gradient.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="n">a</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">n</span><span class="p">);</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o"><em></span> <span class="n">a</span><span class="o">&#39;</span><span class="p">;</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">cg</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="o"></em></span><span class="n">x</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[20]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>6.530265309919312e-6</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">bbig</span> <span class="o">=</span> <span class="nb">convert</span><span class="p">(</span><span class="n">Array</span><span class="p">{</span><span class="n">BigFloat</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span><span class="n">b</span><span class="p">);</span>
-<span class="n">xbig</span> <span class="o">=</span> <span class="n">cg</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">bbig</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">xbig</span> <span class="o">-</span> <span class="n">bbig</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[21]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>3.408504794566293816762470763584253827015914440348506316254697226173169945005103e-37</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">grid2</span><span class="p">(</span><span class="mi">200</span><span class="p">))</span>
-<span class="n">n</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">la</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">mean</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">cg</span><span class="p">(</span><span class="n">la</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[23]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>0.00019928918001516186</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">mapweight</span><span class="p">(</span><span class="n">grid2</span><span class="p">(</span><span class="mi">200</span><span class="p">),</span><span class="n">x</span><span class="o">-&gt;</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]));</span>
-<span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="n">n</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">la</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">mean</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">cg</span><span class="p">(</span><span class="n">la</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">4000</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>0.816791 seconds (29.34 k allocations: 207.333 MB, 3.30% gc time)
-  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[25]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>97.96603417977055</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, let's try a diagonal preconditioner.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">d</span> <span class="o">=</span> <span class="n">diag</span><span class="p">(</span><span class="n">la</span><span class="p">)</span>
-<span class="n">pre</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span> <span class="o">./</span> <span class="n">d</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">pcg</span><span class="p">(</span><span class="n">la</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">pre</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">10</span><span class="o">^</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>4.563222 seconds (16.01 k allocations: 1.193 GB, 3.50% gc time)
-  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[26]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>19.882642385705193</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[27]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">cg</span><span class="p">(</span><span class="n">la</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">10</span><span class="o">^</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>1.198206 seconds (484.48 k allocations: 307.148 MB, 3.73% gc time)
-  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[27]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>19.590092408356856</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>It is very different for a random regular graph of the same size</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="mi">1000000</span>
-<span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">randRegular</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">mean</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[29]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">cg</span><span class="p">(</span><span class="n">la</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>7.891222 seconds (27.15 k allocations: 2.024 GB, 3.64% gc time)
-  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[29]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>0.0007745578882358395</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Computing-Stretch"><a name="stretch">Computing Stretch</a><a class="anchor-link" href="#Computing-Stretch">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The following is a test of our stretch computation code.
-I begin by creating a grid graph with random weights, using our stretch computation,
-and checking that it agrees with the trace computation.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">grid2</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">a</span> <span class="o">=</span> <span class="n">uniformWeight</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">a</span><span class="o">&#39;</span><span class="p">;</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">mst</span> <span class="o">=</span> <span class="n">kruskal</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[31]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>9x9 sparse matrix with 16 Float64 entries:
-    [2, 1]  =  0.718277
-    [4, 1]  =  1.30955
-    [1, 2]  =  0.718277
-    [3, 2]  =  0.656996
-    [2, 3]  =  0.656996
-    [6, 3]  =  0.640175
-    [1, 4]  =  1.30955
-    [6, 5]  =  1.22709
-    [3, 6]  =  0.640175
-    [5, 6]  =  1.22709
-    [9, 6]  =  0.587062
-    [8, 7]  =  0.360802
-    [7, 8]  =  0.360802
-    [9, 8]  =  1.02741
-    [6, 9]  =  0.587062
-    [8, 9]  =  1.02741</pre>
-</div>
-
-</div>
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>2.854674 seconds (172 allocations: 328.068 MB, 4.00% gc time)
-</pre>
-</div>
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The following computes a matrix with entries corresponding to the nonzeros of a.  For each nonzero, it puts in the stretch.
-So, to find the total stretch, we should sum them all and then divide by 2.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">st</span> <span class="o">=</span> <span class="n">compStretches</span><span class="p">(</span><span class="n">mst</span><span class="p">,</span><span class="n">a</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[32]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>9x9 sparse matrix with 24 Float64 entries:
-    [2, 1]  =  1.0
-    [4, 1]  =  1.0
-    [1, 2]  =  1.0
-    [3, 2]  =  1.0
-    [5, 2]  =  6.45151
-    [2, 3]  =  1.0
-    [6, 3]  =  1.0
-    [1, 4]  =  1.0
-    [5, 4]  =  12.0766
-    [7, 4]  =  14.5912
-    ⋮
-    [8, 5]  =  6.03562
-    [3, 6]  =  1.0
-    [5, 6]  =  1.0
-    [9, 6]  =  1.0
-    [4, 7]  =  14.5912
-    [8, 7]  =  1.0
-    [5, 8]  =  6.03562
-    [7, 8]  =  1.0
-    [9, 8]  =  1.0
-    [6, 9]  =  1.0
-    [8, 9]  =  1.0</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">sum</span><span class="p">(</span><span class="n">st</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[33]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>47.15492426761423</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We now check that we got the right answer by using the algebraic formula.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">trace</span><span class="p">(</span> <span class="n">pinv</span><span class="p">(</span> <span class="n">full</span><span class="p">(</span><span class="n">lap</span><span class="p">(</span><span class="n">mst</span><span class="p">)))</span> <span class="o">*</span> <span class="n">lap</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>  <span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[34]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>47.154924267614184</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, let's do a speed test on a randomly weighted grid of side 2000.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">grid2</span><span class="p">(</span><span class="mi">2000</span><span class="p">)</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">a</span> <span class="o">=</span> <span class="n">uniformWeight</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">a</span><span class="o">&#39;</span><span class="p">;</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">mst</span> <span class="o">=</span> <span class="n">kruskal</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">st</span> <span class="o">=</span> <span class="n">compStretches</span><span class="p">(</span><span class="n">mst</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>  2.406615 seconds (31.98 M allocations: 1.609 GB, 15.55% gc time)
-  1.107632 seconds (35 allocations: 823.610 MB, 17.57% gc time)
-  8.919166 seconds (94 allocations: 1.103 GB, 7.60% gc time)
-  </pre>
-</div>
-</div>
-
-</div>
-
-</div>
-
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Preconditioned-Solvers"><a name="precon">Preconditioned Solvers</a><a class="anchor-link" href="#Preconditioned-Solvers">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Here is my a simple solver that uses an augmented spanning tree.
-It should never be too bad.  It wants a positive definite system.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">mapweight</span><span class="p">(</span><span class="n">grid2</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span><span class="n">x</span><span class="o">-&gt;</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]));</span>
-<span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="n">n</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">la</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">F</span> <span class="o">=</span> <span class="n">augTreeSolver</span><span class="p">(</span><span class="n">la</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>3.746014 seconds (79 allocations: 1.467 GB, 15.42% gc time)
-  2.534656 seconds (1.74 M allocations: 508.631 MB, 12.85% gc time)
-  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[36]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>49.93092418950264</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="p">@</span><span class="n">time</span> <span class="n">F</span> <span class="o">=</span> <span class="n">augTreeSolver</span><span class="p">(</span><span class="n">la</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">treeAlg</span><span class="o">=</span><span class="n">randishPrim</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>4.106294 seconds (5.89 k allocations: 3.254 GB, 9.19% gc time)
-  1.520148 seconds (1.08 M allocations: 523.226 MB, 18.93% gc time)
-  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[37]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>49.82364163609152</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Compare to the running time of CG</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="p">@</span><span class="n">time</span> <span class="n">y</span> <span class="o">=</span> <span class="n">cg</span><span class="p">(</span><span class="n">la</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">y</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>4.837599 seconds (6.04 k allocations: 3.597 GB, 8.72% gc time)
-  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[38]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>519.1489086730564</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="mi">40000</span>
-<span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">randRegular</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">la</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">F</span> <span class="o">=</span> <span class="n">augTreeSolver</span><span class="p">(</span><span class="n">la</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>7.434149 seconds (4.01 k allocations: 1.868 GB, 4.28% gc time)
-  0.174792 seconds (121.18 k allocations: 66.463 MB, 4.97% gc time)
-  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[39]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>20.639305575286002</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Compare to the running time of a direct method.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="p">@</span><span class="n">time</span> <span class="n">Fc</span> <span class="o">=</span> <span class="n">cholfact</span><span class="p">(</span><span class="n">la</span><span class="p">)</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">x</span> <span class="o">=</span> <span class="n">Fc</span> \ <span class="n">b</span>
-<span class="n">norm</span><span class="p">(</span><span class="n">la</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>0.299919 seconds (2.52 k allocations: 247.258 MB, 6.75% gc time)
-  8.628694 seconds (68 allocations: 1015.664 MB, 0.04% gc time)
-  </pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[40]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>1.1468469752650618e-11</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, let's try wrapping for singular systems.</p></p>
-<p></div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">n</span> <span class="o">=</span> <span class="mi">40000</span>
-<span class="n">la</span> <span class="o">=</span> <span class="n">lap</span><span class="p">(</span><span class="n">randRegular</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">lapWrapSolver</span><span class="p">(</span><span class="n">augTreeSolver</span><span class="p">,</span><span class="n">la</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span><span class="n">maxits</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[41]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>(anonymous function)</pre>
-</div>
-
-</div>
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>0.128699 seconds (19 allocations: 1.266 MB)
-</pre>
-</div>
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[42]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">grid2</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">t</span> <span class="o">=</span> <span class="n">randishKruskal</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-<span class="n">st</span> <span class="o">=</span> <span class="n">compStretches</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
-<span class="n">sum</span><span class="p">(</span><span class="n">st</span><span class="p">)</span><span class="o">/</span><span class="n">nnz</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[42]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>48.24403503503503</pre>
-</div>
-
-</div>
-
-<p></div>
-</div></p>
-<p></div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">t</span> <span class="o">=</span> <span class="n">randishPrim</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-<span class="n">st</span> <span class="o">=</span> <span class="n">compStretches</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
-<span class="n">sum</span><span class="p">(</span><span class="n">st</span><span class="p">)</span><span class="o">/</span><span class="n">nnz</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-</pre></div></p>
-<p></div>
-</div>
-</div></p>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area"><div class="prompt output_prompt">Out[43]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>32.09173773773774</pre>
-</div>
-
-</div>
-
-<p></div>
 </div></p>
 <p></div>
     </div>
