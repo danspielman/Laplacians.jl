@@ -2,7 +2,6 @@
 
 # Solving linear equations in Laplacians
 
-Right now, our solver code is in `solvers.jl`, but not included in yinsGraph.  So, you should include this directly.  Implementations of cg and pcg have been automatically included in yinsGraph.  They are in the file `pcg.jl`
 
 For some experiments with solvers, including some of those below, look at the notebook Solvers.ipynb.
 

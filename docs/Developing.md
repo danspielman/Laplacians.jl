@@ -133,6 +133,12 @@ include("docs/build.jl")
 
 * Run `mkdocs build` in the root directory to regenerate the documentation from the Markdown.
 
+* To upload the documentation, run
+
+~~~
+mkdocs gh-deploy --clean -b gh-pages
+~~~
+
 ### Parametric Types
 
 A sparse matrix has two types associated with it: the types of its indices (some sort of integer) and the types of its values (some sort of number).  Most of the code has been written so that once these types are fixed, the type of everything else in the function has been too.  This is accomplished by putting curly braces after a function name, with the names of the types that we want to use in the braces.  For example,
