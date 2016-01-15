@@ -3,11 +3,11 @@ Laplacians is a package containing graph algorithms, with an emphsasis on tasks 
 
 All graphs are represented by sparse adjacency matrices. This is both for speed, and because our main concerns are algebraic tasks. It does not handle dynamic graphs. It would be very slow to implement dynamic graphs this way.
 
-The documentation may be found in
-[site/about/index.html](site/about/index.html).
-If you are using a Mac, you can access the documentation by typing
+_Most of this package is not ready for use. The routines that are ready are the graph generators (chimera and wtedChimera), and the routines for computing the stretch of spanning trees.  As soon as we release the package, we expect to discover that many things are broken._
 
-~~~
-open site/about/index.html
-~~~
+The documentation may be found in
+[http://danspielman.github.io/Laplacians.jl](http://danspielman.github.io/Laplacians.jl).
+
+This includes instructions for installing Julia, and some tips for how to start using it.  It also includes guidelines for Dan Spielman's collaborators.
+
 

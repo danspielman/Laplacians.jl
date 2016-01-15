@@ -217,6 +217,7 @@
 <p>To use the julia notebooks, you will need ipython and the IJulia package.  You should also get <code>jupyter</code>, which you should be able to install from ipython.
 To install IJulia, you type <code>Pkg.add("IJulia")</code> from Julia.
 Then, you just need to type <code>using IJulia</code> once.  This will tell jupyter about the Julia kernel.  To run Julia notebooks, you now type <code>jupyter notebook</code>.  You can select the kernel your new notebook is using.</p>
+<p>Each time you upgrade Julia (by installing verison 0.4.x+1), you should run <code>Pkg.build("IJulia")</code> so that the notebooks will be able to access the new kernel.</p>
 <p>Dan recommends installing the anaconda distribution of python.
 You will then need to install some things from that, like
 conda install jupyter (the new notebooks package)
@@ -238,7 +239,7 @@ conda install matplotlib</p>
 </code></pre>
 
 <p>To overcome this issue, you can add the above line to the end of the julia.rc file, found in</p>
-<pre><code class="julia">/Applications/Julia-0.4.0-rc4.app/Contents/Resources/julia/etc/julia
+<pre><code class="julia">/Applications/Julia-0.4.2.app/Contents/Resources/julia/etc/julia
 </code></pre>
 
 <p>Julia 0.4 lets you take advantage of docstrings.
@@ -254,7 +255,7 @@ This will mess up the indentation when calling '?func_name'.</p>
 </ul>
 <h2 id="julia-notebooks">Julia Notebooks</h2>
 <p>To get the Julia notebooks working, I presently type <code>jupyter notebook</code>.
-I then select the kernel to be Julia-0.3.11.
+I then select the kernel to be Julia-0.4.2.
 It seems important to run this command from a directory that contains all the directories
 that have notebooks that you will use.  In particular, I advise against "uploading" notebooks
 from other directories.  That has only given me trouble.</p>
