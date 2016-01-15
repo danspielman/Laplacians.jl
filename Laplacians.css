@@ -1,0 +1,8 @@
+div.wy-menu-vertical ul.current li.toctree-l3 a {
+    font-weight: bold;
+}
+
+.bs-sidebar {
+  overflow-y: auto;
+  max-height: 100%;
+}

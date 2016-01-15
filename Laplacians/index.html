@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../lambda2.ico">
+        
+
+	<title>Introduction - Laplacians.jl</title>
+
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <link href="../css/base.css" rel="stylesheet">
+        <link href="../Laplacians.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="../about/index.html">Laplacians.jl</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            <!-- Main navigation -->
+            <ul class="nav navbar-nav">
+            
+            
+                <li >
+                    <a href="../about/index.html">About</a>
+                </li>
+            
+            
+            
+                <li class="dropdown active">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../Julia/index.html">Using Julia</a>
+                        </li>
+                    
+                        <li class="active">
+                            <a href="index.html">Introduction</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../solvers/index.html">Solvers</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../Examples/index.html">Examples</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developing <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../Developing/index.html">Devleoping Laplacians</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../wholeAPI/index.html">Whole API</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../graphGeneratorsAPI/index.html">graphGenerators</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../IOAPI/index.html">IO</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../graphOpsAPI/index.html">graphOps</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../graphAlgsAPI/index.html">graphAlgs</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../cutPageRankAPI/index.html">cutPageRank</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../solversAPI/index.html">solvers</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            </ul>
+
+            <!-- Search, Navigation and Repo links -->
+            <ul class="nav navbar-nav navbar-right">
+                <li >
+                    <a rel="next" href="../Julia/index.html">
+                        <i class="fa fa-arrow-left"></i> Previous
+                    </a>
+                </li>
+                <li >
+                    <a rel="prev" href="../solvers/index.html">
+                        Next <i class="fa fa-arrow-right"></i>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://github.com/danspielman/Laplacians.jl">
+                        
+                            <i class="fa fa-github"></i>
+                        
+                        GitHub
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#laplacians">Laplacians</a></li>
+        
+            <li><a href="#installation">Installation</a></li>
+        
+            <li><a href="#to-use-laplacians">To use Laplacians</a></li>
+        
+    
+    </ul>
+</div></div>
+            <div class="col-md-9" role="main">
+
+<div class="toc">
+<ul>
+<li><a href="#laplacians">Laplacians</a><ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#to-use-laplacians">To use Laplacians</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h1 id="laplacians">Laplacians</h1>
+<h2 id="installation">Installation</h2>
+<p>First, you will need Julia.
+You will also need a number of Julia packages.<br />
+You install these like</p>
+<pre><code class="julia">Pkg.add(&quot;PyPlot&quot;)
+Pkg.add(&quot;DataStructures&quot;)
+</code></pre>
+
+<p>Once these are installed, you can use Laplacians.
+Right now, Laplacians is a module, not a package.
+So, we will need to do a little more to get it started.
+In the directory where Laplacians resides, type the following:</p>
+<pre><code class="julia">push!(LOAD_PATH,&quot;src&quot;)
+using Laplacians
+</code></pre>
+
+<p>Instead of adding to the load path every time you use Julia, you could put the following line in a file called .juliarc.jl that lives in your home directory:</p>
+<pre><code class="julia">push!(LOAD_PATH,&quot;[path_to_laplacians]/Laplacians.jl/src&quot;)
+</code></pre>
+
+<p>In my case, the path to laplacians is <code>/Users/spielman/git/</code>.
+Then, when you want to use the module, you just need to type <code>using Laplacians</code>.</p>
+<p>You may need to install matplotlib in python before PyPlot.
+Look at this page for more information: https://github.com/stevengj/PyPlot.jl</p>
+<p>If you discover that you need any other packages, please list them above.</p>
+<p>Other recommended (but not necessary) packages are:</p>
+<ul>
+<li>Optim</li>
+</ul>
+<p>To see if it is working, try something like this:</p>
+<pre><code class="julia">a = chimera(100,6)
+spectralDrawing(a)
+</code></pre>
+
+<p>or</p>
+<pre><code class="julia">a = generalizedNecklace(grid2(6),grid2(3),2)
+spectralDrawing(a)
+</code></pre>
+
+<h2 id="to-use-laplacians">To use Laplacians</h2>
+<p>Examples of how to do many things in yinsGraph may be found in the IJulia notebooks.  These have the extensions .ipynb.  When they look nice, I think it makes sense to convert them to .html.</p>
+<p>Right now, the notebooks worth looking at are:</p>
+<ul>
+<li><a href="../yinsGraph.html">yinsGraph</a> - usage, demo, and speed tests (Laplacians was previously called yinsGraph)</li>
+<li><a href="../solvers/index.html">Solvers</a> - code for solving equations.  How to use direct methods, conjugate gradient, and a preconditioned augmented spanning tree solver.</li>
+</ul>
+<p>(I suggest that you open the html in your browser)</p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+            <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+        </footer>
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script src="../js/base.js"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+        <script src="../mathjaxhelper.js"></script>
+    </body>
+</html>

@@ -3,26 +3,94 @@
 
     
     <url>
-     <loc>None/yinsGraph/</loc>
-     <lastmod>2015-10-25</lastmod>
+     <loc>None/about/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
 
     
+        
     <url>
-     <loc>None/solvers/</loc>
-     <lastmod>2015-10-25</lastmod>
+     <loc>None/Julia/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
      <changefreq>daily</changefreq>
     </url>
+        
+    <url>
+     <loc>None/Laplacians/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/solvers/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/Examples/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
     
 
     
+        
     <url>
-     <loc>None/api/yinsGraph/</loc>
-     <lastmod>2015-10-25</lastmod>
+     <loc>None/Developing/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
      <changefreq>daily</changefreq>
     </url>
+        
+    
+
+    
+        
+    <url>
+     <loc>None/wholeAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/graphGeneratorsAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/IOAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/graphOpsAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/graphAlgsAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/cutPageRankAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/solversAPI/index.html</loc>
+     <lastmod>2016-01-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
     
 
 </urlset>
