@@ -84,31 +84,6 @@
             
             
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="../FirstNotebook/index.html">FirstNotebook</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../SolversNB/index.html">Solvers</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../Sampler/index.html">Sampler</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../LightGraphs/index.html">LightGraphs</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Developing <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                     
@@ -179,7 +154,7 @@
                     </a>
                 </li>
                 <li >
-                    <a rel="prev" href="../FirstNotebook/index.html">
+                    <a rel="prev" href="../Developing/index.html">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -229,7 +204,6 @@
 </ul>
 </div>
 <h1 id="solving-linear-equations-in-laplacians">Solving linear equations in Laplacians</h1>
-<p>Right now, our solver code is in <code>solvers.jl</code>, but not included in yinsGraph.  So, you should include this directly.  Implementations of cg and pcg have been automatically included in yinsGraph.  They are in the file <code>pcg.jl</code></p>
 <p>For some experiments with solvers, including some of those below, look at the notebook Solvers.ipynb.</p>
 <h2 id="direct-solvers">Direct Solvers</h2>
 <p>You can compute a cholesky factor directly with <code>cholfact</code>.  It does  more than just compute the factor, and it saves its result in a data structure that implements <code>\</code>.  It uses SuiteSparse by Tim Davis.</p>
