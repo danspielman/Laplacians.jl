@@ -137,7 +137,7 @@ include("docs/build.jl")
 * Once you like the documentation, you can upload it with 
 
 ~~~
-mkdocs gh-deploy --clean -b gh-pages
+mkdocs gh-deploy -b gh-pages
 ~~~
 
 * If you create a Julia notebook that you would like to include as documentation.   You should
