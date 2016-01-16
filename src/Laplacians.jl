@@ -80,7 +80,7 @@ and exports the functions for which it seems appropriate.
 
   include("graphOps.jl")
 
-  export unweight
+  export unweight, unweight!
   export mapweight
   export uniformWeight, uniformWeight!
 

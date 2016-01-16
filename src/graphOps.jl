@@ -12,12 +12,23 @@ We might want to do this differently, say by enforcing symmetry"""
 lap(a) = spdiagm(a*ones(size(a)[1])) - a
 
 """Create a new graph in that is the same as the original, but with all edge weights 1"""
-function unweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
-  (ai, aj, av) = findnz(a)
-  n = size(a)[1]
-  return sparse(ai,aj,ones(length(ai)),n,n)
-
+function unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
+    a = copy(ain)
+    m = length(a.nzval)
+    for i in 1:m
+        a.nzval[i] = 1
+    end
+    return a
 end # unweight
+
+"""Change the weight of every edge in a to 1"""
+function unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
+    m = length(a.nzval)
+    for i in 1:m
+        a.nzval[i] = 1
+    end
+end # unweight
+
 
 """Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write
 
