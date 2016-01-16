@@ -435,22 +435,23 @@ function sampleByWeight(wt)
     find(cumsum(wt) .> r)[1]
 end
 
-"""Builds a chimeric graph on n vertices.
-The components come from pureRandomGraph,
-connected by joinGraphs, productGraph and generalizedNecklace"""
-function chimera(n::Integer)
+"""A Chimera graph with some weights.  The weights just appear when graphs are combined.
+For more interesting weights, use `wtedChimera`"""
+function semiWtedChimera(n::Integer)
 
     if (n < 2)
         gr = sparse([0.0])
 
-        return gr
+        return randperm(gr)
     end
 
+    r = rand()^2
+    
     if (n < 30) || (rand() < .2)
 
         gr = pureRandomGraph(n)
 
-        return gr
+        return randperm(gr)
     end
 
     if (n < 200) 
@@ -460,9 +461,9 @@ function chimera(n::Integer)
         n2 = n - n1
         k = ceil(Integer,exp(rand()*log(min(n1,n2)/2)))
 
-        gr = joinGraphs(chimera(n1),chimera(n2),k)
+        gr = joinGraphs(r*chimera(n1),chimera(n2),k)
 
-        return gr
+        return randperm(gr)
     end
 
     # split with probability .7
@@ -473,9 +474,9 @@ function chimera(n::Integer)
         n2 = n - n1
         k = floor(Integer,1+exp(rand()*log(min(n1,n2)/2)))
 
-        gr = joinGraphs(chimera(n1),chimera(n2),k)
+        gr = joinGraphs(r*chimera(n1),chimera(n2),k)
 
-        return gr
+        return randperm(gr)
 
     else
         n1 = floor(Integer,10*exp(rand()*log(n/100)))
@@ -484,12 +485,12 @@ function chimera(n::Integer)
 
         if (rand() < .5)
 
-            gr = productGraph(chimera(n1),chimera(n2))
+            gr = productGraph(r*chimera(n1),chimera(n2))
 
         else
 
             k = floor(Integer,1+exp(rand()*log(min(n1,n2)/10)))
-            gr = generalizedNecklace(chimera(n1),chimera(n2),k)
+            gr = generalizedNecklace(r*chimera(n1),chimera(n2),k)
 
         end
 
@@ -499,9 +500,23 @@ function chimera(n::Integer)
 
         end
 
-        return gr
+        return randperm(gr)
         
     end
+end
+
+
+"""Builds a chimeric graph on n vertices.
+The components come from pureRandomGraph,
+connected by joinGraphs, productGraph and generalizedNecklace"""
+function chimera(n::Integer)
+
+
+    gr = semiWtedChimera(n)
+    unweight!(gr)
+
+    return gr
+        
 end
 
 """Builds the kth chimeric graph on n vertices.
@@ -517,7 +532,7 @@ end
 """Applies one of a number of random weighting schemes to the edges of the graph"""
 function randWeight(a)
 
-    if (rand() < .1)
+    if (rand() < .2)
         return a
     end
     
@@ -580,8 +595,15 @@ function wtedChimera(n::Integer, k::Integer)
     return g
 end
 
+function semiWtedChimera(n::Integer, k::Integer)
+    srand(k)
+    g = semiWtedChimera(n)
+    return g
+end
+
+
 """Generate a chimera, and then apply a random weighting scheme"""
 function wtedChimera(n::Integer)
-    return randWeight(chimera(n))
+    return randWeight(semiWtedChimera(n))
 end
 

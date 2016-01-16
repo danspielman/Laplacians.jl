@@ -73,7 +73,7 @@ and exports the functions for which it seems appropriate.
 
   export chimera
   export randWeight
-  export wtedChimera
+  export wtedChimera, semiWtedChimera
 
   include("IO.jl")
   export readIJ, readIJV, writeIJV
