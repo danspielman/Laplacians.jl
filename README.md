@@ -10,4 +10,4 @@ The documentation may be found in
 
 This includes instructions for installing Julia, and some tips for how to start using it.  It also includes guidelines for Dan Spielman's collaborators.
 
-
+For some examples of some of the things you can do with Laplacians, look at [this Julia notebook](http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/FirstNotebook.ipynb).

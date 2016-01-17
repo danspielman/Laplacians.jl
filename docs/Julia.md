@@ -2,6 +2,9 @@
 
 # Using Julia
 
+These are some things you might want to know about using Julia if it is new to you.
+
+## Docstrings
 
 Julia 0.4 lets you take advantage of docstrings.
 For example, `?ringGraph` produces
@@ -97,6 +100,8 @@ a
 ~~~
 
 * If you are used to programming in Matlab, you might be tempted to type a line like `for i in 1:10,`.  _Do not put extra commas in Julia!_  It will cause bad things to happen.
+
+* To get a vector with entries 1 through n, type `collect(1:n)`.  The object `1:n` is a range, rather than a vector.
 
 * Julia sparse matrix entries dissapear if they are set to 0. In order to overcome this, use the `setValue` function. `setValue(G, u, i, 0)` will set `weighti(G, u, i)` to 0 while also leaving `(u, nbri(G, u, i))` in the matrix.
 
