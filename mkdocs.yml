@@ -2,7 +2,7 @@ site_name: Laplacians.jl
 
 site_description: Graph analysis inspired by graph Laplacians and the needs of researchers at YINS
 
-theme: flatly
+theme: mkdocs
 
 repo_url: https://github.com/danspielman/Laplacians.jl
 
@@ -12,6 +12,7 @@ pages:
     - Installation: 'Installation.md'
     - Using Julia: 'Julia.md'
     - Examples: 'Examples.md'
+    - Sparse matrices as graphs: 'CSCgraph.md'
     - Solvers: 'solvers.md'
 - Developing:
     - Devleoping Laplacians: 'Developing.md'
