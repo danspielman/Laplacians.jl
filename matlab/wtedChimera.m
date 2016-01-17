@@ -6,19 +6,15 @@ function a = wtedChimera(n, i)
 
 nm = [tempname, '.txt'];
 
-cmd = ['julia ']
+cmd = ['julia '];
 
 cmd = [cmd, ' -e ''using Laplacians; writeIJV("', nm, '",' ...
                     'wtedChimera('];
        
-cmd = [cmd, num2str(n), ',', num2str(i) '))'' ']
+cmd = [cmd, num2str(n), ',', num2str(i) '))'' '];
 
-cmd
 
-unix(cmd)
+system(cmd);
 
-dl = dlmread(nm);
-a = sparse(dl(:,1),dl(:,2),dl(:,3));
-n = max(size(a))
-a(n,n) = 0;
-a = a + a';
+a = readIJV(nm);
+delete(nm);
