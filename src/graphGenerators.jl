@@ -524,7 +524,7 @@ It does this by resetting the random number generator seed.
 It should captute the state of the generator before that and then
 return it, but it does not yet."""
 function chimera(n::Integer, k::Integer)
-    srand(k)
+    srand(100*n+k)
     g = chimera(n)
     return g
 end
@@ -590,13 +590,13 @@ It does this by resetting the random number generator seed.
 It should captute the state of the generator before that and then
 return it, but it does not yet."""
 function wtedChimera(n::Integer, k::Integer)
-    srand(k)
+    srand(100*n+k)
     g = wtedChimera(n)
     return g
 end
 
 function semiWtedChimera(n::Integer, k::Integer)
-    srand(k)
+    srand(100*n+k)
     g = semiWtedChimera(n)
     return g
 end
