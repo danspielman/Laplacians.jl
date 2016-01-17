@@ -4,7 +4,7 @@
     
     <url>
      <loc>None/about/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -13,25 +13,31 @@
         
     <url>
      <loc>None/Installation/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/Julia/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/Examples/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/CSCgraph/index.html</loc>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/solvers/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
@@ -41,7 +47,7 @@
         
     <url>
      <loc>None/Developing/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
@@ -51,61 +57,61 @@
         
     <url>
      <loc>None/wholeAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/graphGeneratorsAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/IOAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/graphOpsAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/graphAlgsAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/graphUtilsAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/cutPageRankAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/solversAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/cutHeuristicsAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/localClusteringAPI/index.html</loc>
-     <lastmod>2016-01-15</lastmod>
+     <lastmod>2016-01-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
