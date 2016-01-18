@@ -8,7 +8,7 @@ function isTree(gr::SparseMatrixCSC)
 end
 
 n = 1000
-tol = 1e-12
+tol = 1e-11
 
 for i in 1:100
     println("wtedChimera($n, $i)")
