@@ -23,7 +23,7 @@ Contributors: ???
 
 =#
 
-include("Sampler.jl")
+include("sampler.jl")
 include("randTrees.jl")
 
 
