@@ -1,4 +1,5 @@
 using Base.Test
+using Laplacians
 
 # generate chimeric graphs, and test run many routines on them
 
@@ -7,6 +8,7 @@ function isTree(gr::SparseMatrixCSC)
 end
 
 n = 1000
+tol = 1e-12
 
 for i in 1:100
     println("wtedChimera($n, $i)")
@@ -14,7 +16,7 @@ for i in 1:100
     @test gr.n == n
     @test isConnected(gr)
     @test isTree(kruskal(gr))
-    @test sum(kruskal(gr)) == sum(prim(gr))
+    @test abs(sum(kruskal(gr)) - sum(prim(gr))) < tol
     @test sum(kruskal(gr,kind=:min)) <= sum(kruskal(gr,kind=:max))
 end
 
