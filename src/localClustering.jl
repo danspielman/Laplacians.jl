@@ -10,7 +10,7 @@
 """
 function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)) 
   #=
-    Notes: err < 1e-13 breaks the code. Precision is 1e-16, so 3 bits of precision are lost somewhere...
+    Notes: err smaller than 1e-13 might give weird behavior
   =#
 
   n = max(G.n, G.m)
@@ -177,7 +177,7 @@ function initGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, newID::
 end # initGPrime
 
 
-" add a random vertex to GPrime "
+" add a new vertex to GPrime "
 function addToGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, GPrime::Array{Array{Tuple{Int64,Float64},1},1}, 
                             newID::Dict{Int64,Int64}, oldID::Dict{Int64,Int64},
                             u::Int64, newU::Int64, alpha::Float64, epsSigma::Float64, maxSize::Int64)
