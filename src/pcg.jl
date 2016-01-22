@@ -7,6 +7,12 @@ Contributors:
 
 =#
 
+# KMP_LOGGING=false
+# KMP_PCGITERS=0
+
+# export KMP_LOGGING
+# export KMP_PCGITERS
+
 
 #=
 """
@@ -175,9 +181,11 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
     p = copy(z)
 
     rho = dot(r, z) # BLAS.dot does not seem faster
-    
+
+    itcnt = 0
     for iter in 1:maxits
-    
+        itcnt = itcnt+1
+        
         q = mat*p
 
         al = rho/dot(p, q)
@@ -210,6 +218,17 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
 
        
       end
+
+    #=
+    if KMP_LOGGING
+        KMP_PCGITERS = itcnt
+        println("ITERS : ", itcnt)
+    end
+
+    println(KMP_LOGGING)
+    println("iters : ", itcnt)
+    =#
+    
     return x
 end
 
