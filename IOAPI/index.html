@@ -233,14 +233,14 @@
 
 <h1 id="io">IO</h1>
 <h3 id="readij">readIJ</h3>
-<p>to read a simple edge list, each line being an (i, j) pair</p>
+<p>To read a simple edge list, each line being an (i, j) pair</p>
 <pre><code class="julia">readIJ(filename::AbstractString)
 readIJ(filename::AbstractString, sep)
 </code></pre>
 
 <p>IO.jl:4</p>
 <h3 id="readijv">readIJV</h3>
-<p>to read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this</p>
+<p>To read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this</p>
 <pre><code>&gt;&gt; [ai,aj,av] = find(triu(a));
 &gt;&gt; dlmwrite('graph.txt',[ai,aj,av],'precision',9);
 </code></pre>

@@ -256,6 +256,8 @@
         
             <li><a href="#purerandomgraph">pureRandomGraph</a></li>
         
+            <li><a href="#semiwtedchimera">semiWtedChimera</a></li>
+        
             <li><a href="#chimera">chimera</a></li>
         
             <li><a href="#randweight">randWeight</a></li>
@@ -381,6 +383,13 @@ grid2coords(n)
 </code></pre>
 
 <p>graphGenerators.jl:379</p>
+<h3 id="semiwtedchimera">semiWtedChimera</h3>
+<p>A Chimera graph with some weights.  The weights just appear when graphs are combined. For more interesting weights, use <code>wtedChimera</code></p>
+<pre><code class="julia">semiWtedChimera(n::Integer)
+semiWtedChimera(n::Integer, k::Integer)
+</code></pre>
+
+<p>graphGenerators.jl:442</p>
 <h3 id="chimera">chimera</h3>
 <p>Builds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
 <p>Builds a chimeric graph on n vertices. The components come from pureRandomGraph, connected by joinGraphs, productGraph and generalizedNecklace</p>
@@ -388,13 +397,13 @@ grid2coords(n)
 chimera(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:443</p>
+<p>graphGenerators.jl:515</p>
 <h3 id="randweight">randWeight</h3>
 <p>Applies one of a number of random weighting schemes to the edges of the graph</p>
 <pre><code class="julia">randWeight(a)
 </code></pre>
 
-<p>graphGenerators.jl:520</p>
+<p>graphGenerators.jl:535</p>
 <h3 id="wtedchimera">wtedChimera</h3>
 <p>Builds the kth wted chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
 <p>Generate a chimera, and then apply a random weighting scheme</p>
@@ -402,7 +411,7 @@ chimera(n::Integer, k::Integer)
 wtedChimera(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:585</p></div>
+<p>graphGenerators.jl:607</p></div>
             
         </div>
 

@@ -228,6 +228,8 @@
         
             <li><a href="#unweight">unweight</a></li>
         
+            <li><a href="#unweight_1">unweight!</a></li>
+        
             <li><a href="#mapweight">mapweight</a></li>
         
             <li><a href="#uniformweight">uniformWeight</a></li>
@@ -282,10 +284,16 @@
 <p>graphOps.jl:12</p>
 <h3 id="unweight">unweight</h3>
 <p>Create a new graph in that is the same as the original, but with all edge weights 1</p>
-<pre><code class="julia">unweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
+<pre><code class="julia">unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
 </code></pre>
 
 <p>graphOps.jl:16</p>
+<h3 id="unweight_1">unweight!</h3>
+<p>Change the weight of every edge in a to 1</p>
+<pre><code class="julia">unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
+</code></pre>
+
+<p>graphOps.jl:26</p>
 <h3 id="mapweight">mapweight</h3>
 <p>Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write</p>
 <pre><code class="julia">b = mapweight(a, x-&gt;rand(1)[1])
@@ -294,37 +302,37 @@
 <pre><code class="julia">mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)
 </code></pre>
 
-<p>graphOps.jl:29</p>
+<p>graphOps.jl:40</p>
 <h3 id="uniformweight">uniformWeight</h3>
 <p>Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight.</p>
 <pre><code class="julia">uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 </code></pre>
 
-<p>graphOps.jl:38</p>
+<p>graphOps.jl:49</p>
 <h3 id="uniformweight_1">uniformWeight!</h3>
 <p>Set the weight of every edge to 1</p>
 <pre><code class="julia">uniformWeight!(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>graphOps.jl:42</p>
+<p>graphOps.jl:53</p>
 <h3 id="productgraph">productGraph</h3>
 <p>The Cartesian product of two graphs.  When applied to two paths, it gives a grid.</p>
 <pre><code class="julia">productGraph(a0::SparseMatrixCSC{Tv,Ti&lt;:Integer}, a1::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>graphOps.jl:47</p>
+<p>graphOps.jl:58</p>
 <h3 id="edgevertexmat">edgeVertexMat</h3>
 <p>The signed edge-vertex adjacency matrix</p>
 <pre><code class="julia">edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
 </code></pre>
 
-<p>graphOps.jl:56</p>
+<p>graphOps.jl:67</p>
 <h3 id="subsampleedges">subsampleEdges</h3>
 <p>Create a new graph from the old, but keeping edge edge with probability <code>p</code></p>
 <pre><code class="julia">subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
 </code></pre>
 
-<p>graphOps.jl:65</p>
+<p>graphOps.jl:76</p>
 <h3 id="twolift">twoLift</h3>
 <p>Creats a 2-lift of a.  <code>flip</code> is a boolean indicating which edges cross</p>
 <pre><code class="julia">twoLift(a)
@@ -332,50 +340,50 @@ twoLift(a, flip::AbstractArray{Bool,1})
 twoLift(a, k::Integer)
 </code></pre>
 
-<p>graphOps.jl:88</p>
+<p>graphOps.jl:99</p>
 <h3 id="joingraphs">joinGraphs</h3>
-<p>create a disjoint union of graphs a and b,  and then put k random edges between them</p>
+<p>Create a disjoint union of graphs a and b,  and then put k random edges between them</p>
 <pre><code class="julia">joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
 </code></pre>
 
-<p>graphOps.jl:100</p>
+<p>graphOps.jl:111</p>
 <h3 id="plotgraph">plotGraph</h3>
 <p>Plots graph gr with coordinates (x,y)</p>
 <pre><code class="julia">plotGraph(gr, x, y)
 plotGraph(gr, x, y, color)
 </code></pre>
 
-<p>graphOps.jl:118</p>
+<p>graphOps.jl:129</p>
 <h3 id="spectraldrawing">spectralDrawing</h3>
 <p>Computes spectral coordinates, and then uses plotGraph to draw</p>
 <pre><code class="julia">spectralDrawing(a)
 </code></pre>
 
-<p>graphOps.jl:155</p>
+<p>graphOps.jl:166</p>
 <h3 id="spectralcoords">spectralCoords</h3>
 <p>Computes the spectral coordinates of a graph</p>
 <pre><code class="julia">spectralCoords(a)
 </code></pre>
 
-<p>graphOps.jl:163</p>
+<p>graphOps.jl:174</p>
 <h3 id="tounitvector">toUnitVector</h3>
-<p>creates a unit vector of length n from a given set of integers, with weights based on the number of occurences</p>
+<p>Creates a unit vector of length n from a given set of integers, with weights based on the number of occurences</p>
 <pre><code class="julia">toUnitVector(a::Array{Int64,1}, n)
 </code></pre>
 
-<p>graphOps.jl:172</p>
+<p>graphOps.jl:183</p>
 <h3 id="diagmat">diagmat</h3>
-<p>returns the diagonal matrix(as a sparse matrix) of a graph</p>
+<p>Returns the diagonal matrix(as a sparse matrix) of a graph</p>
 <pre><code class="julia">diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>graphOps.jl:194</p>
+<p>graphOps.jl:205</p>
 <h3 id="generalizednecklace">generalizedNecklace</h3>
 <p>Constructs a generalized necklace graph starting with two graphs A and H. The resulting new graph will be constructed by expanding each vertex in H to an instance of A. k random edges will be generated between components. Thus, the resulting graph may have weighted edges.</p>
 <pre><code class="julia">generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti&lt;:Integer}, k::Int64)
 </code></pre>
 
-<p>graphOps.jl:214</p></div>
+<p>graphOps.jl:225</p></div>
             
         </div>
 

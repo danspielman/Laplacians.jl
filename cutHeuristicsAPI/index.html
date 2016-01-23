@@ -222,6 +222,8 @@
         
             <li><a href="#refinecut">refineCut</a></li>
         
+            <li><a href="#dumb">dumb</a></li>
+        
     
     </ul>
 </div></div>
@@ -229,15 +231,24 @@
 
 <h1 id="cutheuristics">cutHeuristics</h1>
 <h3 id="refinecut">refineCut</h3>
-<pre><code>Modifies a cluster by adding/removing vertices based on Deg_external - Deg_Internal
-Each vertex can be added in/removed only once
-Uses O(M + N) memory
+<pre><code>Modifies a cluster by adding or removing vertices by picking at each step 
+the vertex that has the maximum value of (Deg_external - Deg_Internal).
+Each vertex can be added in/removed only once.
 </code></pre>
 
 <pre><code class="julia">refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 </code></pre>
 
-<p>cutHeuristics.jl:9</p></div>
+<p>cutHeuristics.jl:9</p>
+<h3 id="dumb">dumb</h3>
+<pre><code>Modify a cluster by passing through all the vertices exactly once and 
+adding/removing them based on the value of (Deg_external - Deg_Internal).
+</code></pre>
+
+<pre><code class="julia">dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+</code></pre>
+
+<p>cutHeuristics.jl:106</p></div>
             
         </div>
 
