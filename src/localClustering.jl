@@ -1,12 +1,13 @@
 """ 
   localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)
 
-  The LocalImprove function, from the Orrechia-Zhu paper 
+The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance
+based on the starting set using a localized version of max-flow. 
 
-  G is the given graph, A is the initial set 
-  epsSigma is a measure of the quality of the returning set (the smaller the better)
-  err is the numerical error considered throughout the algorithm
-  maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm
+G is the given graph, A is the initial set 
+epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(V\A)
+err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10
+maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|
 """
 function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)) 
   #=
@@ -46,8 +47,6 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
   while alphaMax - err > alphaMin
     alpha = (alphaMin + alphaMax) / 2
 
-    # println(alpha, " ", length(localFlow(G, A, alpha, epsSigma, maxSize)[1]), " ", abs(localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G, A)))
-
     if abs(localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G, A)) < err
       alphaMin = alpha
     else
@@ -60,7 +59,7 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
 end # localImprove
 
 
-" the LocalFlow function, from the Orecchia-Zhu paper "
+" The LocalFlow function, from the Orecchia-Zhu paper "
 function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::Float64, epsSigma::Float64, maxSize = max(G.n, G.m))
 
   # compute the number of vertices
@@ -149,7 +148,7 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
 end # localFlow
 
 
-" initialize GPrime with the set A and edges of type s->u"
+" Initialize GPrime with the set A and edges of type s->u"
 function initGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, newID::Dict{Int64,Int64}, oldID::Dict{Int64,Int64}, alpha::Float64, maxSize::Int64)
   GPrime = [Tuple{Int64,Float64}[] for i in 1:(maxSize + 2)]
   s = maxSize + 1
@@ -177,7 +176,7 @@ function initGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, newID::
 end # initGPrime
 
 
-" add a new vertex to GPrime "
+" Add a new vertex to GPrime "
 function addToGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, GPrime::Array{Array{Tuple{Int64,Float64},1},1}, 
                             newID::Dict{Int64,Int64}, oldID::Dict{Int64,Int64},
                             u::Int64, newU::Int64, alpha::Float64, epsSigma::Float64, maxSize::Int64)
@@ -203,7 +202,7 @@ function addToGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, GPrime::Array{Array{Tuple
 end
 
 
-" computes block flow between s and t"
+" Compute block flow between s and t"
 function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::Int64)
 
   # backInd = backIndices(G)
@@ -312,7 +311,7 @@ function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::
 end # localBlockFlow
 
 
-" get the min cut from the source - return all vertices in the cut besides the source "
+" Get the min cut from the source - return all vertices in the cut besides the source "
 function getCutSet(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::Int64)
 
   n = length(G)
@@ -355,11 +354,11 @@ end # getCutSet
 """
   prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 
-  The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper\n
-  s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]
+The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper\n
+s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]
 
-  phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality
-  b is used to handle precision throughout the algorithm - the higher the b, the smaller the eps
+phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality. 
+b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.
 """
 function prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 
@@ -422,8 +421,8 @@ function prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, 
 end # prn_local
 
 """ 
-  computes an approximate page rank vector from a starting set s, an alpha and an epsilon
-  algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's notes
+Computes an approximate page rank vector from a starting set s, an alpha and an epsilon
+The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes
 """
 function apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
 

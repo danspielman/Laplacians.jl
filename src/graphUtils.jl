@@ -14,7 +14,7 @@ weighti{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti) = mat.nzval[mat.colptr
 nbrs{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti) = mat.rowval[mat.colptr[v]:(mat.colptr[v+1]-1)]
 
 
-" finds the weighted degree of a vertex in the graph "
+" Finds the weighted degree of a vertex in the graph "
 function wdeg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)
   sum = 0
   for i in 1:deg(mat,v)
@@ -24,13 +24,13 @@ function wdeg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)
 end
 
 
-" sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing "
+" Sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing "
 function setValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)
   mat.nzval[mat.colptr[v]+i-1] = a
 end # setValue
 
 
-" computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph "
+" Computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph "
 function backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
   n = max(G.n, G.m)
 
@@ -67,7 +67,7 @@ function backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 
 end # backIndices
 
-" same as the above, but now the graph is in adjacency list form "
+" Same as the above, but now the graph is in adjacency list form "
 function backIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})
   n = length(G)
 
@@ -108,7 +108,7 @@ function backIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})
 end # backIndices
 
 
-" similar to findnz, but also returns 0 entries that have an edge in the sparse matrix "
+" Similar to findnz, but also returns 0 entries that have an edge in the sparse matrix "
 function findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 
   n = max(G.n, G.m)
@@ -128,7 +128,7 @@ end # findEntries
 
 
 """ 
-  returns the quality of the cut for a given graph and a given cut set s.
+  Returns the quality of the cut for a given graph and a given cut set s.
   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)
 """
 function compConductance{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
@@ -143,7 +143,7 @@ function compConductance{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 end # compConductance
 
 
-" computes the volume of subset s in an unweighted graph G "
+" Computes the volume of subset s in an unweighted graph G "
 function getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
   vol = 0.0
@@ -161,7 +161,7 @@ function getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 end # getVolume
 
 
-" computes the number of edges leaving s "
+" Computes the number of edges leaving s "
 function getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
   sets = IntSet(s)
