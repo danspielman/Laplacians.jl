@@ -118,6 +118,7 @@ function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer
             elseif (length(ind) < 50)
                 fs = cholfact(lasubsub)
                 ssubSolver = x->(fs\x)
+
             else
 
                 if tol > 0
