@@ -112,20 +112,26 @@ function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer
             
             lasubsub = lasub[ind,ind]
 
-            if tol > 0
-                if maxits > 0
-                    ssubSolver = solver(lasubsub, tol=tol, maxits=maxits);
-                else
-                    ssubSolver = solver(lasubsub, tol=tol);
-                end
-            else
-                if maxits > 0
-                    ssubSolver = solver(lasubsub, maxits=maxits);
-                else
-                    ssubSolver = solver(lasubsub);
-                end
-            end
 
+            if (length(ind) < 50)
+                ssubSolver = cholfact(lasubsub)
+            else
+
+                if tol > 0
+                    if maxits > 0
+                        ssubSolver = solver(lasubsub, tol=tol, maxits=maxits);
+                    else
+                        ssubSolver = solver(lasubsub, tol=tol);
+                    end
+                else
+                    if maxits > 0
+                        ssubSolver = solver(lasubsub, maxits=maxits);
+                    else
+                        ssubSolver = solver(lasubsub);
+                    end
+                end
+
+            end
             push!(solvers, ssubSolver)
         end
 
