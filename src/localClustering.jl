@@ -52,6 +52,9 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
     else
       alphaMax = alpha
     end
+
+    println(alphaMin, " ", alphaMax, " ", localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G,A), 
+      " ", length(localFlow(G, A, alpha, epsSigma, maxSize)[1]))
   end
 
   return localFlow(G, A, alphaMax, epsSigma, maxSize)
@@ -72,7 +75,7 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
   #=
     Initially: {A} + {Neighbors(A)}
     newID will represent the index in GPrime of a certain vertex in G
-    oldID will represent the index in G from a vertex in GPrime
+    oldID will represent the index in G of a vertex in GPrime
   =#
 
   newID = Dict{Int64,Int64}()
@@ -86,6 +89,8 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
 
   # "considered" will keep track of the vertices interesting for the flow graph.
   considered = Set{Int64}()
+  push!(considered, s)
+  push!(considered, t)
   for i in 1:length(A)
     push!(considered, A[i])
   end
@@ -205,7 +210,7 @@ end
 " Compute block flow between s and t"
 function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::Int64)
 
-  # backInd = backIndices(G)
+  backInd = backIndices(G)
 
   n = length(G)
   inQ = zeros(Bool, n)
@@ -242,7 +247,9 @@ function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::
   else
     totalflow = 0
     saturated = []
+
     for i in 1:length(G[t])
+      # ignore the current vertex if flow hasn't passed through it
       u,w = G[t][i]
       if inQ[u] == false
         continue
@@ -275,16 +282,18 @@ function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::
         u = t
         while u != s
           prevU = prev[u][1]
-          indexPrevU = prev[u][2]
-          # indexU = backInd[prevU][indexPrevU]
+          # the index of u in prevU's neighbor list
+          indexPrevU = prev[u][2] 
 
-          indexU = 1
-          for j in 1:length(u)
-            if G[u][j][1] == prevU
-              indexU = j
-              break
-            end
-          end
+          # the index of prevU in u's neighbor list
+          indexU = backInd[prevU][indexPrevU]
+          # indexU = 1
+          # for j in 1:length(G[u])
+          #   if G[u][j][1] == prevU
+          #     indexU = j
+          #     break
+          #   end
+          # end
 
           # between prevU and u
           G[prevU][indexPrevU] = (G[prevU][indexPrevU][1], G[prevU][indexPrevU][2] - currentflow)
