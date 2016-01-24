@@ -56,27 +56,84 @@ end
 =#
 
 
+"""Apply the ith solver on the ith component"""
+function blockSolver(comps, solvers)
+
+    f = function(b)
+        x = zeros(size(b))
+        for i in 1:length(comps)
+            ind = comps[i]
+            bi = b[ind]
+            x[ind] = solvers[i](bi)
+        end
+        return x
+    end
+        
+end
+
+
+
 """Takes a solver for solving nonsingular sdd systems,
 and returns a solver for solving Laplacian systems.
 The optional args tol and maxits are not necessarily taken by
 all solvers.  But, if they are, one can pass them here"""
 function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer=0)
     N = size(la)[1]
+
     lasub = la[1:(N-1),1:(N-1)]
 
-    if tol > 0
-        if maxits > 0
-            subSolver = solver(lasub, tol=tol, maxits=maxits);
+    # need to be sure that removing does not disconnect.
+    # or, if it does, solve on the components!
+
+    co = components(lasub)
+    if maximum(co) == 1
+
+        if tol > 0
+            if maxits > 0
+                subSolver = solver(lasub, tol=tol, maxits=maxits);
+            else
+                subSolver = solver(lasub, tol=tol);
+            end
         else
-            subSolver = solver(lasub, tol=tol);
+            if maxits > 0
+                subSolver = solver(lasub, maxits=maxits);
+            else
+                subSolver = solver(lasub);
+            end
         end
+
     else
-        if maxits > 0
-            subSolver = solver(lasub, maxits=maxits);
-        else
-            subSolver = solver(lasub);
+
+        comps = vecToComps(co)
+
+        solvers = []
+        for i in 1:length(comps)
+            ind = comps[i]
+            
+            lasubsub = lasub[ind,ind]
+
+            if tol > 0
+                if maxits > 0
+                    ssubSolver = solver(lasubsub, tol=tol, maxits=maxits);
+                else
+                    ssubSolver = solver(lasubsub, tol=tol);
+                end
+            else
+                if maxits > 0
+                    ssubSolver = solver(lasubsub, maxits=maxits);
+                else
+                    ssubSolver = solver(lasubsub);
+                end
+            end
+
+            push!(solvers, ssubSolver)
         end
+
+
+        subSolver = blockSolver(comps,solvers)
+
     end
+        
 
     f = function(b)
         b = b - mean(b)
