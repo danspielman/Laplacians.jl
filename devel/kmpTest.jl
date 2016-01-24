@@ -273,46 +273,90 @@ function vecstats(s)
 end
 
 
+"""Do `numruns` tests on chimeras of size `n`, going through each param choice
+in `pList`.  Also use augTreeSolver, for Laplacians, for comparison (last).
+Return the times of all runs. For example:
+
+~~~
+pList = [KMPparams(1/6^2,6,1/4,600,:rand)]
+push!(pList,KMPparams(1/4^2,4,1/4,600,:rand))
+out = manyRuns(10000,10,pList)
+~~~
+"""
 function manyRuns(n,numruns,pList)
-    tot = zeros(length(pList))
+
+    out = zeros(numruns, 1+length(pList))
+    tot = zeros(1+length(pList))
     for it in 1:numruns
-        a = chimera(n,n+it)
+        println("chimera(", n, ", ", it, ")" )
+        a = chimera(n,it)
         b = randn(n)
         b = b - mean(b)
+        
         for i in 1:length(pList)
-            fsub =  KMPLapSolver(a, tol = 0.1, maxits = 10000, params=pList[i])
+            fsub =  KMPLapSolver(a, tol = 0.01, maxits = 10000, params=pList[i], verbose=false)
             tic()
             xh = fsub(b)
-            tot[i] += toq()
+            ti = toq()
+            tot[i] += ti
+            out[it,i] = ti
         end
+
+        fsub = lapWrapSolver(augTreeSolver,lap(a),tol=0.01,maxits=10000)
+        tic()
+        xh = fsub(b)
+        ti = toq()
+        tot[1+length(pList)] += ti
+        out[it,1+length(pList)] = ti
+
+
+        for i in 1:length(pList)
+            println(string(pList[i]), " : ", tot[i])
+        end
+        println("augTree : ", tot[1+length(pList)])
 
     end
 
             
-    for i in 1:length(pList)
-        println(string(pList[i]), " : ", tot[i])
-    end
 
-    return tot
+    return out
 end
 
 function manyRunsW(n,numruns,pList)
-    tot = zeros(length(pList))
+
+    out = zeros(numruns, 1+length(pList))
+    tot = zeros(1+length(pList))
     for it in 1:numruns
-        a = wtedChimera(n,n+it)
+        println("wtedChimera(", n, ", ", it, ")" )
+        a = wtedChimera(n,it)
         b = randn(n)
         b = b - mean(b)
+        
         for i in 1:length(pList)
-            fsub =  KMPLapSolver(a, tol = 0.1, maxits = 10000, params=pList[i])
+            fsub =  KMPLapSolver(a, tol = 0.01, maxits = 10000, params=pList[i], verbose=false)
             tic()
             xh = fsub(b)
-            tot[i] += toq()
+            ti = toq()
+            tot[i] += ti
+            out[it,i] = ti
         end
-        
+
+        fsub = lapWrapSolver(augTreeSolver,lap(a),tol=0.01,maxits=10000)
+        tic()
+        xh = fsub(b)
+        ti = toq()
+        tot[1+length(pList)] += ti
+        out[it,1+length(pList)] = ti
+
+
+        for i in 1:length(pList)
+            println(string(pList[i]), " : ", tot[i])
+        end
+        println("augTree : ", tot[1+length(pList)])
+
     end
-    
-    for i in 1:length(pList)
-        println(string(pList[i]), " : ", tot[i])
-    end
-    return tot
+
+            
+
+    return out
 end
