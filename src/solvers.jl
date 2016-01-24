@@ -284,3 +284,37 @@ function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, max
   return f
 
 end
+
+"""A version of augTreePrecon specialized for Laplacians"""
+function augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
+
+  adjmat = -triu(ddmat,1)
+  adjmat = adjmat + adjmat'
+
+  tree = treeAlg(adjmat)
+
+  n = size(ddmat)[1]
+
+  augtree = augmentTree(tree,adjmat,convert(Int,round(sqrt(n))))
+
+  Dx = spdiagm(ddmat*ones(n))
+
+  augDD = Dx + spdiagm(augtree*ones(n)) - augtree
+
+    F = lapWrapSolver(cholfact,augDD)
+
+  return F
+
+end
+
+"""This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians."""
+function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, treeAlg=akpw)
+
+  F = augTreeLapPrecon(ddmat, treeAlg=treeAlg)
+
+  f(b) = pcg(ddmat, b, F, tol=tol, maxits=maxits)
+    
+  return f
+
+end
+    

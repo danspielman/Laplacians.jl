@@ -7,6 +7,34 @@ function isTree(gr::SparseMatrixCSC)
     isConnected(gr) && (nnz(gr) == 2*(gr.n-1))
 end
 
+
+
+function testSolvers(a)
+
+    la = lap(a)
+    n = size(a,1)
+
+    err = 0
+
+    b = randn(n)
+    b = b - mean(b)
+
+    f = augTreeLapSolver(la,tol=.0001,maxits=1000)
+    
+    err = err + norm(la*f(b)-b)
+
+    sdd = la
+    sdd[1,1] = sdd[1,1] + 1
+    
+    f = augTreeSolver(sdd,tol=.0001,maxits=1000)
+    
+    err = err + norm(sdd*f(b)-b)
+
+    return sdd
+end
+
+
+
 n = 1000
 tol = 1e-11
 
@@ -16,9 +44,16 @@ for i in 1:100
     @test gr.n == n
     @test isConnected(gr)
     @test isTree(kruskal(gr))
+    @test isTree(randishKruskal(gr))
+    @test isTree(randishPrim(gr))
     @test abs(sum(kruskal(gr)) - sum(prim(gr))) < tol
     @test sum(kruskal(gr,kind=:min)) <= sum(kruskal(gr,kind=:max))
+
+    testSolvers(gr)
 end
+
+
+
 
 # every single function/method should have at least one test!
 

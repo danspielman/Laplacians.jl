@@ -174,6 +174,7 @@ and exports the functions for which it seems appropriate.
 
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
+  export augTreeLapPrecon, augTreeLapSolver
 
   include("toposort.jl")
   export toposort, dirEdgeVertexMat
