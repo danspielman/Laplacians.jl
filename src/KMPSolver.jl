@@ -3,7 +3,6 @@
 An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
 =#
 
-global KMP_LOGGING=false
 global KMP_SAVEMATS=false
 
 global KMP_MATS=[]
@@ -22,16 +21,19 @@ type KMPparams
     iters::Int64   # iters of PCG to apply between levels
     treeScale::Float64 # scale tree by treeScale*log_2 (n) * aveStretch
     n0::Int64 # the number of edges at which to go direct
+    treeAlg # :akpw or :rand
 end
 
-defaultKMPparams = KMPparams(1/10, 8, 2, 200)
+defaultKMPparams = KMPparams(1/36, 6, 0.25, 10, :akpw)
 
+# this is just for Laplacians, not general SDD
 immutable elimLeafNode
     nodeid::Int64
     parent::Int64
     wtDeg::Float64
 end
 
+# this is just for Laplacians, not general SDD
 immutable elimDeg2Node
     nodeid::Int64
     nbr1::Int64
@@ -41,51 +43,10 @@ immutable elimDeg2Node
 end
 
 
-function makeElimList(t)
-    tr = matToTree(t)
-    n = size(tr.children,1)  
-    
-    elims = Array{elimLeafNode}(0)
-    for vi in n:-1:2
-        v = tr.children[vi]
-        push!(elims,elimLeafNode(v,tr.parent[v],tr.weights[vi]))
-    end
-    
-    return elims
-end
-
-
-# Must be in DFS order
+# The tree must be in DFS order
 # marked is 1 if flagged for possible elimination,
 # and set to 2 if we do eliminate it
-function elimDeg1(t, marked)
-    n = t.n
-
-    deg = Array{Int64}(n)
-    for v in 1:n
-        deg[v] = t.colptr[v+1] - t.colptr[v]
-    end
-
-    elims1 = Array{elimLeafNode}(0)
-
-    for v in n:-1:2
-
-        if (deg[v] == 1 && marked[v] == 1)
-            parent = t.rowval[t.colptr[v]];
-            wt = t.nzval[t.colptr[v]];
-            push!(elims1,elimLeafNode(v,parent,wt))
-
-            deg[parent] = deg[parent] - 1
-            marked[v] = 2
-        end
-    end
-    return elims1
-end
-
-
-# Must be in DFS order
-# marked is 1 if flagged for possible elimination,
-# and set to 2 if we do eliminate it
+# is just for Laplacians matrices, not general SDD    
 function elimDeg12(t, marked)
 
     # make sure root is not marked
@@ -210,7 +171,9 @@ function backSolve(x, y, elims1, elims2)
 
 end
 
-function subMean(x::Array{Float64,1})
+
+# subtract off the mean from a vector, in place
+function subMean!(x::Array{Float64,1})
     n = size(x,1)
     mn = mean(x)
     for i in 1:n,
@@ -218,8 +181,16 @@ function subMean(x::Array{Float64,1})
     end
 end
 
+"""Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
+function KMPLapSolver(a; verbose=false,
+                      tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
 
-function KMPLapSolver(a; tree=akpw(a), tol::Real=1e-6, maxits::Integer=100,  params::KMPparams=defaultKMPparams)
+    if params.treeAlg == :rand
+        tree = randishPrim(a)
+    else
+        tree = akpw(a)
+    end
+
     n = size(a,1);
 
     # if for some reason the graph is a tree, this will fail
@@ -227,6 +198,10 @@ function KMPLapSolver(a; tree=akpw(a), tol::Real=1e-6, maxits::Integer=100,  par
     # so, default to a direct method
 
     if (nnz(tree) == nnz(a))
+        if verbose
+            println("The graph is a tree.  Solve directly")
+        end
+        
         return lapWrapSolver(cholfact, lap(a))
     end
 
@@ -247,17 +222,17 @@ function KMPLapSolver(a; tree=akpw(a), tol::Real=1e-6, maxits::Integer=100,  par
     end
 
 
-    fsub = KMPLapPrecon(aord, tord, params)
+    fsub = KMPLapPrecon(aord, tord, params, verbose=verbose)
 
 #    f = function(b::Array{Float64,1}; tol::Real=tol, maxits::Integer=maxits)
     f = function(b::Array{Float64,1})
         bord = b[ord]
         
-        xord = pcg(la, bord, fsub, tol=tol, maxits=maxits)
+        xord = pcg(la, bord, fsub, tol=tol, maxits=maxits, verbose=verbose)
 
         x = zeros(Float64,n)
         x[ord] = xord
-        subMean(x) # x = x - mean(x)
+        subMean!(x) # x = x - mean(x)
         return x
     end
 
@@ -273,7 +248,7 @@ end
 
 
 
-function KMPLapPrecon(a, t, params)
+function KMPLapPrecon(a, t, params; verbose=false)
     n = size(a,1);
 
     rest = a-t;
@@ -286,7 +261,7 @@ function KMPLapPrecon(a, t, params)
     fac = aveStretch/targetStretch
     tree = fac*t;
 
-    if KMP_LOGGING
+    if verbose
         println("aveStretch : ", aveStretch, " fac : ", fac)
     end
     
@@ -296,13 +271,13 @@ function KMPLapPrecon(a, t, params)
 
     ijvs = IJVS(ai,aj,av,sv)
 
-    f = KMPLapPreconSub(tree, ijvs, targetStretch, 0, params)
+    f = KMPLapPreconSub(tree, ijvs, targetStretch, 0, params, verbose=verbose)
     
     return f
 end
 
 
-function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::KMPparams)
+function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::KMPparams; verbose=false)
 
     # problem: are forming la before sampling.  should be other way around, at least for top level!
     # that is, we are constructing Heavy, and I don't want to!
@@ -310,9 +285,8 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
     m = size(ijvs.i,1)
     n = size(tree,1)
 
-    if KMP_LOGGING
-        println("level : ", level)
-        println("rest : ", m , ", dim : " , n)
+    if verbose
+        println("level ", level, ". Dimension ", n, " off-tree edges : ", m)
     end
 
     # if is nothing in ijvs
@@ -323,12 +297,6 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
 
 
     ijvs1 = stretchSample(ijvs,targetStretch,params.frac)
-    if KMP_LOGGING
-        println("Sample by ", params.frac, ". From : ", length(ijvs.i), " to : ", length(ijvs1.i));
-    end
-
-
-
     
 
     if (length(ijvs1.i) <= params.n0)
@@ -359,10 +327,10 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n1,n1)
         la1 = lap(rest + rest' + subtree)
 
-        fsub = KMPLapPreconSub(subtree, ijvs1, targetStretch, level+1, params)
+        fsub = KMPLapPreconSub(subtree, ijvs1, targetStretch, level+1, params, verbose=verbose)
 
         f = function(b::Array{Float64,1})
-            subMean(b) # b = b - mean(b)
+            subMean!(b) # b = b - mean(b)
 
             y = forwardSolve(b, elims1, elims2)
             ys = y[ind]
@@ -373,7 +341,7 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
             x[ind] = xs
 
             backSolve(x, y, elims1, elims2)
-            subMean(x) # x = x - mean(x)
+            subMean!(x) # x = x - mean(x)
 
             return x
         end

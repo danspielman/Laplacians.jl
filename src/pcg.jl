@@ -7,12 +7,6 @@ Contributors:
 
 =#
 
-# KMP_LOGGING=false
-# KMP_PCGITERS=0
-
-# export KMP_LOGGING
-# export KMP_PCGITERS
-
 
 #=
 """
@@ -44,16 +38,16 @@ function cg(mat, b; tol::Real=1e-6, maxits::Integer=100)
 end
 
 
-function pcg(mat, b::Array{Float64,1}, pre; tol::Real=1e-6, maxits::Integer=100)
-    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits)
+function pcg(mat, b::Array{Float64,1}, pre; tol::Real=1e-6, maxits::Integer=100, verbose=false)
+    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, verbose=verbose)
 end
 
-function pcg(mat, b::Array{Float32,1}, pre; tol::Real=1e-6, maxits::Integer=100)
-    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits)
+function pcg(mat, b::Array{Float32,1}, pre; tol::Real=1e-6, maxits::Integer=100, verbose=false)
+    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, verbose=verbose)
 end
 
-function pcg(mat, b, pre; tol::Real=1e-6, maxits::Integer=100)
-    pcgSlow(mat, b, pre, tol=tol, maxits=maxits)
+function pcg(mat, b, pre; tol::Real=1e-6, maxits::Integer=100, verbose=false)
+    pcgSlow(mat, b, pre, tol=tol, maxits=maxits, verbose=verbose)
 end
 
 
@@ -169,7 +163,7 @@ end
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar paramaters
 function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
-        tol::Real=1e-6, maxits::Integer=100)
+        tol::Real=1e-6, maxits::Integer=100, verbose=false)
 
     n = size(mat,2)
     
@@ -219,21 +213,15 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
        
       end
 
-    #=
-    if KMP_LOGGING
-        KMP_PCGITERS = itcnt
-        println("ITERS : ", itcnt)
+    if verbose
+        println("PCG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
-    println(KMP_LOGGING)
-    println("iters : ", itcnt)
-    =#
-    
     return x
 end
 
 function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
-        tol::Real=1e-6, maxits::Integer=100)
+        tol::Real=1e-6, maxits::Integer=100, verbose=false)
 
 
     n = size(mat,2)
@@ -284,6 +272,11 @@ function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
             p[i] = z[i] + beta*p[i]
         end
        
-      end
+    end
+
+    if verbose
+        println("PCG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+    end
+
     return x
 end
