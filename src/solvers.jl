@@ -262,7 +262,7 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishKrus
 end
 
 """This is the solver that calls augTreePrecon"""
-function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, treeAlg=randishPrim)
+function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, treeAlg=akpw)
 
   F = augTreePrecon(ddmat, treeAlg=treeAlg)
 
