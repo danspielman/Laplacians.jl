@@ -256,10 +256,21 @@ function KMPLapPrecon(a, t, params; verbose=false)
     st = compStretches(t,rest);
     aveStretch = sum(st)/nnz(rest)
 
-    targetStretch = 1/(params.treeScale*log(n)/log(2))
+    if params.treeScale > 0
+    
+        targetStretch = 1/(params.treeScale*log(n)/log(2))
 
-    fac = aveStretch/targetStretch
-    tree = fac*t;
+        fac = aveStretch/targetStretch
+        tree = fac*t;
+
+    else
+
+        targetStretch = 1.0
+
+        fac = aveStretch/targetStretch
+        tree = t;
+
+    end
 
     if verbose
         println("aveStretch : ", aveStretch, " fac : ", fac)
