@@ -64,7 +64,7 @@ function blockSolver(comps, solvers)
         for i in 1:length(comps)
             ind = comps[i]
             bi = b[ind]
-            x[ind] = solvers[i](bi)
+            x[ind] = (solvers[i])(bi)
         end
         return x
     end
@@ -112,20 +112,29 @@ function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer
             
             lasubsub = lasub[ind,ind]
 
-            if tol > 0
-                if maxits > 0
-                    ssubSolver = solver(lasubsub, tol=tol, maxits=maxits);
-                else
-                    ssubSolver = solver(lasubsub, tol=tol);
-                end
+            if (length(ind) == 1)
+                ssubSolver = x->(x/lasubsub[1,1])
+            
+            elseif (length(ind) < 50)
+                fs = cholfact(lasubsub)
+                ssubSolver = x->(fs\x)
             else
-                if maxits > 0
-                    ssubSolver = solver(lasubsub, maxits=maxits);
-                else
-                    ssubSolver = solver(lasubsub);
-                end
-            end
 
+                if tol > 0
+                    if maxits > 0
+                        ssubSolver = solver(lasubsub, tol=tol, maxits=maxits);
+                    else
+                        ssubSolver = solver(lasubsub, tol=tol);
+                    end
+                else
+                    if maxits > 0
+                        ssubSolver = solver(lasubsub, maxits=maxits);
+                    else
+                        ssubSolver = solver(lasubsub);
+                    end
+                end
+
+            end
             push!(solvers, ssubSolver)
         end
 
