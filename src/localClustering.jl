@@ -2,7 +2,12 @@
   localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)
 
 The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance
-based on the starting set using a localized version of max-flow. 
+based on the starting set using a localized version of max-flow.
+
+Small discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one, 
+the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component, 
+it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize, 
+our initial conductance might be the best solution we can raech.
 
 G is the given graph, A is the initial set 
 epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(V\A)
@@ -52,12 +57,14 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
     else
       alphaMax = alpha
     end
-
-    println(alphaMin, " ", alphaMax, " ", localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G,A), 
-      " ", length(localFlow(G, A, alpha, epsSigma, maxSize)[1]))
   end
 
-  return localFlow(G, A, alphaMax, epsSigma, maxSize)
+  # check if the initial conductance is better than what we got after running flow
+  if compConductance(G, A) < compConductance(G, localFlow(G, A, alphaMax, epsSigma, maxSize)[1])
+    return A, compConductance(G, A)
+  else
+    return localFlow(G, A, alphaMax, epsSigma, maxSize)
+  end
 
 end # localImprove
 
@@ -129,15 +136,15 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
         v = nbri(G, u, i)
         
         if v in considered == false
-          push!(considered, v)
           push!(newbatch, v)
+          push!(considered, v)
         end
       end
     end
 
     # see if the size of the graph exceeds the maximum size imposed by the user
     if (length(considered) > maxSize)
-      return [oldID[u] for u in getCutSet(GPrime, s, t)], getVolume(G, A)
+      continue
     end
 
     # update GPrime
@@ -287,13 +294,6 @@ function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::
 
           # the index of prevU in u's neighbor list
           indexU = backInd[prevU][indexPrevU]
-          # indexU = 1
-          # for j in 1:length(G[u])
-          #   if G[u][j][1] == prevU
-          #     indexU = j
-          #     break
-          #   end
-          # end
 
           # between prevU and u
           G[prevU][indexPrevU] = (G[prevU][indexPrevU][1], G[prevU][indexPrevU][2] - currentflow)

@@ -143,11 +143,11 @@ and exports the functions for which it seems appropriate.
   export akpw
   export akpw!
 
-  # include("localClustering.jl")
+  include("localClustering.jl")
 
-  # export prn
-  # export apr
-  # export localImprove
+  export prn
+  export apr
+  export localImprove
 
   include("cutHeuristics.jl")
 
