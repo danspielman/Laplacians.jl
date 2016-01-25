@@ -561,7 +561,7 @@ kidsPtr  :: Array{Tind,1}
 <pre><code class="julia">apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
 </code></pre>
 
-<p>at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:431</p>
+<p>at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:440</p>
 <h3 id="augtreeprecon">augTreePrecon</h3>
 <p>This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.</p>
 <pre><code class="julia">augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
@@ -799,12 +799,13 @@ lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 <p>at /Users/serbanstan/git/Laplacians.jl/src/solvers.jl:108</p>
 <h3 id="localimprove">localImprove</h3>
 <p>localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)</p>
-<p>The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow. </p>
+<p>The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.</p>
+<p>Small discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.</p>
 <p>G is the given graph, A is the initial set  epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA) err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10 maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|</p>
 <pre><code class="julia">localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})
 </code></pre>
 
-<p>at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:17</p>
+<p>at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:22</p>
 <h3 id="mapweight">mapweight</h3>
 <p>Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write</p>
 <pre><code class="julia">b = mapweight(a, x-&gt;rand(1)[1])
@@ -886,7 +887,7 @@ plotGraph(gr, x, y, color)
 <pre><code class="julia">prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 </code></pre>
 
-<p>at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:365</p>
+<p>at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:374</p>
 <h3 id="productgraph">productGraph</h3>
 <p>The Cartesian product of two graphs.  When applied to two paths, it gives a grid.</p>
 <pre><code class="julia">productGraph(a0::SparseMatrixCSC{Tv,Ti&lt;:Integer}, a1::SparseMatrixCSC{Tv,Ti&lt;:Integer})

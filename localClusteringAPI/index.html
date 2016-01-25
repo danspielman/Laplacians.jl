@@ -234,12 +234,13 @@
 <h1 id="localclustering">localClustering</h1>
 <h3 id="localimprove">localImprove</h3>
 <p>localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)</p>
-<p>The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow. </p>
+<p>The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.</p>
+<p>Small discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.</p>
 <p>G is the given graph, A is the initial set  epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA) err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10 maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|</p>
 <pre><code class="julia">localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})
 </code></pre>
 
-<p>localClustering.jl:17</p>
+<p>localClustering.jl:22</p>
 <h3 id="prn">prn</h3>
 <p>prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)</p>
 <p>The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper</p>
@@ -248,13 +249,13 @@
 <pre><code class="julia">prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 </code></pre>
 
-<p>localClustering.jl:365</p>
+<p>localClustering.jl:374</p>
 <h3 id="apr">apr</h3>
 <p>Computes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes</p>
 <pre><code class="julia">apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
 </code></pre>
 
-<p>localClustering.jl:431</p></div>
+<p>localClustering.jl:440</p></div>
             
         </div>
 
