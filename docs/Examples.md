@@ -8,4 +8,4 @@ You should be able to find them under ~/.julia/v0.4/Laplacians/notebooks.
 * [Solvers](http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Solvers.ipynb)
 * [Sampler](http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Sampler.ipynb)
 * [LocalClustering](https://github.com/danspielman/Laplacians.jl/blob/master/notebooks/LocalClustering.ipynb)
-* [LocalClustering Statistics]()
+* [LocalClustering Statistics](https://github.com/danspielman/Laplacians.jl/blob/master/notebooks/LocalClustering%20Statistics.ipynb)
