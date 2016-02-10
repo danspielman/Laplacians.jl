@@ -1,7 +1,7 @@
 # cutHeuristics
 ### refineCut
 ```
-Modifies a cluster by adding or removing vertices by picking at each step 
+Modify a cluster by adding or removing vertices by picking at each step 
 the vertex that has the maximum value of (Deg_external - Deg_Internal).
 Each vertex can be added in/removed only once.
 ```

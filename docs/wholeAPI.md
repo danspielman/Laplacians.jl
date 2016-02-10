@@ -111,7 +111,7 @@ Computes an approximate page rank vector from a starting set s, an alpha and an 
 apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
 ```
 
- at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:431
+ at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:440
 
 
 ### augTreePrecon
@@ -525,16 +525,21 @@ lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 ### localImprove
 localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)
 
-The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow. 
+The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.
 
-G is the given graph, A is the initial set  epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA) err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10 maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|
+Small discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.
+
+  * G is the given graph, A is the initial set 
+  * epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA)
+  * err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10
+  * maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|
 
 
 ```julia
 localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})
 ```
 
- at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:17
+ at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:22
 
 
 ### mapweight
@@ -678,7 +683,7 @@ phi is a bound on the quality of the conductance of the cut - the smaller the ph
 prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 ```
 
- at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:365
+ at /Users/serbanstan/git/Laplacians.jl/src/localClustering.jl:374
 
 
 ### productGraph
@@ -816,7 +821,7 @@ readIJV(filename::AbstractString)
 
 ### refineCut
 ```
-Modifies a cluster by adding or removing vertices by picking at each step 
+Modify a cluster by adding or removing vertices by picking at each step 
 the vertex that has the maximum value of (Deg_external - Deg_Internal).
 Each vertex can be added in/removed only once.
 ```

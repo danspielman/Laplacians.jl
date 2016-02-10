@@ -1,6 +1,6 @@
 
 """
-	Modifies a cluster by adding or removing vertices by picking at each step 
+	Modify a cluster by adding or removing vertices by picking at each step 
 	the vertex that has the maximum value of (Deg_external - Deg_Internal).
 	Each vertex can be added in/removed only once.
 """
@@ -105,7 +105,7 @@ function dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
 	n = max(G.n, G.m)
 
-	news = copy(s)
+	news = IntSet(s)
 
 	for v in 1:n
 		nrbsA = 0
@@ -122,16 +122,12 @@ function dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 		if nrbsA >= nrbsnotA
 			push!(news, v)
 		else
-			for i in 1:length(news)
-				if news[i] == v
-					news[i] = news[length(news)]
-					Base.pop!(news)
-					break
-				end
+			if v in news
+				pop!(news, v)
 			end
 		end
 	end
 
-	return news
+	return collect(news)
 
 end

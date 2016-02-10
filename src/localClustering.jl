@@ -9,10 +9,10 @@ the algorithm will add more and more vertices until hitting a better conductance
 it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize, 
 our initial conductance might be the best solution we can raech.
 
-G is the given graph, A is the initial set 
-epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(V\A)
-err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10
-maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|
+* G is the given graph, A is the initial set 
+* epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(V\A)
+* err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10
+* maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|
 """
 function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)) 
   #=
