@@ -1,4 +1,4 @@
-#=
+=
 
 An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
 =#
@@ -24,7 +24,7 @@ type KMPparams
     treeAlg # :akpw or :rand
 end
 
-defaultKMPparams = KMPparams(1/36, 6, 0.25, 10, :akpw)
+defaultKMPparams = KMPparams(1/36, 6, 0.125, 600, :akpw)
 
 # this is just for Laplacians, not general SDD
 immutable elimLeafNode
