@@ -30,6 +30,33 @@ function setValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)
 end # setValue
 
 
+""" For a symmetric matrix, this gives the correspondance between pairs of entries in an ijv.
+So, ai[ind] = aj[flip[ind]].  For example, 
+
+~~~
+(ai,aj,av) = findnz(a);
+fl = flipIndex(a)
+ind = 10
+@show backind = fl[10]
+@show [ai[ind], aj[ind], av[ind]]
+@show [ai[backind], aj[backind], av[backind]];
+
+backind = fl[10] = 4
+[ai[ind],aj[ind],av[ind]] = [2.0,4.0,0.7]
+[ai[backind],aj[backind],av[backind]] = [4.0,2.0,0.7]
+~~~
+"""
+function flipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
+
+  b = SparseMatrixCSC(a.m, a.n, copy(a.colptr), copy(a.rowval), collect(UnitRange{Tind}(1,nnz(a))) );
+  bakMat = b';
+  return bakMat.nzval
+
+end
+
+
+
+
 " Computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph "
 function backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
   n = max(G.n, G.m)

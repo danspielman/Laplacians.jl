@@ -43,6 +43,7 @@ and exports the functions for which it seems appropriate.
   export wdeg
   export setValue
   export backIndices
+  export flipIndex
   export findEntries
   export compConductance
   export getVolume
