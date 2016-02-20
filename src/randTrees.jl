@@ -33,22 +33,13 @@ function randishKruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 
 end
 
-function compFlipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
-
-  b = SparseMatrixCSC(a.m, a.n, copy(a.colptr), copy(a.rowval), collect(UnitRange{Tind}(1,nnz(a))) );
-  bakMat = b';
-  return bakMat.nzval
-
-end
-
-
 function randishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})
 
   n = mat.n
   m = nnz(mat)
 
   (ai, aj, av) = findnz(mat)
-  flipInd = compFlipIndex(mat)
+  flipInd = flipIndex(mat)
 
     
   visited = zeros(Bool,n)

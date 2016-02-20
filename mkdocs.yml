@@ -23,7 +23,6 @@ pages:
     - graphOps: 'graphOpsAPI.md'
     - graphAlgs: 'graphAlgsAPI.md'
     - graphUtils: 'graphUtilsAPI.md'
-    - cutPageRank: 'cutPageRankAPI.md'
     - solvers: 'solversAPI.md'
     - cutHeuristics: 'cutHeuristicsAPI.md'
     - localClustering: 'localClusteringAPI.md'

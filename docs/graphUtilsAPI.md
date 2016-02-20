@@ -1,6 +1,6 @@
 # graphUtils
 ### wdeg
-finds the weighted degree of a vertex in the graph 
+Finds the weighted degree of a vertex in the graph 
 
 
 ```julia
@@ -12,7 +12,7 @@ graphUtils.jl:19
 
 
 ### setValue
-sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing 
+Sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing 
 
 
 ```julia
@@ -24,9 +24,9 @@ graphUtils.jl:29
 
 
 ### backIndices
-same as the above, but now the graph is in adjacency list form 
+Same as the above, but now the graph is in adjacency list form 
 
-computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph 
+Computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph 
 
 
 ```julia
@@ -39,7 +39,7 @@ graphUtils.jl:35
 
 
 ### findEntries
-similar to findnz, but also returns 0 entries that have an edge in the sparse matrix 
+Similar to findnz, but also returns 0 entries that have an edge in the sparse matrix 
 
 
 ```julia
@@ -51,7 +51,7 @@ graphUtils.jl:114
 
 
 ### compConductance
-returns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)
+Returns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)
 
 
 ```julia
@@ -63,7 +63,7 @@ graphUtils.jl:136
 
 
 ### getVolume
-computes the volume of subset s in an unweighted graph G 
+Computes the volume of subset s in an unweighted graph G 
 
 
 ```julia
@@ -75,7 +75,7 @@ graphUtils.jl:149
 
 
 ### getObound
-computes the number of edges leaving s 
+Computes the number of edges leaving s 
 
 
 ```julia

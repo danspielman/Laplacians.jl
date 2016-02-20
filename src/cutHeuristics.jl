@@ -1,8 +1,8 @@
 
 """
-	Modifies a cluster by adding/removing vertices based on Deg_external - Deg_Internal
-	Each vertex can be added in/removed only once
-	Uses O(M + N) memory
+	Modify a cluster by adding or removing vertices by picking at each step 
+	the vertex that has the maximum value of (Deg_external - Deg_Internal).
+	Each vertex can be added in/removed only once.
 """
 function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
@@ -97,11 +97,15 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 	return news
 end
 
+"""
+	Modify a cluster by passing through all the vertices exactly once and 
+	adding/removing them based on the value of (Deg_external - Deg_Internal).
+"""
 function dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
 	n = max(G.n, G.m)
 
-	news = copy(s)
+	news = IntSet(s)
 
 	for v in 1:n
 		nrbsA = 0
@@ -118,16 +122,12 @@ function dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 		if nrbsA >= nrbsnotA
 			push!(news, v)
 		else
-			for i in 1:length(news)
-				if news[i] == v
-					news[i] = news[length(news)]
-					Base.pop!(news)
-					break
-				end
+			if v in news
+				pop!(news, v)
 			end
 		end
 	end
 
-	return news
+	return collect(news)
 
 end
