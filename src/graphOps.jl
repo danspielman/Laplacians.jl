@@ -123,6 +123,13 @@ function joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC
 end
 
 
+"""
+ Create a disjoint union of graphs a and b,
+  with no edges between them.
+"""
+disjoin(a,b) = joinGraphs(a,b,0)
+
+
 
 """Plots graph gr with coordinates (x,y)"""
 function plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)

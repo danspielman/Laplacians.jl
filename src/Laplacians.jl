@@ -93,7 +93,7 @@ and exports the functions for which it seems appropriate.
   export subsampleEdges
 
   export twoLift
-  export joinGraphs
+  export joinGraphs, disjoin
 
   export plotGraph
 
