@@ -182,10 +182,51 @@ function subMean!(x::Array{Float64,1})
 end
 
 
+
+"""Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
+function KMPSDDSolver(mat; verbose=false,
+                      tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
+
+    n = size(mat,1)
+    s = mat*ones(n)
+    s = sparse(max(s,0))
+
+    if (s == 0)
+        error("Matrix was not diagonally dominant.")
+    end
+    
+    # Force symmetric and diagonal zero
+    a = triu(abs(mat),1)
+    a = a + a'
+    
+    a1 = [sparse([0 s']); [s a]]
+    
+    f1 = KMPLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, params=params)
+
+    f = function(b::Array{Float64,1})
+
+        b1 = [-sum(b);b]
+        x1 = f1(b1)
+        x = x1[2:end] - x1[1]
+        
+        return x
+        
+    end
+    
+    return f
+end
+
+
 """Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
 function KMPLapSolver(a; verbose=false,
                       tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
 
+
+
+    if (minimum(a) < 0)
+        error("The adjacency matrix cannot have negative entries.")
+    end
+    
 
     co = components(a)
     if maximum(co) == 1
@@ -246,7 +287,6 @@ function KMPLapSolver1(a; verbose=false,
         
         return lapWrapSolver(cholfact, lap(a))
     end
-
 
 
     if params.treeAlg == :rand
