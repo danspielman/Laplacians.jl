@@ -181,9 +181,73 @@ function subMean!(x::Array{Float64,1})
     end
 end
 
+
 """Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
 function KMPLapSolver(a; verbose=false,
                       tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
+
+
+    co = components(a)
+    if maximum(co) == 1
+
+        return KMPLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits,  params=params)
+
+
+    else
+
+        comps = vecToComps(co)
+
+        if verbose
+            println("The graph has $(length(comps)) components.")
+        end
+
+
+        solvers = []
+        for i in 1:length(comps)
+            ind = comps[i]
+            
+            asub = a[ind,ind]
+
+            if (length(ind) == 1)
+                error("Node $ind has no edges.")
+            end
+            
+            subSolver = KMPLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits,  params=params)
+
+            push!(solvers, subSolver)
+        end
+
+
+        return Laplacians.blockSolver(comps,solvers)
+
+    end
+    
+end
+
+
+
+# KMPLapSolver drops right in to this after doing some checks and splitting on components
+function KMPLapSolver1(a; verbose=false,
+                      tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
+
+    if (a.n <= params.n0)
+        if verbose
+            println("The graph is small.  Solve directly")
+        end
+        
+        return lapWrapSolver(cholfact, lap(a))
+    end
+
+
+    if (nnz(a) == 2*(a.n - 1))
+        if verbose
+            println("The graph is a tree.  Solve directly")
+        end
+        
+        return lapWrapSolver(cholfact, lap(a))
+    end
+
+
 
     if params.treeAlg == :rand
         tree = randishPrim(a)
@@ -196,14 +260,6 @@ function KMPLapSolver(a; verbose=false,
     # if for some reason the graph is a tree, this will fail
     # because the stretches will sum to zero
     # so, default to a direct method
-
-    if (nnz(tree) == nnz(a))
-        if verbose
-            println("The graph is a tree.  Solve directly")
-        end
-        
-        return lapWrapSolver(cholfact, lap(a))
-    end
 
 
 
