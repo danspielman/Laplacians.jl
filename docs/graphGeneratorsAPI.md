@@ -221,6 +221,19 @@ graphGenerators.jl:379
 
 
 
+### semiWtedChimera
+A Chimera graph with some weights.  The weights just appear when graphs are combined. For more interesting weights, use `wtedChimera`
+
+
+```julia
+semiWtedChimera(n::Integer)
+semiWtedChimera(n::Integer, k::Integer)
+```
+
+graphGenerators.jl:442
+
+
+
 ### chimera
 Builds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.
 
@@ -232,7 +245,7 @@ chimera(n::Integer)
 chimera(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:443
+graphGenerators.jl:515
 
 
 
@@ -244,7 +257,7 @@ Applies one of a number of random weighting schemes to the edges of the graph
 randWeight(a)
 ```
 
-graphGenerators.jl:520
+graphGenerators.jl:535
 
 
 
@@ -259,7 +272,7 @@ wtedChimera(n::Integer)
 wtedChimera(n::Integer, k::Integer)
 ```
 
-graphGenerators.jl:585
+graphGenerators.jl:607
 
 
 

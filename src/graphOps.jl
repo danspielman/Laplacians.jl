@@ -104,7 +104,7 @@ twoLift(a, k::Integer) = twoLift(a,randperm(div(nnz(a),2)) .> k)
 
 
 """
- create a disjoint union of graphs a and b,
+ Create a disjoint union of graphs a and b,
  and then put k random edges between them
 """
 function joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
@@ -121,6 +121,13 @@ function joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC
 
     ab = sparse([ai;bi;ji;jj],[aj;bj;jj;ji],[av;bv;ones(Tval,2*k)],na+nb,na+nb)
 end
+
+
+"""
+ Create a disjoint union of graphs a and b,
+  with no edges between them.
+"""
+disjoin(a,b) = joinGraphs(a,b,0)
 
 
 
@@ -177,7 +184,7 @@ function spectralCoords(a)
 
 end # spectralCoords
 
-"""creates a unit vector of length n from a given set of integers, with weights based on the number of occurences"""
+"""Creates a unit vector of length n from a given set of integers, with weights based on the number of occurences"""
 function toUnitVector(a::Array{Int64,1}, n)
 
   v = zeros(n)
@@ -199,7 +206,7 @@ function toUnitVector(a::Array{Int64,1}, n)
 
 end # toUnitVector
 
-"returns the diagonal matrix(as a sparse matrix) of a graph"
+"Returns the diagonal matrix(as a sparse matrix) of a graph"
 function diagmat{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti})
 
   dw = zeros(Tv, G.n)

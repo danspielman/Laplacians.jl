@@ -1,6 +1,6 @@
 # IO
 ### readIJ
-to read a simple edge list, each line being an (i, j) pair
+To read a simple edge list, each line being an (i, j) pair
 
 
 ```julia
@@ -13,7 +13,7 @@ IO.jl:4
 
 
 ### readIJV
-to read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this
+To read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this
 
 ```
 >> [ai,aj,av] = find(triu(a));

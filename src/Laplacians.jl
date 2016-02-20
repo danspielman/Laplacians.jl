@@ -43,6 +43,7 @@ and exports the functions for which it seems appropriate.
   export wdeg
   export setValue
   export backIndices
+  export flipIndex
   export findEntries
   export compConductance
   export getVolume
@@ -92,7 +93,7 @@ and exports the functions for which it seems appropriate.
   export subsampleEdges
 
   export twoLift
-  export joinGraphs
+  export joinGraphs, disjoin
 
   export plotGraph
 
@@ -142,21 +143,6 @@ and exports the functions for which it seems appropriate.
 
   export akpw
   export akpw!
-
-  # include("cutPageRank.jl")
-
-  # export prn
-  # export apr
-  # export pr
-  # export ppr
-
-  # include("flowClustering.jl")
-
-  # export localImprove
-  # export localFlow
-  # export compConductance
-  # export getVolume
-  # export getObound
 
   include("localClustering.jl")
 

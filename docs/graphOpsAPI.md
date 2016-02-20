@@ -40,10 +40,22 @@ Create a new graph in that is the same as the original, but with all edge weight
 
 
 ```julia
-unweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
+unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
 ```
 
 graphOps.jl:16
+
+
+
+### unweight!
+Change the weight of every edge in a to 1
+
+
+```julia
+unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
+```
+
+graphOps.jl:26
 
 
 
@@ -59,7 +71,7 @@ b = mapweight(a, x->rand(1)[1])
 mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)
 ```
 
-graphOps.jl:29
+graphOps.jl:40
 
 
 
@@ -71,7 +83,7 @@ Put a uniform [0,1] weight on every edge.  This is an example of how to use mapw
 uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 ```
 
-graphOps.jl:38
+graphOps.jl:49
 
 
 
@@ -83,7 +95,7 @@ Set the weight of every edge to 1
 uniformWeight!(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphOps.jl:42
+graphOps.jl:53
 
 
 
@@ -95,7 +107,7 @@ The Cartesian product of two graphs.  When applied to two paths, it gives a grid
 productGraph(a0::SparseMatrixCSC{Tv,Ti<:Integer}, a1::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphOps.jl:47
+graphOps.jl:58
 
 
 
@@ -107,7 +119,7 @@ The signed edge-vertex adjacency matrix
 edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
-graphOps.jl:56
+graphOps.jl:67
 
 
 
@@ -119,7 +131,7 @@ Create a new graph from the old, but keeping edge edge with probability `p`
 subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
 ```
 
-graphOps.jl:65
+graphOps.jl:76
 
 
 
@@ -133,19 +145,19 @@ twoLift(a, flip::AbstractArray{Bool,1})
 twoLift(a, k::Integer)
 ```
 
-graphOps.jl:88
+graphOps.jl:99
 
 
 
 ### joinGraphs
-create a disjoint union of graphs a and b,  and then put k random edges between them
+Create a disjoint union of graphs a and b,  and then put k random edges between them
 
 
 ```julia
 joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
 ```
 
-graphOps.jl:100
+graphOps.jl:111
 
 
 
@@ -158,7 +170,7 @@ plotGraph(gr, x, y)
 plotGraph(gr, x, y, color)
 ```
 
-graphOps.jl:118
+graphOps.jl:129
 
 
 
@@ -170,7 +182,7 @@ Computes spectral coordinates, and then uses plotGraph to draw
 spectralDrawing(a)
 ```
 
-graphOps.jl:155
+graphOps.jl:166
 
 
 
@@ -182,31 +194,31 @@ Computes the spectral coordinates of a graph
 spectralCoords(a)
 ```
 
-graphOps.jl:163
+graphOps.jl:174
 
 
 
 ### toUnitVector
-creates a unit vector of length n from a given set of integers, with weights based on the number of occurences
+Creates a unit vector of length n from a given set of integers, with weights based on the number of occurences
 
 
 ```julia
 toUnitVector(a::Array{Int64,1}, n)
 ```
 
-graphOps.jl:172
+graphOps.jl:183
 
 
 
 ### diagmat
-returns the diagonal matrix(as a sparse matrix) of a graph
+Returns the diagonal matrix(as a sparse matrix) of a graph
 
 
 ```julia
 diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 ```
 
-graphOps.jl:194
+graphOps.jl:205
 
 
 
@@ -218,7 +230,7 @@ Constructs a generalized necklace graph starting with two graphs A and H. The re
 generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti<:Integer}, k::Int64)
 ```
 
-graphOps.jl:214
+graphOps.jl:225
 
 
 

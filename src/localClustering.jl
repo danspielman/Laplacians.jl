@@ -1,16 +1,22 @@
 """ 
   localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)
 
-  The LocalImprove function, from the Orrechia-Zhu paper 
+The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance
+based on the starting set using a localized version of max-flow.
 
-  G is the given graph, A is the initial set 
-  epsSigma is a measure of the quality of the returning set (the smaller the better)
-  err is the numerical error considered throughout the algorithm
-  maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm
+Small discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one, 
+the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component, 
+it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize, 
+our initial conductance might be the best solution we can raech.
+
+* G is the given graph, A is the initial set 
+* epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(V\A)
+* err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10
+* maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|
 """
 function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)) 
   #=
-    Notes: err < 1e-13 breaks the code. Precision is 1e-16, so 3 bits of precision are lost somewhere...
+    Notes: err smaller than 1e-13 might give weird behavior
   =#
 
   n = max(G.n, G.m)
@@ -46,8 +52,6 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
   while alphaMax - err > alphaMin
     alpha = (alphaMin + alphaMax) / 2
 
-    # println(alpha, " ", length(localFlow(G, A, alpha, epsSigma, maxSize)[1]), " ", abs(localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G, A)))
-
     if abs(localFlow(G, A, alpha, epsSigma, maxSize)[2] - getVolume(G, A)) < err
       alphaMin = alpha
     else
@@ -55,12 +59,17 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
     end
   end
 
-  return localFlow(G, A, alphaMax, epsSigma, maxSize)
+  # check if the initial conductance is better than what we got after running flow
+  if compConductance(G, A) < compConductance(G, localFlow(G, A, alphaMax, epsSigma, maxSize)[1])
+    return A, compConductance(G, A)
+  else
+    return localFlow(G, A, alphaMax, epsSigma, maxSize)
+  end
 
 end # localImprove
 
 
-" the LocalFlow function, from the Orecchia-Zhu paper "
+" The LocalFlow function, from the Orecchia-Zhu paper "
 function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::Float64, epsSigma::Float64, maxSize = max(G.n, G.m))
 
   # compute the number of vertices
@@ -73,7 +82,7 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
   #=
     Initially: {A} + {Neighbors(A)}
     newID will represent the index in GPrime of a certain vertex in G
-    oldID will represent the index in G from a vertex in GPrime
+    oldID will represent the index in G of a vertex in GPrime
   =#
 
   newID = Dict{Int64,Int64}()
@@ -87,6 +96,8 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
 
   # "considered" will keep track of the vertices interesting for the flow graph.
   considered = Set{Int64}()
+  push!(considered, s)
+  push!(considered, t)
   for i in 1:length(A)
     push!(considered, A[i])
   end
@@ -125,15 +136,15 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
         v = nbri(G, u, i)
         
         if v in considered == false
-          push!(considered, v)
           push!(newbatch, v)
+          push!(considered, v)
         end
       end
     end
 
     # see if the size of the graph exceeds the maximum size imposed by the user
     if (length(considered) > maxSize)
-      return [oldID[u] for u in getCutSet(GPrime, s, t)], getVolume(G, A)
+      continue
     end
 
     # update GPrime
@@ -149,7 +160,7 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
 end # localFlow
 
 
-" initialize GPrime with the set A and edges of type s->u"
+" Initialize GPrime with the set A and edges of type s->u"
 function initGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, newID::Dict{Int64,Int64}, oldID::Dict{Int64,Int64}, alpha::Float64, maxSize::Int64)
   GPrime = [Tuple{Int64,Float64}[] for i in 1:(maxSize + 2)]
   s = maxSize + 1
@@ -177,7 +188,7 @@ function initGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, newID::
 end # initGPrime
 
 
-" add a random vertex to GPrime "
+" Add a new vertex to GPrime "
 function addToGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, GPrime::Array{Array{Tuple{Int64,Float64},1},1}, 
                             newID::Dict{Int64,Int64}, oldID::Dict{Int64,Int64},
                             u::Int64, newU::Int64, alpha::Float64, epsSigma::Float64, maxSize::Int64)
@@ -203,10 +214,10 @@ function addToGPrime{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, GPrime::Array{Array{Tuple
 end
 
 
-" computes block flow between s and t"
+" Compute block flow between s and t"
 function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::Int64)
 
-  # backInd = backIndices(G)
+  backInd = backIndices(G)
 
   n = length(G)
   inQ = zeros(Bool, n)
@@ -243,7 +254,9 @@ function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::
   else
     totalflow = 0
     saturated = []
+
     for i in 1:length(G[t])
+      # ignore the current vertex if flow hasn't passed through it
       u,w = G[t][i]
       if inQ[u] == false
         continue
@@ -276,16 +289,11 @@ function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::
         u = t
         while u != s
           prevU = prev[u][1]
-          indexPrevU = prev[u][2]
-          # indexU = backInd[prevU][indexPrevU]
+          # the index of u in prevU's neighbor list
+          indexPrevU = prev[u][2] 
 
-          indexU = 1
-          for j in 1:length(u)
-            if G[u][j][1] == prevU
-              indexU = j
-              break
-            end
-          end
+          # the index of prevU in u's neighbor list
+          indexU = backInd[prevU][indexPrevU]
 
           # between prevU and u
           G[prevU][indexPrevU] = (G[prevU][indexPrevU][1], G[prevU][indexPrevU][2] - currentflow)
@@ -312,7 +320,7 @@ function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::
 end # localBlockFlow
 
 
-" get the min cut from the source - return all vertices in the cut besides the source "
+" Get the min cut from the source - return all vertices in the cut besides the source "
 function getCutSet(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::Int64)
 
   n = length(G)
@@ -355,11 +363,11 @@ end # getCutSet
 """
   prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 
-  The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper\n
-  s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]
+The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper\n
+s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]
 
-  phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality
-  b is used to handle precision throughout the algorithm - the higher the b, the smaller the eps
+phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality. 
+b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.
 """
 function prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 
@@ -422,8 +430,8 @@ function prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, 
 end # prn_local
 
 """ 
-  computes an approximate page rank vector from a starting set s, an alpha and an epsilon
-  algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's notes
+Computes an approximate page rank vector from a starting set s, an alpha and an epsilon
+The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes
 """
 function apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
 
