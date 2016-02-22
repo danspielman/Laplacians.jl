@@ -1,12 +1,35 @@
-# This is code for generating random trees of various sorts.
-# The hope is that one might have low stretch,
-# although none is guaranteed to.
+#=
+ This is code for generating random trees of various sorts.
+ The hope is that one might have low stretch,
+ although none is guaranteed to.
+
+ randishPrim produces lower stretch trees than randishKruskall
+=#
 
 using DataStructures
 
 # sample edges with probability proportional to their weight
 
 function randishKruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
+
+    a = copy(mat)
+    numnz = nnz(a)
+
+    r = -log(rand(numnz))
+    for i in 1:numnz
+        a.nzval[i] = r[i] / a.nzval[i]
+    end
+
+    tr1 = kruskal(a)
+    unweight!(tr1)
+
+    tr = tr1 .* mat
+
+    return tr
+end
+
+
+function randishKruskalV1{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
     n = size(mat)[1]
     (ai,aj,av) = findnz(triu(mat))
     m = length(av)
@@ -32,6 +55,9 @@ function randishKruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
     return tree
 
 end
+
+
+
 
 function randishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})
 
@@ -99,4 +125,5 @@ function randishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})
   return tr
 
 end # randishPrim
+
 
