@@ -189,7 +189,9 @@ function KMPSDDSolver(mat; verbose=false,
 
     n = size(mat,1)
     s = mat*ones(n)
-    s = sparse(max(s,0))
+
+    dmat = diag(mat)
+    s = sparse(max(s,0) .* (s .> (dmat*1e-12)))
 
     if (s == 0)
         error("Matrix was not diagonally dominant.")
@@ -306,8 +308,8 @@ function KMPLapSolver1(a; verbose=false,
     ord::Array{Int64,1} = Laplacians.dfsOrder(tree)
 
     # these lines could be MUCH faster
-    aord = a[ord,ord]
-    tord = tree[ord,ord]
+    aord = sympermute(a,ord)
+    tord = sympermute(tree,ord)
     
     la = lap(aord)
 
