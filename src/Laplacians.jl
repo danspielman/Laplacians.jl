@@ -169,4 +169,8 @@ and exports the functions for which it seems appropriate.
   # export isotonicIPM, isotonicIPMrelEps
 
 
+  include("fastCSC.jl")
+  export sympermute
+
+
 end # module yinsGraph
