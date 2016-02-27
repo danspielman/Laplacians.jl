@@ -48,9 +48,9 @@ backind = fl[10] = 4
 """
 function flipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 
-  b = SparseMatrixCSC(a.m, a.n, copy(a.colptr), copy(a.rowval), collect(UnitRange{Tind}(1,nnz(a))) );
-  bakMat = b';
-  return bakMat.nzval
+    b = SparseMatrixCSC(a.m, a.n, copy(a.colptr), copy(a.rowval), collect(UnitRange{Tind}(1,nnz(a))) );
+    flipMat = symTransposeCSC(b)
+    return flipMat.nzval
 
 end
 

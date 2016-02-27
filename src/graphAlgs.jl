@@ -164,7 +164,7 @@ function biggestComp(mat::SparseMatrixCSC)
 end
 
 
-"""Computes the lenghts of shortest paths from `start`.
+"""Computes the lengths of shortest paths from `start`.
 Returns both a vector of the lenghts, and the parent array
 in the shortest path tree.
 

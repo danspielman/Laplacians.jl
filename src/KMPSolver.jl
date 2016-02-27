@@ -308,8 +308,8 @@ function KMPLapSolver1(a; verbose=false,
     ord::Array{Int64,1} = Laplacians.dfsOrder(tree)
 
     # these lines could be MUCH faster
-    aord = sympermute(a,ord)
-    tord = sympermute(tree,ord)
+    aord = symPermuteCSC(a,ord)
+    tord = symPermuteCSC(tree,ord)
     
     la = lap(aord)
 

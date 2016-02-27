@@ -170,7 +170,7 @@ and exports the functions for which it seems appropriate.
 
 
   include("fastCSC.jl")
-  export sympermute
+  export symPermuteCSC, symTransposeCSC, submatrixCSC
 
 
 end # module yinsGraph
