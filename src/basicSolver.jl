@@ -44,6 +44,8 @@ function basicSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1})
 	# updtNeigh, dEntry, multNeigh, multSum = purge(i, neigh[i], auxVal, auxMult)
         
         indNeigh, wSum, wNeigh, multSum, multNeigh = purge(i, neigh[i], auxVal, auxMult)
+        # println(i,"  ",indNeigh)
+        # println(i,"  ",find(indNeigh .<= i))
 	# in the future, from updtNeigh we will do a sampling - for now, we just use it as is
 
 	# need to divide weights by the diagonal entry
