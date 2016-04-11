@@ -11,7 +11,7 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1})
     #a = lap(a)
 
     eps::Tv = 1/2
-    sampConst::Tv = 1000
+    sampConst::Tv = 10
     # Theorem ? 9*4
     # TODO
     rho = ceil(Ti,sampConst*log(n)^2/eps^2)
@@ -48,11 +48,12 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1})
 	# updtNeigh, dEntry, multNeigh, multSum = purge(i, neigh[i], auxVal, auxMult)
         
         wSum, wNeigh, multSum, multNeigh, indNeigh = purge(i, neigh[i], auxVal, auxMult)
-        println(i,"  ",indNeigh)
-        
-        if wSum <= 0 # debugging
-            @printf "index = %f \n" i
-        end
+        # println(i,"      ",indNeigh)
+        # println(i," ofo: ",find(indNeigh .<= i))
+        # println(i," ok:  ",isSortedAdjList(neigh))
+        # if wSum <= 0 # debugging
+        #     @printf "index = %f \n" i
+        # end
         
 	# need to divide weights by the diagonal entry
 	for j in 1:length(indNeigh)
@@ -69,15 +70,17 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1})
             j = sample(wSamp)
             k = sample(multSamp)
             if j != k
-                if k < j  #swap so j is smaller
+                if indNeigh[k] < indNeigh[j]  #swap so posj is smaller
                     j,k = k,j
-                    #k,j = j,k
                 end
+                
                 posj = indNeigh[j]
                 wj = wNeigh[j]
                 
                 posk = indNeigh[k]
                 wk = wNeigh[k]
+
+                assert(posj < posk) #remove eventually
 
                 sampScaling = wj*multNeigh[k] + wk*multNeigh[j]
                 
@@ -116,6 +119,7 @@ function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, aux
     
     for i in 1:length(v)
 	if auxVal[v[i][3]] != 0
+            assert(col < v[i][3])
 	    if v[i][3] == col
 		assert(false)
 	    else
@@ -133,7 +137,6 @@ end
 
 # this is a debug function, it returns u' * d * u
 function tomatrix{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1}}, d::Array{Tv,1})
-#RNOTE: this seems like it's being weird about diagonal entries?
     n = length(d)
     matu = zeros(n, n)
     matd = zeros(n, n)
@@ -148,9 +151,25 @@ function tomatrix{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1}}, d::Array{Tv,1})
 	    val = u[i][j][1]
 	    matu[i, pos] = val
 	end
-	#matu[i,i] = 1
     end
 
     return matu' * matd * matu
 
 end
+
+
+function isSortedAdjList{Tv,Ti}(neigh::Array{Array{Tuple{Tv,Ti,Ti},1},1})
+    n = length(neigh)
+    isSorted = 0
+    for i in 1:n
+	for j in 1:length(neigh[i])
+	    pos = neigh[i][j][3]
+            posOK = (pos > i)
+	    if !posOK
+                isSorted +=1
+            end
+	end
+    end
+    return isSorted
+end
+
