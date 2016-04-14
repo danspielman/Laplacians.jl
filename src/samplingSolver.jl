@@ -4,16 +4,92 @@ using Laplacians
 
 include("fastSampler.jl")
 
-# a is a laplacian, b is the target answer vector. We return x
-function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1})
-    n = a.n
-    #a = lap(a)
+function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
 
-    eps::Tv = 1/2
+	# Get u and d such that u d u' = -a (doesn't affect solver)
+	u,d = samplingLDL(a)
+
+	# Initialize the data structures
+	n = length(d)
+	m = n
+
+	nnz = 0
+	for i in 1:n
+		nnz = nnz + length(u[i])
+	end
+
+	colptr = Array{Ti,1}(n + 1)
+	rowval = Array{Ti,1}(nnz)
+	nzval = Array{Tv,1}(nnz)
+
+	colptr[1] = 1
+	for i in 1:n
+		colptr[i + 1] = colptr[i] + length(u[i])
+	end
+	index = copy(colptr)
+
+	# We know that in u the values aren't necessarily ordered by row. So, we do a count sort-like algorith to keep linear time.
+	helper = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]
+	for i in 1:n
+		for j in 1:length(u[i])
+			row = u[i][j][2]
+			col = i
+			val = u[i][j][1]
+			push!(helper[row], (val, col))
+		end
+	end
+
+	for i in 1:n
+		for j in 1:length(helper[i])
+			row = i
+			col = helper[i][j][2]
+			val = helper[i][j][1]
+
+			rowval[index[col]] = row
+			nzval[index[col]] = val
+			index[col] = index[col] + 1
+		end
+	end
+
+	# Get U as sparse matrix
+	U = SparseMatrixCSC(n, n, colptr, rowval, nzval)
+
+	# Create the solver function
+	f = function(b::Array{Float64,1})
+		# center
+		res = copy(b)
+		res = res - sum(res) / n
+
+		# forward solve
+		res = U \ res
+
+		# diag inverse
+		for i in 1:(n - 1)
+			res[i] = res[i] / d[i]
+		end
+
+		# backward solve
+		res = U' \ res
+
+		# center
+		res = res - sum(res) / n
+		
+		return res
+	end
+
+	return f
+
+end
+
+# a is a laplacian, b is the target answer vector. We return x
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
+    n = a.n
+
+    eps::Tv = 1 / 2
     sampConst::Tv = 10
     # Theorem ? 9*4
     # TODO
-    rho = ceil(Ti,sampConst*log(n)^2/eps^2)
+    rho = ceil(Ti, sampConst * log(n) ^ 2 / eps ^ 2)
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
 
@@ -42,7 +118,7 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1})
     end
 
     # Now, for every i, we will compute the i'th column in U
-    for i in 1:(n-1)
+    for i in 1:(n - 1)
 		# We will get rid of duplicate edges
 		# wSum -  sum of weights of edges
 		# wNeigh - list of weights correspongind to each neighbors
@@ -78,14 +154,15 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1})
 
                 assert(posj < posk) #remove eventually
 
-                sampScaling = wj*multNeigh[k] + wk*multNeigh[j]
+                sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
                 
-                push!(neigh[posj], (wj * wk/sampScaling,1,posk))
+                push!(neigh[posj], (wj * wk/sampScaling, 1, posk))
             end
         end
     end
 
-    push!(u[n], (1, n)) #diag term
+    # add the last diagonal term
+    push!(u[n], (1, n))
     d[n] = 0
 
     return u, d, sparse(tomatrix(u, d))
@@ -152,10 +229,10 @@ function tomatrix{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1}}, d::Array{Tv,1})
 		for j in 1:length(u[i])
 		    pos = u[i][j][2]
 		    val = u[i][j][1]
-		    matu[i, pos] = val
+		    matu[pos, i] = val
 		end
     end
 
-    return matu' * matd * matu
+    return matu * matd * matu'
 
 end
