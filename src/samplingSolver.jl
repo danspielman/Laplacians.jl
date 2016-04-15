@@ -10,7 +10,7 @@ function sampledSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits:
     F = buildSolver(a)
 
     la = lap(a)
-    f(b) = pcg(la, b, F, tol=tol, maxits=maxits)
+    f(b) = pcg(la, b, F, tol=tol, maxits=maxits, verbose=true)
     
   return f
 
