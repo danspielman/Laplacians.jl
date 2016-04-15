@@ -4,6 +4,18 @@ using Laplacians
 
 include("fastSampler.jl")
 
+
+function sampledSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100)
+
+    F = buildSolver(a)
+
+    la = lap(a)
+    f(b) = pcg(la, b, F, tol=tol, maxits=maxits)
+    
+  return f
+
+end
+
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
 
 	# Get u and d such that u d u' = -a (doesn't affect solver)
