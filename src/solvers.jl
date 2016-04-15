@@ -253,7 +253,7 @@ linear systems.  It takes as optional input a tree growing algorithm.
 The default is a randomized variant of Kruskal.
 It adds back 2sqrt(n) edges via augmentTree.
 With the right tree, it should never be too bad."""
-function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishKruskal)
+function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishPrim)
 
   adjmat = -triu(ddmat,1)
   adjmat = adjmat + adjmat'
