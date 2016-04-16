@@ -3,6 +3,7 @@
 using Laplacians
 
 include("fastSampler.jl")
+include("sqLinOpWrapper.jl")
 
 
 function sampledSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100)
@@ -14,6 +15,10 @@ function sampledSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits:
     
   return f
 
+end
+
+function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti})
+    return eigs(gOp;nev=1,which=:LM)[1][1]
 end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
@@ -64,7 +69,8 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
 	end
 
 	# Get U as sparse matrix
-	U = SparseMatrixCSC(n, n, colptr, rowval, nzval)
+        U = SparseMatrixCSC(n, n, colptr, rowval, nzval)
+        Ut = U'
 
 	# Create the solver function
 	f = function(b::Array{Float64,1})
@@ -81,7 +87,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
 		end
 
 		# backward solve
-		res = U' \ res
+		res = Ut \ res
 
 		# center
 		res = res - sum(res) / n
@@ -89,8 +95,43 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
 		return res
 	end
 
-	return f
+	# Create the error check function
+        la = lap(a)   
+	g = function(b::Array{Float64,1})
+            res = copy(b)
+            res[n] = 0
+            
+            # diag sqrt inverse
+	    for i in 1:(n - 1)
+		res[i] = res[i] * d[i]^(-1/2)
+	    end
 
+            # backward solve #TODO?
+	    res = Ut \ res
+
+            # apply lapl
+            res = la * res
+
+            # forward solve #TODO?
+	    res = U \ res
+
+            # diag sqrt inverse
+	    for i in 1:(n - 1)
+		res[i] = res[i] * d[i]^(-1/2)
+	    end
+
+            # subtract identity, except we haven't zeroed out last coord
+            res = res - b 
+
+            #zero out last coord
+            res[n] = 0 #TODO?
+            
+	    return res
+	end
+
+        gOp = SqLinOp(true,1.0,n,g)
+
+        return f,gOp,U,d
 end
 
 # a is a laplacian, b is the target answer vector. We return x
