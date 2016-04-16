@@ -1,4 +1,6 @@
 import Base.*
+import Base.size
+import Base.eltype
 
 immutable SqLinOp{Tv,Ti}
     issym::Bool
@@ -11,18 +13,14 @@ end
 
 SqLinOp{Tv,Ti}(issym,value::Tv,index::Ti,multFn) = SqLinOp{Tv,Ti}(issym,value,index,multFn)
 
-function eltype{Tv,Ti}(A::SqLinOp{Tv,Ti})
-    return Tv
-end
+eltype{Tv,Ti}(A::SqLinOp{Tv,Ti}) = Tv
 
-function size{Tv,Ti}(A::SqLinOp{Tv,Ti}, d::Ti)
-    return A.n
-end
+size{Tv,Ti}(A::SqLinOp{Tv,Ti}, d::Ti) = A.n
 
 function *{Tv,Ti}(A::SqLinOp{Tv,Ti}, b::Array{Tv,1})
     return A.multFn(b)
 end
 
 function testId()
-    return M = SqLinOp{Float64,Int64}(false,1.0,1,x -> x)# (false,10)
+    return M = SqLinOp{Float64,Int64}(true,1.0,1,x -> x)
 end
