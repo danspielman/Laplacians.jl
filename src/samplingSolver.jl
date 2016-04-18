@@ -187,16 +187,30 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
         push!(u[i], (1, i)) #diag term
 		d[i] = wSum
 
+        newSeed = rand(UInt32)
+        srand(newSeed)
+
+        wSamp = sampler([1.0])
+        multSamp = sampler([1.0])
         try
             wSamp = sampler(wNeigh)
             multSamp = sampler(convert(Array{Tv,1}, multNeigh))
         catch
-            error("samp BUILD err!")
+            writedlm("wNeigh.txt",wNeigh)
+            writedlm("multNeigh.txt",multNeigh)
+            println("newSeed = ", newSeed)
+            rethrow()
+            #error("samp BUILD err!")
         end
-        
-        try
+
+        debug_l = 0
+        try 
 	    # now propagate the clique to the neighbors of i
             for l in 1:multSum
+                debug_l = l
+                newSeed = rand(UInt32)
+                srand(newSeed)
+                
                 j = sample(wSamp)
                 k = sample(multSamp)
                 if j != k
@@ -218,7 +232,12 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
                 end
             end
         catch
-            error("samp USE err!") 
+            writedlm("wNeigh.txt",wNeigh)
+            writedlm("multNeigh.txt",multNeigh)
+            println("debug_l = ",debug_l)
+            println("newSeed = ", newSeed)
+            rethrow()
+            # error("samp USE err!") 
         end
                   
     end
