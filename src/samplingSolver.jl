@@ -69,8 +69,8 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
 	end
 
 	# Get U as sparse matrix
-        U = SparseMatrixCSC(n, n, colptr, rowval, nzval)
-        Ut = U'
+    U = LowerTriangular(SparseMatrixCSC(n, n, colptr, rowval, nzval))
+    Ut = U'
 
 	# Create the solver function
 	f = function(b::Array{Float64,1})
