@@ -187,31 +187,40 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
         push!(u[i], (1, i)) #diag term
 		d[i] = wSum
 
-        wSamp = sampler(wNeigh)
-        multSamp = sampler(convert(Array{Tv,1}, multNeigh))
-
-		# now propagate the clique to the neighbors of i
-        for l in 1:multSum
-            j = sample(wSamp)
-            k = sample(multSamp)
-            if j != k
-                if indNeigh[k] < indNeigh[j]  #swap so posj is smaller
-                    j,k = k,j
-                end
-                
-                posj = indNeigh[j]
-                wj = wNeigh[j]
-                
-                posk = indNeigh[k]
-                wk = wNeigh[k]
-
-                assert(posj < posk) #remove eventually
-
-                sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
-                
-                push!(neigh[posj], (wj * wk/sampScaling, 1, posk))
-            end
+        try
+            wSamp = sampler(wNeigh)
+            multSamp = sampler(convert(Array{Tv,1}, multNeigh))
+        catch
+            error("samp BUILD err!")
         end
+        
+        try
+	    # now propagate the clique to the neighbors of i
+            for l in 1:multSum
+                j = sample(wSamp)
+                k = sample(multSamp)
+                if j != k
+                    if indNeigh[k] < indNeigh[j]  #swap so posj is smaller
+                        j,k = k,j
+                    end
+                    
+                    posj = indNeigh[j]
+                    wj = wNeigh[j]
+                    
+                    posk = indNeigh[k]
+                    wk = wNeigh[k]
+
+                    assert(posj < posk) #remove eventually
+
+                    sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
+                    
+                    push!(neigh[posj], (wj * wk/sampScaling, 1, posk))
+                end
+            end
+        catch
+            error("samp USE err!") 
+        end
+                  
     end
 
     # add the last diagonal term
