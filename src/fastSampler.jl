@@ -40,7 +40,7 @@ function sampler{Tv}(p::Array{Tv,1})
 		if newp[i] < 1 / n && !epsequal(newp[i], 1 / n)
 			pos = pos + 1
 			A[pos] = i
-			F[pos] = newp[i] / (1 / n)
+			F[pos] = newp[i] * n
 		end
 	end
 
@@ -68,7 +68,7 @@ function sampler{Tv}(p::Array{Tv,1})
 			if val > 0 && !epsequal(val, 0)
 				pos = pos + 1
 				A[pos] = i
-				F[pos] = val / (1 / n)
+				F[pos] = val * n
 			end
 		end
 	end
