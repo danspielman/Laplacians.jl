@@ -77,21 +77,19 @@ function sampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
 			if val > 0 && !epsequal(val, 0) && pos < n
 				pos = pos + 1
 				A[pos] = i
+
+				if pos == n
+					posFilled = n
+					V[pos] = i
+				end
+
 				F[pos] = val
 			end
 
 			residualError += val
 		end
 	end
-
-	# trat the case in which posFilled < pos because of precision errors
-	while posFilled < pos
-		posFilled = posFilled + 1
-		V[posFilled] = A[posFilled]
-
-		residualError += (1 - F[posFilled])
-	end
-
+	
 	if residual
 		return Sampler(F, A, V, n), residualError
 	else
