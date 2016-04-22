@@ -6,9 +6,9 @@ include("fastSampler.jl")
 include("sqLinOpWrapper.jl")
 
 
-function sampledSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100)
+function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, eps::Float64 = 0.5, sampConst::Float64 = 10)
 
-    F = buildSolver(a)
+    F = buildSolver(a, eps, sampConst)
 
     la = lap(a)
     f(b) = pcg(la, b, F, tol=tol, maxits=maxits, verbose=true)
@@ -21,10 +21,10 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti})
     return eigs(gOp;nev=1,which=:LM)[1][1]
 end
 
-function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
+function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampConst::Int64 = 10)
 
 	# Get u and d such that u d u' = -a (doesn't affect solver)
-	u,d = samplingLDL(a)
+	u,d = samplingLDL(a, eps, sampConst)
 
 	# Initialize the data structures
 	n = length(d)
@@ -96,52 +96,48 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
 	end
 
 	# Create the error check function
-        la = lap(a)   
+    la = lap(a)   
 	g = function(b::Array{Float64,1})
-            res = copy(b)
-            res[n] = 0
+        res = copy(b)
+		res[n] = 0
             
-            # diag sqrt inverse
+        # diag sqrt inverse
 	    for i in 1:(n - 1)
-		res[i] = res[i] * d[i]^(-1/2)
+			res[i] = res[i] * d[i]^(-1/2)
 	    end
 
-            # backward solve #TODO?
+        # backward solve #TODO?
 	    res = Ut \ res
 
-            # apply lapl
-            res = la * res
+        # apply lapl
+        res = la * res
 
-            # forward solve #TODO?
+        # forward solve #TODO?
 	    res = U \ res
 
-            # diag sqrt inverse
+        # diag sqrt inverse
 	    for i in 1:(n - 1)
-		res[i] = res[i] * d[i]^(-1/2)
+			res[i] = res[i] * d[i]^(-1/2)
 	    end
 
-            # subtract identity, except we haven't zeroed out last coord
-            res = res - b 
+        # subtract identity, except we haven't zeroed out last coord
+        res = res - b 
 
-            #zero out last coord
-            res[n] = 0 #TODO?
+        #zero out last coord
+        res[n] = 0 #TODO?
             
 	    return res
 	end
 
-        gOp = SqLinOp(true,1.0,n,g)
+    gOp = SqLinOp(true,1.0,n,g)
 
-        return f,gOp,U,d
+    return f,gOp,U,d
 end
 
 # a is a laplacian, b is the target answer vector. We return x
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::Int64)
     n = a.n
 
-    eps::Tv = 1 / 2
-    sampConst::Tv = 10
-    # Theorem ? 9*4
-    # TODO
     rho = ceil(Ti, sampConst * log(n) ^ 2 / eps ^ 2)
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
@@ -190,73 +186,52 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
         newSeed = rand(UInt32)
         srand(newSeed)
 
-        wSamp = sampler([1.0])
-        multSamp = sampler([1.0])
-        try
-            wSamp = sampler(wNeigh)
-            multSamp = sampler(convert(Array{Tv,1}, multNeigh))
-        catch
-            writedlm("wNeigh.txt",wNeigh)
-            writedlm("multNeigh.txt",multNeigh)
-            println("newSeed = ", newSeed)
-            rethrow()
-            #error("samp BUILD err!")
-        end
+        wSamp = sampler(wNeigh)
+        multSamp = sampler(convert(Array{Tv,1}, multNeigh))
 
-        debug_l = 0
-        try 
 	    # now propagate the clique to the neighbors of i
-            for l in 1:multSum
-                debug_l = l
-                newSeed = rand(UInt32)
-                srand(newSeed)
-                
-                j = sample(wSamp)
-                k = sample(multSamp)
-                if j != k
-                    if indNeigh[k] < indNeigh[j]  #swap so posj is smaller
-                        j,k = k,j
-                    end
-                    
-                    posj = indNeigh[j]
-                    wj = wNeigh[j]
-                    
-                    posk = indNeigh[k]
-                    wk = wNeigh[k]
-
-                    assert(posj < posk) #remove eventually
-
-                    sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
-                    
-                    push!(neigh[posj], (wj * wk/sampScaling, 1, posk))
+        for l in 1:multSum
+            newSeed = rand(UInt32)
+            srand(newSeed)
+            
+            j = sample(wSamp)
+            k = sample(multSamp)
+            if j != k
+                if indNeigh[k] < indNeigh[j]  #swap so posj is smaller
+                    j, k = k, j
                 end
+                
+                posj = indNeigh[j]
+                wj = wNeigh[j]
+                
+                posk = indNeigh[k]
+                wk = wNeigh[k]
+
+                assert(posj < posk) #remove eventually
+
+                sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
+                
+                push!(neigh[posj], (wj * wk / sampScaling, 1, posk))
             end
-        catch
-            writedlm("wNeigh.txt",wNeigh)
-            writedlm("multNeigh.txt",multNeigh)
-            println("debug_l = ",debug_l)
-            println("newSeed = ", newSeed)
-            rethrow()
-            # error("samp USE err!") 
-        end
-                  
+        end  
     end
 
     # add the last diagonal term
     push!(u[n], (1, n))
     d[n] = 0
 
-    return u, d, sparse(tomatrix(u, d))
+    return u, d
+    # return u, d, sparse(tomatrix(u, d))
 end
 
 # see description in samplingSolver
 function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, auxMult::Array{Ti,1})
 
-    for i in 1:length(v)
-    	neigh = v[i][3]
-		auxVal[neigh] = 0
-        auxMult[neigh] = 0
-    end
+  #   for i in 1:length(v)
+  #   	neigh = v[i][3]
+		# auxVal[neigh] = 0
+  #       auxMult[neigh] = 0
+  #   end
     # RAS: Don't we maintain as invariant that this is zeroed out at the end?
 
     multSum::Ti = 0
@@ -297,23 +272,23 @@ function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, aux
 end
 
 # this is a debug function, it returns u' * d * u
-function tomatrix{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1}}, d::Array{Tv,1})
-    n = length(d)
-    matu = zeros(n, n)
-    matd = zeros(n, n)
+# function tomatrix{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1}}, d::Array{Tv,1})
+#     n = length(d)
+#     matu = zeros(n, n)
+#     matd = zeros(n, n)
 
-    for i in 1:n
-		matd[i, i] = d[i]
-    end
+#     for i in 1:n
+# 		matd[i, i] = d[i]
+#     end
 
-    for i in 1:n
-		for j in 1:length(u[i])
-		    pos = u[i][j][2]
-		    val = u[i][j][1]
-		    matu[pos, i] = val
-		end
-    end
+#     for i in 1:n
+# 		for j in 1:length(u[i])
+# 		    pos = u[i][j][2]
+# 		    val = u[i][j][1]
+# 		    matu[pos, i] = val
+# 		end
+#     end
 
-    return matu * matd * matu'
+#     return matu * matd * matu'
 
-end
+# end
