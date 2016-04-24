@@ -8,12 +8,12 @@ include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, eps::Float64 = 0.5, sampConst::Float64 = 10)
 
-    F = buildSolver(a, eps, sampConst)
+	F = buildSolver(a, eps = eps, sampConst = sampConst)
 
-    la = lap(a)
-    f(b) = pcg(la, b, F, tol=tol, maxits=maxits, verbose=true)
-    
-  return f
+	la = lap(a)
+	f(b) = pcg(la, b, F, tol=tol, maxits=maxits, verbose=true)
+
+	return f
 
 end
 
