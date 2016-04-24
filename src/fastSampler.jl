@@ -79,8 +79,9 @@ function sampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
 				A[pos] = i
 
 				if pos == n
-					posFilled = n
-					V[pos] = i
+					# if we are in this case, posFilled should be equal to pos - 1
+					posFilled = posFilled + 1
+					V[posFilled] = i
 				end
 
 				F[pos] = val
@@ -89,7 +90,9 @@ function sampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
 			residualError += val
 		end
 	end
-	
+
+	@assert(posFilled == pos, "pos and posFilled differ")
+
 	if residual
 		return Sampler(F, A, V, n), residualError
 	else
