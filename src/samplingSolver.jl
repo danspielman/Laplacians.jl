@@ -183,16 +183,16 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
         push!(u[i], (1, i)) #diag term
 		d[i] = wSum
 
-        newSeed = rand(UInt32)
-        srand(newSeed)
+        # newSeed = rand(UInt32)
+        # srand(newSeed)
 
         wSamp = sampler(wNeigh)
         multSamp = sampler(convert(Array{Tv,1}, multNeigh))
 
 	    # now propagate the clique to the neighbors of i
         for l in 1:multSum
-            newSeed = rand(UInt32)
-            srand(newSeed)
+            # newSeed = rand(UInt32)
+            # srand(newSeed)
             
             j = sample(wSamp)
             k = sample(multSamp)
