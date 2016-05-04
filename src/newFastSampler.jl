@@ -43,6 +43,22 @@ function newSampleMany{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     return samples
 end
 
+function newSampleManyPrealloc{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
+    indices::Array{Tv,1} = rand(sampCount)
+    samples::Array{Tv,1} = rand(sampCount) #note: first using this for intermediate alias RVs
+    
+    for j = 1:sampCount
+        i = ceil(Ti,indices[j]*s.n)
+	f = samples[j]
+	if f < s.F[i]
+		samples[j] = s.A[i]
+	else
+		samples[j] = s.V[i]
+	end
+    end
+    return samples
+end
+
 # initialize the sampler. To get the residual error after building the sampler, set residual to true
 function newSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
 
