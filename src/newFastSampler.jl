@@ -43,6 +43,71 @@ function newSampleMany{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     return samples
 end
 
+function newSampleManyInbounds{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
+    #i = rand(1:s.n)
+    samples = Array{Tv,1}(sampCount)
+    @inbounds for j = 1:sampCount
+        i = ceil(Ti,rand()*s.n)
+	f = rand()
+	if f < s.F[i]
+		samples[j] = s.A[i]
+	else
+		samples[j] = s.V[i]
+	end
+    end
+    return samples
+end
+
+function newSampleManyInboundsLines{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
+    #i = rand(1:s.n)
+    samples = Array{Tv,1}(sampCount)
+    @inbounds for j = 1:sampCount
+        i = ceil(Ti,rand()*s.n)
+	f = rand()
+	@inbounds if f < s.F[i]
+	@inbounds	samples[j] = s.A[i]
+	else
+	@inbounds	samples[j] = s.V[i]
+	end
+    end
+    return samples
+end
+
+function newSampleManyInboundsSgnFn{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
+    #i = rand(1:s.n)
+    samples = Array{Tv,1}(sampCount)
+    for j = 1:sampCount
+        i = ceil(Ti,rand()*s.n)
+	f = rand()
+        @inbounds samples[j] = (s.F[i] > f) ? s.A[i] : s.V[i]
+    end
+    return samples
+end
+
+function newSampleManyInboundsSgnFnSimd{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
+    #i = rand(1:s.n)
+    samples = Array{Tv,1}(sampCount)
+    @simd for j = 1:sampCount
+        i = ceil(Ti,rand()*s.n)
+	f = rand()
+        @inbounds samples[j] = (s.F[i] > f) ? s.A[i] : s.V[i]
+    end
+    return samples
+end
+
+# this doesn't work!
+function newSampleManyInboundsAllSgnFnSimd{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
+    #i = rand(1:s.n)
+    samples = Array{Tv,1}(sampCount)
+    @simd for j = 1:sampCount
+        i = ceil(Ti,rand()*s.n)
+	f = rand()
+        @inbounds samples[j] = ((@inbounds s.F[i]) > f) ? (@inbounds s.A[i]) : (@inbounds s.V[i])
+    end
+    return samples
+end
+
+
 function newSampleManyPrealloc{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     indices::Array{Tv,1} = rand(sampCount)
     samples::Array{Tv,1} = rand(sampCount) #note: first using this for intermediate alias RVs
@@ -58,6 +123,8 @@ function newSampleManyPrealloc{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     end
     return samples
 end
+
+
 
 # initialize the sampler. To get the residual error after building the sampler, set residual to true
 function newSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
