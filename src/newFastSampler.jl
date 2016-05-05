@@ -30,7 +30,7 @@ end
 # 
 function newSampleMany{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     #i = rand(1:s.n)
-    samples = Array{Tv,1}(sampCount)
+    samples = Array{Ti,1}(sampCount)
     for j = 1:sampCount
         i = ceil(Ti,rand()*s.n)
 	f = rand()
