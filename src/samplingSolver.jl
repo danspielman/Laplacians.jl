@@ -6,7 +6,7 @@ include("fastSampler.jl")
 include("sqLinOpWrapper.jl")
 
 
-function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, eps::Float64 = 0.5, sampConst::Float64 = 10)
+function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, eps::Float64 = 0.5, sampConst::Float64 = 10.0)
 
 	F = buildSolver(a, eps = eps, sampConst = sampConst)
 
@@ -21,7 +21,7 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti})
     return eigs(gOp;nev=1,which=:LM)[1][1]
 end
 
-function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampConst::Int64 = 10)
+function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampConst::Float64 = 10.0)
 
 	# Get u and d such that u d u' = -a (doesn't affect solver)
 	u,d = samplingLDL(a, eps, sampConst)
@@ -135,7 +135,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampC
 end
 
 # a is a laplacian, b is the target answer vector. We return x
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::Int64)
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::Float64)
     n = a.n
 
     rho = ceil(Ti, sampConst * log(n) ^ 2 / eps ^ 2)
@@ -186,28 +186,33 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
         # newSeed = rand(UInt32)
         # srand(newSeed)
 
-        wSamp = sampler(wNeigh)
-        multSamp = sampler(convert(Array{Tv,1}, multNeigh))
-
-	    # now propagate the clique to the neighbors of i
+        # wSamp = sampler(wNeigh)
+        # multSamp = sampler(convert(Array{Tv,1}, multNeigh))
+        wSamp = newSampler(wNeigh)
+        multSamp = newSampler(convert(Array{Tv,1}, multNeigh))
+        #@assert(typeof(multSum) == Int64,"multsum type err")
+	# now propagate the clique to the neighbors of i
+        jSamples = newSampleMany(wSamp,multSum)
+        kSamples = newSampleMany(multSamp,multSum)
+        
         for l in 1:multSum
             # newSeed = rand(UInt32)
             # srand(newSeed)
             
-            j = sample(wSamp)
-            k = sample(multSamp)
+            j = jSamples[l]
+            k = kSamples[l]
+            #@assert(typeof(j) == Int64,typeof(j))
+            #@assert(typeof(k) == Int64)
             if j != k
-                if indNeigh[k] < indNeigh[j]  #swap so posj is smaller
-                    j, k = k, j
-                end
-                
                 posj = indNeigh[j]
-                wj = wNeigh[j]
-                
                 posk = indNeigh[k]
-                wk = wNeigh[k]
+                if posk < posj  #swap so posj is smaller
+                    j, k = k, j
+                    posj, posk = posk, posj
+                end
 
-                assert(posj < posk) #remove eventually
+                wj = wNeigh[j]                
+                wk = wNeigh[k]
 
                 sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
                 
