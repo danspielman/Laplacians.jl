@@ -15,8 +15,8 @@ end
 
 # sample a random number
 function newSample{Tv,Ti}(s::NewSampler{Tv,Ti})
-        #i = rand(1:s.n)
-        i = ceil(Ti,rand()*s.n)
+    #i = rand(1:s.n)
+    i = ceil(Ti,rand()*s.n)
 	f = rand()
 	if f < s.F[i]
 		return s.A[i]
@@ -33,12 +33,12 @@ function newSampleMany{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     samples = Array{Ti,1}(sampCount)
     for j = 1:sampCount
         i = ceil(Ti,rand()*s.n)
-	f = rand()
-	if f < s.F[i]
-		samples[j] = s.A[i]
-	else
-		samples[j] = s.V[i]
-	end
+    	f = rand()
+    	if f < s.F[i]
+    		samples[j] = s.A[i]
+    	else
+    		samples[j] = s.V[i]
+    	end
     end
     return samples
 end
@@ -48,12 +48,12 @@ function newSampleManyInbounds{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     samples = Array{Tv,1}(sampCount)
     @inbounds for j = 1:sampCount
         i = ceil(Ti,rand()*s.n)
-	f = rand()
-	if f < s.F[i]
-		samples[j] = s.A[i]
-	else
-		samples[j] = s.V[i]
-	end
+    	f = rand()
+    	if f < s.F[i]
+    		samples[j] = s.A[i]
+    	else
+    		samples[j] = s.V[i]
+    	end
     end
     return samples
 end
@@ -63,12 +63,12 @@ function newSampleManyInboundsLines{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     samples = Array{Tv,1}(sampCount)
     @inbounds for j = 1:sampCount
         i = ceil(Ti,rand()*s.n)
-	f = rand()
-	@inbounds if f < s.F[i]
-	@inbounds	samples[j] = s.A[i]
-	else
-	@inbounds	samples[j] = s.V[i]
-	end
+    	f = rand()
+    	@inbounds if f < s.F[i]
+    	   @inbounds samples[j] = s.A[i]
+    	   else
+    	   @inbounds samples[j] = s.V[i]
+    	end
     end
     return samples
 end
@@ -78,7 +78,7 @@ function newSampleManyInboundsSgnFn{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     samples = Array{Tv,1}(sampCount)
     for j = 1:sampCount
         i = ceil(Ti,rand()*s.n)
-	f = rand()
+        f = rand()
         @inbounds samples[j] = (s.F[i] > f) ? s.A[i] : s.V[i]
     end
     return samples
@@ -89,7 +89,7 @@ function newSampleManyInboundsSgnFnSimd{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::T
     samples = Array{Tv,1}(sampCount)
     @simd for j = 1:sampCount
         i = ceil(Ti,rand()*s.n)
-	f = rand()
+	    f = rand()
         @inbounds samples[j] = (s.F[i] > f) ? s.A[i] : s.V[i]
     end
     return samples
@@ -101,7 +101,7 @@ function newSampleManyInboundsAllSgnFnSimd{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount
     samples = Array{Tv,1}(sampCount)
     @simd for j = 1:sampCount
         i = ceil(Ti,rand()*s.n)
-	f = rand()
+        f = rand()
         @inbounds samples[j] = ((@inbounds s.F[i]) > f) ? (@inbounds s.A[i]) : (@inbounds s.V[i])
     end
     return samples
@@ -114,17 +114,15 @@ function newSampleManyPrealloc{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
     
     for j = 1:sampCount
         i = ceil(Ti,indices[j]*s.n)
-	f = samples[j]
-	if f < s.F[i]
-		samples[j] = s.A[i]
-	else
-		samples[j] = s.V[i]
-	end
+    	f = samples[j]
+    	if f < s.F[i]
+    		samples[j] = s.A[i]
+    	else
+    		samples[j] = s.V[i]
+    	end
     end
     return samples
 end
-
-
 
 # initialize the sampler. To get the residual error after building the sampler, set residual to true
 function newSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)

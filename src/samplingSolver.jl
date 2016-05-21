@@ -8,12 +8,12 @@ include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, eps::Float64 = 0.5, sampConst::Float64 = 10.0)
 
-	F = buildSolver(a, eps = eps, sampConst = sampConst)
+    F = buildSolver(a, eps = eps, sampConst = sampConst)
 
-	la = lap(a)
-	f(b) = pcg(la, b, F, tol=tol, maxits=maxits, verbose=true)
+    la = lap(a)
+    f(b) = pcg(la, b, F, tol=tol, maxits=maxits, verbose=true)
 
-	return f
+    return f
 
 end
 
@@ -23,102 +23,102 @@ end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampConst::Float64 = 10.0)
 
-	# Get u and d such that u d u' = -a (doesn't affect solver)
-	u,d = samplingLDL(a, eps, sampConst)
+    # Get u and d such that u d u' = -a (doesn't affect solver)
+    u,d = samplingLDL(a, eps, sampConst)
 
-	# Initialize the data structures
-	n = length(d)
-	m = n
+    # Initialize the data structures
+    n = length(d)
+    m = n
 
-	nnz = 0
-	for i in 1:n
-		nnz = nnz + length(u[i])
-	end
+    nnz = 0
+    for i in 1:n
+        nnz = nnz + length(u[i])
+    end
 
-	colptr = Array{Ti,1}(n + 1)
-	rowval = Array{Ti,1}(nnz)
-	nzval = Array{Tv,1}(nnz)
+    colptr = Array{Ti,1}(n + 1)
+    rowval = Array{Ti,1}(nnz)
+    nzval = Array{Tv,1}(nnz)
 
-	colptr[1] = 1
-	for i in 1:n
-		colptr[i + 1] = colptr[i] + length(u[i])
-	end
-	index = copy(colptr)
+    colptr[1] = 1
+    for i in 1:n
+        colptr[i + 1] = colptr[i] + length(u[i])
+    end
+    index = copy(colptr)
 
-	# We know that in u the values aren't necessarily ordered by row. So, we do a count sort-like algorith to keep linear time.
-	helper = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]
-	for i in 1:n
-		for j in 1:length(u[i])
-			row = u[i][j][2]
-			col = i
-			val = u[i][j][1]
-			push!(helper[row], (val, col))
-		end
-	end
+    # We know that in u the values aren't necessarily ordered by row. So, we do a count sort-like algorith to keep linear time.
+    helper = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]
+    for i in 1:n
+        for j in 1:length(u[i])
+            row = u[i][j][2]
+            col = i
+            val = u[i][j][1]
+            push!(helper[row], (val, col))
+        end
+    end
 
-	for i in 1:n
-		for j in 1:length(helper[i])
-			row = i
-			col = helper[i][j][2]
-			val = helper[i][j][1]
+    for i in 1:n
+        for j in 1:length(helper[i])
+            row = i
+            col = helper[i][j][2]
+            val = helper[i][j][1]
 
-			rowval[index[col]] = row
-			nzval[index[col]] = val
-			index[col] = index[col] + 1
-		end
-	end
+            rowval[index[col]] = row
+            nzval[index[col]] = val
+            index[col] = index[col] + 1
+        end
+    end
 
-	# Get U as sparse matrix
+    # Get U as sparse matrix
     U = LowerTriangular(SparseMatrixCSC(n, n, colptr, rowval, nzval))
     Ut = U'
 
-	# Create the solver function
-	f = function(b::Array{Float64,1})
-		# center
-		res = copy(b)
-		res = res - sum(res) / n
-
-		# forward solve
-		res = U \ res
-
-		# diag inverse
-		for i in 1:(n - 1)
-			res[i] = res[i] / d[i]
-		end
-
-		# backward solve
-		res = Ut \ res
-
-		# center
-		res = res - sum(res) / n
-		
-		return res
-	end
-
-	# Create the error check function
-    la = lap(a)   
-	g = function(b::Array{Float64,1})
+    # Create the solver function
+    f = function(b::Array{Float64,1})
+        # center
         res = copy(b)
-		res[n] = 0
+        res = res - sum(res) / n
+
+        # forward solve
+        res = U \ res
+
+        # diag inverse
+        for i in 1:(n - 1)
+            res[i] = res[i] / d[i]
+        end
+
+        # backward solve
+        res = Ut \ res
+
+        # center
+        res = res - sum(res) / n
+        
+        return res
+    end
+
+    # Create the error check function
+    la = lap(a)   
+    g = function(b::Array{Float64,1})
+        res = copy(b)
+        res[n] = 0
             
         # diag sqrt inverse
-	    for i in 1:(n - 1)
-			res[i] = res[i] * d[i]^(-1/2)
-	    end
+        for i in 1:(n - 1)
+            res[i] = res[i] * d[i]^(-1/2)
+        end
 
         # backward solve #TODO?
-	    res = Ut \ res
+        res = Ut \ res
 
         # apply lapl
         res = la * res
 
         # forward solve #TODO?
-	    res = U \ res
+        res = U \ res
 
         # diag sqrt inverse
-	    for i in 1:(n - 1)
-			res[i] = res[i] * d[i]^(-1/2)
-	    end
+        for i in 1:(n - 1)
+            res[i] = res[i] * d[i]^(-1/2)
+        end
 
         # subtract identity, except we haven't zeroed out last coord
         res = res - b 
@@ -126,8 +126,8 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampC
         #zero out last coord
         res[n] = 0 #TODO?
             
-	    return res
-	end
+        return res
+    end
 
     gOp = SqLinOp(true,1.0,n,g)
 
@@ -144,11 +144,11 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
 
     # some extra memory to be used later in the algorithm. this can be later pulled out of this function
     # into an external recipient, to be used on subsequent runs of the solver
-    auxVal = zeros(Tv, n) 						# used to sum weights from multiedges
-    auxMult = zeros(Ti, n) 						# used to counte the number of multiedges
+    auxVal = zeros(Tv, n)                       # used to sum weights from multiedges
+    auxMult = zeros(Ti, n)                      # used to counte the number of multiedges
     
-    u = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]	# the lower triangular u matrix part of u d u'
-    d = zeros(Tv, n)							# the d matrix part of u d u'
+    u = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
+    d = zeros(Tv, n)                            # the d matrix part of u d u'
 
     # neigh[i] = the list of neighbors for vertex i with their corresponding weights
     # note neigh[i] only stores neighbors j such that j > i
@@ -157,31 +157,31 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
-		push!(neigh, [])
+        push!(neigh, [])
 
-		for j in a.colptr[i]:a.colptr[i + 1] - 1
-		    if a.rowval[j] > i
-				push!(neigh[i], (a.nzval[j], rho, a.rowval[j]))
-		    end
-		end
+        for j in a.colptr[i]:a.colptr[i + 1] - 1
+            if a.rowval[j] > i
+                push!(neigh[i], (a.nzval[j], rho, a.rowval[j]))
+            end
+        end
     end
 
     # Now, for every i, we will compute the i'th column in U
     for i in 1:(n - 1)
-		# We will get rid of duplicate edges
-		# wSum -  sum of weights of edges
-		# wNeigh - list of weights correspongind to each neighbors
-		# multSum - sum of number of edges (including multiedges)
-		# multNeigh - list of number of multiedges to each neighbor
-		# indNeigh - the indices of the neighboring vertices
+        # We will get rid of duplicate edges
+        # wSum -  sum of weights of edges
+        # wNeigh - list of weights correspongind to each neighbors
+        # multSum - sum of number of edges (including multiedges)
+        # multNeigh - list of number of multiedges to each neighbor
+        # indNeigh - the indices of the neighboring vertices
         wSum, wNeigh, multSum, multNeigh, indNeigh = purge(i, neigh[i], auxVal, auxMult)
         
-		# need to divide weights by the diagonal entry
-		for j in 1:length(indNeigh)
-		    push!(u[i], (-wNeigh[j] / wSum, indNeigh[j]))
-		end
+        # need to divide weights by the diagonal entry
+        for j in 1:length(indNeigh)
+            push!(u[i], (-wNeigh[j] / wSum, indNeigh[j]))
+        end
         push!(u[i], (1, i)) #diag term
-		d[i] = wSum
+        d[i] = wSum
 
         # newSeed = rand(UInt32)
         # srand(newSeed)
@@ -191,7 +191,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
         wSamp = newSampler(wNeigh)
         multSamp = newSampler(convert(Array{Tv,1}, multNeigh))
         #@assert(typeof(multSum) == Int64,"multsum type err")
-	# now propagate the clique to the neighbors of i
+    # now propagate the clique to the neighbors of i
         jSamples = newSampleMany(wSamp,multSum)
         kSamples = newSampleMany(multSamp,multSum)
         
@@ -233,8 +233,8 @@ end
 function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, auxMult::Array{Ti,1})
 
   #   for i in 1:length(v)
-  #   	neigh = v[i][3]
-		# auxVal[neigh] = 0
+  #     neigh = v[i][3]
+        # auxVal[neigh] = 0
   #       auxMult[neigh] = 0
   #   end
     # RAS: Don't we maintain as invariant that this is zeroed out at the end?
@@ -242,11 +242,11 @@ function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, aux
     multSum::Ti = 0
     diag::Tv = 0
     for i in 1:length(v)
-    	neigh = v[i][3]
-    	w = v[i][1]
-    	e = v[i][2]
+        neigh = v[i][3]
+        w = v[i][1]
+        e = v[i][2]
 
-		auxVal[neigh] += w
+        auxVal[neigh] += w
         diag += w
         auxMult[neigh] += e
         multSum += e
@@ -257,20 +257,20 @@ function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, aux
     ind = Ti[]
     
     for i in 1:length(v)
-    	neigh = v[i][3]
+        neigh = v[i][3]
 
-		if auxVal[neigh] != 0
-	        assert(col < neigh)
-		    if neigh == col
-				assert(false)
-		    else
+        if auxVal[neigh] != 0
+            assert(col < neigh)
+            if neigh == col
+                assert(false)
+            else
                 push!(res, auxVal[neigh])
                 push!(mult, auxMult[neigh])
                 push!(ind, neigh)
-				auxVal[neigh] = 0
-	            auxMult[neigh] = 0
-		    end
-		end
+                auxVal[neigh] = 0
+                auxMult[neigh] = 0
+            end
+        end
     end
 
     return diag, res, multSum, mult, ind
@@ -283,15 +283,15 @@ end
 #     matd = zeros(n, n)
 
 #     for i in 1:n
-# 		matd[i, i] = d[i]
+#       matd[i, i] = d[i]
 #     end
 
 #     for i in 1:n
-# 		for j in 1:length(u[i])
-# 		    pos = u[i][j][2]
-# 		    val = u[i][j][1]
-# 		    matu[pos, i] = val
-# 		end
+#       for j in 1:length(u[i])
+#           pos = u[i][j][2]
+#           val = u[i][j][1]
+#           matu[pos, i] = val
+#       end
 #     end
 
 #     return matu * matd * matu'
