@@ -65,9 +65,9 @@ function newSampleManyInboundsLines{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
         i = ceil(Ti,rand()*s.n)
     	f = rand()
     	@inbounds if f < s.F[i]
-    	   @inbounds samples[j] = s.A[i]
-    	   else
-    	   @inbounds samples[j] = s.V[i]
+            @inbounds samples[j] = s.A[i]
+        else
+            @inbounds samples[j] = s.V[i]
     	end
     end
     return samples
