@@ -2,7 +2,7 @@
 
 using Laplacians
 
-include("newFastSampler.jl")
+include("fastSampler.jl")
 include("fastSampler2.jl")
 include("sqLinOpWrapper.jl")
 
@@ -184,20 +184,22 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
         push!(u[i], (1, i)) #diag term
         d[i] = wSum
 
-        # # newSeed = rand(UInt32)
-        # # srand(newSeed)
+        # # println("i = ", i)
+        # newSeed = rand(UInt32)
+        # # println("newSeed = ",newSeed)
+        # srand(newSeed)
 
-        # # wSamp = sampler(wNeigh)
-        # # multSamp = sampler(convert(Array{Tv,1}, multNeigh))
-        # wSamp = newSampler(wNeigh)
-        # multSamp = newSampler(convert(Array{Tv,1}, multNeigh))
-        # #@assert(typeof(multSum) == Int64,"multsum type err")
+        # wSamp = sampler(wNeigh)
+        # multSamp = sampler(convert(Array{Tv,1}, multNeigh))
+        wSamp = newSampler(wNeigh)
+        multSamp = newSampler(convert(Array{Tv,1}, multNeigh))
+        #@assert(typeof(multSum) == Int64,"multsum type err")
         
-        # jSamples = newSampleMany(wSamp,multSum)
-        # kSamples = newSampleMany(multSamp,multSum)
+        jSamples = newSampleMany(wSamp,multSum)
+        kSamples = newSampleMany(multSamp,multSum)
 
-        jSamples = sampleMany(wNeigh, multSum)[randperm(multSum)]
-        kSamples = sampleMany(multNeigh, multSum)[randperm(multSum)]
+        # jSamples = sampleMany(wNeigh, multSum)[randperm(multSum)]
+        # kSamples = sampleMany(multNeigh, multSum)[randperm(multSum)]
         
         # now propagate the clique to the neighbors of i
         for l in 1:multSum
