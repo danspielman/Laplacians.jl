@@ -3,7 +3,6 @@
 using Laplacians
 
 include("fastSampler.jl")
-include("fastSampler2.jl")
 include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, eps::Float64 = 0.5, sampConst::Float64 = 10.0)
@@ -134,7 +133,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampC
     return f,gOp,U,d
 end
 
-# a is a laplacian, b is the target answer vector. We return x
+# a is an adjacency matrix
 function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::Float64)
     n = a.n
 
@@ -157,7 +156,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
-        push!(neigh, [])
+        push!(neigh, Tuple{Tv,Ti,Ti}[])
 
         for j in a.colptr[i]:a.colptr[i + 1] - 1
             if a.rowval[j] > i
@@ -183,14 +182,22 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
         push!(u[i], (1, i)) #diag term
         d[i] = wSum
 
-        wSamp = sampler(wNeigh)
-        multSamp = sampler(convert(Array{Tv,1}, multNeigh))
+        # wSamp = sampler(wNeigh)
+        # multSamp = sampler(convert(Array{Tv,1}, multNeigh))
         
-        jSamples = sampleMany(wSamp,multSum)
-        kSamples = sampleMany(multSamp,multSum)
+        # jSamples = sampleMany(wSamp, multSum)
+        # kSamples = sampleMany(multSamp, multSum)
 
-        # jSamples = sampleMany(wNeigh, multSum)[randperm(multSum)]
-        # kSamples = sampleMany(multNeigh, multSum)[randperm(multSum)]
+        wSamp = sampler(wNeigh)
+        jSamples = sampleMany(wSamp, multSum)
+
+        kSamples = Ti[]
+        ind = 0
+        for j in 1:length(indNeigh)
+            for k in 1:multNeigh[j]
+                push!(kSamples, j)
+            end
+        end
         
         # now propagate the clique to the neighbors of i
         for l in 1:multSum
@@ -230,13 +237,6 @@ end
 # see description in samplingSolver
 function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, auxMult::Array{Ti,1})
 
-  #   for i in 1:length(v)
-  #     neigh = v[i][3]
-        # auxVal[neigh] = 0
-  #       auxMult[neigh] = 0
-  #   end
-    # RAS: Don't we maintain as invariant that this is zeroed out at the end?
-
     multSum::Ti = 0
     diag::Tv = 0
     for i in 1:length(v)
@@ -251,16 +251,16 @@ function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, aux
     end
 
     res = Tv[]
-    mult = Ti[]  
+    mult = Ti[]
     ind = Ti[]
     
     for i in 1:length(v)
         neigh = v[i][3]
 
         if auxVal[neigh] != 0
-            assert(col < neigh)
+            @assert(col < neigh, "col < neigh in purge")
             if neigh == col
-                assert(false)
+                @assert(false, "col = neigh in purge")
             else
                 push!(res, auxVal[neigh])
                 push!(mult, auxMult[neigh])
