@@ -1,5 +1,5 @@
-#TODO: would be nice to add a link to the paper rasmus was referencing    
-immutable NewSampler{Tv,Ti}
+# Alias sampling  
+immutable Sampler{Tv,Ti}
     F::Array{Tv,1}    # array of p[s.A[i]] / (1 / n)
     A::Array{Ti,1}    # array of indices of elements < (1 / n)
     V::Array{Ti,1}    # arary of indices of elements > (1 / n)
@@ -7,7 +7,7 @@ immutable NewSampler{Tv,Ti}
 end
 
 # sample a random number
-function newSample{Tv,Ti}(s::NewSampler{Tv,Ti})
+function sample{Tv,Ti}(s::Sampler{Tv,Ti})
     #i = rand(1:s.n)
     i = ceil(Ti,rand()*s.n)
     f = rand()
@@ -16,11 +16,10 @@ function newSample{Tv,Ti}(s::NewSampler{Tv,Ti})
     else
         return s.V[i]
     end
-
 end
 
 # sample a random number
-function newSampleMany{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
+function sampleMany{Tv,Ti}(s::Sampler{Tv,Ti},sampCount::Ti)
     #i = rand(1:s.n)
     samples = Array{Ti,1}(sampCount)
     for j = 1:sampCount
@@ -36,7 +35,7 @@ function newSampleMany{Tv,Ti}(s::NewSampler{Tv,Ti},sampCount::Ti)
 end
 
 # initialize the sampler. To get the residual error after building the sampler, set residual to true
-function newSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
+function sampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
 
     n = length(p)
 
@@ -103,8 +102,8 @@ function newSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
     end
 
     if residual
-        return NewSampler(F, A, V, n), err
+        return Sampler(F, A, V, n), err
     else
-        return NewSampler(F, A, V, n)
+        return Sampler(F, A, V, n)
     end
 end
