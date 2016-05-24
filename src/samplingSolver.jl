@@ -6,7 +6,6 @@ include("fastSampler.jl")
 include("fastSampler2.jl")
 include("sqLinOpWrapper.jl")
 
-
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, eps::Float64 = 0.5, sampConst::Float64 = 10.0)
 
     F = buildSolver(a, eps = eps, sampConst = sampConst)
@@ -184,19 +183,11 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
         push!(u[i], (1, i)) #diag term
         d[i] = wSum
 
-        # # println("i = ", i)
-        # newSeed = rand(UInt32)
-        # # println("newSeed = ",newSeed)
-        # srand(newSeed)
-
-        # wSamp = sampler(wNeigh)
-        # multSamp = sampler(convert(Array{Tv,1}, multNeigh))
-        wSamp = newSampler(wNeigh)
-        multSamp = newSampler(convert(Array{Tv,1}, multNeigh))
-        #@assert(typeof(multSum) == Int64,"multsum type err")
+        wSamp = sampler(wNeigh)
+        multSamp = sampler(convert(Array{Tv,1}, multNeigh))
         
-        jSamples = newSampleMany(wSamp,multSum)
-        kSamples = newSampleMany(multSamp,multSum)
+        jSamples = sampleMany(wSamp,multSum)
+        kSamples = sampleMany(multSamp,multSum)
 
         # jSamples = sampleMany(wNeigh, multSum)[randperm(multSum)]
         # kSamples = sampleMany(multNeigh, multSum)[randperm(multSum)]
@@ -208,12 +199,12 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
             
             j = jSamples[l]
             k = kSamples[l]
-            #@assert(typeof(j) == Int64,typeof(j))
-            #@assert(typeof(k) == Int64)
             if j != k
                 posj = indNeigh[j]
                 posk = indNeigh[k]
-                if posk < posj  #swap so posj is smaller
+
+                # swap so posj is smaller
+                if posk < posj  
                     j, k = k, j
                     posj, posk = posk, posj
                 end
