@@ -266,9 +266,9 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishKrus
 
   Dx = spdiagm(ddmat*ones(n))
 
-  augDD = Dx + spdiagm(augtree*ones(n)) - augtree
+  augDD = Dx + spdiagm(augtree*ones(n)) - augtree + speye(n) * 1 / 10000 * 1 / n^2
 
-  F = cholfact(augDD)
+  F = cholfact(augDD) 
 
   return x -> (F\x)
 
