@@ -167,13 +167,17 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
 
     # Now, for every i, we will compute the i'th column in U
     for i in 1:(n - 1)
+        # if i == n - 3000
+        #     break
+        # end
+
         # We will get rid of duplicate edges
         # wSum -  sum of weights of edges
         # wNeigh - list of weights correspongind to each neighbors
         # multSum - sum of number of edges (including multiedges)
         # multNeigh - list of number of multiedges to each neighbor
         # indNeigh - the indices of the neighboring vertices
-        wSum, wNeigh, multSum, multNeigh, indNeigh = purge(i, neigh[i], auxVal, auxMult)
+        wSum, wNeigh, multSum, multNeigh, indNeigh = purge(i, rho, neigh[i], auxVal, auxMult)
         
         # need to divide weights by the diagonal entry
         for j in 1:length(indNeigh)
@@ -235,7 +239,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
 end
 
 # see description in samplingSolver
-function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, auxMult::Array{Ti,1})
+function purge{Tv,Ti}(col::Ti, rho::Int64, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, auxMult::Array{Ti,1})
 
     multSum::Ti = 0
     diag::Tv = 0
@@ -247,7 +251,6 @@ function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, aux
         auxVal[neigh] += w
         diag += w
         auxMult[neigh] += e
-        multSum += e
     end
 
     res = Tv[]
@@ -262,9 +265,15 @@ function purge{Tv,Ti}(col, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, aux
             if neigh == col
                 @assert(false, "col = neigh in purge")
             else
+                # we want to cap the number of multiedges at rho
+                actualMult = min(rho, auxMult[neigh])
+
                 push!(res, auxVal[neigh])
-                push!(mult, auxMult[neigh])
+                push!(mult, actualMult)
                 push!(ind, neigh)
+
+                multSum = multSum + actualMult
+
                 auxVal[neigh] = 0
                 auxMult[neigh] = 0
             end
