@@ -5,12 +5,19 @@ using Laplacians
 include("fastSampler.jl")
 include("sqLinOpWrapper.jl")
 
-function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, eps::Float64 = 0.5, sampConst::Float64 = 10.0)
+function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
+								eps::Float64 = 0.5, sampConst::Float64 = 10.0, k = 10)
 
-    F = buildSolver(a, eps = eps, sampConst = sampConst)
+    F,_,_,_,ord = buildSolver(a, eps = eps, sampConst = sampConst, k = k)
 
-    la = lap(a)
-    f(b) = pcg(la, b, F, tol=tol, maxits=maxits, verbose=true)
+    invperm = collect(1:n)
+    sort!(invperm, by=x->ord[x])
+
+    la = lap(a[ord,ord])
+    function f(b) 
+    	ret = pcg(la, b[ord], F, tol=tol, maxits=maxits, verbose=true)
+    	return ret[invperm]
+    end
 
     return f
 
@@ -20,15 +27,44 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti})
     return eigs(gOp;nev=1,which=:LM)[1][1]
 end
 
-function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampConst::Float64 = 10.0)
+function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampConst::Float64 = 10.0, k = 10)
+
+	n = a.n;
+	rho = ceil(Ti, sampConst * log(n) ^ 2 / eps ^ 2)
+
+	tic()
+
+	tree = randishKruskal(a);
+	ord = reverse!(dfsOrder(tree));
+
+	a = a[ord, ord];
+	tree = tree[ord, ord];
+	rootedTree = matToTree(tree);
+
+	depth = compDepth(rootedTree);
+	stretch = tarjanStretch(rootedTree, a, depth);
+
+	# I think Dan's code also multiplies stretch by edge weight
+	stretch = ceil(Int64, stretch * log(n) / (k * log(n)));
+
+	# set the tree strech to rho
+	#### NOT EFFICIENT
+	for u in 1:n
+		for i in 1:deg(tree,u)
+			v = nbri(tree,u,i)
+			stretch[u,v] = rho
+		end
+	end
+
+	print("Time to build the tree and compute the stretch: ")
+
+	toc()
+
 
     # Get u and d such that u d u' = -a (doesn't affect solver)
-    u,d = samplingLDL(a, eps, sampConst)
+    u,d = samplingLDL(a, stretch, rho)
 
     # Initialize the data structures
-    n = length(d)
-    m = n
-
     nnz = 0
     for i in 1:n
         nnz = nnz + length(u[i])
@@ -130,14 +166,12 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampC
 
     gOp = SqLinOp(true,1.0,n,g)
 
-    return f,gOp,U,d
+    return f,gOp,U,d,ord
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::Float64)
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Ti,Ti}, rho::Ti)
     n = a.n
-
-    rho = ceil(Ti, sampConst * log(n) ^ 2 / eps ^ 2)
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
 
@@ -160,7 +194,8 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::
 
         for j in a.colptr[i]:a.colptr[i + 1] - 1
             if a.rowval[j] > i
-                push!(neigh[i], (a.nzval[j], rho, a.rowval[j]))
+            	# set the value min between rho and the stretch
+                push!(neigh[i], (a.nzval[j], min(rho, stretch.nzval[j]), a.rowval[j]))
             end
         end
     end
@@ -266,8 +301,7 @@ function purge{Tv,Ti}(col::Ti, rho::Int64, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::
                 @assert(false, "col = neigh in purge")
             else
                 # we want to cap the number of multiedges at rho
-                # actualMult = min(rho, auxMult[neigh])
-                actualMult = auxMult[neigh]
+                actualMult = min(rho, auxMult[neigh])
 
                 push!(res, auxVal[neigh])
                 push!(mult, actualMult)

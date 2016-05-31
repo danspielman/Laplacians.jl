@@ -1,5 +1,5 @@
 # Alias sampling  
-immutable Sampler{Tv,Ti}
+immutable fastSampler{Tv,Ti}
     F::Array{Tv,1}    # array of p[s.A[i]] / (1 / n)
     A::Array{Ti,1}    # array of indices of elements < (1 / n)
     V::Array{Ti,1}    # arary of indices of elements > (1 / n)
@@ -7,7 +7,7 @@ immutable Sampler{Tv,Ti}
 end
 
 # sample a random number
-function sample{Tv,Ti}(s::Sampler{Tv,Ti})
+function sample{Tv,Ti}(s::fastSampler{Tv,Ti})
     #i = rand(1:s.n)
     i = ceil(Ti,rand()*s.n)
     f = rand()
@@ -19,7 +19,7 @@ function sample{Tv,Ti}(s::Sampler{Tv,Ti})
 end
 
 # sample a random number
-function sampleMany{Tv,Ti}(s::Sampler{Tv,Ti},sampCount::Ti)
+function sampleMany{Tv,Ti}(s::fastSampler{Tv,Ti},sampCount::Ti)
     #i = rand(1:s.n)
     samples = Array{Ti,1}(sampCount)
     for j = 1:sampCount
@@ -102,8 +102,8 @@ function sampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
     end
 
     if residual
-        return Sampler(F, A, V, n), err
+        return fastSampler(F, A, V, n), err
     else
-        return Sampler(F, A, V, n)
+        return fastSampler(F, A, V, n)
     end
 end
