@@ -119,6 +119,8 @@ and exports the functions for which it seems appropriate.
 
   include("treeAlgs.jl")
 
+  export dfsOrder
+  export bfsOrder
   export RootedTree
   export matToTree
   export matToTreeDepth
