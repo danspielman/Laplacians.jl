@@ -6,19 +6,21 @@ include("fastSampler.jl")
 include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
-								eps::Float64 = 0.5, sampConst::Float64 = 10.0, k = 10)
+								eps::Float64 = 0.5, sampConst::Float64 = 10.0, k::Float64 = 5, beta::Float64 = 5)
 
-    F,_,_,_,ord = buildSolver(a, eps = eps, sampConst = sampConst, k = k)
+	a2 = copy(a)
+
+    F,_,_,_,ord = buildSolver(a, eps = eps, sampConst = sampConst, k = k, beta = beta)
 
     invperm = collect(1:n)
     sort!(invperm, by=x->ord[x])
 
     la = lap(a[ord,ord])
-    function f(b) 
+    function f(b)
     	ret = pcg(la, b[ord], F, tol=tol, maxits=maxits, verbose=true)
     	return ret[invperm]
     end
-
+    
     return f
 
 end
@@ -27,7 +29,8 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti})
     return eigs(gOp;nev=1,which=:LM)[1][1]
 end
 
-function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampConst::Float64 = 10.0, k = 10)
+function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; 
+							eps::Float64 = 0.5, sampConst::Float64 = 10.0, k::Float64 = 5, beta::Float64 = 6)
 
 	n = a.n;
 	rho = ceil(Ti, sampConst * log(n) ^ 2 / eps ^ 2)
@@ -41,23 +44,26 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampC
 	tree = tree[ord, ord];
 	rootedTree = matToTree(tree);
 
+	# blow up the tree
+	a = a + beta * tree
+
 	depth = compDepth(rootedTree);
 	stretch = tarjanStretch(rootedTree, a, depth);
 
 	# I think Dan's code also multiplies stretch by edge weight
-	stretch = ceil(Int64, stretch * log(n) / (k * log(n)));
+	stretch = ceil(Int64, stretch / k);
 
 	# set the tree strech to rho
 	#### NOT EFFICIENT
 	for u in 1:n
 		for i in 1:deg(tree,u)
 			v = nbri(tree,u,i)
+
 			stretch[u,v] = rho
 		end
 	end
 
 	print("Time to build the tree and compute the stretch: ")
-
 	toc()
 
 
@@ -188,6 +194,9 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
     neigh = Array{Tuple{Tv,Ti,Ti},1}[]
 
+    # TODO: remove when solver is finished. Used to find the mean of the multiedges
+    multiedgeVals = []
+
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
         push!(neigh, Tuple{Tv,Ti,Ti}[])
@@ -196,9 +205,13 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
             if a.rowval[j] > i
             	# set the value min between rho and the stretch
                 push!(neigh[i], (a.nzval[j], min(rho, stretch.nzval[j]), a.rowval[j]))
+                push!(multiedgeVals, min(rho, stretch.nzval[j]))
             end
         end
     end
+
+    println("The mean value of multiedges in the graph: ", mean(multiedgeVals), 
+    		"; The number of multiedges in the graph = ", length(multiedgeVals))
 
     # Now, for every i, we will compute the i'th column in U
     for i in 1:(n - 1)
