@@ -178,11 +178,15 @@ function akpwUsub(graph, xfac::Function)
     
     # allocate reusable queue, but only used inside subroutines
     thisBdry = fastPairQueue(m)
+
+    hackSeed = 1
     
-    while hasMore(potSeeds)
+    while hackSeed <= n # hasMore(potSeeds)
 
         # could try pulling a random seed instead
-        seed = pull!(potSeeds)
+        # seed = pull!(potSeeds)
+        seed = hackSeed
+        hackSeed += 1
         
         if comp[seed] <= 0
             ncomps += 1
