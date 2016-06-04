@@ -140,13 +140,12 @@ end
 =#
 
 
-function akpwU(graph, xfac::Function)
-    n = size(graph,1)
-    akpwU(graph, xfac(n))
+function akpwU(graph, xfac::Float64)
+    akpwU(graph, n->xfac)
 end
 
 
-function akpwU(graph, xfac::Float64)
+function akpwU(graph, xfac::Function)
     n = size(graph,1)
 
     tre = akpwUsub(graph, xfac)
@@ -161,7 +160,7 @@ end
 akpwU(graph) = akpwU(graph, 0.2)
 
 
-function akpwUsub(graph, xfac::Float64)
+function akpwUsub(graph, xfac::Function)
     n = size(graph,1)
     m = nnz(graph)
     
@@ -181,11 +180,13 @@ function akpwUsub(graph, xfac::Float64)
     thisBdry = fastPairQueue(m)
     
     while hasMore(potSeeds)
+
+        # could try pulling a random seed instead
         seed = pull!(potSeeds)
         
         if comp[seed] <= 0
             ncomps += 1
-            growFromSeed(graph, seed, ncomps, comp, treeEdges, thisBdry, potSeeds, xfac) 
+            growFromSeed(graph, seed, ncomps, comp, treeEdges, thisBdry, potSeeds, xfac(n)) 
             reset!(thisBdry)
         end
         
@@ -211,11 +212,13 @@ function akpwUsub(graph, xfac::Float64)
         edgeMap = cGraph.nzval
         cGraph.nzval = ones(length(edgeMap))
 
-        ctre = akpwUsub(cGraph, xfac)
+        if (nnz(cGraph) > 0)
+            ctre = akpwUsub(cGraph, xfac)
 
-        sube = edgeMap[ctre]
+            sube = edgeMap[ctre]
 
-        tre = [tre;sube]
+            tre = [tre;sube]
+        end
         
     end
     
@@ -245,7 +248,9 @@ function growFromSeed(graph, seed::Int, ncomps::Int, comp,
             
             push!(thisBdry,ind,nbr)
             bdry += 1
-                             
+
+            vol += 1 # if using sum of degrees CHECK ON THIS
+
         end
     end
 
@@ -254,7 +259,7 @@ function growFromSeed(graph, seed::Int, ncomps::Int, comp,
         
         if (comp[node] != ncomps)
 
-            comp[node] = ncomps
+            comp[node] = ncomps 
             push!(treeEdges,edge)
 
             for ind in graph.colptr[node]:(graph.colptr[node+1]-1)
@@ -272,6 +277,8 @@ function growFromSeed(graph, seed::Int, ncomps::Int, comp,
 
                     push!(thisBdry,ind,nbr)  # issue: nodes pop up many times
                     bdry += 1
+                    vol += 1 # if using sum of degrees CHECK ON THIS
+
 
                 end
             end
