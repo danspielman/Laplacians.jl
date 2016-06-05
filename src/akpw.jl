@@ -136,12 +136,13 @@ function akpwUsub(graph, xfac::Function)
 
         if comp[seed] <= 0
             ncomps += 1
-            growFromSeed(graph, seed, ncomps, comp, treeEdges, thisBdry, xfac(n)) 
+            bfsFromSeed(graph, seed, ncomps, comp, treeEdges, thisBdry, xfac(n)) 
             reset!(thisBdry)
         end
         
     end
      
+    #println(comp)
     
     #=  THIS CODE CHECKS THAT THE FOREST SPANS THE COMPONENTS 
     @assert 2*n - nnz(tree) - 2*maximum(comp) == 0
@@ -157,7 +158,7 @@ function akpwUsub(graph, xfac::Function)
 
     if maximum(comp) > 1
 
-        cGraph = compGraph(graph, comp)
+        cGraph = compGraphU(graph, comp)
 
         edgeMap = cGraph.nzval
         cGraph.nzval = ones(length(edgeMap))
@@ -180,7 +181,7 @@ end
 
 
 
-function growFromSeed(graph, seed::Int, ncomps::Int, comp, 
+function bfsFromSeed(graph, seed::Int, ncomps::Int, comp, 
     treeEdges::fastQueue, thisBdry::fastPairQueue, xfac::Float64)
    
     bdry = 0
@@ -200,8 +201,11 @@ function growFromSeed(graph, seed::Int, ncomps::Int, comp,
 
     while (bdry > xfac*vol) && hasMore(thisBdry)
         (edge,node) = pull!(thisBdry)
+
+        #println([edge node bdry vol])
         
-        if (comp[node] != ncomps)
+        # if (comp[node] != ncomps)
+        if (comp[node] == 0)
 
             comp[node] = ncomps 
             push!(treeEdges,edge)
@@ -226,8 +230,8 @@ function growFromSeed(graph, seed::Int, ncomps::Int, comp,
 end
 
 
-      
-function compGraph(graph, comp)
+# unweighted version      
+function compGraphU(graph, comp)
 
     m = nnz(graph)
     (ai,aj) = findnz(graph)
@@ -247,10 +251,343 @@ function compGraph(graph, comp)
             aind[i] = 0
         end
     end
-    
+
     cGraph = sparse(aic,ajc,aind,nc,nc,combine)
 
     return cGraph
 
 end
+
+
+function akpwish(graph, xfac::Float64)
+    akpwish(graph, n->xfac)
+end
+
+
+function akpwish(graph, xfac::Function)
+    n = size(graph,1)
+
+    tre = akpwSub(graph, xfac)
+
+    (ai,aj,av) = findnz(graph)
+    tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]])
+
+    return tree
+
+end
+
+akpwish(graph) = akpwish(graph, x->(1/(2*log(x))))
+
+
+
+function akpwSub(graph, xfac::Function)
+    n = size(graph,1)
+    m = nnz(graph)
+
+    (_,aj,_) = findnz(graph)
+    
+    comp = zeros(Int, n)
+    ncomps = 0
+    
+    # the indices into (ai,aj) = findnz(a) of the edges in the tree
+    treeEdges = fastQueue(n-1)
+    
+    curBdry = fastQueue(n)
+    
+    # start from a random vertex
+    seedlist = randperm(n)
+    
+    # allocate reusable queue, but only used inside subroutines
+    thisBdry = fastPairQueue(m)
+
+    dists = Inf*ones(Float64, n)
+
+    for seed in seedlist
+
+        if comp[seed] <= 0
+            ncomps += 1
+            dijkstraFromSeed(graph, aj, seed, ncomps, comp, dists, treeEdges, xfac(n)) 
+            reset!(thisBdry)
+        end
+        
+    end
+
+    #println(comp)
+    
+    tre = treeEdges.q[1:treeEdges.endPtr]
+     
+    #=  THIS CODE CHECKS THAT THE FOREST SPANS THE COMPONENTS 
+
+    (ai,aj,av) = findnz(graph)
+    tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]])
+
+    @assert 2*n - nnz(tree) - 2*maximum(comp) == 0
+    for i in 1:maximum(comp)
+        ind = find(comp .== i)
+        tri = tree[ind,ind]
+        @assert isConnected(tri)
+    end
+
+    =#
+
+    if maximum(comp) > 1
+
+        cGraph, edgeMap = compGraph(graph, comp)
+        #=
+        cGraph = compGraphU(graph, comp)
+        edgeMap = cGraph.nzval
+        cGraph.nzval = ones(length(edgeMap))
+        =#
+        
+        if (nnz(cGraph) > 0)
+            ctre = akpwSub(cGraph, xfac)
+
+            sube = edgeMap[ctre]
+
+            tre = [tre;sube]
+        end
+        
+    end
+        
+    return tre
+    
+end
+
+
+
+
+# grow shortest path tree from the seed
+# will need to make the heap reusable
+function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, comp, 
+    dists::Array{Float64,1}, treeEdges::fastQueue, xfac::Float64)
+
+    ai = graph.rowval
+    av = graph.nzval
+    
+    bdry = 0
+    vol = 0
+
+    heap = Collections.PriorityQueue(Int64, Float64)
+
+    dists[seed] = 0
+    comp[seed] = ncomps
+
+
+   #=
+   issue: how to keep track of the edges used.
+    shortestPaths does it by keeping a parent pointer for every node.
+    randishPrim does it by popping.
+   =#
+
+    for ind in graph.colptr[seed]:(graph.colptr[seed+1]-1)
+        nbr = graph.rowval[ind]
+        if comp[nbr] == 0
+
+            wt = graph.nzval[ind]
+            Collections.enqueue!(heap, ind, 1/wt)
+            bdry += wt
+            vol += wt
+        end
+        
+    end
+
+    while (bdry > xfac*vol) && (length(heap) > 0)
+
+        edge = Collections.dequeue!(heap)
+        node = aj[edge]
+        from = ai[edge]
+        if comp[node] == ncomps
+            node = ai[edge]
+            from = aj[edge]
+        end
+
+
+        # println([edge node bdry vol length(heap)])
+        
+        if (comp[node] == 0)
+
+            comp[node] = ncomps
+            # println([edge ai[edge] aj[edge] ncomps])
+            push!(treeEdges,edge)
+            dist = dists[from] + 1/graph.nzval[edge]
+            dists[node] = dist
+
+            #println(dist)
+
+            for ind in graph.colptr[node]:(graph.colptr[node+1]-1)
+                nbr = graph.rowval[ind]
+
+                if comp[nbr] == ncomps
+                    wt = graph.nzval[ind]
+
+                    bdry -= wt
+                    vol += wt
+
+                elseif comp[nbr] == 0
+
+                    wt = graph.nzval[ind]
+                    newdist = dist + 1/wt
+                    
+                    bdry += wt
+                    vol += wt
+
+                    Collections.enqueue!(heap,ind,newdist)
+
+                    #=
+                    if newdist < dists[nbr]
+                        dists[nbr] = newdist
+                        Collections.enqueue!(heap,ind,newdist)
+                    end
+                    =#
+                    
+                end
+            end
+        end
+    end
+
+end
+
+
+# this combines all the vertices in a comp together, keeping the max of their weights
+# it also produces a map from edges in the smaller graph back to their reps in the original
+# possible speed up: combine the third pass with the second
+# possible improvement: keep track of sum of multiedges in some way
+function compGraph(graph, comp)
+
+    m = nnz(graph)
+    (ai,aj,av) = findnz(graph)
+
+    aic = comp[ai]
+    ajc = comp[aj]
+
+    nc = maximum(comp)
+
+    aind = collect(1:m)
+
+    # remove self-loops
+    for i in 1:m
+        if aic[i] == ajc[i]
+            aind[i] = 0
+        end
+    end
+
+    ind = find(aind)
+    aic = aic[ind]
+    ajc = ajc[ind]
+    av = av[ind]
+    aind = aind[ind]
+
+    # println([aic ajc av aind])
+    
+    cGraph, edgeMap = combineMultiG(aic,ajc,av,aind)
+
+    return cGraph, edgeMap
+
+end
+
+# question is how to combine.  right now use max of wts, but sum might be reasonable too
+# it carries around with it aind--which is a map on edges
+function combineMultiG{Ti,Tv}(ai::Array{Ti,1}, aj::Array{Ti,1}, av::Array{Tv,1},  aind::Array{Ti,1})
+
+    numnz = length(ai)
+
+    n = maximum([maximum(ai) maximum(aj)]) 
+    
+    deg = zeros(Ti, n) 
+
+    ptr = 1
+    for k in 1:numnz
+        deg[ai[k]] += 1
+    end
+
+    I1 = Array(Ti, numnz)
+    J1 = Array(Ti, numnz)
+    aind1 = Array(Ti, numnz)
+    V1 = zeros(Tv, numnz)
+
+    cumdeg = cumsum(deg)
+    col = [1;cumdeg+1]
+
+    cumdeg1 = copy(cumdeg)
+    
+    for i in numnz:-1:1
+        ptr = cumdeg1[ai[i]]
+        cumdeg1[ai[i]] -= 1
+        I1[ptr] = ai[i]
+        J1[ptr] = aj[i]
+        V1[ptr] = av[i]
+        aind1[ptr] = aind[i]
+    end
+
+
+    
+    I2 = Array(Ti, numnz)
+    J2 = Array(Ti, numnz)
+    aind2 = Array(Ti, numnz)
+    V2 = Array(Tv, numnz)
+
+    for i in numnz:-1:1
+        ptr = cumdeg[J1[i]]
+        cumdeg[J1[i]] -= 1
+        I2[ptr] = I1[i]
+        J2[ptr] = J1[i]
+        aind2[ptr] = aind1[i]
+        V2[ptr] = V1[i]
+    end
+
+    # now, the list is sorted by J, and within that by i
+    # so compress it
+    
+    I3 = Array(Ti, numnz)
+    J3 = Array(Ti, numnz)
+    aind3 = Array(Ti, numnz)
+    V3 = Array(Tv, numnz)
+    
+    ptr = 0
+    i2old = I2[1]
+    j2old = J2[1]
+    v2 = 0
+    ind3 = 0
+
+    for i in 1:numnz
+        i2 = I2[i]
+        j2 = J2[i]
+        
+        
+        if  (i2 == i2old) && (j2 == j2old)
+            if V2[i] > v2
+                v2 = V2[i]
+                ind3 = aind2[i]
+            end
+        else 
+            
+            
+            ptr += 1
+            I3[ptr] = i2old
+            J3[ptr] = j2old
+            aind3[ptr] = ind3
+            V3[ptr] = v2
+            i2old = i2
+            j2old = j2
+            v2 = V2[i]
+            ind3 = aind2[i]
+        end
+
+    end
+    
+    ptr += 1
+    I3[ptr] = i2old
+    J3[ptr] = j2old
+    aind3[ptr] = ind3
+    V3[ptr] = v2
+
+    J3 = J3[1:ptr]
+    I3 = I3[1:ptr]
+    V3 = V3[1:ptr]
+    aind3 = aind3[1:ptr]
+    
+    return sparse(J3, I3, V3, n , n), aind3 
+
+end
+
 
