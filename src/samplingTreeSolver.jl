@@ -3,7 +3,6 @@
 using Laplacians
 
 include("fastSampler.jl")
-include("linkedListStorage.jl")
 include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
@@ -150,20 +149,16 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     # neigh[i] = the list of neighbors for vertex i with their corresponding weights
     # note neigh[i] only stores neighbors j such that j > i
     # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
-
-    # neigh = Array{Tuple{Tv,Ti,Ti},1}[]
-    # TODO: change after this works for the current behavior
-    neigh = llsInit(a)
+    neigh = Array{Tuple{Tv,Ti,Ti},1}[]
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
-        # push!(neigh, Tuple{Tv,Ti,Ti}[])
+        push!(neigh, Tuple{Tv,Ti,Ti}[])
 
         for j in a.colptr[i]:a.colptr[i + 1] - 1
             if a.rowval[j] > i
             	# set the value min between rho and the stretch
-                # push!(neigh[i], (a.nzval[j], min(rho, stretch.nzval[j]), a.rowval[j]))
-                llsAdd(neigh, i, (a.nzval[j], min(rho, stretch.nzval[j]), a.rowval[j]))
+                push!(neigh[i], (a.nzval[j], min(rho, stretch.nzval[j]), a.rowval[j]))
             end
         end
     end
@@ -180,9 +175,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
         # multSum - sum of number of edges (including multiedges)
         # multNeigh - list of number of multiedges to each neighbor
         # indNeigh - the indices of the neighboring vertices
-
-        # wSum, wNeigh, multSum, multNeigh, indNeigh = purge(i, rho, neigh[i], auxVal, auxMult)
-        wSum, wNeigh, multSum, multNeigh, indNeigh = llsPurge(neigh, i, rho, auxVal, auxMult)
+        wSum, wNeigh, multSum, multNeigh, indNeigh = purge(i, rho, neigh[i], auxVal, auxMult)
         
         # need to divide weights by the diagonal entry
         for j in 1:length(indNeigh)
@@ -230,8 +223,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 
                 sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
                 
-                # push!(neigh[posj], (wj * wk / sampScaling, 1, posk))
-                llsAdd(neigh, posj, (wj * wk / sampScaling, 1, posk))
+                push!(neigh[posj], (wj * wk / sampScaling, 1, posk))
             end
         end  
     end
@@ -241,6 +233,52 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     d[n] = 0
 
     return constructLowerTriangularMat(u), d
+end
+
+# see description in samplingSolver
+function purge{Tv,Ti}(col::Ti, rho::Int64, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, auxMult::Array{Ti,1})
+
+    multSum::Ti = 0
+    diag::Tv = 0
+    for i in 1:length(v)
+        neigh = v[i][3]
+        w = v[i][1]
+        e = v[i][2]
+
+        auxVal[neigh] += w
+        diag += w
+        auxMult[neigh] += e
+    end
+
+    res = Tv[]
+    mult = Ti[]
+    ind = Ti[]
+    
+    for i in 1:length(v)
+        neigh = v[i][3]
+
+        if auxVal[neigh] != 0
+            @assert(col < neigh, "col < neigh in purge")
+            if neigh == col
+                @assert(false, "col = neigh in purge")
+            else
+                # we want to cap the number of multiedges
+                actualMult = auxMult[neigh]
+
+                push!(res, auxVal[neigh])
+                push!(mult, actualMult)
+                push!(ind, neigh)
+
+                multSum = multSum + actualMult
+
+                auxVal[neigh] = 0
+                auxMult[neigh] = 0
+            end
+        end
+    end
+
+    return diag, res, multSum, mult, ind
+
 end
 
 # u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
@@ -287,52 +325,6 @@ function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
 
     return LowerTriangular(SparseMatrixCSC(n, n, colptr, rowval, nzval))
 end
-
-# see description in samplingSolver
-# function purge{Tv,Ti}(col::Ti, rho::Int64, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, auxMult::Array{Ti,1})
-
-#     multSum::Ti = 0
-#     diag::Tv = 0
-#     for i in 1:length(v)
-#         neigh = v[i][3]
-#         w = v[i][1]
-#         e = v[i][2]
-
-#         auxVal[neigh] += w
-#         diag += w
-#         auxMult[neigh] += e
-#     end
-
-#     res = Tv[]
-#     mult = Ti[]
-#     ind = Ti[]
-    
-#     for i in 1:length(v)
-#         neigh = v[i][3]
-
-#         if auxVal[neigh] != 0
-#             @assert(col < neigh, "col < neigh in purge")
-#             if neigh == col
-#                 @assert(false, "col = neigh in purge")
-#             else
-#                 # we want to cap the number of multiedges at rho
-#                 actualMult = min(rho, auxMult[neigh])
-
-#                 push!(res, auxVal[neigh])
-#                 push!(mult, actualMult)
-#                 push!(ind, neigh)
-
-#                 multSum = multSum + actualMult
-
-#                 auxVal[neigh] = 0
-#                 auxMult[neigh] = 0
-#             end
-#         end
-#     end
-
-#     return diag, res, multSum, mult, ind
-
-# end
 
 # this is a debug function, it returns u' * d * u
 # function tomatrix{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1}}, d::Array{Tv,1})
