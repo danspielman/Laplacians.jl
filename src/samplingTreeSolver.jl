@@ -226,6 +226,8 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
                 push!(neigh[posj], (wj * wk / sampScaling, 1, posk))
             end
         end  
+
+        neigh[i] = Tuple{Tv,Ti,Ti}[]
     end
 
     # add the last diagonal term
