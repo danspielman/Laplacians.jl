@@ -295,16 +295,28 @@ function akpwSub(graph, xfac::Function)
     curBdry = fastQueue(n)
     
     # start from a random vertex
-    seedlist = randperm(n)
+    # seedlist = randperm(n)
+
+    # order the edges, keeping only those within xfac of largest
+    bigEdges = find(graph.nzval .> xfac(n)*maximum(graph.nzval))
+    bigOrder = sortperm(graph.nzval[bigEdges],rev=true)
+    
+    edgeOrder = bigEdges[bigOrder]
+    
     
     # allocate reusable queue, but only used inside subroutines
     thisBdry = fastPairQueue(m)
 
     dists = Inf*ones(Float64, n)
 
-    for seed in seedlist
+    # for seed in seedlist
+    for edge in edgeOrder
+        edgeu = aj[edge]
+        edgev = graph.rowval[edge]
+        if (comp[edgeu] == 0) && (comp[edgev] == 0)
 
-        if comp[seed] <= 0
+            seed = edgeu
+            
             ncomps += 1
             dijkstraFromSeed(graph, aj, seed, ncomps, comp, dists, treeEdges, xfac(n)) 
             reset!(thisBdry)
@@ -312,27 +324,53 @@ function akpwSub(graph, xfac::Function)
         
     end
 
+
+    # clean up: make singletons their own comps...
+    for i in 1:n
+        if comp[i] == 0
+            ncomps += 1
+            comp[i] = ncomps
+        end
+    end
+    
+
+    
     #println(comp)
     
     tre = treeEdges.q[1:treeEdges.endPtr]
      
     #=  THIS CODE CHECKS THAT THE FOREST SPANS THE COMPONENTS 
+    AND, computes the stretch of each 
 
     (ai,aj,av) = findnz(graph)
-    tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]])
+    tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]],n,n)
 
     @assert 2*n - nnz(tree) - 2*maximum(comp) == 0
     for i in 1:maximum(comp)
         ind = find(comp .== i)
+        # println(ind)
         tri = tree[ind,ind]
         @assert isConnected(tri)
+    end
+
+    for i in 1:maximum(comp)
+        ind = find(comp .== i)
+        tri = tree[ind,ind]
+        gri = a[ind,ind]
+        println([i sum(compStretches(tri,gri))])
+        println(ind)
     end
 
     =#
 
     if maximum(comp) > 1
 
+        #println(comp)
+        
         cGraph, edgeMap = compGraph(graph, comp)
+
+        #println(cGraph)
+        
         #=
         cGraph = compGraphU(graph, comp)
         edgeMap = cGraph.nzval
@@ -431,15 +469,15 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
                     bdry += wt
                     vol += wt
 
+                    # not clear why the effect of this line is different from what follows..except for having a smaller heap.
+                    # so, there is a bug somewhere!
                     Collections.enqueue!(heap,ind,newdist)
-
                     #=
                     if newdist < dists[nbr]
                         dists[nbr] = newdist
                         Collections.enqueue!(heap,ind,newdist)
                     end
                     =#
-                    
                 end
             end
         end
