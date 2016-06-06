@@ -1,16 +1,11 @@
 #=
-akpw.jl, part of Laplacians.jl.
-By Daniel A. Spielman
-Inspired by the paper
-A Graph-Theoretic Game and Its Application to the k-Server Problem,
-SIAM J. Comput., 24(1), 78–100,
-by Noga Alon, Richard M. Karp, David Peleg, and Douglas West
+for the unwted case first:
 
-This code is somewhat more aggressive than the algorithm suggested in that paper.
+do a bfs from an initial vertex.
+label vertices 0 initially, and eventually by component number.
+
 
 =#
-
-using DataStructures
 
 #========================================================================
 
@@ -90,82 +85,24 @@ function reset!(fq::fastPairQueue)
 end
 
 
-type reusableIntMap
-    q::fastQueue
-    map::Array{Int,1}
-end
-
-reusableIntMap(n::Int) = reusableIntMap(fastQueue(n), zeros(n))
-
-# note: does not allow for resetting
-function set!(rim::reusableIntMap, from::Int, to::Int)
-    if rim.map[from] == 0
-        push!(rim.q, from)
-        rim.map[from] = to
-        return true
-    else
-        return false
-    end
-end
-
-import Base.getindex
-getindex(rim::reusableIntMap, from::Int) = rim.map[from]
-
-function reset!(rim::reusableIntMap)
-    while hasMore(rim.q) > 0
-        from = pull!(rim.q)
-        rim.map[from] = 0
-    end
-    reset!(rim.q)
-end
-
-
-
-
-
-immutable IJVind
-    i::Int64
-    j::Int64
-    v::Float64
-    ind::Int64
-end
-
-import Base.isless
-isless(x::IJVind, y::IJVind) = x.v < y.v
-
-# requires sorting on i and j, with j primary
-type IJVindGraph
-    list::Array{IJVind,1}
-    colptr::Array{Int64,1}
-end
-
-import Base.getindex
-getindex(G::IJVindGraph, i::Int) = G.list[i]
-
-function printijv(ijv::IJVind)
-    println(ijv.i, " ", ijv.j, " ", ijv.v, " ", ijv.ind )
-end
-function printijv(list::Array{IJVind,1})
-    for ijv in list
-        printijv(ijv)
-    end
-end
-
-
 
 
 #========================================================================
 
-              Unweighted Algorithm Here
+              MAIN FUNC HERE
 
 =#
 
 
-"""Computes a low stretch spanning tree of an unweighted `graph`, and returns it as a graph."""
-function akpwU(graph)
+function akpwU(graph, xfac::Float64)
+    akpwU(graph, n->xfac)
+end
+
+
+function akpwU(graph, xfac::Function)
     n = size(graph,1)
 
-    tre = akpwUsub(graph)
+    tre = akpwUsub(graph, xfac)
 
     (ai,aj,av) = findnz(graph)
     tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]])
@@ -174,8 +111,10 @@ function akpwU(graph)
 
 end
 
+akpwU(graph) = akpwU(graph, x->(1/(2*log(x))))
 
-function akpwUsub(graph)
+
+function akpwUsub(graph, xfac::Function)
     n = size(graph,1)
     m = nnz(graph)
     
@@ -185,25 +124,37 @@ function akpwUsub(graph)
     # the indices into (ai,aj) = findnz(a) of the edges in the tree
     treeEdges = fastQueue(n-1)
     
+    curBdry = fastQueue(n)
+    
     # start from a random vertex
     seedlist = randperm(n)
     
     # allocate reusable queue, but only used inside subroutines
     thisBdry = fastPairQueue(m)
 
-    xf = 1/(2*log(n))
-
     for seed in seedlist
 
         if comp[seed] <= 0
             ncomps += 1
-            bfsFromSeed(graph, seed, ncomps, comp, treeEdges, thisBdry, xf) 
+            bfsFromSeed(graph, seed, ncomps, comp, treeEdges, thisBdry, xfac(n)) 
             reset!(thisBdry)
         end
         
     end
      
+    #println(comp)
+    
+    #=  THIS CODE CHECKS THAT THE FOREST SPANS THE COMPONENTS 
+    @assert 2*n - nnz(tree) - 2*maximum(comp) == 0
+    for i in 1:maximum(comp)
+        ind = find(comp .== i)
+        tri = tree[ind,ind]
+        @assert isConnected(tri)
+    end
+    =#
+
     tre = treeEdges.q[1:treeEdges.endPtr]
+
 
     if maximum(comp) > 1
 
@@ -213,7 +164,7 @@ function akpwUsub(graph)
         cGraph.nzval = ones(length(edgeMap))
 
         if (nnz(cGraph) > 0)
-            ctre = akpwUsub(cGraph)
+            ctre = akpwUsub(cGraph, xfac)
 
             sube = edgeMap[ctre]
 
@@ -221,6 +172,7 @@ function akpwUsub(graph)
         end
         
     end
+    
         
     return tre
     
@@ -242,7 +194,7 @@ function bfsFromSeed(graph, seed::Int, ncomps::Int, comp,
             
             push!(thisBdry,ind,nbr)
             bdry += 1
-            vol += 1 
+            vol += 1 # if using sum of degrees CHECK ON THIS
 
         end
     end
@@ -250,6 +202,9 @@ function bfsFromSeed(graph, seed::Int, ncomps::Int, comp,
     while (bdry > xfac*vol) && hasMore(thisBdry)
         (edge,node) = pull!(thisBdry)
 
+        #println([edge node bdry vol])
+        
+        # if (comp[node] != ncomps)
         if (comp[node] == 0)
 
             comp[node] = ncomps 
@@ -263,7 +218,7 @@ function bfsFromSeed(graph, seed::Int, ncomps::Int, comp,
 
                 elseif comp[nbr] == 0
 
-                    push!(thisBdry,ind,nbr) 
+                    push!(thisBdry,ind,nbr)  # issue: nodes pop up many times
                     bdry += 1
                     vol += 1 # if using sum of degrees CHECK ON THIS
 
@@ -275,6 +230,7 @@ function bfsFromSeed(graph, seed::Int, ncomps::Int, comp,
 end
 
 
+# unweighted version      
 function compGraphU(graph, comp)
 
     m = nnz(graph)
@@ -303,23 +259,15 @@ function compGraphU(graph, comp)
 end
 
 
-#========================================================================
-
-              Weighted Algorithm 
-
-=#
+function akpwish(graph, xfac::Float64)
+    akpwish(graph, n->xfac)
+end
 
 
-"""Computes a low stretch spanning tree of `graph`, and returns it as a graph.
-The default version is 0.  In event of emergency, one can try `ver=2`.  It is usually slower, but might have slightly better stretch."""
-function akpw(graph; ver=0)
+function akpwish(graph, xfac::Function)
     n = size(graph,1)
 
-    if ver == 0
-        tre = akpwSub5(graph)
-    elseif ver == 2
-        tre = akpwSub2(graph)
-    end
+    tre = akpwSub(graph, xfac)
 
     (ai,aj,av) = findnz(graph)
     tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]])
@@ -328,488 +276,53 @@ function akpw(graph; ver=0)
 
 end
 
+akpwish(graph) = akpwish(graph, x->(1/(2*log(x))))
 
-function akpwSub5(graph)
+
+
+function akpwSub(graph, xfac::Function)
     n = size(graph,1)
+    m = nnz(graph)
 
-    (ai,aj,av) = findnz(graph)
-
-    m = length(ai)
-
-    origList = sort(IJVindList(ai,aj,av),rev=true)
-
-    # the indices into (ai,aj) = findnz(a) of the edges in the tree
-    treeEdges = fastQueue(n-1)
-
-    nameMap = IntDisjointSets(n)
-
-    xf = 1/(2*log(n))
-
-    # figure out how far to go down the list : should be edges 1:last
-    maxv = origList[1].v
-    last = 2
-    targ::Float64 = xf*maxv
-    while (last <= m) && (origList[last].v > targ) 
-        last += 1
-    end
-    last -= 1
-
-    curIJVind = origList[1:last]
-
-    rim = reusableIntMap(n)
-
-    nverts = compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
-
-    # this could be a lot of the time used
-    curIJVind = sortIJVind(curIJVind)
-    # curIJVind = compress(curIJVind)
-
-    while (last <= m) && (nverts > 1) 
-
-        prevTreePtr = treeEdges.endPtr
-
-        nleft = n - treeEdges.endPtr
-        xf = 1/(2*log(nleft))
-
-        cluster!(curIJVind, treeEdges, xf) 
-
-
-        for i in (prevTreePtr+1):treeEdges.endPtr
-            edgeind = treeEdges.q[i]
-            ainame = find_root(nameMap, ai[edgeind])
-            ajname = find_root(nameMap, aj[edgeind])
-            if (ainame < ajname)
-                union!(nameMap, ainame,ajname)
-            else
-                union!(nameMap, ajname,ainame)
-            end
-        end
-
-        # make the new curList, by applying NameMap to cur ind
-        # and, find the max wt edge between clusters
-        # remove self loops as go
-
-        newIJVind = Array(IJVind,0)
-        maxv = 0
-        for i in 1:length(curIJVind)
-            ijv = curIJVind[i]
-            ind = ijv.ind
-            namei = find_root(nameMap,ai[ind])
-            namej = find_root(nameMap,aj[ind])
-            if (namei != namej)
-                if (ijv.v > maxv)
-                    maxv = ijv.v
-                end
-                push!(newIJVind, IJVind(namei, namej, ijv.v, ijv.ind))
-            end
-        end
-
-        last += 1
-
-        while (last <= m) && (origList[last].v > xf*maxv)
-            ijv = origList[last]
-            
-            namei = find_root(nameMap,ijv.i)
-            namej = find_root(nameMap,ijv.j)
-            if namei != namej
-                if maxv == 0
-                    maxv = ijv.v
-                end
-                push!(newIJVind, IJVind(namei, namej,  ijv.v, ijv.ind))
-            end
-            last += 1
-        end
-        last -= 1
-
-        # would it be better to do these in bulk?
-        # append!(curList,origList[prevlast:last])
-
-                        
-        nverts = compressIndices!(newIJVind::Array{IJVind,1}, rim::reusableIntMap)
-
-        if nverts > 1
-            # this can also be a big bunch of time
-            curIJVind = sortIJVind(newIJVind)
-            curIJVind = compress(curIJVind)
-        end
-        
-        
-    end
-
-    tre = treeEdges.q[1:treeEdges.endPtr]
-    return tre
+    (_,aj,_) = findnz(graph)
     
-end
-
-
-
-
-
-# based on counting sort: is stable.  exploits symmetry, can produce multiedges
-function IJVindGraph(inList::Array{IJVind,1})
-
-    Ti = Int64
-    Tv = Float64
-    
-    numnz = length(inList)
-    n = 0
-    for i in 1:numnz
-        if inList[i].i > n
-            n = inList[i].i
-        end
-    end
-    
-    deg = zeros(Ti, n) 
-
-    ptr = 1
-    for i in 1:numnz
-        deg[inList[i].i] += 1
-    end
-
-
-    list1 = Array(IJVind, numnz)
-    
-    cumdeg = cumsum(deg)
-    colptr = [1;cumdeg+1]
-
-    cumdeg1 = copy(cumdeg)
-
-    for i in numnz:-1:1
-        thisi = inList[i].i
-        ptr = cumdeg1[thisi]
-        cumdeg1[thisi] -= 1
-        list1[ptr] = inList[i]
-    end
-
-    cumdeg1 = copy(cumdeg)
-
-    list2 = Array(IJVind, numnz)
-
-    for i in numnz:-1:1
-        thisj = list1[i].j
-        ptr = cumdeg1[thisj]
-        cumdeg1[thisj] -= 1
-        list2[ptr] = list1[i]
-    end
-
-    return IJVindGraph(list2, colptr)
-
-end
-
-
-# based on counting sort: is stable.  exploits symmetry, can produce multiedges
-# tried to improve this in sortIJVind3, but it was not faster
-function sortIJVind(inList::Array{IJVind,1})
-
-    Ti = Int64
-    Tv = Float64
-    
-    numnz = length(inList)
-    n = 0
-    for i in 1:numnz
-        if inList[i].i > n
-            n = inList[i].i
-        end
-    end
-    
-    deg = zeros(Ti, n) 
-
-    ptr = 1
-    for i in 1:numnz
-        deg[inList[i].i] += 1
-    end
-
-
-    list1 = Array(IJVind, numnz)
-    
-    cumdeg = cumsum(deg)
-    cumdeg1 = copy(cumdeg)
-
-    for i in numnz:-1:1
-        thisi = inList[i].i
-        ptr = cumdeg1[thisi]
-        cumdeg1[thisi] -= 1
-        list1[ptr] = inList[i]
-    end
-
-    cumdeg1 = copy(cumdeg)
-
-    list2 = Array(IJVind, numnz)
-
-    for i in numnz:-1:1
-        thisj = list1[i].j
-        ptr = cumdeg1[thisj]
-        cumdeg1[thisj] -= 1
-        list2[ptr] = list1[i]
-    end
-
-    return list2
-
-end
-
-
-# combine multiedges by keeping the one of max weight.
-# must be sorted for this to work
-function compress(inList::Array{IJVind,1})
-
-    outlist = Array(IJVind,0)
-
-    ijv = inList[1]
-
-    iold = ijv.i
-    jold = ijv.j
-    v = ijv.v
-    ind = ijv.ind
-
-    for i in 2:length(inList)
-        ijv = inList[i]
-
-        if  (ijv.i == iold) && (ijv.j == jold)
-            if ijv.v > v
-                v = ijv.v
-                ind = ijv.ind
-            end
-        else 
-
-            push!(outlist, IJVind(iold, jold, v, ind))
-            iold = ijv.i
-            jold = ijv.j
-            v = ijv.v
-            ind = ijv.ind
-        end
-    end
-
-    push!(outlist, IJVind(iold, jold, v, ind))
-
-    return outlist
-
-end
-
-
-# convert (ai,aj,av) to an array of IJVind entries
-function IJVindList{Tv,Ti}(ai::Array{Ti,1},aj::Array{Ti,1},av::Array{Tv,1})
-
-    m = length(ai)
-    origList = Array(IJVind,m)
-    for i in 1:m
-        origList[i] = IJVind(ai[i],aj[i],av[i],i)
-    end
-
-    return origList
-
-end
-
-# this maps the indices to consecutive integers starting at 1
-function compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
-    nverts = 1
-
-    #println("comp in ")
-    #printijv(curIJVind)
-
-    for ijv in curIJVind
-        if set!(rim, ijv.j, nverts)
-            nverts += 1
-        end
-    end
-
-    for i in 1:length(curIJVind)
-        ijv = curIJVind[i]
-        curIJVind[i] = IJVind(rim[ijv.i], rim[ijv.j], ijv.v, ijv.ind)
-    end
-
-    reset!(rim)
-
-    return (nverts-1)
-end
-
-        
-
-    
-
-function cluster!(curIJVind, treeEdges, xf) 
-
-    n = curIJVind[end].j
-    @assert n >= curIJVind[end].i
-
-    # create colptr
-    deg = zeros(Int, n) 
-
-    ptr = 1
-    for ijv in curIJVind
-        deg[ijv.j] += 1
-    end
-    cumdeg = cumsum(deg)
-    colptr = [1;cumdeg+1]
-
-
-    ijvGraph = IJVindGraph(curIJVind, colptr) 
-    
-    comp = zeros(Int,n)
-
-    ncomps = 0
-
-
-    for seed in 1:n
-        ijvind = curIJVind[seed]
-        edgeu = ijvind.i
-        edgev = ijvind.j
-
-        #println("seed ", ijvind.v)
-        
-        if (comp[edgeu] == 0) && (comp[edgev] == 0)
-
-            seed = edgeu
-            ncomps += 1
-            dijkstraFromSeed(ijvGraph, seed, ncomps, comp, treeEdges, xf)
-            
-        end
-        
-    end
-
-end
-
-
-    
-
-
-immutable HeapEntry
-    node::Int64
-    edge::Int64
-    dist::Float64
-end
-
-import Base.isless
-isless(x::HeapEntry, y::HeapEntry) = x.dist < y.dist
-
-
-# grow shortest path tree from the seed
-# might want to make the heap reusable
-# might want to store both edge and vertex on the heap, too
-function dijkstraFromSeed(ijvGraph::IJVindGraph, seed::Int, ncomps::Int, comp, 
-    treeEdges::fastQueue, xfac::Float64)
-
-    bdry = 0
-    vol = 0
-
-    heap = Array(HeapEntry, 0)
-
-    comp[seed] = ncomps
-
-    for ind in ijvGraph.colptr[seed]:(ijvGraph.colptr[seed+1]-1)
-        nbr = ijvGraph[ind].i 
-        if comp[nbr] == 0
-
-            wt = ijvGraph[ind].v
-            Collections.heappush!(heap, HeapEntry(nbr, ijvGraph[ind].ind, 1/wt))
-            bdry += wt
-            vol += wt
-        end
-        
-    end
-
-    while (bdry > xfac*vol) && (length(heap) > 0)
-
-        he = Collections.heappop!(heap)
-
-        node = he.node
-        
-        if (comp[node] == 0)
-
-            comp[node] = ncomps
-
-            push!(treeEdges,he.edge)
-            dist = he.dist
-
-            for ind in ijvGraph.colptr[node]:(ijvGraph.colptr[node+1]-1)
-
-                nbr = ijvGraph[ind].i 
-
-                if comp[nbr] == ncomps
-
-                    wt = ijvGraph[ind].v
-
-                    bdry -= wt
-                    vol += wt
-
-                elseif comp[nbr] == 0
-
-                    wt = ijvGraph[ind].v
-                    newdist = dist + 1/wt
-                    
-                    bdry += wt
-                    vol += wt
-
-                    Collections.heappush!(heap, HeapEntry(nbr, ijvGraph[ind].ind, newdist))
-                end
-            end
-        end
-    end
-
-end
-
-
-
-#==============================================================
-
-   alt variant of the code: this is a recursive version
-   more closely related to the undirected one.
-   
-   it is a little bit slower, so we don't us it by default    
-   but, its stretch is often a little lower
-
-=#
-
-function akpwSub2(graph)
-    n = size(graph,1)
-
-
-    #println("n ", n)
-
-    (ai,aj,av) = findnz(graph)
-    m = length(ai)
-    
-    origList = Array(IJVind,m)
-    for i in 1:m
-        origList[i] = IJVind(ai[i],aj[i],av[i],i)
-    end
-    
-
-    origList = sort(origList,rev=true)
-
     comp = zeros(Int, n)
     ncomps = 0
     
     # the indices into (ai,aj) = findnz(a) of the edges in the tree
     treeEdges = fastQueue(n-1)
     
-    # figure out how far to go down the list : should be edges 1:last
-    maxv = origList[1].v
-    last = 2
-    xf = 1/(2*log(n))
-
-    while (last <= m) && (origList[last].v > xf*maxv) 
-        last += 1
-    end
-    last -= 1
-
-    ijvGraph = IJVindGraph(origList[1:last]) 
+    curBdry = fastQueue(n)
     
+    # start from a random vertex
+    # seedlist = randperm(n)
+
+    # order the edges, keeping only those within xfac of largest
+    bigEdges = find(graph.nzval .> xfac(n)*maximum(graph.nzval))
+    bigOrder = sortperm(graph.nzval[bigEdges],rev=true)
+    
+    edgeOrder = bigEdges[bigOrder]
+    
+    
+    # allocate reusable queue, but only used inside subroutines
+    thisBdry = fastPairQueue(m)
+
+    dists = Inf*ones(Float64, n)
+
     # for seed in seedlist
-    for ijvind in origList[1:last] # ITER ON IND INSTEAD?
-        edgeu = ijvind.i
-        edgev = ijvind.j
-        
+    for edge in edgeOrder
+        edgeu = aj[edge]
+        edgev = graph.rowval[edge]
         if (comp[edgeu] == 0) && (comp[edgev] == 0)
 
             seed = edgeu
             
             ncomps += 1
-            dijkstraFromSeed(ijvGraph, seed, ncomps, comp, treeEdges, xf)
-            
+            dijkstraFromSeed(graph, aj, seed, ncomps, comp, dists, treeEdges, xfac(n)) 
+            reset!(thisBdry)
         end
         
     end
-
 
 
     # clean up: make singletons their own comps...
@@ -820,16 +333,52 @@ function akpwSub2(graph)
         end
     end
     
+
+    
+    #println(comp)
     
     tre = treeEdges.q[1:treeEdges.endPtr]
+     
+    #=  THIS CODE CHECKS THAT THE FOREST SPANS THE COMPONENTS 
+    AND, computes the stretch of each 
+
+    (ai,aj,av) = findnz(graph)
+    tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]],n,n)
+
+    @assert 2*n - nnz(tree) - 2*maximum(comp) == 0
+    for i in 1:maximum(comp)
+        ind = find(comp .== i)
+        # println(ind)
+        tri = tree[ind,ind]
+        @assert isConnected(tri)
+    end
+
+    for i in 1:maximum(comp)
+        ind = find(comp .== i)
+        tri = tree[ind,ind]
+        gri = a[ind,ind]
+        println([i sum(compStretches(tri,gri))])
+        println(ind)
+    end
+
+    =#
 
     if maximum(comp) > 1
 
+        #println(comp)
         
         cGraph, edgeMap = compGraph(graph, comp)
 
+        #println(cGraph)
+        
+        #=
+        cGraph = compGraphU(graph, comp)
+        edgeMap = cGraph.nzval
+        cGraph.nzval = ones(length(edgeMap))
+        =#
+        
         if (nnz(cGraph) > 0)
-            ctre = akpwSub2(cGraph)
+            ctre = akpwSub(cGraph, xfac)
 
             sube = edgeMap[ctre]
 
@@ -842,6 +391,99 @@ function akpwSub2(graph)
     
 end
 
+
+
+
+# grow shortest path tree from the seed
+# will need to make the heap reusable
+function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, comp, 
+    dists::Array{Float64,1}, treeEdges::fastQueue, xfac::Float64)
+
+    ai = graph.rowval
+    av = graph.nzval
+    
+    bdry = 0
+    vol = 0
+
+    heap = Collections.PriorityQueue(Int64, Float64)
+
+    dists[seed] = 0
+    comp[seed] = ncomps
+
+
+   #=
+   issue: how to keep track of the edges used.
+    shortestPaths does it by keeping a parent pointer for every node.
+    randishPrim does it by popping.
+   =#
+
+    for ind in graph.colptr[seed]:(graph.colptr[seed+1]-1)
+        nbr = graph.rowval[ind]
+        if comp[nbr] == 0
+
+            wt = graph.nzval[ind]
+            Collections.enqueue!(heap, ind, 1/wt)
+            bdry += wt
+            vol += wt
+        end
+        
+    end
+
+    while (bdry > xfac*vol) && (length(heap) > 0)
+
+        edge = Collections.dequeue!(heap)
+        node = aj[edge]
+        from = ai[edge]
+        if comp[node] == ncomps
+            node = ai[edge]
+            from = aj[edge]
+        end
+
+
+        # println([edge node bdry vol length(heap)])
+        
+        if (comp[node] == 0)
+
+            comp[node] = ncomps
+            # println([edge ai[edge] aj[edge] ncomps])
+            push!(treeEdges,edge)
+            dist = dists[from] + 1/graph.nzval[edge]
+            dists[node] = dist
+
+            #println(dist)
+
+            for ind in graph.colptr[node]:(graph.colptr[node+1]-1)
+                nbr = graph.rowval[ind]
+
+                if comp[nbr] == ncomps
+                    wt = graph.nzval[ind]
+
+                    bdry -= wt
+                    vol += wt
+
+                elseif comp[nbr] == 0
+
+                    wt = graph.nzval[ind]
+                    newdist = dist + 1/wt
+                    
+                    bdry += wt
+                    vol += wt
+
+                    # not clear why the effect of this line is different from what follows..except for having a smaller heap.
+                    # so, there is a bug somewhere!
+                    Collections.enqueue!(heap,ind,newdist)
+                    #=
+                    if newdist < dists[nbr]
+                        dists[nbr] = newdist
+                        Collections.enqueue!(heap,ind,newdist)
+                    end
+                    =#
+                end
+            end
+        end
+    end
+
+end
 
 
 # this combines all the vertices in a comp together, keeping the max of their weights
@@ -987,60 +629,3 @@ function combineMultiG{Ti,Tv}(ai::Array{Ti,1}, aj::Array{Ti,1}, av::Array{Tv,1},
 end
 
 
-
-#==============================================
-
-   Unused Code
-
-=#
-
-using Base.Order
-# This was an attempt to improve on sortIJVind by sorting in place
-# it does not seem to be faster in general
-function sortIJVind3(inList::Array{IJVind,1})
-
-    Ti = Int64
-    Tv = Float64
-    
-    numnz = length(inList)
-    n = 0
-    for i in 1:numnz
-        if inList[i].i > n
-            n = inList[i].i
-        end
-    end
-    
-    deg = zeros(Ti, n) 
-
-    ptr = 1
-    for i in 1:numnz
-        deg[inList[i].i] += 1
-    end
-
-
-    list1 = Array(IJVind, numnz)
-
-    maxdeg = maximum(deg)
-    
-    cumdeg = cumsum(deg)
-    colptr = [1;cumdeg+1]
-
-    cumdeg1 = copy(cumdeg)
-
-    for i in numnz:-1:1
-        thisj = inList[i].j
-        ptr = cumdeg1[thisj]
-        cumdeg1[thisj] -= 1
-        list1[ptr] = inList[i]
-    end
-
-    byi(x::IJVind) = x.i
-    o = ord(isless, byi, false, Forward)
-
-    for j in 1:n
-        sort!(list1, colptr[j], (colptr[j+1]-1),  PartialQuickSort(colptr[j]:(colptr[j+1]-1)), o)
-    end
-
-    return list1
-
-end
