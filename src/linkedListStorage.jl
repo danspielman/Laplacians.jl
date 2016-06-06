@@ -13,7 +13,7 @@
 		- position of next element in LinkedListStorage
 =#
 
-type element{Tv,Ti}
+immutable element{Tv,Ti}
 	edgeWeight::Tv
 	edgeCount::Ti
 	neighbor::Ti
@@ -65,7 +65,8 @@ function llsAdd{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, t::Tuple{Tv,Ti,Ti
 		ind = lls.free[lls.left];
 
 		# set the new value for next
-		lls.val[lls.last[pos]].next = ind
+		lls.val[lls.last[pos]] = element(lls.val[lls.last[pos]].edgeWeight, lls.val[lls.last[pos]].edgeCount, 
+			lls.val[lls.last[pos]].neighbor, ind)
 
 		lls.last[pos] = ind
 		lls.val[ind] = element(t[1], t[2], t[3], -1)
