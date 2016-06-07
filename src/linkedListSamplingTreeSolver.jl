@@ -9,7 +9,7 @@ include("sqLinOpWrapper.jl")
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
 								eps::Float64 = 0.5, sampConst::Float64 = 10.0, k::Float64 = 5, beta::Float64 = 5)
 
-	a2 = copy(a)
+	n = a.n
 
     F,_,_,_,ord = buildSolver(a, eps = eps, sampConst = sampConst, k = k, beta = beta)
 
