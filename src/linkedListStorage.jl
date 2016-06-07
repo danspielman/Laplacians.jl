@@ -75,7 +75,8 @@ function llsAdd{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, t::Tuple{Tv,Ti,Ti
 end
 
 
-function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{Tv,1}, auxMult::Array{Ti,1})
+function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{Tv,1}, auxMult::Array{Ti,1},
+	res::Array{Tv,1}, mult::Array{Ti,1}, ind::Array{Ti,1})
 
  	multSum::Ti = 0
  	diag::Tv = 0
@@ -93,9 +94,10 @@ function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{T
 		i = lls.val[i].next
 	end
 
-    res = Tv[]
-    mult = Ti[]
-    ind = Ti[]
+    # res = Tv[]
+    # mult = Ti[]
+    # ind = Ti[]
+    numPurged = 0
 
     i = lls.first[pos]
     while i != -1
@@ -109,9 +111,13 @@ function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{T
                 # TODO: we want to cap the number of multiedges
                 actualMult = auxMult[neigh]
 
-                push!(res, auxVal[neigh])
-                push!(mult, actualMult)
-                push!(ind, neigh)
+                # push!(res, auxVal[neigh])
+                # push!(mult, actualMult)
+                # push!(ind, neigh)
+                numPurged += 1
+                res[numPurged] = auxVal[neigh]
+                mult[numPurged] = actualMult
+                ind[numPurged] = neigh
 
                 multSum = multSum + actualMult
 
@@ -127,7 +133,7 @@ function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{T
         i = lls.val[i].next
     end
 
-    return diag, res, multSum, mult, ind
+    return diag, multSum, numPurged
 
 end
 
