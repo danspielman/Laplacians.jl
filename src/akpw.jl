@@ -259,15 +259,15 @@ function compGraphU(graph, comp)
 end
 
 
-function akpwish(graph, xfac::Float64)
-    akpwish(graph, n->xfac)
+function akpwish(graph, xfac::Float64; ver=0)
+    akpwish(graph, n->xfac, ver=ver)
 end
 
 
-function akpwish(graph, xfac::Function)
+function akpwish(graph, xfac::Function; ver=0)
     n = size(graph,1)
 
-    tre = akpwSub(graph, xfac)
+    tre = akpwSub(graph, xfac; ver=ver)
 
     (ai,aj,av) = findnz(graph)
     tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]])
@@ -276,11 +276,11 @@ function akpwish(graph, xfac::Function)
 
 end
 
-akpwish(graph) = akpwish(graph, x->(1/(2*log(x))))
+akpwish(graph; ver=0) = akpwish(graph, x->(1/(2*log(x))), ver=ver)
 
 
 
-function akpwSub(graph, xfac::Function)
+function akpwSub(graph, xfac::Function; ver=0)
     n = size(graph,1)
     m = nnz(graph)
 
@@ -304,11 +304,6 @@ function akpwSub(graph, xfac::Function)
     edgeOrder = bigEdges[bigOrder]
     
     
-    # allocate reusable queue, but only used inside subroutines
-    thisBdry = fastPairQueue(m)
-
-    dists = Inf*ones(Float64, n)
-
     # for seed in seedlist
     for edge in edgeOrder
         edgeu = aj[edge]
@@ -318,8 +313,8 @@ function akpwSub(graph, xfac::Function)
             seed = edgeu
             
             ncomps += 1
-            dijkstraFromSeed(graph, aj, seed, ncomps, comp, dists, treeEdges, xfac(n)) 
-            reset!(thisBdry)
+            dijkstraFromSeed(graph, aj, seed, ncomps, comp, treeEdges, xfac(n))
+            
         end
         
     end
@@ -399,13 +394,16 @@ immutable HeapEntry
     dist::Float64
 end
 
+import Base.isless
 isless(x::HeapEntry, y::HeapEntry) = x.dist < y.dist
 
 
+
 # grow shortest path tree from the seed
-# will need to make the heap reusable
+# might want to make the heap reusable
+# might want to store both edge and vertex on the heap, too
 function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, comp, 
-    dists::Array{Float64,1}, treeEdges::fastQueue, xfac::Float64)
+    treeEdges::fastQueue, xfac::Float64)
 
     ai = graph.rowval
     av = graph.nzval
@@ -415,15 +413,7 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
 
     heap = Array(HeapEntry, 0)
 
-    dists[seed] = 0
     comp[seed] = ncomps
-
-
-   #=
-   issue: how to keep track of the edges used.
-    shortestPaths does it by keeping a parent pointer for every node.
-    randishPrim does it by popping.
-   =#
 
     for ind in graph.colptr[seed]:(graph.colptr[seed+1]-1)
         nbr = graph.rowval[ind]
@@ -443,10 +433,8 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
         edge = he.edge
         
         node = aj[edge]
-        #  from = ai[edge]
         if comp[node] == ncomps
             node = ai[edge]
-            # from = aj[edge]
         end
 
 
@@ -455,13 +443,9 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
         if (comp[node] == 0)
 
             comp[node] = ncomps
-            # println([edge ai[edge] aj[edge] ncomps])
-            push!(treeEdges,edge)
-            # dist = dists[from] + 1/graph.nzval[edge]
-            dist = he.dist
-            dists[node] = dist
 
-            #println(dist)
+            push!(treeEdges,edge)
+            dist = he.dist
 
             for ind in graph.colptr[node]:(graph.colptr[node+1]-1)
                 nbr = graph.rowval[ind]
@@ -480,22 +464,13 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
                     bdry += wt
                     vol += wt
 
-                    # not clear why the effect of this line is different from what follows..except for having a smaller heap.
-                    # so, there is a bug somewhere!
                     Collections.heappush!(heap,HeapEntry(ind,newdist))
-                    #=
-                    if newdist < dists[nbr]
-                        dists[nbr] = newdist
-                        Collections.enqueue!(heap,ind,newdist)
-                    end
-                    =#
                 end
             end
         end
     end
 
 end
-
 
 # this combines all the vertices in a comp together, keeping the max of their weights
 # it also produces a map from edges in the smaller graph back to their reps in the original
