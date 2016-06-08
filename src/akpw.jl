@@ -267,7 +267,11 @@ end
 function akpwish(graph, xfac::Function; ver=0)
     n = size(graph,1)
 
-    tre = akpwSub(graph, xfac; ver=ver)
+    if ver == 0
+        tre = akpwSub(graph, xfac; ver=ver)
+    else
+        tre = akpwSub2(graph, xfac; ver=ver)
+    end
 
     (ai,aj,av) = findnz(graph)
     tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]])
@@ -308,6 +312,12 @@ function akpwSub(graph, xfac::Function; ver=0)
     for edge in edgeOrder
         edgeu = aj[edge]
         edgev = graph.rowval[edge]
+        if (edgeu < edgev) # REMOVE
+            tmp = edgeu
+            edgeu = edgev
+            edgev = tmp
+        end
+
         if (comp[edgeu] == 0) && (comp[edgev] == 0)
 
             seed = edgeu
@@ -375,6 +385,173 @@ function akpwSub(graph, xfac::Function; ver=0)
         
         if (nnz(cGraph) > 0)
             ctre = akpwSub(cGraph, xfac)
+
+            sube = edgeMap[ctre]
+
+            tre = [tre;sube]
+        end
+        
+    end
+        
+    return tre
+    
+end
+
+
+#=
+
+ijvInd : 4 items, with ind being the map back to original edges
+sort by v, so that can make a bunch 
+
+when compress comp, do it in the ijvInd structure...
+
+so, keep original ijvList, which just go down to include edges,
+and a current ijvList, which will contain the current graph.
+origList, curList
+
+after cluster, can op on curList to compress it.
+then move more edges into it from origList, as needed.
+
+how should curList interact with the clusterer ?
+
+cluster pushes directly to list of tree edges.
+
+akpw has two data structures: loose ijv and tight ijv.
+tight ijv should have the same ptr structure into vertices as does sparseCSC
+call it an augIJVind.  
+so, ijvind is ai, aj, av, aind, with a ptr.
+should it be 4 arrays or a struct?
+
+it might depend on what we put on those heap entries:
+  perhaps should be (ai, aj, dist, aind)
+=#
+
+immutable IJVind
+    i::Int64
+    j::Int64
+    v::Float64
+    ind::Int64
+end
+
+import Base.isless
+isless(x::IJVind, y::IJVind) = x.v < y.v
+
+
+
+function akpwSub2(graph, xfac::Function; ver=0)
+    n = size(graph,1)
+    m = nnz(graph)
+
+    (ai,aj,av) = findnz(graph)
+    
+    origList = Array(IJVind,m)
+    for i in 1:m
+        origList[i] = IJVind(ai[i],aj[i],av[i],i)
+    end
+    
+
+    origList = sort(origList,rev=true)
+
+    comp = zeros(Int, n)
+    ncomps = 0
+    
+    # the indices into (ai,aj) = findnz(a) of the edges in the tree
+    treeEdges = fastQueue(n-1)
+    
+    curBdry = fastQueue(n)
+    
+    # start from a random vertex
+    # seedlist = randperm(n)
+
+
+    # figure out how far to go down the list : should be edges 1:last
+    maxv = origList[1].v
+    last = 2
+    xf = xfac(n)
+    while (last <= m) && (origList[last].v > xf*maxv) 
+        last += 1
+    end
+    last -= 1
+    
+    
+    
+    # for seed in seedlist
+    for ijvind in origList[1:last] # ITER ON IND INSTEAD?
+        edgeu = ijvind.i
+        edgev = ijvind.j
+        if (edgeu < edgev) # REMOVE
+            tmp = edgeu
+            edgeu = edgev
+            edgev = tmp
+        end
+        
+        if (comp[edgeu] == 0) && (comp[edgev] == 0)
+
+            seed = edgeu
+            
+            ncomps += 1
+            dijkstraFromSeed2(graph, aj, seed, ncomps, comp, treeEdges, xf)
+            
+        end
+        
+    end
+
+
+
+    # clean up: make singletons their own comps...
+    for i in 1:n
+        if comp[i] == 0
+            ncomps += 1
+            comp[i] = ncomps
+        end
+    end
+    
+
+    
+    #println(comp)
+    
+    tre = treeEdges.q[1:treeEdges.endPtr]
+     
+    #=  THIS CODE CHECKS THAT THE FOREST SPANS THE COMPONENTS 
+    AND, computes the stretch of each 
+
+    (ai,aj,av) = findnz(graph)
+    tree = sparse([ai[tre];aj[tre]], [aj[tre];ai[tre]], [av[tre];av[tre]],n,n)
+
+    @assert 2*n - nnz(tree) - 2*maximum(comp) == 0
+    for i in 1:maximum(comp)
+        ind = find(comp .== i)
+        # println(ind)
+        tri = tree[ind,ind]
+        @assert isConnected(tri)
+    end
+
+    for i in 1:maximum(comp)
+        ind = find(comp .== i)
+        tri = tree[ind,ind]
+        gri = a[ind,ind]
+        println([i sum(compStretches(tri,gri))])
+        println(ind)
+    end
+
+    =#
+
+    if maximum(comp) > 1
+
+        #println(comp)
+        
+        cGraph, edgeMap = compGraph(graph, comp)
+
+        #println(cGraph)
+        
+        #=
+        cGraph = compGraphU(graph, comp)
+        edgeMap = cGraph.nzval
+        cGraph.nzval = ones(length(edgeMap))
+        =#
+        
+        if (nnz(cGraph) > 0)
+            ctre = akpwSub2(cGraph, xfac, ver=ver)
 
             sube = edgeMap[ctre]
 
@@ -465,6 +642,87 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
                     vol += wt
 
                     Collections.heappush!(heap,HeapEntry(ind,newdist))
+                end
+            end
+        end
+    end
+
+end
+
+
+
+immutable HeapEntry2
+    node::Int64
+    edge::Int64
+    dist::Float64
+end
+
+import Base.isless
+isless(x::HeapEntry2, y::HeapEntry2) = x.dist < y.dist
+
+
+
+# grow shortest path tree from the seed
+# might want to make the heap reusable
+# might want to store both edge and vertex on the heap, too
+function dijkstraFromSeed2(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, comp, 
+    treeEdges::fastQueue, xfac::Float64)
+
+    ai = graph.rowval
+    av = graph.nzval
+    
+    bdry = 0
+    vol = 0
+
+    heap = Array(HeapEntry2, 0)
+
+    comp[seed] = ncomps
+
+    for ind in graph.colptr[seed]:(graph.colptr[seed+1]-1)
+        nbr = graph.rowval[ind]
+        if comp[nbr] == 0
+
+            wt = graph.nzval[ind]
+            Collections.heappush!(heap, HeapEntry2(nbr, ind, 1/wt))
+            bdry += wt
+            vol += wt
+        end
+        
+    end
+
+    while (bdry > xfac*vol) && (length(heap) > 0)
+
+        he = Collections.heappop!(heap)
+
+        node = he.node
+        
+        # println([edge node bdry vol length(heap)])
+        
+        if (comp[node] == 0)
+
+            comp[node] = ncomps
+
+            push!(treeEdges,he.edge)
+            dist = he.dist
+
+            for ind in graph.colptr[node]:(graph.colptr[node+1]-1)
+                nbr = graph.rowval[ind]
+
+                if comp[nbr] == ncomps
+                    wt = graph.nzval[ind]
+
+                    bdry -= wt
+                    vol += wt
+
+                elseif comp[nbr] == 0
+
+                    wt = graph.nzval[ind]
+                    newdist = dist + 1/wt
+                    
+                    bdry += wt
+                    vol += wt
+
+                    Collections.heappush!(heap,HeapEntry2(nbr, ind,newdist))
                 end
             end
         end
