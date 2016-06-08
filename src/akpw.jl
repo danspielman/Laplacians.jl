@@ -325,6 +325,7 @@ function akpwSub(graph, xfac::Function)
     end
 
 
+
     # clean up: make singletons their own comps...
     for i in 1:n
         if comp[i] == 0
@@ -393,6 +394,13 @@ end
 
 
 
+immutable HeapEntry
+    edge::Int64
+    dist::Float64
+end
+
+isless(x::HeapEntry, y::HeapEntry) = x.dist < y.dist
+
 
 # grow shortest path tree from the seed
 # will need to make the heap reusable
@@ -405,7 +413,7 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
     bdry = 0
     vol = 0
 
-    heap = Collections.PriorityQueue(Int64, Float64)
+    heap = Array(HeapEntry, 0)
 
     dists[seed] = 0
     comp[seed] = ncomps
@@ -422,7 +430,7 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
         if comp[nbr] == 0
 
             wt = graph.nzval[ind]
-            Collections.enqueue!(heap, ind, 1/wt)
+            Collections.heappush!(heap, HeapEntry(ind, 1/wt))
             bdry += wt
             vol += wt
         end
@@ -431,12 +439,14 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
 
     while (bdry > xfac*vol) && (length(heap) > 0)
 
-        edge = Collections.dequeue!(heap)
+        he = Collections.heappop!(heap)
+        edge = he.edge
+        
         node = aj[edge]
-        from = ai[edge]
+        #  from = ai[edge]
         if comp[node] == ncomps
             node = ai[edge]
-            from = aj[edge]
+            # from = aj[edge]
         end
 
 
@@ -447,7 +457,8 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
             comp[node] = ncomps
             # println([edge ai[edge] aj[edge] ncomps])
             push!(treeEdges,edge)
-            dist = dists[from] + 1/graph.nzval[edge]
+            # dist = dists[from] + 1/graph.nzval[edge]
+            dist = he.dist
             dists[node] = dist
 
             #println(dist)
@@ -471,7 +482,7 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
 
                     # not clear why the effect of this line is different from what follows..except for having a smaller heap.
                     # so, there is a bug somewhere!
-                    Collections.enqueue!(heap,ind,newdist)
+                    Collections.heappush!(heap,HeapEntry(ind,newdist))
                     #=
                     if newdist < dists[nbr]
                         dists[nbr] = newdist
