@@ -613,11 +613,9 @@ function compress(inList::Array{IJVind,1})
 
             push!(outlist, IJVind(iold, jold, v, ind))
             iold = ijv.i
+            jold = ijv.j
             v = ijv.v
             ind = ijv.ind
-            if (ijv.j != jold)
-                jold = ijv.j
-            end
         end
     end
 
@@ -834,7 +832,7 @@ function akpwSub6(graph, xfac::Function; ver=5)
         
         prevTreePtr = treeEdges.endPtr
 
-        nleft = n + 1 - treeEdges.endPtr
+        nleft = n - treeEdges.endPtr
         # xf = xfac(nleft)  # this might be too small
         xf = 1/(2*log(nleft))
 
@@ -951,9 +949,12 @@ function akpwSub5(graph, xfac::Function; ver=5)
         
         prevTreePtr = treeEdges.endPtr
 
-        nleft = n + 1 - treeEdges.endPtr
+        nleft = n - treeEdges.endPtr
         # xf = xfac(nleft)  # this might be too small
         xf = 1/(2*log(nleft))
+
+        #println("nleft ", nleft, " nverts ", nverts)
+        #println("maxv ", maxv, " upto ", origList[last].v)
 
         cluster2!(curIJVind, treeEdges, xf) 
         #println("sh: ", length(curIJVind), " ", treeEdges.endPtr-(prevTreePtr+1))
@@ -993,6 +994,10 @@ function akpwSub5(graph, xfac::Function; ver=5)
         
         # prevlast = last
         last += 1
+        if (maxv == 0) && (last <= m)
+            maxv = origList[last].v
+        end
+        
         while (last <= m) && (origList[last].v > xf*maxv) 
             ijv = origList[last]
 
@@ -1386,6 +1391,9 @@ end
 function akpwSub2(graph, xfac::Function; ver=2)
     n = size(graph,1)
 
+
+    #println("n ", n)
+
     (ai,aj,av) = findnz(graph)
     m = length(ai)
     
@@ -1412,6 +1420,8 @@ function akpwSub2(graph, xfac::Function; ver=2)
     end
     last -= 1
 
+    #println("last ", last)
+    #println("maxv ", maxv, " upto ", origList[last].v)
 
     ijvGraph = IJVindGraph(origList[1:last]) 
     
