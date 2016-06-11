@@ -307,8 +307,6 @@ function akpwish(graph, xfac::Function; ver=0)
         tre = akpwSub4(graph, xfac; ver=ver)
     elseif ver == 5
         tre = akpwSub5(graph, xfac; ver=ver)
-    elseif ver == 6
-        tre = akpwSub6(graph, xfac; ver=ver)
     end
 
     (ai,aj,av) = findnz(graph)
@@ -790,123 +788,6 @@ end
   4. spit out a tree, which we union on
 =#
 
-function akpwSub6(graph, xfac::Function; ver=5)
-    n = size(graph,1)
-
-    (ai,aj,av) = findnz(graph)
-    m = length(ai)
-
-    origList = Array(IJVind,m)
-    for i in 1:m
-        origList[i] = IJVind(ai[i],aj[i],av[i],i)
-    end
-    
-    origList = sort(origList,rev=true)
-
-    # the indices into (ai,aj) = findnz(a) of the edges in the tree
-    treeEdges = fastQueue(n-1)
-
-    nameMap = IntDisjointSets(n)
-
-    xf::Float64 = xfac(n)
-
-    # figure out how far to go down the list : should be edges 1:last
-    maxv = origList[1].v
-    last = 2
-    targ::Float64 = xf*maxv
-    while (last <= m) && (origList[last].v > targ) 
-        last += 1
-    end
-    last -= 1
-
-    curIJVind = origList[1:last]
-
-    rim = reusableIntMap(n)
-
-    nverts = compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
-
-    curIJVind = sortIJVind(curIJVind)
-    # curIJVind = compress(curIJVind)
-    
-    while (last <= m) && (nverts > 1) 
-        
-        prevTreePtr = treeEdges.endPtr
-
-        nleft = n - treeEdges.endPtr
-        # xf = xfac(nleft)  # this might be too small
-        xf = 1/(2*log(nleft))
-
-        cluster3!(curIJVind, treeEdges, xf) 
-#        println("sh: ", length(curIJVind), " ", treeEdges.endPtr-(prevTreePtr+1))
-
-
-        for i in (prevTreePtr+1):treeEdges.endPtr
-            edgeind = treeEdges.q[i]
-            ainame = find_root(nameMap, ai[edgeind])
-            ajname = find_root(nameMap, aj[edgeind])
-            if (ainame < ajname)
-                union!(nameMap, ainame,ajname)
-            else
-                union!(nameMap, ajname,ainame)
-            end
-        end
-        #println("nm : ", nameMap)
-
-        # make the new curList, by applying NameMap to cur ind
-        # and, find the max wt edge between clusters
-        # remove self loops as go
-
-        newIJVind = Array(IJVind,0)
-        maxv = 0
-        for i in 1:length(curIJVind)
-            ijv = curIJVind[i]
-            ind = ijv.ind
-            namei = find_root(nameMap,ai[ind])
-            namej = find_root(nameMap,aj[ind])
-            if (namei != namej)
-                if (ijv.v > maxv)
-                    maxv = ijv.v
-                end
-                push!(newIJVind, IJVind(namei, namej, ijv.v, ijv.ind))
-            end
-        end
-
-        
-        # prevlast = last
-        last += 1
-        while (last <= m) && (origList[last].v > xf*maxv) 
-            ijv = origList[last]
-
-            namei = find_root(nameMap,ijv.i)
-            namej = find_root(nameMap,ijv.j)
-            if namei != namej
-                push!(newIJVind, IJVind(namei, namej,  ijv.v, ijv.ind))
-            end
-            last += 1
-        end
-        last -= 1
-
-        # would it be better to do these in bulk?
-        # append!(curList,origList[prevlast:last])
-
-                        
-        nverts = compressIndices!(newIJVind::Array{IJVind,1}, rim::reusableIntMap)
-
-        #println("nv ", nverts)
-        
-        if nverts > 1
-            curIJVind = sortIJVind(newIJVind)
-            curIJVind = compress(curIJVind)
-        end
-        
-        
-    end
-
-    tre = treeEdges.q[1:treeEdges.endPtr]
-    return tre
-    
-end
-
 function akpwSub5(graph, xfac::Function; ver=5)
     n = size(graph,1)
 
@@ -917,6 +798,10 @@ function akpwSub5(graph, xfac::Function; ver=5)
     for i in 1:m
         origList[i] = IJVind(ai[i],aj[i],av[i],i)
     end
+
+    #println("original ")
+    #printijv(origList)
+    #println(" ")
     
     origList = sort(origList,rev=true)
 
@@ -944,8 +829,11 @@ function akpwSub5(graph, xfac::Function; ver=5)
 
     curIJVind = sortIJVind(curIJVind)
     # curIJVind = compress(curIJVind)
-    
+
     while (last <= m) && (nverts > 1) 
+
+        #println(" ")
+        #printijv(curIJVind)
         
         prevTreePtr = treeEdges.endPtr
 
@@ -964,6 +852,7 @@ function akpwSub5(graph, xfac::Function; ver=5)
             edgeind = treeEdges.q[i]
             ainame = find_root(nameMap, ai[edgeind])
             ajname = find_root(nameMap, aj[edgeind])
+            #println("tree " , ai[edgeind], " ", aj[edgeind], " " , edgeind)
             if (ainame < ajname)
                 union!(nameMap, ainame,ajname)
             else
@@ -991,19 +880,31 @@ function akpwSub5(graph, xfac::Function; ver=5)
             end
         end
 
+        #println("xlast ", last, " maxv ", maxv)
+
         
         # prevlast = last
         last += 1
+
+        #=
         if (maxv == 0) && (last <= m)
             maxv = origList[last].v
         end
+        =#
         
-        while (last <= m) && (origList[last].v > xf*maxv) 
+        #println("last ", last, " maxv ", maxv)
+        #println(nameMap)
+        
+        while (last <= m) && (origList[last].v > xf*maxv)
             ijv = origList[last]
-
+            
             namei = find_root(nameMap,ijv.i)
             namej = find_root(nameMap,ijv.j)
+            #println("nms: " , namei, " ", namej)
             if namei != namej
+                if maxv == 0
+                    maxv = ijv.v
+                end
                 push!(newIJVind, IJVind(namei, namej,  ijv.v, ijv.ind))
             end
             last += 1
@@ -1227,52 +1128,6 @@ end
 
 
     
-
-function cluster3!(curIJVind, treeEdges, xf) 
-
-    n = curIJVind[end].j
-    @assert n >= curIJVind[end].i
-
-    # create colptr
-    deg = zeros(Int, n) 
-
-    ptr = 1
-    for ijv in curIJVind
-        deg[ijv.j] += 1
-    end
-    cumdeg = cumsum(deg)
-    colptr = [1;cumdeg+1]
-
-
-    ijvGraph = IJVindGraph(curIJVind, colptr) 
-    
-    comp = zeros(Int,n)
-
-    ncomps = 0
-
-    seedorder = sortperm(curIJVind, by=x->x.ind, rev=true)
-    
-    for seed in seedorder
-    # for seed in 1:n
-        ijvind = curIJVind[seed]
-        edgeu = ijvind.i
-        edgev = ijvind.j
-
-        #println("seed ", ijvind.v)
-        
-        if (comp[edgeu] == 0) && (comp[edgev] == 0)
-
-            seed = edgeu
-            ncomps += 1
-            dijkstraFromSeed2(ijvGraph, seed, ncomps, comp, treeEdges, xf)
-            
-        end
-        
-    end
-
-end
-
-
 
 
 immutable HeapEntry2

@@ -52,10 +52,10 @@ for i in 1:nruns
     push!(told,atold)
     push!(stold,astold)
         
-    catch
+    catch err
         println("bad on wtedChimera ", n, " ", i)
+        @show err
     end
-
 
 end
        
@@ -66,14 +66,16 @@ vstat = function(x)
     [mean(x) minimum(x) x[n10:n10:(9*n10)]' maximum(x)]
 end
 
-println("st5 : ", vstat(st5./st2))
-println("stp : ", vstat(stp./st2))
-println("stold : ", vstat(stold./st2))
+println("st2vs5 : ", round(vstat(st2./st5),3))
+println("st5 : ", round(vstat(st5./st2),3))
+println("stp : ", round(vstat(stp./st2),3))
+println("stold : ", round(vstat(stold./st2),3))
 
 
-println("t5 : ", vstat(t5./t2))
-println("tp : ", vstat(tp./t2))
-println("told : ", vstat(told./t2))
+println("t2vs5 : ", round(vstat(t2./t5),3))
+println("t5 : ", round(vstat(t5./t2),3))
+println("tp : ", round(vstat(tp./t2),3))
+println("told : ", round(vstat(told./t2),3))
 
     return t2, t5, tp, told, st2, st5, stp, stold
 end
