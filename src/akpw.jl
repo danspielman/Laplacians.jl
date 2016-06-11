@@ -305,6 +305,8 @@ function akpwish(graph, xfac::Function; ver=0)
         tre = akpwSub3(graph, xfac; ver=ver)
     elseif ver == 4
         tre = akpwSub4(graph, xfac; ver=ver)
+    elseif ver == 5
+        tre = akpwSub5(graph, xfac; ver=ver)
     end
 
     (ai,aj,av) = findnz(graph)
@@ -473,6 +475,16 @@ end
 
 import Base.getindex
 getindex(G::IJVindGraph, i::Int) = G.list[i]
+
+function printijv(ijv::IJVind)
+    println(ijv.i, " ", ijv.j, " ", ijv.v, " ", ijv.ind )
+end
+function printijv(list::Array{IJVind,1})
+    for ijv in list
+        printijv(ijv)
+    end
+end
+
 
 # based on counting sort: is stable.  exploits symmetry, can produce multiedges
 function IJVindGraph(inList::Array{IJVind,1})
@@ -778,6 +790,126 @@ end
   4. spit out a tree, which we union on
 =#
 
+function akpwSub5(graph, xfac::Function; ver=5)
+    n = size(graph,1)
+
+    (ai,aj,av) = findnz(graph)
+    m = length(ai)
+
+    origList = Array(IJVind,m)
+    for i in 1:m
+        origList[i] = IJVind(ai[i],aj[i],av[i],i)
+    end
+    
+    origList = sort(origList,rev=true)
+
+    #println("list")
+    #printijv(origList)
+
+    # the indices into (ai,aj) = findnz(a) of the edges in the tree
+    treeEdges = fastQueue(n-1)
+
+    nameMap = IntDisjointSets(n)
+
+    xf::Float64 = xfac(n)
+
+    # figure out how far to go down the list : should be edges 1:last
+    maxv = origList[1].v
+    last = 2
+    targ::Float64 = xf*maxv
+    while (origList[last].v > targ) && (last <= m)
+        last += 1
+    end
+    last -= 1
+
+    curIJVind = origList[1:last]
+
+    rim = reusableIntMap(n)
+
+    nverts = compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
+
+    curIJVind = sortIJVind(curIJVind)
+    # curIJVind = compress(curIJVind)
+    
+    while (last <= m) && (nverts > 1) 
+        
+        prevTreePtr = treeEdges.endPtr
+
+        nleft = n + 1 - treeEdges.endPtr
+        # xf = xfac(nleft)  # this might be too small
+        xf = 1/(2*log(nleft))
+
+        cluster2!(curIJVind, treeEdges, xf) 
+
+        for i in (prevTreePtr+1):treeEdges.endPtr
+            edgeind = treeEdges.q[i]
+            ainame = find_root(nameMap, ai[edgeind])
+            ajname = find_root(nameMap, aj[edgeind])
+            if (ainame < ajname)
+                union!(nameMap, ainame,ajname)
+            else
+                union!(nameMap, ajname,ainame)
+            end
+        end
+        #println("nm : ", nameMap)
+
+        # make the new curList, by applying NameMap to cur ind
+        # and, find the max wt edge between clusters
+        # remove self loops as go
+
+        newIJVind = Array(IJVind,0)
+        maxv = 0
+        for i in 1:length(curIJVind)
+            ijv = curIJVind[i]
+            ind = ijv.ind
+            namei = find_root(nameMap,ai[ind])
+            namej = find_root(nameMap,aj[ind])
+            if (namei != namej)
+                if (ijv.v > maxv)
+                    maxv = ijv.v
+                end
+                push!(newIJVind, IJVind(namei, namej, ijv.v, ijv.ind))
+            end
+        end
+
+        
+        # prevlast = last
+        last += 1
+        while (last <= m) && (origList[last].v > xf*maxv) 
+            ijv = origList[last]
+
+            namei = find_root(nameMap,ijv.i)
+            namej = find_root(nameMap,ijv.j)
+            if namei != namej
+                push!(newIJVind, IJVind(namei, namej,  ijv.v, ijv.ind))
+            end
+            last += 1
+        end
+        last -= 1
+
+        # would it be better to do these in bulk?
+        # append!(curList,origList[prevlast:last])
+
+                        
+        nverts = compressIndices!(newIJVind::Array{IJVind,1}, rim::reusableIntMap)
+
+        #println("nv ", nverts)
+        
+        if nverts > 1
+            curIJVind = sortIJVind(newIJVind)
+            curIJVind = compress(curIJVind)
+        end
+        
+        
+    end
+
+    tre = treeEdges.q[1:treeEdges.endPtr]
+    # println(tre)
+
+    
+    return tre
+    
+end
 function akpwSub4(graph, xfac::Function; ver=4)
     n = size(graph,1)
 
@@ -898,8 +1030,11 @@ end
 function compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
     nverts = 1
 
+    #println("comp in ")
+    #printijv(curIJVind)
+
     for ijv in curIJVind
-        if set!(rim, ijv.i, nverts)
+        if set!(rim, ijv.j, nverts)
             nverts += 1
         end
     end
@@ -908,6 +1043,11 @@ function compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
         ijv = curIJVind[i]
         curIJVind[i] = IJVind(rim[ijv.i], rim[ijv.j], ijv.v, ijv.ind)
     end
+
+    #println("comp out ")
+    #printijv(curIJVind)
+
+
 
     reset!(rim)
 
