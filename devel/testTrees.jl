@@ -1,3 +1,65 @@
+function testTrees2(n,nruns)
+
+st2 = Array(Float64,0)
+st4 = Array(Float64,0)
+st5 = Array(Float64,0)
+
+t2 = Array(Float64,0)
+t4 = Array(Float64,0)
+t5 = Array(Float64,0)
+
+for i in 1:nruns
+    a = wtedChimera(n,i)
+    f(t) = sum(compStretches(t,a))/nnz(a)
+    
+    try
+    
+    tic()
+    tr = akpwish(a,ver=2)
+    at2 = toq()
+    ast2 = f(tr)
+
+    tic()
+    tr = akpwish(a,ver=4)
+    at4 = toq()
+    ast4 = f(tr)
+
+    tic()
+    tr = akpwish(a,ver=5)
+    at5 = toq()
+    ast5 = f(tr)
+
+    push!(t2,at2)
+    push!(st2,ast2)
+    
+    push!(t4,at4)
+    push!(st4,ast4)
+    
+    push!(t5,at5)
+    push!(st5,ast5)
+        
+    catch
+        println("bad on wtedChimera ", n, " ", i)
+    end
+
+
+end
+       
+vstat = function(x)
+    x = sort(x)
+    n = length(x)
+    n5 = div(n,5)
+    [mean(x) minimum(x) x[n5:n5:(4*n5)]' maximum(x)]
+end
+
+println("st4 : ", vstat(st4./st2))
+println("st5 : ", vstat(st5./st2))
+println("t4 : ", vstat(t4./t2))
+println("t5 : ", vstat(t5./t2))
+
+    return t2, t4, t5, st2, st4, st5
+end
+
 function testTrees(n,nruns,fn)
 
 st0 = Array(Float64,0)
