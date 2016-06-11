@@ -7,6 +7,8 @@ label vertices 0 initially, and eventually by component number.
 
 =#
 
+using DataStructures
+
 #========================================================================
 
      DATA STRUCTURES
@@ -85,6 +87,36 @@ function reset!(fq::fastPairQueue)
 end
 
 
+type reusableIntMap
+    q::fastQueue
+    map::Array{Int,1}
+end
+
+reusableIntMap(n::Int) = reusableIntMap(fastQueue(n), zeros(n))
+
+# note: does not allow for resetting
+function set!(rim::reusableIntMap, from::Int, to::Int)
+    if rim.map[from] == 0
+        push!(rim.q, from)
+        rim.map[from] = to
+        return true
+    else
+        return false
+    end
+end
+
+import Base.getindex
+getindex(rim::reusableIntMap, from::Int) = rim.map[from]
+
+function reset!(rim::reusableIntMap)
+    while hasMore(rim.q) > 0
+        from = pull!(rim.q)
+        rim.map[from] = 0
+    end
+    reset!(rim.q)
+end
+
+
 
 
 #========================================================================
@@ -123,8 +155,6 @@ function akpwUsub(graph, xfac::Function)
     
     # the indices into (ai,aj) = findnz(a) of the edges in the tree
     treeEdges = fastQueue(n-1)
-    
-    curBdry = fastQueue(n)
     
     # start from a random vertex
     seedlist = randperm(n)
@@ -273,6 +303,8 @@ function akpwish(graph, xfac::Function; ver=0)
         tre = akpwSub2(graph, xfac; ver=ver)
     elseif ver == 3
         tre = akpwSub3(graph, xfac; ver=ver)
+    elseif ver == 4
+        tre = akpwSub4(graph, xfac; ver=ver)
     end
 
     (ai,aj,av) = findnz(graph)
@@ -298,11 +330,6 @@ function akpwSub(graph, xfac::Function; ver=0)
     # the indices into (ai,aj) = findnz(a) of the edges in the tree
     treeEdges = fastQueue(n-1)
     
-    curBdry = fastQueue(n)
-    
-    # start from a random vertex
-    # seedlist = randperm(n)
-
     # order the edges, keeping only those within xfac of largest
     bigEdges = find(graph.nzval .> xfac(n)*maximum(graph.nzval))
     bigOrder = sortperm(graph.nzval[bigEdges],rev=true)
@@ -447,7 +474,7 @@ end
 import Base.getindex
 getindex(G::IJVindGraph, i::Int) = G.list[i]
 
-# based on counting sort: is stable.  exploits symmetry
+# based on counting sort: is stable.  exploits symmetry, can produce multiedges
 function IJVindGraph(inList::Array{IJVind,1})
 
     Ti = Int64
@@ -498,6 +525,137 @@ function IJVindGraph(inList::Array{IJVind,1})
 
 end
 
+# based on counting sort: is stable.  exploits symmetry, can produce multiedges
+function sortIJVind(inList::Array{IJVind,1})
+
+    Ti = Int64
+    Tv = Float64
+    
+    numnz = length(inList)
+    n = 0
+    for i in 1:numnz
+        if inList[i].i > n
+            n = inList[i].i
+        end
+    end
+    
+    deg = zeros(Ti, n) 
+
+    ptr = 1
+    for i in 1:numnz
+        deg[inList[i].i] += 1
+    end
+
+
+    list1 = Array(IJVind, numnz)
+    
+    cumdeg = cumsum(deg)
+    cumdeg1 = copy(cumdeg)
+
+    for i in numnz:-1:1
+        thisi = inList[i].i
+        ptr = cumdeg1[thisi]
+        cumdeg1[thisi] -= 1
+        list1[ptr] = inList[i]
+    end
+
+    cumdeg1 = copy(cumdeg)
+
+    list2 = Array(IJVind, numnz)
+
+    for i in numnz:-1:1
+        thisj = list1[i].j
+        ptr = cumdeg1[thisj]
+        cumdeg1[thisj] -= 1
+        list2[ptr] = list1[i]
+    end
+
+    return list2
+
+end
+
+
+# combine multiedges
+function compress(inList::Array{IJVind,1})
+
+    outlist = Array(IJVind,0)
+
+    ijv = inList[1]
+
+    iold = ijv.i
+    jold = ijv.j
+    v = ijv.v
+    ind = ijv.ind
+
+    for i in 2:length(inList)
+        ijv = inList[i]
+
+        if  (ijv.i == iold) && (ijv.j == jold)
+            if ijv.v > v
+                v = ijv.v
+                ind = ijv.ind
+            end
+        else 
+
+            push!(outlist, IJVind(iold, jold, v, ind))
+            iold = ijv.i
+            v = ijv.v
+            ind = ijv.ind
+            if (ijv.j != jold)
+                jold = ijv.j
+            end
+        end
+    end
+
+    push!(outlist, IJVind(iold, jold, v, ind))
+
+    return outlist
+
+end
+
+
+function compress(graph::IJVindGraph)
+    list = graph.list
+
+    outlist = Array(IJVind,0)
+
+    ijv = list[1]
+
+    iold = ijv.i
+    jold = ijv.j
+    v = 0
+    ind = 0
+
+    colptr = zeros(Int64, length(graph.colptr))
+    colptr[1] = 1
+
+    for i in 2:length(list)
+        ijv = list[i]
+
+        if  (ijv.i == iold) && (ijv.j == jold)
+            if ijv.v > v
+                v = ijv.v
+                ind = ijv.ind
+            end
+        else 
+
+            push!(outlist, IJVind(iold, jold, v, ind))
+            iold = ijv.i
+            v = ijv.v
+            ind = ijv.ind
+            if (ijv.j != jold)
+                jold = ijv.j
+                colptr[j] = i
+            end
+        end
+    end
+
+    push!(outlist, IJVind(iold, jold, v, ind))
+    colptr[end] = 1+length(list)
+    
+    return IJVindGraph(outlist, colptr)
+
+end
 
 function akpwSub3(graph, xfac::Function; ver=3)
     n = size(graph,1)
@@ -515,8 +673,6 @@ function akpwSub3(graph, xfac::Function; ver=3)
 
     # the indices into (ai,aj) = findnz(a) of the edges in the tree
     treeEdges = fastQueue(n-1)
-    
-    curBdry = fastQueue(n)
     
     # start from a random vertex
     # seedlist = randperm(n)
@@ -590,7 +746,7 @@ function akpwSub3(graph, xfac::Function; ver=3)
         =#
         
         if (nnz(cGraph) > 0)
-            ctre = akpwSub2(cGraph, xfac, ver=ver)
+            ctre = akpwSub3(cGraph, xfac, ver=ver)
 
             sube = edgeMap[ctre]
 
@@ -601,6 +757,297 @@ function akpwSub3(graph, xfac::Function; ver=3)
         
     return tre
     
+end
+
+#=
+ start by ordering ind by v in the ijv.  the sort could be ok
+  create a namemap IntDisjointUnion
+
+  after we have a list of edges, say by ind:
+  1. name with namemap
+  2. compress, by
+     a. ident unique numbers, sort those, and rename by those
+           needs a reuse int map, first implement by unique
+     
+     b. then, compress
+     c. save the edge inds left, as those are what we will build with
+
+  3. feed to cluster, which will
+     a. sort by wt, or at least choose seeds in order of wt
+
+  4. spit out a tree, which we union on
+=#
+
+function akpwSub4(graph, xfac::Function; ver=4)
+    n = size(graph,1)
+
+    (ai,aj,av) = findnz(graph)
+    m = length(ai)
+
+    # the indices into (ai,aj) = findnz(a) of the edges in the tree
+    treeEdges = fastQueue(n-1)
+
+    nameMap = IntDisjointSets(n)
+
+    order = sortperm(av, rev=true)
+    
+    # figure out how far to go down the list : should be edges 1:last
+    maxv = av[order[1]]
+    last = 2
+    xf = xfac(n)
+    while (last <= m) && (av[order[last]] > xf*maxv) 
+        last += 1
+    end
+    last -= 1
+
+    # probably don't need curList
+    curList = order[1:last]
+
+    curIJVind = Array(IJVind, length(curList))
+    for i in 1:length(curList)
+        ind = curList[i]
+        curIJVind[i] = IJVind(ai[ind], aj[ind], av[ind], ind)
+    end
+
+    rim = reusableIntMap(n)
+
+    nverts = compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
+    curIJVind = sortIJVind(curIJVind)
+
+    curIJVind = compress(curIJVind)
+    
+    while (last <= m) && (nverts > 1) 
+        
+        prevTreePtr = treeEdges.endPtr
+
+        nleft = n + 1 - treeEdges.endPtr
+        xf = xfac(nleft)  # this might be too small
+
+        cluster2!(curIJVind, treeEdges, xf) 
+
+        for i in (prevTreePtr+1):treeEdges.endPtr
+            edgeind = treeEdges.q[i]
+            ainame = find_root(nameMap, ai[edgeind])
+            ajname = find_root(nameMap, aj[edgeind])
+            if (ainame < ajname)
+                union!(nameMap, ainame,ajname)
+            else
+                union!(nameMap, ajname,ainame)
+            end
+        end
+        #println("nm : ", nameMap)
+
+        # make the new curList, by applying NameMap to cur ind
+        # and, find the max wt edge between clusters
+        # remove self loops as go
+
+        newIJVind = Array(IJVind,0)
+        maxv = 0
+        for i in 1:length(curIJVind)
+            ijv = curIJVind[i]
+            ind = ijv.ind
+            namei = find_root(nameMap,ai[ind])
+            namej = find_root(nameMap,aj[ind])
+            if (namei != namej)
+                if (ijv.v > maxv)
+                    maxv = ijv.v
+                end
+                push!(newIJVind, IJVind(namei, namej, ijv.v, ijv.ind))
+            end
+        end
+
+        
+        prevlast = last
+        last += 1
+        while (last <= m) && (av[order[last]] > xf*maxv)
+            ind = order[last]
+            namei = find_root(nameMap,ai[ind])
+            namej = find_root(nameMap,aj[ind])
+            if namei != namej
+                push!(newIJVind, IJVind(namei, namej,  av[ind], ind))
+            end
+            last += 1
+        end
+        last -= 1
+
+        # would it be better to do these in bulk?
+        # append!(curList,origList[prevlast:last])
+
+                        
+        nverts = compressIndices!(newIJVind::Array{IJVind,1}, rim::reusableIntMap)
+
+        #println("nv ", nverts)
+        
+        if nverts > 1
+            curIJVind = sortIJVind(newIJVind)
+            curIJVind = compress(curIJVind)
+        end
+        
+        
+    end
+
+    tre = treeEdges.q[1:treeEdges.endPtr]
+    # println(tre)
+
+    
+    return tre
+    
+end
+
+# this maps the indices to consecutive integers starting at 1
+function compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
+    nverts = 1
+
+    for ijv in curIJVind
+        if set!(rim, ijv.i, nverts)
+            nverts += 1
+        end
+    end
+
+    for i in 1:length(curIJVind)
+        ijv = curIJVind[i]
+        curIJVind[i] = IJVind(rim[ijv.i], rim[ijv.j], ijv.v, ijv.ind)
+    end
+
+    reset!(rim)
+
+    return (nverts-1)
+end
+
+        
+
+    
+
+function cluster2!(curIJVind, treeEdges, xf) 
+
+    #println("c : " ,curIJVind)
+
+    n = curIJVind[end].j
+    @assert n >= curIJVind[end].i
+
+    # create colptr
+    deg = zeros(Int, n) 
+
+    ptr = 1
+    for ijv in curIJVind
+        deg[ijv.j] += 1
+    end
+    cumdeg = cumsum(deg)
+    colptr = [1;cumdeg+1]
+
+
+    ijvGraph = IJVindGraph(curIJVind, colptr) 
+    
+    comp = zeros(Int,n)
+
+    ncomps = 0
+
+    # seedorder = sortperm(curIJVind, by=x->x.ind, rev=true)
+    
+    # for seed in seedlist
+    # for seed in seedorder
+    for seed in 1:n
+        ijvind = curIJVind[seed]
+        edgeu = ijvind.i
+        edgev = ijvind.j
+
+        #println("seed ", ijvind.v)
+        
+        if (comp[edgeu] == 0) && (comp[edgev] == 0)
+
+            seed = edgeu
+            ncomps += 1
+            dijkstraFromSeed2(ijvGraph, seed, ncomps, comp, treeEdges, xf)
+            
+        end
+        
+    end
+
+end
+
+
+
+
+immutable HeapEntry2
+    node::Int64
+    edge::Int64
+    dist::Float64
+end
+
+import Base.isless
+isless(x::HeapEntry2, y::HeapEntry2) = x.dist < y.dist
+
+
+
+# grow shortest path tree from the seed
+# might want to make the heap reusable
+# might want to store both edge and vertex on the heap, too
+function dijkstraFromSeed2(ijvGraph::IJVindGraph, seed::Int, ncomps::Int, comp, 
+    treeEdges::fastQueue, xfac::Float64)
+
+    bdry = 0
+    vol = 0
+
+    heap = Array(HeapEntry2, 0)
+
+    comp[seed] = ncomps
+
+    # println(ijvGraph.list)
+    
+    for ind in ijvGraph.colptr[seed]:(ijvGraph.colptr[seed+1]-1)
+        nbr = ijvGraph[ind].i 
+        if comp[nbr] == 0
+
+            wt = ijvGraph[ind].v
+            Collections.heappush!(heap, HeapEntry2(nbr, ijvGraph[ind].ind, 1/wt))
+            bdry += wt
+            vol += wt
+        end
+        
+    end
+
+    while (bdry > xfac*vol) && (length(heap) > 0)
+
+        he = Collections.heappop!(heap)
+
+        #println("pop : ", he)
+
+        node = he.node
+        
+        # println([edge node bdry vol length(heap)])
+        
+        if (comp[node] == 0)
+
+            comp[node] = ncomps
+
+            push!(treeEdges,he.edge)
+            dist = he.dist
+
+            for ind in ijvGraph.colptr[node]:(ijvGraph.colptr[node+1]-1)
+
+                nbr = ijvGraph[ind].i 
+
+                if comp[nbr] == ncomps
+
+                    wt = ijvGraph[ind].v
+
+                    bdry -= wt
+                    vol += wt
+
+                elseif comp[nbr] == 0
+
+                    wt = ijvGraph[ind].v
+                    newdist = dist + 1/wt
+                    
+                    bdry += wt
+                    vol += wt
+
+                    Collections.heappush!(heap, HeapEntry2(nbr, ijvGraph[ind].ind, newdist))
+                end
+            end
+        end
+    end
+
 end
 
 
@@ -653,8 +1100,6 @@ function akpwSub2(graph, xfac::Function; ver=2)
     
     # the indices into (ai,aj) = findnz(a) of the edges in the tree
     treeEdges = fastQueue(n-1)
-    
-    curBdry = fastQueue(n)
     
     # start from a random vertex
     # seedlist = randperm(n)
@@ -849,88 +1294,6 @@ function dijkstraFromSeed(graph, aj::Array{Int64,1}, seed::Int, ncomps::Int, com
 end
 
 
-
-immutable HeapEntry2
-    node::Int64
-    edge::Int64
-    dist::Float64
-end
-
-import Base.isless
-isless(x::HeapEntry2, y::HeapEntry2) = x.dist < y.dist
-
-
-
-# grow shortest path tree from the seed
-# might want to make the heap reusable
-# might want to store both edge and vertex on the heap, too
-function dijkstraFromSeed2(ijvGraph::IJVindGraph, seed::Int, ncomps::Int, comp, 
-    treeEdges::fastQueue, xfac::Float64)
-
-    bdry = 0
-    vol = 0
-
-    heap = Array(HeapEntry2, 0)
-
-    comp[seed] = ncomps
-
-    # println(ijvGraph.list)
-    
-    for ind in ijvGraph.colptr[seed]:(ijvGraph.colptr[seed+1]-1)
-        nbr = ijvGraph[ind].i 
-        if comp[nbr] == 0
-
-            wt = ijvGraph[ind].v
-            Collections.heappush!(heap, HeapEntry2(nbr, ijvGraph[ind].ind, 1/wt))
-            bdry += wt
-            vol += wt
-        end
-        
-    end
-
-    while (bdry > xfac*vol) && (length(heap) > 0)
-
-        he = Collections.heappop!(heap)
-
-        node = he.node
-        
-        # println([edge node bdry vol length(heap)])
-        
-        if (comp[node] == 0)
-
-            comp[node] = ncomps
-
-            push!(treeEdges,he.edge)
-            dist = he.dist
-
-            # println([node dist])
-            
-            for ind in ijvGraph.colptr[node]:(ijvGraph.colptr[node+1]-1)
-
-                nbr = ijvGraph[ind].i 
-
-                if comp[nbr] == ncomps
-
-                    wt = ijvGraph[ind].v
-
-                    bdry -= wt
-                    vol += wt
-
-                elseif comp[nbr] == 0
-
-                    wt = ijvGraph[ind].v
-                    newdist = dist + 1/wt
-                    
-                    bdry += wt
-                    vol += wt
-
-                    Collections.heappush!(heap, HeapEntry2(nbr, ijvGraph[ind].ind, newdist))
-                end
-            end
-        end
-    end
-
-end
 
 # this combines all the vertices in a comp together, keeping the max of their weights
 # it also produces a map from edges in the smaller graph back to their reps in the original
