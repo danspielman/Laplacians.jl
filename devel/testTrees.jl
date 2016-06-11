@@ -1,3 +1,100 @@
+function testTrees3(n,nruns)
+
+st0 = Array(Float64,0)
+st2 = Array(Float64,0)
+st5 = Array(Float64,0)
+stold = Array(Float64,0)
+stp = Array(Float64,0)
+
+t0 = Array(Float64,0)
+t2 = Array(Float64,0)
+t5 = Array(Float64,0)
+told = Array(Float64,0)
+tp = Array(Float64,0)
+
+for i in 1:nruns
+    a = wtedChimera(n+i,1)
+    f(t) = sum(compStretches(t,a))/nnz(a)
+    
+    try
+    
+    tic()
+    tr = akpwish(a)
+    at0 = toq()
+    ast0 = f(tr)
+
+
+    tic()
+    tr = akpwish(a,ver=2)
+    at2 = toq()
+    ast2 = f(tr)
+
+
+    tic()
+    tr = akpwish(a,ver=5)
+    at5 = toq()
+    ast5 = f(tr)
+
+    tic()
+    tr = akpw(a)
+    atold = toq()
+    astold = f(tr)
+
+    tic()
+    tr = randishPrim(a)
+    atp = toq()
+    astp = f(tr)
+
+    push!(t0,at0)
+    push!(st0,ast0)
+    
+    push!(t2,at2)
+    push!(st2,ast2)
+    
+    
+    push!(t5,at5)
+    push!(st5,ast5)
+    
+    
+    push!(tp,atp)
+    push!(stp,astp)
+    
+    
+    push!(told,atold)
+    push!(stold,astold)
+        
+    catch err
+        println("bad on wtedChimera ", n, " ", i)
+        @show err
+    end
+
+end
+       
+vstat = function(x)
+    x = sort(x)
+    n = length(x)
+    n10 = div(n,10)
+    [mean(x) minimum(x) x[n10:n10:(9*n10)]' maximum(x)]
+end
+
+
+println("st0 : ", round(vstat(st0./st5),3))
+println("st2 : ", round(vstat(st2./st5),3))
+println("stp : ", round(vstat(stp./st5),3))
+println("stold : ", round(vstat(stold./st5),3))
+
+
+
+println("t0 : ", round(vstat(t0./t5),3))
+println("t2 : ", round(vstat(t2./t5),3))
+println("tp : ", round(vstat(tp./t5),3))
+println("told : ", round(vstat(told./t5),3))
+
+    return t0, t2, t5, tp, told, st0, st2, st5, stp, stold
+end
+
+
+
 function testTrees2(n,nruns)
 
 st2 = Array(Float64,0)
@@ -79,6 +176,9 @@ println("told : ", round(vstat(told./t2),3))
 
     return t2, t5, tp, told, st2, st5, stp, stold
 end
+
+
+
 
 function testTrees(n,nruns,fn)
 
