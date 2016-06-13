@@ -1,4 +1,4 @@
-__precompile__()
+#__precompile__()
 
 """A package for graph computations related to graph Laplacians
 
