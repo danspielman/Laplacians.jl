@@ -310,7 +310,7 @@ end
 
 
 
-function akpwish(graph; ver=0)
+function akpw(graph; ver=0)
     n = size(graph,1)
 
     if ver == 0

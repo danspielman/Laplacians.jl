@@ -1,4 +1,4 @@
-__precompile__()
+#__precompile__()
 
 """A package for graph computations related to graph Laplacians
 
@@ -139,10 +139,10 @@ and exports the functions for which it seems appropriate.
   # using LightGraphs #for akpw
   # using Metis #for akpw
 
-  include("akpwWeighted.jl")
+  include("akpw.jl")
 
-  export akpw
-  export akpw!
+  export akpw, akpwU
+
 
   include("localClustering.jl")
 
