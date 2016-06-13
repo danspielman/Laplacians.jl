@@ -8,7 +8,7 @@ include("linkedListStorage.jl")
 include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
-                                eps::Float64 = 0.5, sampConst::Float64 = 0.5, k::Float64 = 30.0, beta::Float64 = 15.0)
+                                eps::Float64 = 0.5, sampConst::Float64 = 0.02, k::Float64 = 0.5, beta::Float64 = 100.0)
 
     n = a.n
 
@@ -31,8 +31,8 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
     return eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
 end
 
-function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; 
-                            eps::Tv = 0.5, sampConst::Tv = 0.5, k::Tv = 30.0, beta::Tv = 15.0, maxMulti::Ti = 10,
+function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
+                            eps::Tv = 0.5, sampConst::Tv = 0.02, k::Tv = 0.5, beta::Tv = 100.0,
                             returnCN::Bool = false)
 
     n = a.n;
@@ -52,17 +52,19 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     # blow up the tree by beta
     a2 = copy(a)                    ## store a2 for computing the condition number
 
-    a = a + beta * tree
+    a = a + (beta - 1) * tree
 
     # depth = compDepth(rootedTree);
     # stretch = tarjanStretch(rootedTree, a, depth);
 
-    stretch = compStretches((beta + 1) * tree, a)
+    stretch = compStretches(beta * tree, a)
 
+    meanStretch = mean(stretch.nzval)
     println("Average stretch = ", mean(stretch.nzval))
+    maxStretch = maximum(stretch.nzval)
     println("Maximum stretch = ", maximum(stretch.nzval))
 
-    # I think Dan's code also multiplies stretch by edge weight
+    # I think Dan's code also multiplies resistance by edge weight 
     stretch = ceil(Int64, stretch / k);
 
     # set the tree strech to rho
@@ -79,7 +81,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     toc()
 
     # Get u and d such that u d u' = -a (doesn't affect solver)
-    U,d = samplingLDL(a, stretch, rho, maxMulti)
+    U,d = samplingLDL(a, stretch, rho, ceil(Ti, a.n * rho + length(a.nzval) * log(n) / beta))
     Ut = U'
 
     # Create the solver function
@@ -141,9 +143,9 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     gOp = SqLinOp(true,1.0,n,g)
 
     if returnCN
-        return f,gOp,U,d,ord,computeCN(lap(a2),U,Ut,d)
+        return f,gOp,U,d,ord,computeCN(lap(a2),U,Ut,d),(meanStretch,maxStretch)
     else
-        return f,gOp,U,d,ord,(0.0, 0.0)
+        return f,gOp,U,d,ord,(0.0, 0.0), (0.0, 0.0)
     end
 end
 
@@ -219,12 +221,11 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
     end
     hOp = SqLinOp(true,1.0,n,h)
 
-
-    eps = 0.02
+    eps = 0.0002
     R = checkError(hOp, tol = eps)
 
-    Kmin = 1 / (1 - R + eps / lambdaMax)
-    Kmax = 1 / (1 - R - eps / lambdaMax)
+    Kmin = 1 / (1 - R)
+    Kmax = 1 / (1 - R - eps)
 
     # K = 1 / (-checkError(hOp, tol = eps) + 1)
 
@@ -235,7 +236,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Ti,Ti}, rho::Ti, maxMulti::Ti)
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Ti,Ti}, rho::Ti, totalSize::Ti)
     n = a.n
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
@@ -257,7 +258,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
 
     # TODO: change after this works for the current behavior
-    neigh = llsInit(a, rho)
+    neigh = llsInit(a, totalSize)
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
@@ -267,7 +268,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
             if a.rowval[j] > i
                 # set the value min between rho and the stretch
                 # llsAdd(neigh, i, (a.nzval[j], min(rho, stretch.nzval[j]), a.rowval[j]))
-                llsAdd(neigh, i, (a.nzval[j], min(maxMulti, stretch.nzval[j]), a.rowval[j]))
+                llsAdd(neigh, i, (a.nzval[j], stretch.nzval[j], a.rowval[j]))
             end
         end
     end

@@ -34,11 +34,10 @@ type LinkedListStorage{Tv,Ti}
 	size::Ti 							# total size of the data structure
 end
 
-function llsInit{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, rho::Ti)
+function llsInit{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, size::Ti)
 
 	n = a.n
 	m = length(a.nzval)
-	size = rho * m
 
 	first = -ones(Ti, n)
 	last = -ones(Ti, n)
