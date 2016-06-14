@@ -53,7 +53,6 @@ julia> Pkg.add("Laplacians")
 
 This should add all the packages upon which Laplacians explicitly depends.  
 
-Some of the options for the routine `akpw` require LightGraphs and Metis.  But, you probably don't want to use these, so don't worry about them for now.
 
 ## Using Laplacians
 

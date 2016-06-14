@@ -12,6 +12,7 @@ pages:
     - Installation: 'Installation.md'
     - Using Julia: 'Julia.md'
     - Examples: 'Examples.md'
+    - Low Stretch Spanning Trees: 'LSST.md'
     - Sparse matrices as graphs: 'CSCgraph.md'
     - Solvers: 'solvers.md'
 - Developing:
@@ -26,6 +27,8 @@ pages:
     - solvers: 'solversAPI.md'
     - cutHeuristics: 'cutHeuristicsAPI.md'
     - localClustering: 'localClusteringAPI.md'
+    - Conjugate Gradient: 'pcgAPI.md'
+    - AKPW: 'akpwAPI.md'
 
 docs_dir: 'docs'
 

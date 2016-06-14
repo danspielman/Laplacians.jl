@@ -53,20 +53,23 @@ norm(la*x - b)
 ## Iterative Solvers
 The first, of course, is the Conjugate Gradient (cg).
 
-Our implementation requires 2 arguments: the matrix and the right-hand vector.  It's optional arguments are the tolerance `tol` and the maximum number of iterations, `maxits`.  It has been written to use BLAS when possible, and slower routines when dealing with data types that BLAS cannot handle.  Here are examples.
+Our implementation requires 2 arguments: the matrix and the right-hand vector.  It's optional arguments are the tolerance `tol`, the maximum number of iterations, `maxits`, and the maximum number of seconds, `maxtime`.  It has been written to use BLAS when possible, and slower routines when dealing with data types that BLAS cannot handle.  For extra information, set `verbose` to true.  Here are examples.
 
 ~~~julia
+srand(1)
 n = 50
 a = randn(n,n); a = a * a';
 b = randn(n)
-x = cg(a,b,maxits=100)
-norm(a*x - b)
-	1.2191649497921835e-6
+x = cg(a,b,maxits=100,verbose=true);
+	CG stopped after: 66 iterations with relative error 4.901070762774203e-7.
+norm(a*x - b)/norm(b)
+	4.901071329720876e-7
 
 bbig = convert(Array{BigFloat,1},b)
 xbig = cg(a,bbig,maxits=100)
+	CG stopped after: 50 iterations with relative error 2.18672511297479336887519117065525148757254642683072581090418060286711737398731e-38.
 norm(a*xbig - bbig)
-	1.494919244242202629856363570306545126541716514824419323325986374186529786019681e-33
+	2.186725112974793368875191170655251487433448469718749360094794057951719231569009e-38
 ~~~
 
 As a sanity check, we do two speed tests against Matlab.
@@ -102,6 +105,7 @@ ans =
 PCG also takes as input a preconditioner.  This should be a function.  Here is an example of how one might construct and use a diagonal preonditioner.  To motivate this, I will use a grid with highly varying weights on edges.
 
 ~~~julia
+srand(1)
 a = mapweight(grid2(200),x->1/(rand(1)[1]));
 la = lap(a)
 n = size(la)[1]
@@ -110,49 +114,74 @@ b = b - mean(b);
 
 d = diag(la)
 pre(x) = x ./ d
-@time x = pcg(la,b,pre,maxits=2000)
-	3.322035 seconds (42.21 k allocations: 1.194 GB, 5.11% gc time)
-norm(la*x-b)
-	0.008508746034886803
+@time x = pcg(la,b,pre,maxits=2000,verbose=true);
+
+	PCG stopped after: 2000 iterations with relative error 1.535193885968155e-5.
+	  2.719655 seconds (42.41 k allocations: 1.194 GB, 6.21% gc time)
 ~~~
 
 If our target is just low error, and we are willing to allow many iterations, here's how cg and pcg compare on this example.
 
 ~~~julia
-@time x = pcg(la,b,pre,tol=1e-1,maxits=10^5)
-	0.747042 seconds (9.65 k allocations: 275.819 MB, 4.87% gc time)
-norm(la*x-b)
-	19.840756251253442
+@time x = pcg(la,b,pre,tol=1e-1,maxits=10^5,verbose=true);
+	PCG stopped after: 452 iterations with relative error 0.09944363573171432.
+ 	0.649586 seconds (9.67 k allocations: 277.034 MB, 5.74% gc time) 
+norm(la*x - b)/norm(b)
+	0.09944363573090279
 
-@time x = cg(la,b,tol=1e-1,maxits=10^5)
-	6.509665 seconds (22.55 k allocations: 1.680 GB, 3.68% gc time)
-norm(la*x-b)
-	19.222483530605043
+@time x = cg(la,b,tol=1e-1,maxits=10^5);
+	4.526119 seconds (16.03 k allocations: 1.195 GB, 4.16% gc time)
+  
+norm(la*x - b)/norm(b)
+	0.0981610595725004  
 ~~~
 
 ## Low-Stretch Spanning Trees
 
-In order to make preconditioners, we will want low-stretch spanning trees.  We do not yet have any code in Julia that is guaranteed to produce these.  Instead, for now, we have two routines that can be thought of as randomized versions of Prim and Kruskall's algorithm.
+In order to make preconditioners, we will want low-stretch spanning trees.  We do not yet have any code that is guaranteed to produce these.  Instead, we supply three heuristics: `akpw` which is inspired by the algorith of Alon, Karp, Peleg and West, and  randomized versions of Prim and Kruskall's algorithm.
 `randishKruskall` samples the remaining edges with probability proportional to their weight.  `randishPrim` samples edges on the boundary while using the same rule.
 
-Both use a data structure called `Sampler` that allows you to store integers with real values, and to sample according to those real values.
+See [Low Stretch Spanning Trees](LSST.md)
 
-We also have code for computing the stretches.
-Here are some examples.
+Let's try using a low-stretch spanning tree as a preconditioner for that last example.  First, we compute a low stretch tree and, for fun, check its average stretch.
 
 ~~~julia
-a = grid2(1000)
-t = randishKruskal(a);
-st = compStretches(t,a);
-sum(st)/nnz(a)
-	43.410262262262265
-
-t = randishPrim(a);
-st = compStretches(t,a);
-sum(st)/nnz(a)
-	33.14477077077077
-
+@time tree = akpw(a);
+	0.195370 seconds (1.07 M allocations: 86.283 MB, 5.84% gc time)
+aveStretch = sum(compStretches(tree,a))/nnz(a)
+	6.527424129533183
 ~~~
+
+To use it as a preconditioner, we must construct a function that inverts linear systems in its Laplacian:
+
+~~~julia
+ltree = lap(tree)
+@time ltreeSolver = lapChol(ltree);
+	0.045963 seconds (92 allocations: 17.703 MB, 9.51% gc time)
+norm(ltree*ltreeSolver(b) - b)
+	8.209228285591316e-8
+~~~
+
+Now, let's see how well it works as a preconditioner.
+
+~~~julia
+@time x = pcg(la,b,ltreeSolver,tol=1e-1,maxits=10^5,verbose=true);
+	PCG stopped after: 153 iterations with relative error 0.09900131423570005.
+	0.658006 seconds (12.27 k allocations: 654.998 MB, 11.53% gc time)
+~~~
+
+That's a lot like using the diagonal preconditioner.  However, we see that the tree performs fewer iterations, and is faster when we seek higher accuracy.
+
+~~~julia
+@time x = pcg(la,b,pre,tol=1e-6,maxtime=10,verbose=true);
+	PCG stopped after: 2435 iterations with relative error 9.92454258869586e-7.
+ 	3.431920 seconds (51.35 k allocations: 1.454 GB, 6.16% gc time)
+
+@time x = pcg(la,b,ltreeSolver,tol=1e-6,maxtime=10,verbose=true);
+	PCG stopped after: 605 iterations with relative error 9.78414046170984e-7.
+ 	2.510224 seconds (48.01 k allocations: 2.527 GB, 11.68% gc time)
+~~~
+
 
 ## Augmented spanning tree preconditioners
 

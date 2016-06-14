@@ -136,9 +136,6 @@ and exports the functions for which it seems appropriate.
   export maxflow
 
 
-  # using LightGraphs #for akpw
-  # using Metis #for akpw
-
   include("akpw.jl")
 
   export akpw, akpwU

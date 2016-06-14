@@ -161,6 +161,7 @@ end
 =#
 
 
+"""Computes a low stretch spanning tree of an unweighted `graph`, and returns it as a graph."""
 function akpwU(graph)
     n = size(graph,1)
 
@@ -309,7 +310,8 @@ end
 =#
 
 
-
+"""Computes a low stretch spanning tree of `graph`, and returns it as a graph.
+The default version is 0.  In event of emergency, one can try `ver=2`.  It is usually slower, but might have slightly better stretch."""
 function akpw(graph; ver=0)
     n = size(graph,1)
 
