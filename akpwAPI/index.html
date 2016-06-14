@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../../lambda2.ico">
         
 
-	<title>Examples - Laplacians.jl</title>
+	<title>AKPW - Laplacians.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
@@ -61,7 +61,7 @@
                 
                 
                 
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
@@ -78,8 +78,8 @@
 
                         
                             
-<li class="active">
-    <a href="index.html">Examples</a>
+<li >
+    <a href="../Examples/index.html">Examples</a>
 </li>
 
                         
@@ -121,7 +121,7 @@
                 
                 
                 
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
@@ -186,8 +186,8 @@
 
                         
                             
-<li >
-    <a href="../akpwAPI/index.html">AKPW</a>
+<li class="active">
+    <a href="index.html">AKPW</a>
 </li>
 
                         
@@ -206,12 +206,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../Julia/index.html">
+                        <a rel="next" href="../pcgAPI/index.html">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../LSST/index.html">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -236,24 +236,30 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#examples">Examples</a></li>
+        <li class="main active"><a href="#akpw">akpw</a></li>
+        
+            <li><a href="#akpwu">akpwU</a></li>
+        
+            <li><a href="#akpw_1">akpw</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="examples">Examples</h1>
-<p>The following are links to html files of Julia notebooks.
-These notebooks are also in the notebook directory, and can be open there so that you can run the code live.
-You should be able to find them under ~/.julia/v0.4/Laplacians/notebooks.</p>
-<ul>
-<li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/FirstNotebook.ipynb">FirstNotebook</a></li>
-<li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Solvers.ipynb">Solvers</a></li>
-<li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Sampler.ipynb">Sampler</a></li>
-<li><a href="https://github.com/danspielman/Laplacians.jl/blob/master/notebooks/LocalClustering.ipynb">LocalClustering</a></li>
-<li><a href="https://github.com/danspielman/Laplacians.jl/blob/master/notebooks/LocalClustering%20Statistics.ipynb">LocalClustering Statistics</a></li>
-</ul></div>
+<h1 id="akpw">akpw</h1>
+<h3 id="akpwu">akpwU</h3>
+<p>Computes a low stretch spanning tree of an unweighted <code>graph</code>, and returns it as a graph.</p>
+<pre><code class="julia">akpwU(graph)
+</code></pre>
+
+<p>akpw.jl:166</p>
+<h3 id="akpw_1">akpw</h3>
+<p>Computes a low stretch spanning tree of <code>graph</code>, and returns it as a graph. The default version is 0.  In event of emergency, one can try <code>ver=2</code>.  It is usually slower, but might have slightly better stretch.</p>
+<pre><code class="julia">akpw(graph)
+</code></pre>
+
+<p>akpw.jl:316</p></div>
             
         </div>
 

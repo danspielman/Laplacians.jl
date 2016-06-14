@@ -85,6 +85,12 @@
                         
                             
 <li >
+    <a href="../LSST/index.html">Low Stretch Spanning Trees</a>
+</li>
+
+                        
+                            
+<li >
     <a href="../CSCgraph/index.html">Sparse matrices as graphs</a>
 </li>
 
@@ -173,6 +179,18 @@
 </li>
 
                         
+                            
+<li >
+    <a href="../pcgAPI/index.html">Conjugate Gradient</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../akpwAPI/index.html">AKPW</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -245,6 +263,8 @@
             <li><a href="#twolift">twoLift</a></li>
         
             <li><a href="#joingraphs">joinGraphs</a></li>
+        
+            <li><a href="#disjoin">disjoin</a></li>
         
             <li><a href="#plotgraph">plotGraph</a></li>
         
@@ -347,43 +367,49 @@ twoLift(a, k::Integer)
 </code></pre>
 
 <p>graphOps.jl:111</p>
+<h3 id="disjoin">disjoin</h3>
+<p>Create a disjoint union of graphs a and b,   with no edges between them.</p>
+<pre><code class="julia">disjoin(a, b)
+</code></pre>
+
+<p>graphOps.jl:130</p>
 <h3 id="plotgraph">plotGraph</h3>
 <p>Plots graph gr with coordinates (x,y)</p>
 <pre><code class="julia">plotGraph(gr, x, y)
 plotGraph(gr, x, y, color)
 </code></pre>
 
-<p>graphOps.jl:129</p>
+<p>graphOps.jl:136</p>
 <h3 id="spectraldrawing">spectralDrawing</h3>
 <p>Computes spectral coordinates, and then uses plotGraph to draw</p>
 <pre><code class="julia">spectralDrawing(a)
 </code></pre>
 
-<p>graphOps.jl:166</p>
+<p>graphOps.jl:173</p>
 <h3 id="spectralcoords">spectralCoords</h3>
 <p>Computes the spectral coordinates of a graph</p>
 <pre><code class="julia">spectralCoords(a)
 </code></pre>
 
-<p>graphOps.jl:174</p>
+<p>graphOps.jl:181</p>
 <h3 id="tounitvector">toUnitVector</h3>
 <p>Creates a unit vector of length n from a given set of integers, with weights based on the number of occurences</p>
 <pre><code class="julia">toUnitVector(a::Array{Int64,1}, n)
 </code></pre>
 
-<p>graphOps.jl:183</p>
+<p>graphOps.jl:190</p>
 <h3 id="diagmat">diagmat</h3>
 <p>Returns the diagonal matrix(as a sparse matrix) of a graph</p>
 <pre><code class="julia">diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>graphOps.jl:205</p>
+<p>graphOps.jl:212</p>
 <h3 id="generalizednecklace">generalizedNecklace</h3>
 <p>Constructs a generalized necklace graph starting with two graphs A and H. The resulting new graph will be constructed by expanding each vertex in H to an instance of A. k random edges will be generated between components. Thus, the resulting graph may have weighted edges.</p>
 <pre><code class="julia">generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti&lt;:Integer}, k::Int64)
 </code></pre>
 
-<p>graphOps.jl:225</p></div>
+<p>graphOps.jl:232</p></div>
             
         </div>
 

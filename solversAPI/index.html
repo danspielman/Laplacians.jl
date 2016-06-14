@@ -85,6 +85,12 @@
                         
                             
 <li >
+    <a href="../LSST/index.html">Low Stretch Spanning Trees</a>
+</li>
+
+                        
+                            
+<li >
     <a href="../CSCgraph/index.html">Sparse matrices as graphs</a>
 </li>
 
@@ -173,6 +179,18 @@
 </li>
 
                         
+                            
+<li >
+    <a href="../pcgAPI/index.html">Conjugate Gradient</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../akpwAPI/index.html">AKPW</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -228,6 +246,10 @@
         
             <li><a href="#augtreesolver">augTreeSolver</a></li>
         
+            <li><a href="#augtreelapprecon">augTreeLapPrecon</a></li>
+        
+            <li><a href="#augtreelapsolver">augTreeLapSolver</a></li>
+        
     
     </ul>
 </div></div>
@@ -241,25 +263,37 @@ lapWrapSolver(solver, la::AbstractArray{T,N})
 lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 </code></pre>
 
-<p>solvers.jl:108</p>
+<p>solvers.jl:178</p>
 <h3 id="augmenttree">augmentTree</h3>
 <p>Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch</p>
 <pre><code class="julia">augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)
 </code></pre>
 
-<p>solvers.jl:138</p>
+<p>solvers.jl:208</p>
 <h3 id="augtreeprecon">augTreePrecon</h3>
 <p>This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.</p>
 <pre><code class="julia">augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>solvers.jl:188</p>
+<p>solvers.jl:258</p>
 <h3 id="augtreesolver">augTreeSolver</h3>
 <p>This is the solver that calls augTreePrecon</p>
 <pre><code class="julia">augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>solvers.jl:210</p></div>
+<p>solvers.jl:280</p>
+<h3 id="augtreelapprecon">augTreeLapPrecon</h3>
+<p>A version of augTreePrecon specialized for Laplacians</p>
+<pre><code class="julia">augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>solvers.jl:291</p>
+<h3 id="augtreelapsolver">augTreeLapSolver</h3>
+<p>This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.</p>
+<pre><code class="julia">augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>solvers.jl:313</p></div>
             
         </div>
 

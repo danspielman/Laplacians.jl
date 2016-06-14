@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../../lambda2.ico">
         
 
-	<title>Examples - Laplacians.jl</title>
+	<title>Low Stretch Spanning Trees - Laplacians.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
@@ -78,14 +78,14 @@
 
                         
                             
-<li class="active">
-    <a href="index.html">Examples</a>
+<li >
+    <a href="../Examples/index.html">Examples</a>
 </li>
 
                         
                             
-<li >
-    <a href="../LSST/index.html">Low Stretch Spanning Trees</a>
+<li class="active">
+    <a href="index.html">Low Stretch Spanning Trees</a>
 </li>
 
                         
@@ -206,12 +206,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../Julia/index.html">
+                        <a rel="next" href="../Examples/index.html">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../LSST/index.html">
+                        <a rel="prev" href="../CSCgraph/index.html">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -236,24 +236,77 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#examples">Examples</a></li>
+        <li class="main active"><a href="#low-stretch-spanning-trees">Low Stretch Spanning Trees</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="examples">Examples</h1>
-<p>The following are links to html files of Julia notebooks.
-These notebooks are also in the notebook directory, and can be open there so that you can run the code live.
-You should be able to find them under ~/.julia/v0.4/Laplacians/notebooks.</p>
-<ul>
-<li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/FirstNotebook.ipynb">FirstNotebook</a></li>
-<li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Solvers.ipynb">Solvers</a></li>
-<li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Sampler.ipynb">Sampler</a></li>
-<li><a href="https://github.com/danspielman/Laplacians.jl/blob/master/notebooks/LocalClustering.ipynb">LocalClustering</a></li>
-<li><a href="https://github.com/danspielman/Laplacians.jl/blob/master/notebooks/LocalClustering%20Statistics.ipynb">LocalClustering Statistics</a></li>
-</ul></div>
+<h1 id="low-stretch-spanning-trees">Low Stretch Spanning Trees</h1>
+<p>We have implemented a variant of the algorithm of Alon, Karp, Peleg and West for computing low stretch spanning trees.  It is called <code>akpw</code>.  For unweighted graphs we provide a faster variant called <code>akpwU</code>.  If you require faster algorithms, with possibly higher average stretch, you can try the heuristics <code>randishPrim</code> or <code>randishKruskal</code>.</p>
+<p>You can compute the stretch of a graph with respect to a spanning tree with the routine <code>compStretches</code>.  It returns a sparse matrix with one entry for each edge in the graph giving its stretch.  For example:</p>
+<pre><code class="julia">julia&gt; graph = grid2(4)
+16x16 sparse matrix with 48 Float64 entries:
+
+julia&gt; tree = akpwU(graph)
+16x16 sparse matrix with 30 Float64 entries:
+
+julia&gt; st = compStretches(tree,graph)
+16x16 sparse matrix with 48 Float64 entries:
+    [2 ,  1]  =  1.0
+    [5 ,  1]  =  1.0
+    [1 ,  2]  =  1.0
+    [3 ,  2]  =  1.0
+    [6 ,  2]  =  3.0
+    [2 ,  3]  =  1.0
+    [4 ,  3]  =  1.0
+    [7 ,  3]  =  1.0
+    [3 ,  4]  =  1.0
+    [8 ,  4]  =  3.0
+    [1 ,  5]  =  1.0
+    [6 ,  5]  =  5.0
+    ⋮
+    [8 , 12]  =  3.0
+    [11, 12]  =  1.0
+    [16, 12]  =  1.0
+    [9 , 13]  =  1.0
+    [14, 13]  =  3.0
+    [10, 14]  =  1.0
+    [13, 14]  =  3.0
+    [15, 14]  =  3.0
+    [11, 15]  =  1.0
+    [14, 15]  =  3.0
+    [16, 15]  =  3.0
+    [12, 16]  =  1.0
+    [15, 16]  =  3.0
+</code></pre>
+
+<p>Here is an example demonstrating the average stretches and times taken by these algorithms on a large graph.</p>
+<pre><code class="julia">
+julia&gt; graph = chimera(1000000,1);
+
+julia&gt; @time tree = akpw(graph);
+  5.700285 seconds (16.10 M allocations: 1.263 GB, 11.16% gc time)
+
+julia&gt; aveStretch = sum(compStretches(tree,graph))/nnz(graph)
+8.793236275779616
+
+julia&gt; @time tree = randishPrim(graph);
+  3.736225 seconds (3.21 M allocations: 566.887 MB, 6.40% gc time)
+
+julia&gt; aveStretch = sum(compStretches(tree,graph))/nnz(graph)
+10.800094649795756
+
+julia&gt; @time tree = randishKruskal(graph);
+  2.515443 seconds (3.21 M allocations: 423.529 MB, 4.35% gc time)
+
+julia&gt; aveStretch = sum(compStretches(tree,graph))/nnz(graph)
+37.819948689847564
+
+</code></pre>
+
+<p>Of course, you can get very different results on very different graphs.  But, the ordering of these algorithms respect to time and stretch will usually follow this pattern.</p></div>
             
         </div>
 

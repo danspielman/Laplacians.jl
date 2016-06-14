@@ -85,6 +85,12 @@
                         
                             
 <li >
+    <a href="../LSST/index.html">Low Stretch Spanning Trees</a>
+</li>
+
+                        
+                            
+<li >
     <a href="../CSCgraph/index.html">Sparse matrices as graphs</a>
 </li>
 
@@ -173,6 +179,18 @@
 </li>
 
                         
+                            
+<li >
+    <a href="../pcgAPI/index.html">Conjugate Gradient</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../akpwAPI/index.html">AKPW</a>
+</li>
+
+                        
                         </ul>
                     </li>
                 
@@ -224,6 +242,8 @@
         
             <li><a href="#setvalue">setValue</a></li>
         
+            <li><a href="#flipindex">flipIndex</a></li>
+        
             <li><a href="#backindices">backIndices</a></li>
         
             <li><a href="#findentries">findEntries</a></li>
@@ -252,6 +272,24 @@
 </code></pre>
 
 <p>graphUtils.jl:29</p>
+<h3 id="flipindex">flipIndex</h3>
+<p>For a symmetric matrix, this gives the correspondance between pairs of entries in an ijv. So, ai[ind] = aj[flip[ind]].  For example, </p>
+<pre><code>(ai,aj,av) = findnz(a);
+fl = flipIndex(a)
+ind = 10
+@show backind = fl[10]
+@show [ai[ind], aj[ind], av[ind]]
+@show [ai[backind], aj[backind], av[backind]];
+
+backind = fl[10] = 4
+[ai[ind],aj[ind],av[ind]] = [2.0,4.0,0.7]
+[ai[backind],aj[backind],av[backind]] = [4.0,2.0,0.7]
+</code></pre>
+
+<pre><code class="julia">flipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
+</code></pre>
+
+<p>graphUtils.jl:51</p>
 <h3 id="backindices">backIndices</h3>
 <p>Same as the above, but now the graph is in adjacency list form </p>
 <p>Computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph </p>
@@ -259,31 +297,31 @@
 backIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})
 </code></pre>
 
-<p>graphUtils.jl:35</p>
+<p>graphUtils.jl:62</p>
 <h3 id="findentries">findEntries</h3>
 <p>Similar to findnz, but also returns 0 entries that have an edge in the sparse matrix </p>
 <pre><code class="julia">findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>graphUtils.jl:114</p>
+<p>graphUtils.jl:141</p>
 <h3 id="compconductance">compConductance</h3>
 <p>Returns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)</p>
 <pre><code class="julia">compConductance{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 </code></pre>
 
-<p>graphUtils.jl:136</p>
+<p>graphUtils.jl:163</p>
 <h3 id="getvolume">getVolume</h3>
 <p>Computes the volume of subset s in an unweighted graph G </p>
 <pre><code class="julia">getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 </code></pre>
 
-<p>graphUtils.jl:149</p>
+<p>graphUtils.jl:176</p>
 <h3 id="getobound">getObound</h3>
 <p>Computes the number of edges leaving s </p>
 <pre><code class="julia">getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 </code></pre>
 
-<p>graphUtils.jl:167</p></div>
+<p>graphUtils.jl:194</p></div>
             
         </div>
 
