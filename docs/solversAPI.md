@@ -9,7 +9,7 @@ lapWrapSolver(solver, la::AbstractArray{T,N})
 lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 ```
 
-solvers.jl:108
+solvers.jl:178
 
 
 
@@ -21,7 +21,7 @@ Takes as input a tree and an adjacency matrix of a graph. It then computes the s
 augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)
 ```
 
-solvers.jl:138
+solvers.jl:208
 
 
 
@@ -33,7 +33,7 @@ This is an augmented spanning tree preconditioner for diagonally dominant linear
 augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
 ```
 
-solvers.jl:188
+solvers.jl:258
 
 
 
@@ -45,7 +45,31 @@ This is the solver that calls augTreePrecon
 augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
 ```
 
-solvers.jl:210
+solvers.jl:280
+
+
+
+### augTreeLapPrecon
+A version of augTreePrecon specialized for Laplacians
+
+
+```julia
+augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+```
+
+solvers.jl:291
+
+
+
+### augTreeLapSolver
+This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.
+
+
+```julia
+augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+```
+
+solvers.jl:313
 
 
 

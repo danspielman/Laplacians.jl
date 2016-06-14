@@ -161,6 +161,18 @@ graphOps.jl:111
 
 
 
+### disjoin
+Create a disjoint union of graphs a and b,   with no edges between them.
+
+
+```julia
+disjoin(a, b)
+```
+
+graphOps.jl:130
+
+
+
 ### plotGraph
 Plots graph gr with coordinates (x,y)
 
@@ -170,7 +182,7 @@ plotGraph(gr, x, y)
 plotGraph(gr, x, y, color)
 ```
 
-graphOps.jl:129
+graphOps.jl:136
 
 
 
@@ -182,7 +194,7 @@ Computes spectral coordinates, and then uses plotGraph to draw
 spectralDrawing(a)
 ```
 
-graphOps.jl:166
+graphOps.jl:173
 
 
 
@@ -194,7 +206,7 @@ Computes the spectral coordinates of a graph
 spectralCoords(a)
 ```
 
-graphOps.jl:174
+graphOps.jl:181
 
 
 
@@ -206,7 +218,7 @@ Creates a unit vector of length n from a given set of integers, with weights bas
 toUnitVector(a::Array{Int64,1}, n)
 ```
 
-graphOps.jl:183
+graphOps.jl:190
 
 
 
@@ -218,7 +230,7 @@ Returns the diagonal matrix(as a sparse matrix) of a graph
 diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 ```
 
-graphOps.jl:205
+graphOps.jl:212
 
 
 
@@ -230,7 +242,7 @@ Constructs a generalized necklace graph starting with two graphs A and H. The re
 generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti<:Integer}, k::Int64)
 ```
 
-graphOps.jl:225
+graphOps.jl:232
 
 
 

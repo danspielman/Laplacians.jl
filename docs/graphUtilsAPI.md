@@ -23,6 +23,31 @@ graphUtils.jl:29
 
 
 
+### flipIndex
+For a symmetric matrix, this gives the correspondance between pairs of entries in an ijv. So, ai[ind] = aj[flip[ind]].  For example, 
+
+```
+(ai,aj,av) = findnz(a);
+fl = flipIndex(a)
+ind = 10
+@show backind = fl[10]
+@show [ai[ind], aj[ind], av[ind]]
+@show [ai[backind], aj[backind], av[backind]];
+
+backind = fl[10] = 4
+[ai[ind],aj[ind],av[ind]] = [2.0,4.0,0.7]
+[ai[backind],aj[backind],av[backind]] = [4.0,2.0,0.7]
+```
+
+
+```julia
+flipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
+```
+
+graphUtils.jl:51
+
+
+
 ### backIndices
 Same as the above, but now the graph is in adjacency list form 
 
@@ -34,7 +59,7 @@ backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 backIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})
 ```
 
-graphUtils.jl:35
+graphUtils.jl:62
 
 
 
@@ -46,7 +71,7 @@ Similar to findnz, but also returns 0 entries that have an edge in the sparse ma
 findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
 ```
 
-graphUtils.jl:114
+graphUtils.jl:141
 
 
 
@@ -58,7 +83,7 @@ Returns the quality of the cut for a given graph and a given cut set s.   the re
 compConductance{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 ```
 
-graphUtils.jl:136
+graphUtils.jl:163
 
 
 
@@ -70,7 +95,7 @@ Computes the volume of subset s in an unweighted graph G
 getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 ```
 
-graphUtils.jl:149
+graphUtils.jl:176
 
 
 
@@ -82,7 +107,7 @@ Computes the number of edges leaving s
 getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 ```
 
-graphUtils.jl:167
+graphUtils.jl:194
 
 
 
