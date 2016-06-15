@@ -9,7 +9,7 @@
 
 using Laplacians
 
-include("akpw.jl")
+include("johnlind.jl")
 include("fastSampler.jl")
 include("linkedListStorage.jl")
 include("sqLinOpWrapper.jl")
@@ -47,48 +47,11 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     println("rho = ", rho)
 
-    tic()
-
-    tree = akpwish(a);
-    ord = reverse!(dfsOrder(tree));
-
-    a = a[ord, ord];
-    tree = tree[ord, ord];
-    # rootedTree = matToTree(tree);
-
-    # blow up the tree by beta
-    a2 = copy(a)                    ## store a2 for computing the condition number
-
-    a = a + (beta - 1) * tree
-
-    # depth = compDepth(rootedTree);
-    # stretch = tarjanStretch(rootedTree, a, depth);
-
-    stretch = compStretches(beta * tree, a)
-
-    meanStretch = mean(stretch.nzval)
-    println("Average stretch = ", mean(stretch.nzval))
-    maxStretch = maximum(stretch.nzval)
-    println("Maximum stretch = ", maximum(stretch.nzval))
-
-    # I think Dan's code also multiplies resistance by edge weight 
-    stretch = ceil(Int64, stretch / k);
-
-    # set the tree strech to rho
-    #### NOT EFFICIENT
-    for u in 1:n
-        for i in 1:deg(tree,u)
-            v = nbri(tree,u,i)
-
-            stretch[u,v] = rho
-        end
-    end
-
-    print("Time to build the tree and compute the stretch: ")
-    toc()
+    # Compute the leverage scores using Johnson-Lindenstrauss
+    reff = johnlind()
 
     # Get u and d such that u d u' = -a (doesn't affect solver)
-    U,d = samplingLDL(a, stretch, rho, ceil(Ti, sum(stretch) + rho * (n - 1)))
+    U,d = samplingLDL(a, lev, rho)
     Ut = U'
 
     # Create the solver function
@@ -234,8 +197,6 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
     Kmin = 1 / (1 - R)
     Kmax = 1 / (1 - R - eps)
 
-    # K = 1 / (-checkError(hOp, tol = eps) + 1)
-
     print("computing the condition number takes: ")
     toc()
 
@@ -243,7 +204,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Ti,Ti}, rho::Ti, totalSize::Ti)
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Ti,Ti}, rho::Ti)
     n = a.n
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
@@ -264,8 +225,8 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     # note neigh[i] only stores neighbors j such that j > i
     # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
 
-    # TODO: change after this works for the current behavior
-    neigh = llsInit(a, totalSize)
+    # compute the sum of leverage scores
+    neigh = llsInit(a, sum(lev))
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
@@ -274,8 +235,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
         for j in a.colptr[i]:a.colptr[i + 1] - 1
             if a.rowval[j] > i
                 # set the value min between rho and the stretch
-                # llsAdd(neigh, i, (a.nzval[j], min(rho, stretch.nzval[j]), a.rowval[j]))
-                llsAdd(neigh, i, (a.nzval[j], stretch.nzval[j], a.rowval[j]))
+                llsAdd(neigh, i, (a.nzval[j], min(rho, lev.nzval[j]), a.rowval[j]))
             end
         end
     end
