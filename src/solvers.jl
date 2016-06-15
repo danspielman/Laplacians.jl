@@ -258,14 +258,11 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishKrus
   adjmat = -triu(ddmat,1)
   adjmat = adjmat + adjmat'
 
-  tic()
   tree = treeAlg(adjmat)
-  toc()
 
   n = size(ddmat)[1]
 
   augtree = augmentTree(tree,adjmat,convert(Int,round(sqrt(n))))
-  print("Tree build time: ")
 
   Dx = spdiagm(ddmat*ones(n))
 
