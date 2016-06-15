@@ -12,14 +12,14 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64)
 
 	P = ones(dhat, m)
 	for i in 1:dhat
-		for j in 1:n
+		for j in 1:m
 			if rand() < 1/2
 				P[i,j] = -P[i,j]
 			end
-			# we want ||P * x|| = ||x||
-			P[i,j] = P[i,j] / sqrt(dhat)
 		end
 	end
+	# we want ||P * x|| = ||x||
+	P = P / sqrt(dhat)
 
 	# compute W, B
 	W = speye(m,m) * 0
@@ -55,33 +55,20 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64)
 	println("the diff is: ", maximum(B' * W * B / 2 - lap(a)))
 
 	# P * W^(1/2) * B. Solve for each line. dims are dhat x n
-	# bs = P * sqrt(W) * B 
-	bs = sqrt(W) * B / sqrt(2)
-
-	# compute P * W^(1/2) * B * L^-1
-
-	# xs = bs * pinv(full(lap(a)))
+	bs = P * sqrt(W) * B / sqrt(2)
 
 	la = lap(a)
 	f = lapWrapSolver(augTreeSolver,la,tol=1e-6,maxits=1000)
 
-	xs = zeros(m, n)
-	for i in 1:m
+	xs = zeros(dhat, n)
+	for i in 1:dhat
 		b = reshape(bs[i,:], n)
 		b = b - mean(b)
 		xs[i,:] = f(b)
 	end
 
-	# xs = zeros(dhat, n)
-	# for i in 1:dhat
-	# 	b = reshape(bs[i,:], n)
-	# 	b = b - mean(b)
-	# 	xs[i,:] = f(b)
-	# end
-
 	# let's compute xhat[i] = xs * unitVec(i)
-	# xhat = zeros(n, dhat)
-	xhat = zeros(n, m)
+	xhat = zeros(n, dhat)
 	for i in 1:n
 		unitVec = zeros(n)
 		unitVec[i] = 1
