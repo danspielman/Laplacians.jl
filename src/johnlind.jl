@@ -8,7 +8,7 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64)
 	m = length(a.nzval)
 	dhat = ceil(Int64, 24 * log(m) / eps^2)
 
-	println("dhat = ", dhat)
+	# println("dhat = ", dhat)
 
 	P = ones(dhat, m)
 	for i in 1:dhat
@@ -52,7 +52,7 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64)
 	# be L+ be = be L+ L L+ be = be L+ B' W B L+ be
 
 	# check if B * W * B' - L = 0
-	println("the diff is: ", maximum(B' * W * B / 2 - lap(a)))
+	# println("the diff is: ", maximum(B' * W * B / 2 - lap(a)))
 
 	# P * W^(1/2) * B. Solve for each line. dims are dhat x n
 	bs = P * sqrt(W) * B / sqrt(2)
@@ -76,7 +76,7 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64)
 		xhat[i,:] = xs * unitVec
 	end
 
-	println(size(xhat))
+	# println(size(xhat))
 
 	# compute the effective resistance
 	reff = copy(a)

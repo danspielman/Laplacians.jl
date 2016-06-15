@@ -1,33 +1,23 @@
 # Rasmus' linear system sovler. 
 
-#=
-    Some historically good parameters:
-    k in [1/4, 1/2]
-    sampConst in [0.001, 0.03]
-    beta in [30,200]
-=#
-
 using Laplacians
 
 include("johnlind.jl")
 include("fastSampler.jl")
-include("linkedListStorage.jl")
+include("linkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
-                                eps::Float64 = 0.5, sampConst::Float64 = 0.02, k::Float64 = 0.5, beta::Float64 = 100.0)
+                                eps::Float64 = 0.5, sampConst::Float64 = 0.02)
 
     n = a.n
 
-    F,_,_,_,ord,_ = buildSolver(a, eps = eps, sampConst = sampConst, k = k, beta = beta)
+    F,_,_,_,_ = buildSolver(a, eps = eps, sampConst = sampConst)
 
-    invperm = collect(1:n)
-    sort!(invperm, by=x->ord[x])
-
-    la = lap(a[ord,ord])
+    la = lap(a)
     function f(b)
-        ret = pcg(la, b[ord], F, tol=tol, maxits=maxits, verbose=true)
-        return ret[invperm]
+        ret = pcg(la, b, F, tol=tol, maxits=maxits, verbose=true)
+        return ret
     end
     
     return f
@@ -38,8 +28,7 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
     return eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
 end
 
-function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                            eps::Tv = 0.5, sampConst::Tv = 0.02, k::Tv = 0.5, beta::Tv = 100.0,
+function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Tv = 0.5, sampConst::Tv = 0.02,
                             returnCN::Bool = false)
 
     n = a.n;
@@ -48,11 +37,23 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     println("rho = ", rho)
 
     # Compute the leverage scores using Johnson-Lindenstrauss
-    reff = johnlind()
+
+    tic()
+    reff = johnlind(a, 0.2)
+    print("Johnson-Lindenstrauss takes ")
+    toc()
+
+    lev = copy(a)
+    for i in 1:length(lev.nzval)
+        lev.nzval[i] = a.nzval[i] * reff.nzval[i]
+    end
+    println("leverage score sum = ", sum(lev.nzval))
 
     # Get u and d such that u d u' = -a (doesn't affect solver)
     U,d = samplingLDL(a, lev, rho)
     Ut = U'
+
+    # println(full(U.data))
 
     # Create the solver function
     f = function(b::Array{Float64,1})
@@ -113,9 +114,9 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     gOp = SqLinOp(true,1.0,n,g)
 
     if returnCN
-        return f,gOp,U,d,ord,computeCN(lap(a2),U,Ut,d),(meanStretch,maxStretch)
+        return f,gOp,U,d,computeCN(lap(a),U,Ut,d)
     else
-        return f,gOp,U,d,ord,(0.0, 0.0), (0.0, 0.0)
+        return f,gOp,U,d,(0.0, 0.0)
     end
 end
 
@@ -204,7 +205,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Ti,Ti}, rho::Ti)
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Tv,Ti}, rho::Ti)
     n = a.n
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
@@ -212,10 +213,10 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Ti,T
     # some extra memory to be used later in the algorithm. this can be later pulled out of this function
     # into an external recipient, to be used on subsequent runs of the solver
     auxVal = zeros(Tv, n)                       # used to sum weights from multiedges
-    auxMult = zeros(Ti, n)                      # used to counte the number of multiedges
+    auxMult = zeros(Tv, n)                      # used to count the number of multiedges
 
     wNeigh = zeros(Tv, n)
-    multNeigh = zeros(Ti, n)
+    multNeigh = zeros(Tv, n)
     indNeigh = zeros(Ti, n)
     
     u = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
@@ -226,7 +227,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Ti,T
     # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
 
     # compute the sum of leverage scores
-    neigh = llsInit(a, sum(lev))
+    neigh = llsInit(a, ceil(Int64, sum(min(lev.nzval * rho, rho)) + n))
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
@@ -235,7 +236,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Ti,T
         for j in a.colptr[i]:a.colptr[i + 1] - 1
             if a.rowval[j] > i
                 # set the value min between rho and the stretch
-                llsAdd(neigh, i, (a.nzval[j], min(rho, lev.nzval[j]), a.rowval[j]))
+                llsAdd(neigh, i, (a.nzval[j], min(rho, lev.nzval[j] * rho), a.rowval[j]))
             end
         end
     end
@@ -258,22 +259,12 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Ti,T
         push!(u[i], (1, i)) #diag term
         d[i] = wSum
 
-        # wSamp = sampler(wNeigh)
-        # multSamp = sampler(convert(Array{Tv,1}, multNeigh))
-        
-        # jSamples = sampleMany(wSamp, multSum)
-        # kSamples = sampleMany(multSamp, multSum)
-
+        multSum = ceil(Int64, multSum)
         wSamp = sampler(wNeigh[1:numPurged])
+        multSamp = sampler(multNeigh[1:numPurged])
+        
         jSamples = sampleMany(wSamp, multSum)
-
-        kSamples = Ti[]
-        ind = 0
-        for j in 1:numPurged
-            for k in 1:multNeigh[j]
-                push!(kSamples, j)
-            end
-        end
+        kSamples = sampleMany(multSamp, multSum)
         
         # now propagate the clique to the neighbors of i
         for l in 1:multSum
@@ -299,7 +290,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Ti,T
                 sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
                 
                 # push!(neigh[posj], (wj * wk / sampScaling, 1, posk))
-                llsAdd(neigh, posj, (wj * wk / sampScaling, 1, posk))
+                llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
             end
         end  
     end
