@@ -199,3 +199,4 @@ function testAKPW(startingDim, iterationSize, numIterations; kindVar=:max, rando
   
 end #testAKPW
 
+include("testPCG.jl")
