@@ -15,7 +15,8 @@ include("linkedListStorage.jl")
 include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
-                                eps::Float64 = 0.5, sampConst::Float64 = 0.02, k::Float64 = 0.5, beta::Float64 = 100.0)
+                                eps::Float64 = 0.5, sampConst::Float64 = 0.02, k::Float64 = 0.5, beta::Float64 = 100.0,
+                                verbose=false)
 
     n = a.n
 
@@ -26,7 +27,7 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, max
 
     la = lap(a[ord,ord])
     function f(b)
-        ret = pcg(la, b[ord], F, tol=tol, maxits=maxits, verbose=true)
+        ret = pcg(la, b[ord], F, tol=tol, maxits=maxits, verbose=verbose)
         return ret[invperm]
     end
     

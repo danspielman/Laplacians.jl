@@ -8,11 +8,11 @@ include("linkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
-                                eps::Float64 = 0.5, sampConst::Float64 = 0.02)
+                                eps::Float64 = 0.5, sampConst::Float64 = 0.02, JLeps = 0.5, resetMultCounts::Bool = true)
 
     n = a.n
 
-    F,_,_,_,_ = buildSolver(a, eps = eps, sampConst = sampConst)
+    F,_,_,_,_ = buildSolver(a, eps = eps, sampConst = sampConst, JLeps = JLeps)
 
     la = lap(a)
     function f(b)
@@ -29,28 +29,20 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
 end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Tv = 0.5, sampConst::Tv = 0.02,
-                            returnCN::Bool = false)
+                            returnCN::Bool = false, JLeps::Tv = 0.5, resetMultCounts::Bool = true)
 
     n = a.n;
-    rho = ceil(Ti, sampConst * log(n) ^ 2 / eps ^ 2)
-
+    rho = sampConst * log(n) ^ 2 / eps ^ 2
     println("rho = ", rho)
 
     # Compute the leverage scores using Johnson-Lindenstrauss
-
     tic()
-    reff = johnlind(a, 0.2)
+    xhat = johnlind(a, JLeps, retXhat = true)
     print("Johnson-Lindenstrauss takes ")
     toc()
 
-    lev = copy(a)
-    for i in 1:length(lev.nzval)
-        lev.nzval[i] = a.nzval[i] * reff.nzval[i]
-    end
-    println("leverage score sum = ", sum(lev.nzval))
-
     # Get u and d such that u d u' = -a (doesn't affect solver)
-    U,d = samplingLDL(a, lev, rho)
+    U,d = samplingLDL(a, xhat, rho, resetMultCounts)
     Ut = U'
 
     # println(full(U.data))
@@ -205,7 +197,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Tv,Ti}, rho::Ti)
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, xhat::Array{Tv,2}, rho::Tv, resetMultCounts::Bool)
     n = a.n
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
@@ -226,22 +218,32 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Tv,T
     # note neigh[i] only stores neighbors j such that j > i
     # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
 
-    # compute the sum of leverage scores
-    neigh = llsInit(a, ceil(Int64, sum(min(lev.nzval * rho, rho)) + n))
+    # construct and initialize the linked list structure
+    neigh = llsInit(a, ceil(Int64, rho * n + n))
+
+    totalLev = 0
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
-        # push!(neigh, Tuple{Tv,Ti,Ti}[])
 
         for j in a.colptr[i]:a.colptr[i + 1] - 1
             if a.rowval[j] > i
+                p = a.rowval[j]
+                q = i
+                lev = a.nzval[j] * norm(xhat[p,:] - xhat[q,:])^2
+
+                totalLev += lev
+
                 # set the value min between rho and the stretch
-                llsAdd(neigh, i, (a.nzval[j], min(rho, lev.nzval[j] * rho), a.rowval[j]))
+                llsAdd(neigh, i, (a.nzval[j], min(rho, lev * rho), a.rowval[j]))
             end
         end
     end
 
+    println("Total leverage = ", totalLev)
+
     # Now, for every i, we will compute the i'th column in U
+    lastOpt = n
     for i in 1:(n - 1)
         # We will get rid of duplicate edges
         # wSum - sum of weights of edges
@@ -250,7 +252,18 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, lev::SparseMatrixCSC{Tv,T
         # wNeigh - list of weights correspongind to each neighbors
         # multNeigh - list of number of multiedges to each neighbor
         # indNeigh - the indices of the neighboring vertices
-        wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh)
+
+        wSum = 0
+        multSum = 0
+        numPurged = 0
+
+        if lastOpt / 2 > i || resetMultCounts == false
+            wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh)
+        else
+            lastOpt = i
+            wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh, 
+                                                capEdge = true, rho = rho, xhat = xhat)
+        end
 
         # need to divide weights by the diagonal entry
         for j in 1:numPurged

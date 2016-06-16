@@ -77,7 +77,7 @@ end
 
 
 function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{Tv,1}, auxMult::Array{Tv,1},
-	weight::Array{Tv,1}, mult::Array{Tv,1}, ind::Array{Ti,1})
+	weight::Array{Tv,1}, mult::Array{Tv,1}, ind::Array{Ti,1}; capEdge::Bool=false, rho::Tv=0.0, xhat::Array{Tv,2}=zeros(1,1))
 
  	multSum::Tv = 0
  	diag::Tv = 0
@@ -106,8 +106,17 @@ function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{T
             if neigh == pos
                 @assert(false, "current element = neigh in purge")
             else
-                # TODO: we want to cap the number of multiedges
+            	# this is an edge between pos and neigh. if capEdge is true, we will use the effective resistance estimates to cap this edge
                 actualMult = auxMult[neigh]
+
+                if capEdge
+                	p = pos
+                	q = neigh
+                	w = auxVal[neigh]
+                	lev = w * norm(xhat[p,:] - xhat[q,:])^2
+
+                	actualMult = min(actualMult, rho * lev)
+                end
 
                 numPurged += 1
                 weight[numPurged] = auxVal[neigh]

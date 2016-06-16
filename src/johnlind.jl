@@ -1,14 +1,12 @@
 # Implements the Johnson-Lindenstauss resistance upperbounding
 # TODO: not optimized for speed - let's see how resistance estimates improve the number of nonzeros at the end
 
-function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64)
+function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64; retXhat::Bool = false)
 
 	n = a.n
 	# m = ceil(Int64, length(a.nzval) / 2)
 	m = length(a.nzval)
-	dhat = ceil(Int64, 24 * log(m) / eps^2)
-
-	# println("dhat = ", dhat)
+	dhat = ceil(Int64, 4 * log(m) / eps^2)
 
 	P = ones(dhat, m)
 	for i in 1:dhat
@@ -21,12 +19,12 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64)
 	# we want ||P * x|| = ||x||
 	P = P / sqrt(dhat)
 
-	# compute W, B
-	W = speye(m,m) * 0
-	B = speye(m,n) * 0
+	# compute B
+	U = Ti[]
+	V = Ti[]
+	W = Tv[]
 
 	pos = 1
-	ind = 0
 	for i in 1:length(a.nzval)
 		while a.colptr[pos + 1] <= i
 			pos = pos + 1
@@ -34,7 +32,7 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64)
 
 		p = a.rowval[i]
 		q = pos
-		w = a.nzval[i]
+		w = sqrt(a.nzval[i])
 
 		if p > q
 			aux = p
@@ -42,41 +40,35 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64)
 			q = aux
 		end
 
-		ind = ind + 1
+		# multiply B by W
+		push!(U, i)
+		push!(V, p)
+		push!(W, w)
 
-		W[ind,ind] = w
-		B[ind,p] = 1
-		B[ind,q] = -1
+		push!(U, i)
+		push!(V, q)
+		push!(W, -w)
 	end
 
-	# be L+ be = be L+ L L+ be = be L+ B' W B L+ be
+	B = sparse(U, V, W)
 
-	# check if B * W * B' - L = 0
-	# println("the diff is: ", maximum(B' * W * B / 2 - lap(a)))
-
-	# P * W^(1/2) * B. Solve for each line. dims are dhat x n
-	bs = P * sqrt(W) * B / sqrt(2)
+	# Get bs = P * W^(1/2) * B. We already multiplied W by B. Solve for each line. dims are dhat x n
+	bs = P * B / sqrt(2)
 
 	la = lap(a)
 	f = lapWrapSolver(augTreeSolver,la,tol=1e-6,maxits=1000)
 
-	xs = zeros(dhat, n)
+	# xhat = P * W^(1/2) * B * L ^-1 * ei
+	xhat = zeros(n, dhat)
 	for i in 1:dhat
 		b = reshape(bs[i,:], n)
 		b = b - mean(b)
-		xs[i,:] = f(b)
+		xhat[:,i] = f(b)
 	end
 
-	# let's compute xhat[i] = xs * unitVec(i)
-	xhat = zeros(n, dhat)
-	for i in 1:n
-		unitVec = zeros(n)
-		unitVec[i] = 1
-
-		xhat[i,:] = xs * unitVec
+	if retXhat
+		return xhat
 	end
-
-	# println(size(xhat))
 
 	# compute the effective resistance
 	reff = copy(a)
