@@ -128,8 +128,8 @@ and exports the functions for which it seems appropriate.
 
   include("pcg.jl")
 
-  export cg
-  export pcg
+  export cg, cgSolver
+  export pcg, pcgSolver, pcgLapSolver
 
   include("flow.jl")
 

@@ -19,7 +19,7 @@ function cg end
 
 """
 `pcg(mat, b, pre; tol, maxits, maxtime, verbose)` solves a symmetric linear system using preconditioner `pre`.
-`pre` should be a function
+`pre` can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact.
 `tol` is set to 1e-6 by default,
 `maxits` defaults to Inf
 `maxtime` defaults to Inf.  It measures seconds.
@@ -39,18 +39,50 @@ function cg(mat, b; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=true)
     cgSlow(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
 
+"""Create a solver that uses cg to solve systems in mat.  Fix the default parameters of the solver as given"""
+function cgSolver(mat; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+    f(b; tol::Real=1e-6, maxits=maxits, maxtime=maxtime, verbose=verbose) = cg(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+end
+    
 
-function pcg(mat, b::Array{Float64,1}, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+
+function pcg(mat, b, pre::Union{AbstractArray,Matrix}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+    fact = cholfact(pre)
+    F = x->(fact \ x)
+    pcg(mat, b, F; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+end
+
+
+function pcg(mat, b::Array{Float64,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
     pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
 
-function pcg(mat, b::Array{Float32,1}, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+function pcg(mat, b::Array{Float32,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
     pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
 
-function pcg(mat, b, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+
+
+function pcg(mat, b, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
     pcgSlow(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
+
+
+"""Create a solver that uses pcg to solve systems in mat.  Fix the default parameters of the solver as given"""
+function pcgSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+    f(b; tol::Real=1e-6, maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+
+end
+
+"""Create a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given"""
+function pcgLapSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+    fact = lapChol(pre)
+    f(b; tol::Real=1e-6, maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(mat, b, fact, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+
+end
+
+
+
 
 
 # uses BLAS.  As fast as Matlab's pcg.
