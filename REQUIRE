@@ -1,3 +1,4 @@
 julia 0.4
-PyPlot
+PyCall 1.5
+PyPlot 2.2
 DataStructures
