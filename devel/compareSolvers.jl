@@ -1,13 +1,13 @@
 
 
-function compareSolversOut(n, nruns)
+function compareSolversOut(n, nruns; maxtime=Inf)
 
     t1 = time()
 
     # first, force a compile
-    tab = compareSolvers(10000,2)
+    tab = compareSolvers(1000,2)
 
-    tab = compareSolvers(n, nruns)
+    tab = compareSolvers(n, nruns, maxtime=maxtime)
     fn = string("compSolvers", n , "x", nruns, ".csv")
     writecsv(fn,tab)
 
@@ -16,7 +16,7 @@ function compareSolversOut(n, nruns)
 end
 
 
-function compareSolvers(n, nruns)
+function compareSolvers(n, nruns; maxtime=Inf)
 
     akpwBuild = Array(Float64,nruns)
     akpwSolve = Array(Float64,nruns)
@@ -46,7 +46,7 @@ function compareSolvers(n, nruns)
         akpwBuild[i] = t
         
         tic()
-        x = f(b)
+        x = f(b, maxtime=maxtime)
         t = toq()
         akpwSolve[i] = t
         
@@ -56,7 +56,7 @@ function compareSolvers(n, nruns)
         primBuild[i] = t
         
         tic()
-        x = f(b)
+        x = f(b, maxtime=maxtime)
         t = toq()
         primSolve[i] = t
         
@@ -66,7 +66,7 @@ function compareSolvers(n, nruns)
         augBuild[i] = t
         
         tic()
-        x = f(b)
+        x = f(b, maxtime=maxtime)
         t = toq()
         augSolve[i] = t
         
@@ -99,9 +99,9 @@ function compareSolvers(n, nruns)
 end
 
 
-function treeSolver(a,treeAlg)
+function treeSolver(a,treeAlg;maxtime=Inf)
     t = treeAlg(a)
     la = lap(a)
     lt = lap(t)
-    f = pcgLapSolver(la,lt)
+    f = pcgLapSolver(la,lt;maxtime=maxtime)
 end
