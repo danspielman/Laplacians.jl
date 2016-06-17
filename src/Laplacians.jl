@@ -31,7 +31,8 @@ and exports the functions for which it seems appropriate.
   using DataStructures
 
   #  ENV["PYTHON"]=""
-  #  Pkg.build("PyCall")
+#  Pkg.build("PyCall")
+  using PyCall
   using PyPlot
 
   include("graphUtils.jl")
