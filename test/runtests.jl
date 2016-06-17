@@ -19,6 +19,11 @@ function testSolvers(a)
     b = randn(n)
     b = b - mean(b)
 
+    t = akpw(a)
+    lt = lap(t)
+    f = pcgLapSolver(la,lt)
+    err = err + norm(la*f(b) - b)
+
     f = augTreeLapSolver(la,tol=.0001,maxits=1000)
     
     err = err + norm(la*f(b)-b)
@@ -199,3 +204,4 @@ function testAKPW(startingDim, iterationSize, numIterations; kindVar=:max, rando
   
 end #testAKPW
 
+include("testPCG.jl")

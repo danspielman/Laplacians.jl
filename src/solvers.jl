@@ -308,11 +308,11 @@ function augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 end
 
 """This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians."""
-function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, treeAlg=akpw)
+function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, maxtime=Inf, verbose=false, treeAlg=akpw)
 
   F = augTreeLapPrecon(ddmat, treeAlg=treeAlg)
 
-  f(b) = pcg(ddmat, b, F, tol=tol, maxits=maxits)
+  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
     
   return f
 
