@@ -30,9 +30,10 @@ and exports the functions for which it seems appropriate.
 
   using DataStructures
 
-  #  ENV["PYTHON"]=""
+  ENV["PYTHON"]=""
 #  Pkg.build("PyCall")
-  using PyCall
+using PyCall
+  
   using PyPlot
 
   include("graphUtils.jl")
