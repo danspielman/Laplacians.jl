@@ -216,992 +216,1027 @@
             "title": "Integration with other packages."
         }, 
         {
-            "location": "/wholeAPI/index.html", 
+            "location": "/API/wholeAPI/index.html", 
             "text": "ErdosRenyi\n\n\nGenerate a random graph on n vertices with m edges. The actual number of edges will probably be smaller, as we sample with replacement\n\n\nErdosRenyi(n::Integer, m::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:337\n\n\nErdosRenyiCluster\n\n\nGenerate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.\n\n\nErdosRenyiCluster(n::Integer, k::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:351\n\n\nErdosRenyiClusterFix\n\n\nLike an Erdos-Renyi cluster, but add back a tree so it has n vertices\n\n\nErdosRenyiClusterFix(n::Integer, k::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:364\n\n\nLaplacians\n\n\nA package for graph computations related to graph Laplacians\n\n\nGraphs are represented by sparse adjacency matrices, etc.\n\n\nRootedTree\n\n\nSummary:\n\n\ntype Laplacians.RootedTree{Tval,Tind} \n: Any\n\n\n\n\nFields:\n\n\nroot     :: Tind\nparent   :: Array{Tind,1}\nchildren :: Array{Tind,1}\nweights  :: Array{Tval,1}\nnumKids  :: Array{Tind,1}\nkidsPtr  :: Array{Tind,1}\n\n\n\n\nakpw\n\n\nComputes a low stretch spanning tree of \ngraph\n, and returns it as a graph. The default version is 0.  In event of emergency, one can try \nver=2\n.  It is usually slower, but might have slightly better stretch.\n\n\nakpw(graph)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/akpw.jl:316\n\n\nakpwU\n\n\nComputes a low stretch spanning tree of an unweighted \ngraph\n, and returns it as a graph.\n\n\nakpwU(graph)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/akpw.jl:166\n\n\napr\n\n\nComputes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes\n\n\napr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/localClustering.jl:440\n\n\naugTreeLapPrecon\n\n\nA version of augTreePrecon specialized for Laplacians\n\n\naugTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:291\n\n\naugTreeLapSolver\n\n\nThis is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.\n\n\naugTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:313\n\n\naugTreePrecon\n\n\nThis is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.\n\n\naugTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:258\n\n\naugTreeSolver\n\n\nThis is the solver that calls augTreePrecon\n\n\naugTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:280\n\n\naugmentTree\n\n\nTakes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch\n\n\naugmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:208\n\n\nbackIndices\n\n\nSame as the above, but now the graph is in adjacency list form \n\n\nComputes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph \n\n\nbackIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})\nbackIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:62\n\n\nbiggestComp\n\n\nReturn the biggest component in a graph, as a graph\n\n\nbiggestComp(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:159\n\n\ncg\n\n\ncg(mat, b; tol, maxits, maxtime, verbose)\n solves a symmetric linear system. \ntol\n is set to 1e-6 by default, \nmaxits\n defaults to Inf \nmaxtime\n defaults to Inf.  It measures seconds. \nverbose\n defaults to false\n\n\ncg(mat, b::Array{Float64,1})\ncg(mat, b::Array{Float32,1})\ncg(mat, b)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:45\n\n\ncgSolver\n\n\ncgSolver(mat; tol, maxits, maxtime, verbose)\n creates a solver for a PSD system \nmat\n. The parameters are as described in cg.\n\n\ncgSolver(mat)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:57\n\n\nchimera\n\n\nBuilds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.\n\n\nBuilds a chimeric graph on n vertices. The components come from pureRandomGraph, connected by joinGraphs, productGraph and generalizedNecklace\n\n\nchimera(n::Integer)\nchimera(n::Integer, k::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:515\n\n\ncompConductance\n\n\nReturns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)\n\n\ncompConductance{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:163\n\n\ncompDepth\n\n\ncompDepth{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:311\n\n\ncompStretches\n\n\nCompute the stretched of every edge in \nmat\n with respect to the tree \ntree\n. Returns the answer as a sparse matrix with the same nonzero structure as \nmat\n. Assumes that \nmat\n is symmetric. \ntree\n should be the adjacency matrix of a spanning tree.\n\n\ncompStretches{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})\ncompStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:393\n\n\ncompleteBinaryTree\n\n\nThe complete binary tree on n vertices\n\n\ncompleteBinaryTree(n::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:139\n\n\ncompleteGraph\n\n\nThe complete graph\n\n\ncompleteGraph(n::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:17\n\n\ncomponents\n\n\nComputes the connected components of a graph. Returns them as a vector of length equal to the number of vertices. The vector numbers the components from 1 through the maximum number. For example,\n\n\ngr = ErdosRenyi(10,11)\nc = components(gr)\n\n10-element Array{Int64,1}:\n 1\n 1\n 1\n 1\n 2\n 1\n 1\n 1\n 3\n 2\n\n\n\n\ncomponents{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:65\n\n\ndeg\n\n\ndeg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:11\n\n\ndiagmat\n\n\nReturns the diagonal matrix(as a sparse matrix) of a graph\n\n\ndiagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:212\n\n\ndirEdgeVertexMat\n\n\nThe signed edge-vertex adjacency matrix\n\n\ndirEdgeVertexMat(A::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/toposort.jl:49\n\n\ndisjoin\n\n\nCreate a disjoint union of graphs a and b,   with no edges between them.\n\n\ndisjoin(a, b)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:130\n\n\ndumb\n\n\nModify a cluster by passing through all the vertices exactly once and \nadding/removing them based on the value of (Deg_external - Deg_Internal).\n\n\n\n\ndumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/cutHeuristics.jl:106\n\n\nedgeVertexMat\n\n\nThe signed edge-vertex adjacency matrix\n\n\nedgeVertexMat(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:67\n\n\nfindEntries\n\n\nSimilar to findnz, but also returns 0 entries that have an edge in the sparse matrix \n\n\nfindEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:141\n\n\nflipIndex\n\n\nFor a symmetric matrix, this gives the correspondance between pairs of entries in an ijv. So, ai[ind] = aj[flip[ind]].  For example, \n\n\n(ai,aj,av) = findnz(a);\nfl = flipIndex(a)\nind = 10\n@show backind = fl[10]\n@show [ai[ind], aj[ind], av[ind]]\n@show [ai[backind], aj[backind], av[backind]];\n\nbackind = fl[10] = 4\n[ai[ind],aj[ind],av[ind]] = [2.0,4.0,0.7]\n[ai[backind],aj[backind],av[backind]] = [4.0,2.0,0.7]\n\n\n\n\nflipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:51\n\n\nfloatGraph\n\n\nConvert the nonzero entries in a graph to Float64\n\n\nfloatGraph(a::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:6\n\n\ngeneralizedNecklace\n\n\nConstructs a generalized necklace graph starting with two graphs A and H. The resulting new graph will be constructed by expanding each vertex in H to an instance of A. k random edges will be generated between components. Thus, the resulting graph may have weighted edges.\n\n\ngeneralizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti\n:Integer}, k::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:232\n\n\ngeneralizedRing\n\n\nA generalization of a ring graph. The vertices are integers modulo n. Two are connected if their difference is in gens. For example, \n\n\ngeneralizedRing(17, [1 5])\n\n\n\n\ngeneralizedRing(n::Int64, gens)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:38\n\n\ngetObound\n\n\nComputes the number of edges leaving s \n\n\ngetObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:194\n\n\ngetVolume\n\n\nComputes the volume of subset s in an unweighted graph G \n\n\ngetVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:176\n\n\ngrid2\n\n\nAn n-by-m grid graph.  iostropy is the weighting on edges in one direction.\n\n\ngrid2(n::Int64)\ngrid2(n::Int64, m::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:159\n\n\ngrid2coords\n\n\nCoordinates for plotting the vertices of the n-by-m grid graph\n\n\ngrid2coords(n::Int64, m::Int64)\ngrid2coords(n)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:163\n\n\ngrownGraph\n\n\nCreate a graph on n vertices. For each vertex, give it k edges to randomly chosen prior vertices. This is a variety of a preferential attachment graph.    \n\n\ngrownGraph(n::Int64, k::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:202\n\n\ngrownGraphD\n\n\nLike a grownGraph, but it forces the edges to all be distinct. It starts out with a k+1 clique on the first k vertices\n\n\ngrownGraphD(n::Int64, k::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:234\n\n\nhyperCube\n\n\nThe d dimensional hypercube.  Has 2^d vertices\n\n\nhyperCube(d::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:125\n\n\nisConnected\n\n\nReturns true if graph is connected.  Calls components.\n\n\nisConnected(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:113\n\n\njoinGraphs\n\n\nCreate a disjoint union of graphs a and b,  and then put k random edges between them\n\n\njoinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:111\n\n\nkruskal\n\n\nUses Kruskal's algorithm to compute a minimum (or maximum) spanning tree. Set kind=:max if you want the max spanning tree. It returns it a a graph\n\n\nkruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:407\n\n\nlap\n\n\nCreate a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry\n\n\nlap(a)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:12\n\n\nlapChol\n\n\nlapWrapSolver\n\n\nTakes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here\n\n\nlapWrapSolver(solver)\nlapWrapSolver(solver, la::AbstractArray{T,N})\nlapWrapSolver(solver, la::AbstractArray{T,N}, b)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:178\n\n\nlocalImprove\n\n\nlocalImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)\n\n\nThe LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.\n\n\nSmall discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.\n\n\n\n\nG is the given graph, A is the initial set \n\n\nepsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA)\n\n\nerr is the numerical error considered throughout the algorithm. It's defaulted to 1e-10\n\n\nmaxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|\n\n\n\n\nlocalImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/localClustering.jl:22\n\n\nmapweight\n\n\nCreate a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write\n\n\nb = mapweight(a, x-\nrand(1)[1])\n\n\n\n\nmapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:40\n\n\nmatToTree\n\n\nmatToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\nmatToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:32\n\n\nmatToTreeDepth\n\n\nmatToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\nmatToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:98\n\n\nmaxflow\n\n\nimplementation of Dinic's algorithm. computes the maximum flow and min-cut in G between s and t    we consider the adjacency matrix to be the capacity matrix \n\n\nmaxflow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Int64, t::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/flow.jl:7\n\n\nnbri\n\n\nnbri{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:12\n\n\nnbrs\n\n\nnbrs{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:14\n\n\npathFromParents\n\n\npathFromParents(parents, y)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:215\n\n\npathGraph\n\n\nThe path graph on n vertices\n\n\npathGraph(n::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:8\n\n\npcg\n\n\npcg(mat, b, pre; tol, maxits, maxtime, verbose)\n solves a symmetric linear system using preconditioner \npre\n. \npre\n can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact. \ntol\n is set to 1e-6 by default, \nmaxits\n defaults to Inf \nmaxtime\n defaults to Inf.  It measures seconds. \nverbose\n defaults to false\n\n\npcg(mat, b, pre::AbstractArray{T,N})\npcg(mat, b::Array{Float64,1}, pre::Function)\npcg(mat, b::Array{Float32,1}, pre::Function)\npcg(mat, b, pre::Function)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:63\n\n\npcgLapSolver\n\n\nCreate a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given\n\n\npcgLapSolver(mat, pre)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:91\n\n\npcgSolver\n\n\npcgSolver(mat, pre; tol, maxits, maxtime, verbose)\n creates a solver for a PSD system using preconditioner \npre\n. The parameters are as described in pcg.\n\n\npcgSolver(mat, pre)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:85\n\n\nplotGraph\n\n\nPlots graph gr with coordinates (x,y)\n\n\nplotGraph(gr, x, y)\nplotGraph(gr, x, y, color)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:136\n\n\nprefAttach\n\n\nA preferential attachment graph in which each vertex has k edges to those that come before.  These are chosen with probability p to be from a random vertex, and with probability 1-p to come from the endpoint of a random edge. It begins with a k-clique on the first k+1 vertices.\n\n\nprefAttach(n::Int64, k::Int64, p::Float64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:258\n\n\nprim\n\n\nprim(mat::SparseMatrixCSC; rev=false)\n Compute a minimum spanning tree of the matrix \nmat\n.   If rev is true, computes a maximum spanning tree.\n\n\nprim(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:440\n\n\nprn\n\n\nprn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)\n\n\nThe PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper\n\n\ns is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]\n\n\nphi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality.  b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.\n\n\nprn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/localClustering.jl:374\n\n\nproductGraph\n\n\nThe Cartesian product of two graphs.  When applied to two paths, it gives a grid.\n\n\nproductGraph(a0::SparseMatrixCSC{Tv,Ti\n:Integer}, a1::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:58\n\n\npureRandomGraph\n\n\nGenerate a random graph with n vertices from one of our natural distributions\n\n\npureRandomGraph(n::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:379\n\n\nrandGenRing\n\n\nA random generalized ring graph of degree k. Gens always contains 1, and the other k-1 edge types are chosen from an exponential distribution\n\n\nrandGenRing(n::Int64, k::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:62\n\n\nrandMatching\n\n\nA random matching on n vertices\n\n\nrandMatching(n::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:174\n\n\nrandRegular\n\n\nA sum of k random matchings on n vertices\n\n\nrandRegular(n::Int64, k::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:187\n\n\nrandWeight\n\n\nApplies one of a number of random weighting schemes to the edges of the graph\n\n\nrandWeight(a)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:535\n\n\nrandishKruskal\n\n\nA heuristic for computing low-stretch spanning trees.  Where Kruskal's MST algorithm adds edges in order of weight, this algorithm adds them at random with probability proportional to their weight.\n\n\nrandishKruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/randTrees.jl:11\n\n\nrandishPrim\n\n\nA heuristic for computing low-stretch spanning trees.  Where Prim's MST algorithm grows a cluster by always adding the edge on the boundary of maximum weight, this algorithm adds a boundary edge with probability proportional to its weight.\n\n\nrandishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/randTrees.jl:40\n\n\nrandperm\n\n\n..  randperm([rng,] n)\n\nConstruct a random permutation of length ``n``. The optional ``rng`` argument\nspecifies a random number generator, see :ref:`Random Numbers \nrandom-numbers\n`.\n\n\n\n\nRandomly permutes the vertex indices\n\n\nrandperm(r::AbstractRNG, n::Integer)\nrandperm(n::Integer)\nrandperm(mat::AbstractArray{T,2})\nrandperm(f::Expr)\n\n\n\n\nat random.jl:1341\n\n\nreadIJ\n\n\nTo read a simple edge list, each line being an (i, j) pair\n\n\nreadIJ(filename::AbstractString)\nreadIJ(filename::AbstractString, sep)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/IO.jl:4\n\n\nreadIJV\n\n\nTo read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this\n\n\n [ai,aj,av] = find(triu(a));\n\n dlmwrite('graph.txt',[ai,aj,av],'precision',9);\n\n\n\n\nreadIJV(filename::AbstractString)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/IO.jl:25\n\n\nrefineCut\n\n\nModify a cluster by adding or removing vertices by picking at each step \nthe vertex that has the maximum value of (Deg_external - Deg_Internal).\nEach vertex can be added in/removed only once.\n\n\n\n\nrefineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/cutHeuristics.jl:9\n\n\nringGraph\n\n\nThe simple ring on n vertices\n\n\nringGraph(n::Int64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:23\n\n\nsemiWtedChimera\n\n\nA Chimera graph with some weights.  The weights just appear when graphs are combined. For more interesting weights, use \nwtedChimera\n\n\nsemiWtedChimera(n::Integer)\nsemiWtedChimera(n::Integer, k::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:442\n\n\nsetValue\n\n\nSets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing \n\n\nsetValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:29\n\n\nshortIntGraph\n\n\nConvert the indices in a graph to 32-bit ints.  This takes less storage, but does not speed up much\n\n\nshortIntGraph(a::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:3\n\n\nshortestPathTree\n\n\nComputes the shortest path tree, and returns it as a sparse matrix. Treats edge weights as reciprocals of lengths. For example:\n\n\na = [0 2 1; 2 0 3; 1 3 0]\ntr = full(shortestPathTree(sparse(a),1))\n\n3x3 Array{Float64,2}:\n 0.0  2.0  0.0\n 2.0  0.0  3.0\n 0.0  3.0  0.0\n\n\n\n\nshortestPathTree(a, start)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:239\n\n\nshortestPaths\n\n\nComputes the lenghts of shortest paths from \nstart\n. Returns both a vector of the lenghts, and the parent array in the shortest path tree.\n\n\nThis algorithm treats edge weights as reciprocals of distances. DOC BETTER\n\n\nshortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)\nshortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:175\n\n\nspectralCoords\n\n\nComputes the spectral coordinates of a graph\n\n\nspectralCoords(a)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:181\n\n\nspectralDrawing\n\n\nComputes spectral coordinates, and then uses plotGraph to draw\n\n\nspectralDrawing(a)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:173\n\n\nsubsampleEdges\n\n\nCreate a new graph from the old, but keeping edge edge with probability \np\n\n\nsubsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:76\n\n\ntarjanStretch\n\n\ntarjanStretch{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, depth::Array{Tv,1})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:334\n\n\ntoUnitVector\n\n\nCreates a unit vector of length n from a given set of integers, with weights based on the number of occurences\n\n\ntoUnitVector(a::Array{Int64,1}, n)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:190\n\n\ntoposort\n\n\ntoposort{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/toposort.jl:13\n\n\ntwoLift\n\n\nCreats a 2-lift of a.  \nflip\n is a boolean indicating which edges cross\n\n\ntwoLift(a)\ntwoLift(a, flip::AbstractArray{Bool,1})\ntwoLift(a, k::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:99\n\n\nuniformWeight\n\n\nPut a uniform [0,1] weight on every edge.  This is an example of how to use mapweight.\n\n\nuniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:49\n\n\nuniformWeight!\n\n\nSet the weight of every edge to 1\n\n\nuniformWeight!(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:53\n\n\nunweight\n\n\nCreate a new graph in that is the same as the original, but with all edge weights 1\n\n\nunweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:16\n\n\nunweight!\n\n\nChange the weight of every edge in a to 1\n\n\nunweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:26\n\n\nvecToComps\n\n\nThis turns a component vector, like that generated by components, into an array of arrays of indices of vertices in each component.  For example,\n\n\ncomps = vecToComps(c)\n\n3-element Array{Array{Int64,1},1}:\n [1,2,3,4,6,7,8]\n [5,10]\n [9]\n\n\n\n\nvecToComps{Ti}(compvec::Array{Ti,1})\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:136\n\n\nwdeg\n\n\nFinds the weighted degree of a vertex in the graph \n\n\nwdeg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:19\n\n\nweighti\n\n\nweighti{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:13\n\n\nwriteIJV\n\n\nWrites the upper portion of a matrix in ijv format, one row for each edge, separated by commas.  Only writes the upper triangular portion. The result can be read from Matlab like this:\n\n\n dl = dlmread('graph.txt');\n\n a = sparse(dl(:,1),dl(:,2),dl(:,3));\n\n n = max(size(a))\n\n a(n,n) = 0;\n\n a = a + a';\n\n\n\n\nwriteIJV(filename::AbstractString, mat)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/IO.jl:52\n\n\nwtedChimera\n\n\nBuilds the kth wted chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.\n\n\nGenerate a chimera, and then apply a random weighting scheme\n\n\nwtedChimera(n::Integer)\nwtedChimera(n::Integer, k::Integer)\n\n\n\n\nat /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:607", 
             "title": "Whole API"
         }, 
         {
-            "location": "/wholeAPI/index.html#erdosrenyi", 
+            "location": "/API/wholeAPI/index.html#erdosrenyi", 
             "text": "Generate a random graph on n vertices with m edges. The actual number of edges will probably be smaller, as we sample with replacement  ErdosRenyi(n::Integer, m::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:337", 
             "title": "ErdosRenyi"
         }, 
         {
-            "location": "/wholeAPI/index.html#erdosrenyicluster", 
+            "location": "/API/wholeAPI/index.html#erdosrenyicluster", 
             "text": "Generate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.  ErdosRenyiCluster(n::Integer, k::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:351", 
             "title": "ErdosRenyiCluster"
         }, 
         {
-            "location": "/wholeAPI/index.html#erdosrenyiclusterfix", 
+            "location": "/API/wholeAPI/index.html#erdosrenyiclusterfix", 
             "text": "Like an Erdos-Renyi cluster, but add back a tree so it has n vertices  ErdosRenyiClusterFix(n::Integer, k::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:364", 
             "title": "ErdosRenyiClusterFix"
         }, 
         {
-            "location": "/wholeAPI/index.html#laplacians", 
+            "location": "/API/wholeAPI/index.html#laplacians", 
             "text": "A package for graph computations related to graph Laplacians  Graphs are represented by sparse adjacency matrices, etc.", 
             "title": "Laplacians"
         }, 
         {
-            "location": "/wholeAPI/index.html#rootedtree", 
+            "location": "/API/wholeAPI/index.html#rootedtree", 
             "text": "Summary:  type Laplacians.RootedTree{Tval,Tind}  : Any  Fields:  root     :: Tind\nparent   :: Array{Tind,1}\nchildren :: Array{Tind,1}\nweights  :: Array{Tval,1}\nnumKids  :: Array{Tind,1}\nkidsPtr  :: Array{Tind,1}", 
             "title": "RootedTree"
         }, 
         {
-            "location": "/wholeAPI/index.html#akpw", 
+            "location": "/API/wholeAPI/index.html#akpw", 
             "text": "Computes a low stretch spanning tree of  graph , and returns it as a graph. The default version is 0.  In event of emergency, one can try  ver=2 .  It is usually slower, but might have slightly better stretch.  akpw(graph)  at /Users/spielman/.julia/v0.4/Laplacians/src/akpw.jl:316", 
             "title": "akpw"
         }, 
         {
-            "location": "/wholeAPI/index.html#akpwu", 
+            "location": "/API/wholeAPI/index.html#akpwu", 
             "text": "Computes a low stretch spanning tree of an unweighted  graph , and returns it as a graph.  akpwU(graph)  at /Users/spielman/.julia/v0.4/Laplacians/src/akpw.jl:166", 
             "title": "akpwU"
         }, 
         {
-            "location": "/wholeAPI/index.html#apr", 
+            "location": "/API/wholeAPI/index.html#apr", 
             "text": "Computes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes  apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)  at /Users/spielman/.julia/v0.4/Laplacians/src/localClustering.jl:440", 
             "title": "apr"
         }, 
         {
-            "location": "/wholeAPI/index.html#augtreelapprecon", 
+            "location": "/API/wholeAPI/index.html#augtreelapprecon", 
             "text": "A version of augTreePrecon specialized for Laplacians  augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:291", 
             "title": "augTreeLapPrecon"
         }, 
         {
-            "location": "/wholeAPI/index.html#augtreelapsolver", 
+            "location": "/API/wholeAPI/index.html#augtreelapsolver", 
             "text": "This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.  augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:313", 
             "title": "augTreeLapSolver"
         }, 
         {
-            "location": "/wholeAPI/index.html#augtreeprecon", 
+            "location": "/API/wholeAPI/index.html#augtreeprecon", 
             "text": "This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.  augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:258", 
             "title": "augTreePrecon"
         }, 
         {
-            "location": "/wholeAPI/index.html#augtreesolver", 
+            "location": "/API/wholeAPI/index.html#augtreesolver", 
             "text": "This is the solver that calls augTreePrecon  augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:280", 
             "title": "augTreeSolver"
         }, 
         {
-            "location": "/wholeAPI/index.html#augmenttree", 
+            "location": "/API/wholeAPI/index.html#augmenttree", 
             "text": "Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch  augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)  at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:208", 
             "title": "augmentTree"
         }, 
         {
-            "location": "/wholeAPI/index.html#backindices", 
+            "location": "/API/wholeAPI/index.html#backindices", 
             "text": "Same as the above, but now the graph is in adjacency list form   Computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph   backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})\nbackIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:62", 
             "title": "backIndices"
         }, 
         {
-            "location": "/wholeAPI/index.html#biggestcomp", 
+            "location": "/API/wholeAPI/index.html#biggestcomp", 
             "text": "Return the biggest component in a graph, as a graph  biggestComp(mat::SparseMatrixCSC{Tv,Ti :Integer})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:159", 
             "title": "biggestComp"
         }, 
         {
-            "location": "/wholeAPI/index.html#cg", 
+            "location": "/API/wholeAPI/index.html#cg", 
             "text": "cg(mat, b; tol, maxits, maxtime, verbose)  solves a symmetric linear system.  tol  is set to 1e-6 by default,  maxits  defaults to Inf  maxtime  defaults to Inf.  It measures seconds.  verbose  defaults to false  cg(mat, b::Array{Float64,1})\ncg(mat, b::Array{Float32,1})\ncg(mat, b)  at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:45", 
             "title": "cg"
         }, 
         {
-            "location": "/wholeAPI/index.html#cgsolver", 
+            "location": "/API/wholeAPI/index.html#cgsolver", 
             "text": "cgSolver(mat; tol, maxits, maxtime, verbose)  creates a solver for a PSD system  mat . The parameters are as described in cg.  cgSolver(mat)  at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:57", 
             "title": "cgSolver"
         }, 
         {
-            "location": "/wholeAPI/index.html#chimera", 
+            "location": "/API/wholeAPI/index.html#chimera", 
             "text": "Builds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.  Builds a chimeric graph on n vertices. The components come from pureRandomGraph, connected by joinGraphs, productGraph and generalizedNecklace  chimera(n::Integer)\nchimera(n::Integer, k::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:515", 
             "title": "chimera"
         }, 
         {
-            "location": "/wholeAPI/index.html#compconductance", 
+            "location": "/API/wholeAPI/index.html#compconductance", 
             "text": "Returns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)  compConductance{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:163", 
             "title": "compConductance"
         }, 
         {
-            "location": "/wholeAPI/index.html#compdepth", 
+            "location": "/API/wholeAPI/index.html#compdepth", 
             "text": "compDepth{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:311", 
             "title": "compDepth"
         }, 
         {
-            "location": "/wholeAPI/index.html#compstretches", 
+            "location": "/API/wholeAPI/index.html#compstretches", 
             "text": "Compute the stretched of every edge in  mat  with respect to the tree  tree . Returns the answer as a sparse matrix with the same nonzero structure as  mat . Assumes that  mat  is symmetric.  tree  should be the adjacency matrix of a spanning tree.  compStretches{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})\ncompStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:393", 
             "title": "compStretches"
         }, 
         {
-            "location": "/wholeAPI/index.html#completebinarytree", 
+            "location": "/API/wholeAPI/index.html#completebinarytree", 
             "text": "The complete binary tree on n vertices  completeBinaryTree(n::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:139", 
             "title": "completeBinaryTree"
         }, 
         {
-            "location": "/wholeAPI/index.html#completegraph", 
+            "location": "/API/wholeAPI/index.html#completegraph", 
             "text": "The complete graph  completeGraph(n::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:17", 
             "title": "completeGraph"
         }, 
         {
-            "location": "/wholeAPI/index.html#components", 
+            "location": "/API/wholeAPI/index.html#components", 
             "text": "Computes the connected components of a graph. Returns them as a vector of length equal to the number of vertices. The vector numbers the components from 1 through the maximum number. For example,  gr = ErdosRenyi(10,11)\nc = components(gr)\n\n10-element Array{Int64,1}:\n 1\n 1\n 1\n 1\n 2\n 1\n 1\n 1\n 3\n 2  components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:65", 
             "title": "components"
         }, 
         {
-            "location": "/wholeAPI/index.html#deg", 
+            "location": "/API/wholeAPI/index.html#deg", 
             "text": "deg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:11", 
             "title": "deg"
         }, 
         {
-            "location": "/wholeAPI/index.html#diagmat", 
+            "location": "/API/wholeAPI/index.html#diagmat", 
             "text": "Returns the diagonal matrix(as a sparse matrix) of a graph  diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:212", 
             "title": "diagmat"
         }, 
         {
-            "location": "/wholeAPI/index.html#diredgevertexmat", 
+            "location": "/API/wholeAPI/index.html#diredgevertexmat", 
             "text": "The signed edge-vertex adjacency matrix  dirEdgeVertexMat(A::SparseMatrixCSC{Tv,Ti :Integer})  at /Users/spielman/.julia/v0.4/Laplacians/src/toposort.jl:49", 
             "title": "dirEdgeVertexMat"
         }, 
         {
-            "location": "/wholeAPI/index.html#disjoin", 
+            "location": "/API/wholeAPI/index.html#disjoin", 
             "text": "Create a disjoint union of graphs a and b,   with no edges between them.  disjoin(a, b)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:130", 
             "title": "disjoin"
         }, 
         {
-            "location": "/wholeAPI/index.html#dumb", 
+            "location": "/API/wholeAPI/index.html#dumb", 
             "text": "Modify a cluster by passing through all the vertices exactly once and \nadding/removing them based on the value of (Deg_external - Deg_Internal).  dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  at /Users/spielman/.julia/v0.4/Laplacians/src/cutHeuristics.jl:106", 
             "title": "dumb"
         }, 
         {
-            "location": "/wholeAPI/index.html#edgevertexmat", 
+            "location": "/API/wholeAPI/index.html#edgevertexmat", 
             "text": "The signed edge-vertex adjacency matrix  edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti :Integer})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:67", 
             "title": "edgeVertexMat"
         }, 
         {
-            "location": "/wholeAPI/index.html#findentries", 
+            "location": "/API/wholeAPI/index.html#findentries", 
             "text": "Similar to findnz, but also returns 0 entries that have an edge in the sparse matrix   findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:141", 
             "title": "findEntries"
         }, 
         {
-            "location": "/wholeAPI/index.html#flipindex", 
+            "location": "/API/wholeAPI/index.html#flipindex", 
             "text": "For a symmetric matrix, this gives the correspondance between pairs of entries in an ijv. So, ai[ind] = aj[flip[ind]].  For example,   (ai,aj,av) = findnz(a);\nfl = flipIndex(a)\nind = 10\n@show backind = fl[10]\n@show [ai[ind], aj[ind], av[ind]]\n@show [ai[backind], aj[backind], av[backind]];\n\nbackind = fl[10] = 4\n[ai[ind],aj[ind],av[ind]] = [2.0,4.0,0.7]\n[ai[backind],aj[backind],av[backind]] = [4.0,2.0,0.7]  flipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:51", 
             "title": "flipIndex"
         }, 
         {
-            "location": "/wholeAPI/index.html#floatgraph", 
+            "location": "/API/wholeAPI/index.html#floatgraph", 
             "text": "Convert the nonzero entries in a graph to Float64  floatGraph(a::SparseMatrixCSC{Tv,Ti :Integer})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:6", 
             "title": "floatGraph"
         }, 
         {
-            "location": "/wholeAPI/index.html#generalizednecklace", 
+            "location": "/API/wholeAPI/index.html#generalizednecklace", 
             "text": "Constructs a generalized necklace graph starting with two graphs A and H. The resulting new graph will be constructed by expanding each vertex in H to an instance of A. k random edges will be generated between components. Thus, the resulting graph may have weighted edges.  generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti :Integer}, k::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:232", 
             "title": "generalizedNecklace"
         }, 
         {
-            "location": "/wholeAPI/index.html#generalizedring", 
+            "location": "/API/wholeAPI/index.html#generalizedring", 
             "text": "A generalization of a ring graph. The vertices are integers modulo n. Two are connected if their difference is in gens. For example,   generalizedRing(17, [1 5])  generalizedRing(n::Int64, gens)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:38", 
             "title": "generalizedRing"
         }, 
         {
-            "location": "/wholeAPI/index.html#getobound", 
+            "location": "/API/wholeAPI/index.html#getobound", 
             "text": "Computes the number of edges leaving s   getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:194", 
             "title": "getObound"
         }, 
         {
-            "location": "/wholeAPI/index.html#getvolume", 
+            "location": "/API/wholeAPI/index.html#getvolume", 
             "text": "Computes the volume of subset s in an unweighted graph G   getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:176", 
             "title": "getVolume"
         }, 
         {
-            "location": "/wholeAPI/index.html#grid2", 
+            "location": "/API/wholeAPI/index.html#grid2", 
             "text": "An n-by-m grid graph.  iostropy is the weighting on edges in one direction.  grid2(n::Int64)\ngrid2(n::Int64, m::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:159", 
             "title": "grid2"
         }, 
         {
-            "location": "/wholeAPI/index.html#grid2coords", 
+            "location": "/API/wholeAPI/index.html#grid2coords", 
             "text": "Coordinates for plotting the vertices of the n-by-m grid graph  grid2coords(n::Int64, m::Int64)\ngrid2coords(n)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:163", 
             "title": "grid2coords"
         }, 
         {
-            "location": "/wholeAPI/index.html#growngraph", 
+            "location": "/API/wholeAPI/index.html#growngraph", 
             "text": "Create a graph on n vertices. For each vertex, give it k edges to randomly chosen prior vertices. This is a variety of a preferential attachment graph.      grownGraph(n::Int64, k::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:202", 
             "title": "grownGraph"
         }, 
         {
-            "location": "/wholeAPI/index.html#growngraphd", 
+            "location": "/API/wholeAPI/index.html#growngraphd", 
             "text": "Like a grownGraph, but it forces the edges to all be distinct. It starts out with a k+1 clique on the first k vertices  grownGraphD(n::Int64, k::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:234", 
             "title": "grownGraphD"
         }, 
         {
-            "location": "/wholeAPI/index.html#hypercube", 
+            "location": "/API/wholeAPI/index.html#hypercube", 
             "text": "The d dimensional hypercube.  Has 2^d vertices  hyperCube(d::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:125", 
             "title": "hyperCube"
         }, 
         {
-            "location": "/wholeAPI/index.html#isconnected", 
+            "location": "/API/wholeAPI/index.html#isconnected", 
             "text": "Returns true if graph is connected.  Calls components.  isConnected(mat::SparseMatrixCSC{Tv,Ti :Integer})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:113", 
             "title": "isConnected"
         }, 
         {
-            "location": "/wholeAPI/index.html#joingraphs", 
+            "location": "/API/wholeAPI/index.html#joingraphs", 
             "text": "Create a disjoint union of graphs a and b,  and then put k random edges between them  joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:111", 
             "title": "joinGraphs"
         }, 
         {
-            "location": "/wholeAPI/index.html#kruskal", 
+            "location": "/API/wholeAPI/index.html#kruskal", 
             "text": "Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree. Set kind=:max if you want the max spanning tree. It returns it a a graph  kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:407", 
             "title": "kruskal"
         }, 
         {
-            "location": "/wholeAPI/index.html#lap", 
+            "location": "/API/wholeAPI/index.html#lap", 
             "text": "Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry  lap(a)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:12", 
             "title": "lap"
         }, 
         {
-            "location": "/wholeAPI/index.html#lapchol", 
+            "location": "/API/wholeAPI/index.html#lapchol", 
             "text": "", 
             "title": "lapChol"
         }, 
         {
-            "location": "/wholeAPI/index.html#lapwrapsolver", 
+            "location": "/API/wholeAPI/index.html#lapwrapsolver", 
             "text": "Takes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here  lapWrapSolver(solver)\nlapWrapSolver(solver, la::AbstractArray{T,N})\nlapWrapSolver(solver, la::AbstractArray{T,N}, b)  at /Users/spielman/.julia/v0.4/Laplacians/src/solvers.jl:178", 
             "title": "lapWrapSolver"
         }, 
         {
-            "location": "/wholeAPI/index.html#localimprove", 
+            "location": "/API/wholeAPI/index.html#localimprove", 
             "text": "localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)  The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.  Small discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.   G is the given graph, A is the initial set   epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA)  err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10  maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|   localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})  at /Users/spielman/.julia/v0.4/Laplacians/src/localClustering.jl:22", 
             "title": "localImprove"
         }, 
         {
-            "location": "/wholeAPI/index.html#mapweight", 
+            "location": "/API/wholeAPI/index.html#mapweight", 
             "text": "Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write  b = mapweight(a, x- rand(1)[1])  mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:40", 
             "title": "mapweight"
         }, 
         {
-            "location": "/wholeAPI/index.html#mattotree", 
+            "location": "/API/wholeAPI/index.html#mattotree", 
             "text": "matToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\nmatToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)  at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:32", 
             "title": "matToTree"
         }, 
         {
-            "location": "/wholeAPI/index.html#mattotreedepth", 
+            "location": "/API/wholeAPI/index.html#mattotreedepth", 
             "text": "matToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\nmatToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)  at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:98", 
             "title": "matToTreeDepth"
         }, 
         {
-            "location": "/wholeAPI/index.html#maxflow", 
+            "location": "/API/wholeAPI/index.html#maxflow", 
             "text": "implementation of Dinic's algorithm. computes the maximum flow and min-cut in G between s and t    we consider the adjacency matrix to be the capacity matrix   maxflow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Int64, t::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/flow.jl:7", 
             "title": "maxflow"
         }, 
         {
-            "location": "/wholeAPI/index.html#nbri", 
+            "location": "/API/wholeAPI/index.html#nbri", 
             "text": "nbri{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:12", 
             "title": "nbri"
         }, 
         {
-            "location": "/wholeAPI/index.html#nbrs", 
+            "location": "/API/wholeAPI/index.html#nbrs", 
             "text": "nbrs{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:14", 
             "title": "nbrs"
         }, 
         {
-            "location": "/wholeAPI/index.html#pathfromparents", 
+            "location": "/API/wholeAPI/index.html#pathfromparents", 
             "text": "pathFromParents(parents, y)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:215", 
             "title": "pathFromParents"
         }, 
         {
-            "location": "/wholeAPI/index.html#pathgraph", 
+            "location": "/API/wholeAPI/index.html#pathgraph", 
             "text": "The path graph on n vertices  pathGraph(n::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:8", 
             "title": "pathGraph"
         }, 
         {
-            "location": "/wholeAPI/index.html#pcg", 
+            "location": "/API/wholeAPI/index.html#pcg", 
             "text": "pcg(mat, b, pre; tol, maxits, maxtime, verbose)  solves a symmetric linear system using preconditioner  pre .  pre  can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact.  tol  is set to 1e-6 by default,  maxits  defaults to Inf  maxtime  defaults to Inf.  It measures seconds.  verbose  defaults to false  pcg(mat, b, pre::AbstractArray{T,N})\npcg(mat, b::Array{Float64,1}, pre::Function)\npcg(mat, b::Array{Float32,1}, pre::Function)\npcg(mat, b, pre::Function)  at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:63", 
             "title": "pcg"
         }, 
         {
-            "location": "/wholeAPI/index.html#pcglapsolver", 
+            "location": "/API/wholeAPI/index.html#pcglapsolver", 
             "text": "Create a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given  pcgLapSolver(mat, pre)  at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:91", 
             "title": "pcgLapSolver"
         }, 
         {
-            "location": "/wholeAPI/index.html#pcgsolver", 
+            "location": "/API/wholeAPI/index.html#pcgsolver", 
             "text": "pcgSolver(mat, pre; tol, maxits, maxtime, verbose)  creates a solver for a PSD system using preconditioner  pre . The parameters are as described in pcg.  pcgSolver(mat, pre)  at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:85", 
             "title": "pcgSolver"
         }, 
         {
-            "location": "/wholeAPI/index.html#plotgraph", 
+            "location": "/API/wholeAPI/index.html#plotgraph", 
             "text": "Plots graph gr with coordinates (x,y)  plotGraph(gr, x, y)\nplotGraph(gr, x, y, color)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:136", 
             "title": "plotGraph"
         }, 
         {
-            "location": "/wholeAPI/index.html#prefattach", 
+            "location": "/API/wholeAPI/index.html#prefattach", 
             "text": "A preferential attachment graph in which each vertex has k edges to those that come before.  These are chosen with probability p to be from a random vertex, and with probability 1-p to come from the endpoint of a random edge. It begins with a k-clique on the first k+1 vertices.  prefAttach(n::Int64, k::Int64, p::Float64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:258", 
             "title": "prefAttach"
         }, 
         {
-            "location": "/wholeAPI/index.html#prim", 
+            "location": "/API/wholeAPI/index.html#prim", 
             "text": "prim(mat::SparseMatrixCSC; rev=false)  Compute a minimum spanning tree of the matrix  mat .   If rev is true, computes a maximum spanning tree.  prim(mat::SparseMatrixCSC{Tv,Ti :Integer})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:440", 
             "title": "prim"
         }, 
         {
-            "location": "/wholeAPI/index.html#prn", 
+            "location": "/API/wholeAPI/index.html#prn", 
             "text": "prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)  The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper  s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]  phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality.  b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.  prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/localClustering.jl:374", 
             "title": "prn"
         }, 
         {
-            "location": "/wholeAPI/index.html#productgraph", 
+            "location": "/API/wholeAPI/index.html#productgraph", 
             "text": "The Cartesian product of two graphs.  When applied to two paths, it gives a grid.  productGraph(a0::SparseMatrixCSC{Tv,Ti :Integer}, a1::SparseMatrixCSC{Tv,Ti :Integer})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:58", 
             "title": "productGraph"
         }, 
         {
-            "location": "/wholeAPI/index.html#purerandomgraph", 
+            "location": "/API/wholeAPI/index.html#purerandomgraph", 
             "text": "Generate a random graph with n vertices from one of our natural distributions  pureRandomGraph(n::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:379", 
             "title": "pureRandomGraph"
         }, 
         {
-            "location": "/wholeAPI/index.html#randgenring", 
+            "location": "/API/wholeAPI/index.html#randgenring", 
             "text": "A random generalized ring graph of degree k. Gens always contains 1, and the other k-1 edge types are chosen from an exponential distribution  randGenRing(n::Int64, k::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:62", 
             "title": "randGenRing"
         }, 
         {
-            "location": "/wholeAPI/index.html#randmatching", 
+            "location": "/API/wholeAPI/index.html#randmatching", 
             "text": "A random matching on n vertices  randMatching(n::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:174", 
             "title": "randMatching"
         }, 
         {
-            "location": "/wholeAPI/index.html#randregular", 
+            "location": "/API/wholeAPI/index.html#randregular", 
             "text": "A sum of k random matchings on n vertices  randRegular(n::Int64, k::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:187", 
             "title": "randRegular"
         }, 
         {
-            "location": "/wholeAPI/index.html#randweight", 
+            "location": "/API/wholeAPI/index.html#randweight", 
             "text": "Applies one of a number of random weighting schemes to the edges of the graph  randWeight(a)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:535", 
             "title": "randWeight"
         }, 
         {
-            "location": "/wholeAPI/index.html#randishkruskal", 
+            "location": "/API/wholeAPI/index.html#randishkruskal", 
             "text": "A heuristic for computing low-stretch spanning trees.  Where Kruskal's MST algorithm adds edges in order of weight, this algorithm adds them at random with probability proportional to their weight.  randishKruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/randTrees.jl:11", 
             "title": "randishKruskal"
         }, 
         {
-            "location": "/wholeAPI/index.html#randishprim", 
+            "location": "/API/wholeAPI/index.html#randishprim", 
             "text": "A heuristic for computing low-stretch spanning trees.  Where Prim's MST algorithm grows a cluster by always adding the edge on the boundary of maximum weight, this algorithm adds a boundary edge with probability proportional to its weight.  randishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})  at /Users/spielman/.julia/v0.4/Laplacians/src/randTrees.jl:40", 
             "title": "randishPrim"
         }, 
         {
-            "location": "/wholeAPI/index.html#randperm", 
+            "location": "/API/wholeAPI/index.html#randperm", 
             "text": "..  randperm([rng,] n)\n\nConstruct a random permutation of length ``n``. The optional ``rng`` argument\nspecifies a random number generator, see :ref:`Random Numbers  random-numbers `.  Randomly permutes the vertex indices  randperm(r::AbstractRNG, n::Integer)\nrandperm(n::Integer)\nrandperm(mat::AbstractArray{T,2})\nrandperm(f::Expr)  at random.jl:1341", 
             "title": "randperm"
         }, 
         {
-            "location": "/wholeAPI/index.html#readij", 
+            "location": "/API/wholeAPI/index.html#readij", 
             "text": "To read a simple edge list, each line being an (i, j) pair  readIJ(filename::AbstractString)\nreadIJ(filename::AbstractString, sep)  at /Users/spielman/.julia/v0.4/Laplacians/src/IO.jl:4", 
             "title": "readIJ"
         }, 
         {
-            "location": "/wholeAPI/index.html#readijv", 
+            "location": "/API/wholeAPI/index.html#readijv", 
             "text": "To read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this   [ai,aj,av] = find(triu(a));  dlmwrite('graph.txt',[ai,aj,av],'precision',9);  readIJV(filename::AbstractString)  at /Users/spielman/.julia/v0.4/Laplacians/src/IO.jl:25", 
             "title": "readIJV"
         }, 
         {
-            "location": "/wholeAPI/index.html#refinecut", 
+            "location": "/API/wholeAPI/index.html#refinecut", 
             "text": "Modify a cluster by adding or removing vertices by picking at each step \nthe vertex that has the maximum value of (Deg_external - Deg_Internal).\nEach vertex can be added in/removed only once.  refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  at /Users/spielman/.julia/v0.4/Laplacians/src/cutHeuristics.jl:9", 
             "title": "refineCut"
         }, 
         {
-            "location": "/wholeAPI/index.html#ringgraph", 
+            "location": "/API/wholeAPI/index.html#ringgraph", 
             "text": "The simple ring on n vertices  ringGraph(n::Int64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:23", 
             "title": "ringGraph"
         }, 
         {
-            "location": "/wholeAPI/index.html#semiwtedchimera", 
+            "location": "/API/wholeAPI/index.html#semiwtedchimera", 
             "text": "A Chimera graph with some weights.  The weights just appear when graphs are combined. For more interesting weights, use  wtedChimera  semiWtedChimera(n::Integer)\nsemiWtedChimera(n::Integer, k::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:442", 
             "title": "semiWtedChimera"
         }, 
         {
-            "location": "/wholeAPI/index.html#setvalue", 
+            "location": "/API/wholeAPI/index.html#setvalue", 
             "text": "Sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing   setValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:29", 
             "title": "setValue"
         }, 
         {
-            "location": "/wholeAPI/index.html#shortintgraph", 
+            "location": "/API/wholeAPI/index.html#shortintgraph", 
             "text": "Convert the indices in a graph to 32-bit ints.  This takes less storage, but does not speed up much  shortIntGraph(a::SparseMatrixCSC{Tv,Ti :Integer})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:3", 
             "title": "shortIntGraph"
         }, 
         {
-            "location": "/wholeAPI/index.html#shortestpathtree", 
+            "location": "/API/wholeAPI/index.html#shortestpathtree", 
             "text": "Computes the shortest path tree, and returns it as a sparse matrix. Treats edge weights as reciprocals of lengths. For example:  a = [0 2 1; 2 0 3; 1 3 0]\ntr = full(shortestPathTree(sparse(a),1))\n\n3x3 Array{Float64,2}:\n 0.0  2.0  0.0\n 2.0  0.0  3.0\n 0.0  3.0  0.0  shortestPathTree(a, start)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:239", 
             "title": "shortestPathTree"
         }, 
         {
-            "location": "/wholeAPI/index.html#shortestpaths", 
+            "location": "/API/wholeAPI/index.html#shortestpaths", 
             "text": "Computes the lenghts of shortest paths from  start . Returns both a vector of the lenghts, and the parent array in the shortest path tree.  This algorithm treats edge weights as reciprocals of distances. DOC BETTER  shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)\nshortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:175", 
             "title": "shortestPaths"
         }, 
         {
-            "location": "/wholeAPI/index.html#spectralcoords", 
+            "location": "/API/wholeAPI/index.html#spectralcoords", 
             "text": "Computes the spectral coordinates of a graph  spectralCoords(a)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:181", 
             "title": "spectralCoords"
         }, 
         {
-            "location": "/wholeAPI/index.html#spectraldrawing", 
+            "location": "/API/wholeAPI/index.html#spectraldrawing", 
             "text": "Computes spectral coordinates, and then uses plotGraph to draw  spectralDrawing(a)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:173", 
             "title": "spectralDrawing"
         }, 
         {
-            "location": "/wholeAPI/index.html#subsampleedges", 
+            "location": "/API/wholeAPI/index.html#subsampleedges", 
             "text": "Create a new graph from the old, but keeping edge edge with probability  p  subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:76", 
             "title": "subsampleEdges"
         }, 
         {
-            "location": "/wholeAPI/index.html#tarjanstretch", 
+            "location": "/API/wholeAPI/index.html#tarjanstretch", 
             "text": "tarjanStretch{Tv,Ti}(t::Laplacians.RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, depth::Array{Tv,1})  at /Users/spielman/.julia/v0.4/Laplacians/src/treeAlgs.jl:334", 
             "title": "tarjanStretch"
         }, 
         {
-            "location": "/wholeAPI/index.html#tounitvector", 
+            "location": "/API/wholeAPI/index.html#tounitvector", 
             "text": "Creates a unit vector of length n from a given set of integers, with weights based on the number of occurences  toUnitVector(a::Array{Int64,1}, n)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:190", 
             "title": "toUnitVector"
         }, 
         {
-            "location": "/wholeAPI/index.html#toposort", 
+            "location": "/API/wholeAPI/index.html#toposort", 
             "text": "toposort{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})  at /Users/spielman/.julia/v0.4/Laplacians/src/toposort.jl:13", 
             "title": "toposort"
         }, 
         {
-            "location": "/wholeAPI/index.html#twolift", 
+            "location": "/API/wholeAPI/index.html#twolift", 
             "text": "Creats a 2-lift of a.   flip  is a boolean indicating which edges cross  twoLift(a)\ntwoLift(a, flip::AbstractArray{Bool,1})\ntwoLift(a, k::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:99", 
             "title": "twoLift"
         }, 
         {
-            "location": "/wholeAPI/index.html#uniformweight", 
+            "location": "/API/wholeAPI/index.html#uniformweight", 
             "text": "Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight.  uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:49", 
             "title": "uniformWeight"
         }, 
         {
-            "location": "/wholeAPI/index.html#uniformweight_1", 
+            "location": "/API/wholeAPI/index.html#uniformweight_1", 
             "text": "Set the weight of every edge to 1  uniformWeight!(mat::SparseMatrixCSC{Tv,Ti :Integer})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:53", 
             "title": "uniformWeight!"
         }, 
         {
-            "location": "/wholeAPI/index.html#unweight", 
+            "location": "/API/wholeAPI/index.html#unweight", 
             "text": "Create a new graph in that is the same as the original, but with all edge weights 1  unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:16", 
             "title": "unweight"
         }, 
         {
-            "location": "/wholeAPI/index.html#unweight_1", 
+            "location": "/API/wholeAPI/index.html#unweight_1", 
             "text": "Change the weight of every edge in a to 1  unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphOps.jl:26", 
             "title": "unweight!"
         }, 
         {
-            "location": "/wholeAPI/index.html#vectocomps", 
+            "location": "/API/wholeAPI/index.html#vectocomps", 
             "text": "This turns a component vector, like that generated by components, into an array of arrays of indices of vertices in each component.  For example,  comps = vecToComps(c)\n\n3-element Array{Array{Int64,1},1}:\n [1,2,3,4,6,7,8]\n [5,10]\n [9]  vecToComps{Ti}(compvec::Array{Ti,1})  at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:136", 
             "title": "vecToComps"
         }, 
         {
-            "location": "/wholeAPI/index.html#wdeg", 
+            "location": "/API/wholeAPI/index.html#wdeg", 
             "text": "Finds the weighted degree of a vertex in the graph   wdeg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:19", 
             "title": "wdeg"
         }, 
         {
-            "location": "/wholeAPI/index.html#weighti", 
+            "location": "/API/wholeAPI/index.html#weighti", 
             "text": "weighti{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphUtils.jl:13", 
             "title": "weighti"
         }, 
         {
-            "location": "/wholeAPI/index.html#writeijv", 
+            "location": "/API/wholeAPI/index.html#writeijv", 
             "text": "Writes the upper portion of a matrix in ijv format, one row for each edge, separated by commas.  Only writes the upper triangular portion. The result can be read from Matlab like this:   dl = dlmread('graph.txt');  a = sparse(dl(:,1),dl(:,2),dl(:,3));  n = max(size(a))  a(n,n) = 0;  a = a + a';  writeIJV(filename::AbstractString, mat)  at /Users/spielman/.julia/v0.4/Laplacians/src/IO.jl:52", 
             "title": "writeIJV"
         }, 
         {
-            "location": "/wholeAPI/index.html#wtedchimera", 
+            "location": "/API/wholeAPI/index.html#wtedchimera", 
             "text": "Builds the kth wted chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.  Generate a chimera, and then apply a random weighting scheme  wtedChimera(n::Integer)\nwtedChimera(n::Integer, k::Integer)  at /Users/spielman/.julia/v0.4/Laplacians/src/graphGenerators.jl:607", 
             "title": "wtedChimera"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html", 
+            "location": "/API/graphGeneratorsAPI/index.html", 
             "text": "graphGenerators\n\n\npathGraph\n\n\nThe path graph on n vertices\n\n\npathGraph(n::Int64)\n\n\n\n\ngraphGenerators.jl:8\n\n\ncompleteGraph\n\n\nThe complete graph\n\n\ncompleteGraph(n::Int64)\n\n\n\n\ngraphGenerators.jl:17\n\n\nringGraph\n\n\nThe simple ring on n vertices\n\n\nringGraph(n::Int64)\n\n\n\n\ngraphGenerators.jl:23\n\n\ngeneralizedRing\n\n\nA generalization of a ring graph. The vertices are integers modulo n. Two are connected if their difference is in gens. For example, \n\n\ngeneralizedRing(17, [1 5])\n\n\n\n\ngeneralizedRing(n::Int64, gens)\n\n\n\n\ngraphGenerators.jl:38\n\n\nrandGenRing\n\n\nA random generalized ring graph of degree k. Gens always contains 1, and the other k-1 edge types are chosen from an exponential distribution\n\n\nrandGenRing(n::Int64, k::Integer)\n\n\n\n\ngraphGenerators.jl:62\n\n\nhyperCube\n\n\nThe d dimensional hypercube.  Has 2^d vertices\n\n\nhyperCube(d::Int64)\n\n\n\n\ngraphGenerators.jl:125\n\n\ncompleteBinaryTree\n\n\nThe complete binary tree on n vertices\n\n\ncompleteBinaryTree(n::Int64)\n\n\n\n\ngraphGenerators.jl:139\n\n\ngrid2\n\n\nAn n-by-m grid graph.  iostropy is the weighting on edges in one direction.\n\n\ngrid2(n::Int64)\ngrid2(n::Int64, m::Int64)\n\n\n\n\ngraphGenerators.jl:159\n\n\ngrid2coords\n\n\nCoordinates for plotting the vertices of the n-by-m grid graph\n\n\ngrid2coords(n::Int64, m::Int64)\ngrid2coords(n)\n\n\n\n\ngraphGenerators.jl:163\n\n\nrandMatching\n\n\nA random matching on n vertices\n\n\nrandMatching(n::Int64)\n\n\n\n\ngraphGenerators.jl:174\n\n\nrandRegular\n\n\nA sum of k random matchings on n vertices\n\n\nrandRegular(n::Int64, k::Int64)\n\n\n\n\ngraphGenerators.jl:187\n\n\ngrownGraph\n\n\nCreate a graph on n vertices. For each vertex, give it k edges to randomly chosen prior vertices. This is a variety of a preferential attachment graph.    \n\n\ngrownGraph(n::Int64, k::Int64)\n\n\n\n\ngraphGenerators.jl:202\n\n\ngrownGraphD\n\n\nLike a grownGraph, but it forces the edges to all be distinct. It starts out with a k+1 clique on the first k vertices\n\n\ngrownGraphD(n::Int64, k::Int64)\n\n\n\n\ngraphGenerators.jl:234\n\n\nprefAttach\n\n\nA preferential attachment graph in which each vertex has k edges to those that come before.  These are chosen with probability p to be from a random vertex, and with probability 1-p to come from the endpoint of a random edge. It begins with a k-clique on the first k+1 vertices.\n\n\nprefAttach(n::Int64, k::Int64, p::Float64)\n\n\n\n\ngraphGenerators.jl:258\n\n\nErdosRenyi\n\n\nGenerate a random graph on n vertices with m edges. The actual number of edges will probably be smaller, as we sample with replacement\n\n\nErdosRenyi(n::Integer, m::Integer)\n\n\n\n\ngraphGenerators.jl:337\n\n\nErdosRenyiCluster\n\n\nGenerate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.\n\n\nErdosRenyiCluster(n::Integer, k::Integer)\n\n\n\n\ngraphGenerators.jl:351\n\n\nErdosRenyiClusterFix\n\n\nLike an Erdos-Renyi cluster, but add back a tree so it has n vertices\n\n\nErdosRenyiClusterFix(n::Integer, k::Integer)\n\n\n\n\ngraphGenerators.jl:364\n\n\npureRandomGraph\n\n\nGenerate a random graph with n vertices from one of our natural distributions\n\n\npureRandomGraph(n::Integer)\n\n\n\n\ngraphGenerators.jl:379\n\n\nsemiWtedChimera\n\n\nA Chimera graph with some weights.  The weights just appear when graphs are combined. For more interesting weights, use \nwtedChimera\n\n\nsemiWtedChimera(n::Integer)\nsemiWtedChimera(n::Integer, k::Integer)\n\n\n\n\ngraphGenerators.jl:442\n\n\nchimera\n\n\nBuilds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.\n\n\nBuilds a chimeric graph on n vertices. The components come from pureRandomGraph, connected by joinGraphs, productGraph and generalizedNecklace\n\n\nchimera(n::Integer)\nchimera(n::Integer, k::Integer)\n\n\n\n\ngraphGenerators.jl:515\n\n\nrandWeight\n\n\nApplies one of a number of random weighting schemes to the edges of the graph\n\n\nrandWeight(a)\n\n\n\n\ngraphGenerators.jl:535\n\n\nwtedChimera\n\n\nBuilds the kth wted chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.\n\n\nGenerate a chimera, and then apply a random weighting scheme\n\n\nwtedChimera(n::Integer)\nwtedChimera(n::Integer, k::Integer)\n\n\n\n\ngraphGenerators.jl:607", 
             "title": "graphGenerators"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#graphgenerators", 
+            "location": "/API/graphGeneratorsAPI/index.html#graphgenerators", 
             "text": "", 
             "title": "graphGenerators"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#pathgraph", 
+            "location": "/API/graphGeneratorsAPI/index.html#pathgraph", 
             "text": "The path graph on n vertices  pathGraph(n::Int64)  graphGenerators.jl:8", 
             "title": "pathGraph"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#completegraph", 
+            "location": "/API/graphGeneratorsAPI/index.html#completegraph", 
             "text": "The complete graph  completeGraph(n::Int64)  graphGenerators.jl:17", 
             "title": "completeGraph"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#ringgraph", 
+            "location": "/API/graphGeneratorsAPI/index.html#ringgraph", 
             "text": "The simple ring on n vertices  ringGraph(n::Int64)  graphGenerators.jl:23", 
             "title": "ringGraph"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#generalizedring", 
+            "location": "/API/graphGeneratorsAPI/index.html#generalizedring", 
             "text": "A generalization of a ring graph. The vertices are integers modulo n. Two are connected if their difference is in gens. For example,   generalizedRing(17, [1 5])  generalizedRing(n::Int64, gens)  graphGenerators.jl:38", 
             "title": "generalizedRing"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#randgenring", 
+            "location": "/API/graphGeneratorsAPI/index.html#randgenring", 
             "text": "A random generalized ring graph of degree k. Gens always contains 1, and the other k-1 edge types are chosen from an exponential distribution  randGenRing(n::Int64, k::Integer)  graphGenerators.jl:62", 
             "title": "randGenRing"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#hypercube", 
+            "location": "/API/graphGeneratorsAPI/index.html#hypercube", 
             "text": "The d dimensional hypercube.  Has 2^d vertices  hyperCube(d::Int64)  graphGenerators.jl:125", 
             "title": "hyperCube"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#completebinarytree", 
+            "location": "/API/graphGeneratorsAPI/index.html#completebinarytree", 
             "text": "The complete binary tree on n vertices  completeBinaryTree(n::Int64)  graphGenerators.jl:139", 
             "title": "completeBinaryTree"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#grid2", 
+            "location": "/API/graphGeneratorsAPI/index.html#grid2", 
             "text": "An n-by-m grid graph.  iostropy is the weighting on edges in one direction.  grid2(n::Int64)\ngrid2(n::Int64, m::Int64)  graphGenerators.jl:159", 
             "title": "grid2"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#grid2coords", 
+            "location": "/API/graphGeneratorsAPI/index.html#grid2coords", 
             "text": "Coordinates for plotting the vertices of the n-by-m grid graph  grid2coords(n::Int64, m::Int64)\ngrid2coords(n)  graphGenerators.jl:163", 
             "title": "grid2coords"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#randmatching", 
+            "location": "/API/graphGeneratorsAPI/index.html#randmatching", 
             "text": "A random matching on n vertices  randMatching(n::Int64)  graphGenerators.jl:174", 
             "title": "randMatching"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#randregular", 
+            "location": "/API/graphGeneratorsAPI/index.html#randregular", 
             "text": "A sum of k random matchings on n vertices  randRegular(n::Int64, k::Int64)  graphGenerators.jl:187", 
             "title": "randRegular"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#growngraph", 
+            "location": "/API/graphGeneratorsAPI/index.html#growngraph", 
             "text": "Create a graph on n vertices. For each vertex, give it k edges to randomly chosen prior vertices. This is a variety of a preferential attachment graph.      grownGraph(n::Int64, k::Int64)  graphGenerators.jl:202", 
             "title": "grownGraph"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#growngraphd", 
+            "location": "/API/graphGeneratorsAPI/index.html#growngraphd", 
             "text": "Like a grownGraph, but it forces the edges to all be distinct. It starts out with a k+1 clique on the first k vertices  grownGraphD(n::Int64, k::Int64)  graphGenerators.jl:234", 
             "title": "grownGraphD"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#prefattach", 
+            "location": "/API/graphGeneratorsAPI/index.html#prefattach", 
             "text": "A preferential attachment graph in which each vertex has k edges to those that come before.  These are chosen with probability p to be from a random vertex, and with probability 1-p to come from the endpoint of a random edge. It begins with a k-clique on the first k+1 vertices.  prefAttach(n::Int64, k::Int64, p::Float64)  graphGenerators.jl:258", 
             "title": "prefAttach"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#erdosrenyi", 
+            "location": "/API/graphGeneratorsAPI/index.html#erdosrenyi", 
             "text": "Generate a random graph on n vertices with m edges. The actual number of edges will probably be smaller, as we sample with replacement  ErdosRenyi(n::Integer, m::Integer)  graphGenerators.jl:337", 
             "title": "ErdosRenyi"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#erdosrenyicluster", 
+            "location": "/API/graphGeneratorsAPI/index.html#erdosrenyicluster", 
             "text": "Generate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.  ErdosRenyiCluster(n::Integer, k::Integer)  graphGenerators.jl:351", 
             "title": "ErdosRenyiCluster"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#erdosrenyiclusterfix", 
+            "location": "/API/graphGeneratorsAPI/index.html#erdosrenyiclusterfix", 
             "text": "Like an Erdos-Renyi cluster, but add back a tree so it has n vertices  ErdosRenyiClusterFix(n::Integer, k::Integer)  graphGenerators.jl:364", 
             "title": "ErdosRenyiClusterFix"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#purerandomgraph", 
+            "location": "/API/graphGeneratorsAPI/index.html#purerandomgraph", 
             "text": "Generate a random graph with n vertices from one of our natural distributions  pureRandomGraph(n::Integer)  graphGenerators.jl:379", 
             "title": "pureRandomGraph"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#semiwtedchimera", 
+            "location": "/API/graphGeneratorsAPI/index.html#semiwtedchimera", 
             "text": "A Chimera graph with some weights.  The weights just appear when graphs are combined. For more interesting weights, use  wtedChimera  semiWtedChimera(n::Integer)\nsemiWtedChimera(n::Integer, k::Integer)  graphGenerators.jl:442", 
             "title": "semiWtedChimera"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#chimera", 
+            "location": "/API/graphGeneratorsAPI/index.html#chimera", 
             "text": "Builds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.  Builds a chimeric graph on n vertices. The components come from pureRandomGraph, connected by joinGraphs, productGraph and generalizedNecklace  chimera(n::Integer)\nchimera(n::Integer, k::Integer)  graphGenerators.jl:515", 
             "title": "chimera"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#randweight", 
+            "location": "/API/graphGeneratorsAPI/index.html#randweight", 
             "text": "Applies one of a number of random weighting schemes to the edges of the graph  randWeight(a)  graphGenerators.jl:535", 
             "title": "randWeight"
         }, 
         {
-            "location": "/graphGeneratorsAPI/index.html#wtedchimera", 
+            "location": "/API/graphGeneratorsAPI/index.html#wtedchimera", 
             "text": "Builds the kth wted chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.  Generate a chimera, and then apply a random weighting scheme  wtedChimera(n::Integer)\nwtedChimera(n::Integer, k::Integer)  graphGenerators.jl:607", 
             "title": "wtedChimera"
         }, 
         {
-            "location": "/IOAPI/index.html", 
+            "location": "/API/IOAPI/index.html", 
             "text": "IO\n\n\nreadIJ\n\n\nTo read a simple edge list, each line being an (i, j) pair\n\n\nreadIJ(filename::AbstractString)\nreadIJ(filename::AbstractString, sep)\n\n\n\n\nIO.jl:4\n\n\nreadIJV\n\n\nTo read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this\n\n\n [ai,aj,av] = find(triu(a));\n\n dlmwrite('graph.txt',[ai,aj,av],'precision',9);\n\n\n\n\nreadIJV(filename::AbstractString)\n\n\n\n\nIO.jl:25\n\n\nwriteIJV\n\n\nWrites the upper portion of a matrix in ijv format, one row for each edge, separated by commas.  Only writes the upper triangular portion. The result can be read from Matlab like this:\n\n\n dl = dlmread('graph.txt');\n\n a = sparse(dl(:,1),dl(:,2),dl(:,3));\n\n n = max(size(a))\n\n a(n,n) = 0;\n\n a = a + a';\n\n\n\n\nwriteIJV(filename::AbstractString, mat)\n\n\n\n\nIO.jl:52", 
             "title": "IO"
         }, 
         {
-            "location": "/IOAPI/index.html#io", 
+            "location": "/API/IOAPI/index.html#io", 
             "text": "", 
             "title": "IO"
         }, 
         {
-            "location": "/IOAPI/index.html#readij", 
+            "location": "/API/IOAPI/index.html#readij", 
             "text": "To read a simple edge list, each line being an (i, j) pair  readIJ(filename::AbstractString)\nreadIJ(filename::AbstractString, sep)  IO.jl:4", 
             "title": "readIJ"
         }, 
         {
-            "location": "/IOAPI/index.html#readijv", 
+            "location": "/API/IOAPI/index.html#readijv", 
             "text": "To read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this   [ai,aj,av] = find(triu(a));  dlmwrite('graph.txt',[ai,aj,av],'precision',9);  readIJV(filename::AbstractString)  IO.jl:25", 
             "title": "readIJV"
         }, 
         {
-            "location": "/IOAPI/index.html#writeijv", 
+            "location": "/API/IOAPI/index.html#writeijv", 
             "text": "Writes the upper portion of a matrix in ijv format, one row for each edge, separated by commas.  Only writes the upper triangular portion. The result can be read from Matlab like this:   dl = dlmread('graph.txt');  a = sparse(dl(:,1),dl(:,2),dl(:,3));  n = max(size(a))  a(n,n) = 0;  a = a + a';  writeIJV(filename::AbstractString, mat)  IO.jl:52", 
             "title": "writeIJV"
         }, 
         {
-            "location": "/graphOpsAPI/index.html", 
+            "location": "/API/graphOpsAPI/index.html", 
             "text": "graphOps\n\n\nshortIntGraph\n\n\nConvert the indices in a graph to 32-bit ints.  This takes less storage, but does not speed up much\n\n\nshortIntGraph(a::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\ngraphOps.jl:3\n\n\nfloatGraph\n\n\nConvert the nonzero entries in a graph to Float64\n\n\nfloatGraph(a::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\ngraphOps.jl:6\n\n\nlap\n\n\nCreate a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry\n\n\nlap(a)\n\n\n\n\ngraphOps.jl:12\n\n\nunweight\n\n\nCreate a new graph in that is the same as the original, but with all edge weights 1\n\n\nunweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})\n\n\n\n\ngraphOps.jl:16\n\n\nunweight!\n\n\nChange the weight of every edge in a to 1\n\n\nunweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})\n\n\n\n\ngraphOps.jl:26\n\n\nmapweight\n\n\nCreate a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write\n\n\nb = mapweight(a, x-\nrand(1)[1])\n\n\n\n\nmapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)\n\n\n\n\ngraphOps.jl:40\n\n\nuniformWeight\n\n\nPut a uniform [0,1] weight on every edge.  This is an example of how to use mapweight.\n\n\nuniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})\n\n\n\n\ngraphOps.jl:49\n\n\nuniformWeight!\n\n\nSet the weight of every edge to 1\n\n\nuniformWeight!(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\ngraphOps.jl:53\n\n\nproductGraph\n\n\nThe Cartesian product of two graphs.  When applied to two paths, it gives a grid.\n\n\nproductGraph(a0::SparseMatrixCSC{Tv,Ti\n:Integer}, a1::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\ngraphOps.jl:58\n\n\nedgeVertexMat\n\n\nThe signed edge-vertex adjacency matrix\n\n\nedgeVertexMat(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\ngraphOps.jl:67\n\n\nsubsampleEdges\n\n\nCreate a new graph from the old, but keeping edge edge with probability \np\n\n\nsubsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)\n\n\n\n\ngraphOps.jl:76\n\n\ntwoLift\n\n\nCreats a 2-lift of a.  \nflip\n is a boolean indicating which edges cross\n\n\ntwoLift(a)\ntwoLift(a, flip::AbstractArray{Bool,1})\ntwoLift(a, k::Integer)\n\n\n\n\ngraphOps.jl:99\n\n\njoinGraphs\n\n\nCreate a disjoint union of graphs a and b,  and then put k random edges between them\n\n\njoinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)\n\n\n\n\ngraphOps.jl:111\n\n\ndisjoin\n\n\nCreate a disjoint union of graphs a and b,   with no edges between them.\n\n\ndisjoin(a, b)\n\n\n\n\ngraphOps.jl:130\n\n\nplotGraph\n\n\nPlots graph gr with coordinates (x,y)\n\n\nplotGraph(gr, x, y)\nplotGraph(gr, x, y, color)\n\n\n\n\ngraphOps.jl:136\n\n\nspectralDrawing\n\n\nComputes spectral coordinates, and then uses plotGraph to draw\n\n\nspectralDrawing(a)\n\n\n\n\ngraphOps.jl:173\n\n\nspectralCoords\n\n\nComputes the spectral coordinates of a graph\n\n\nspectralCoords(a)\n\n\n\n\ngraphOps.jl:181\n\n\ntoUnitVector\n\n\nCreates a unit vector of length n from a given set of integers, with weights based on the number of occurences\n\n\ntoUnitVector(a::Array{Int64,1}, n)\n\n\n\n\ngraphOps.jl:190\n\n\ndiagmat\n\n\nReturns the diagonal matrix(as a sparse matrix) of a graph\n\n\ndiagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})\n\n\n\n\ngraphOps.jl:212\n\n\ngeneralizedNecklace\n\n\nConstructs a generalized necklace graph starting with two graphs A and H. The resulting new graph will be constructed by expanding each vertex in H to an instance of A. k random edges will be generated between components. Thus, the resulting graph may have weighted edges.\n\n\ngeneralizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti\n:Integer}, k::Int64)\n\n\n\n\ngraphOps.jl:232", 
             "title": "graphOps"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#graphops", 
+            "location": "/API/graphOpsAPI/index.html#graphops", 
             "text": "", 
             "title": "graphOps"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#shortintgraph", 
+            "location": "/API/graphOpsAPI/index.html#shortintgraph", 
             "text": "Convert the indices in a graph to 32-bit ints.  This takes less storage, but does not speed up much  shortIntGraph(a::SparseMatrixCSC{Tv,Ti :Integer})  graphOps.jl:3", 
             "title": "shortIntGraph"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#floatgraph", 
+            "location": "/API/graphOpsAPI/index.html#floatgraph", 
             "text": "Convert the nonzero entries in a graph to Float64  floatGraph(a::SparseMatrixCSC{Tv,Ti :Integer})  graphOps.jl:6", 
             "title": "floatGraph"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#lap", 
+            "location": "/API/graphOpsAPI/index.html#lap", 
             "text": "Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry  lap(a)  graphOps.jl:12", 
             "title": "lap"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#unweight", 
+            "location": "/API/graphOpsAPI/index.html#unweight", 
             "text": "Create a new graph in that is the same as the original, but with all edge weights 1  unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})  graphOps.jl:16", 
             "title": "unweight"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#unweight_1", 
+            "location": "/API/graphOpsAPI/index.html#unweight_1", 
             "text": "Change the weight of every edge in a to 1  unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})  graphOps.jl:26", 
             "title": "unweight!"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#mapweight", 
+            "location": "/API/graphOpsAPI/index.html#mapweight", 
             "text": "Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write  b = mapweight(a, x- rand(1)[1])  mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, f)  graphOps.jl:40", 
             "title": "mapweight"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#uniformweight", 
+            "location": "/API/graphOpsAPI/index.html#uniformweight", 
             "text": "Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight.  uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})  graphOps.jl:49", 
             "title": "uniformWeight"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#uniformweight_1", 
+            "location": "/API/graphOpsAPI/index.html#uniformweight_1", 
             "text": "Set the weight of every edge to 1  uniformWeight!(mat::SparseMatrixCSC{Tv,Ti :Integer})  graphOps.jl:53", 
             "title": "uniformWeight!"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#productgraph", 
+            "location": "/API/graphOpsAPI/index.html#productgraph", 
             "text": "The Cartesian product of two graphs.  When applied to two paths, it gives a grid.  productGraph(a0::SparseMatrixCSC{Tv,Ti :Integer}, a1::SparseMatrixCSC{Tv,Ti :Integer})  graphOps.jl:58", 
             "title": "productGraph"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#edgevertexmat", 
+            "location": "/API/graphOpsAPI/index.html#edgevertexmat", 
             "text": "The signed edge-vertex adjacency matrix  edgeVertexMat(mat::SparseMatrixCSC{Tv,Ti :Integer})  graphOps.jl:67", 
             "title": "edgeVertexMat"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#subsampleedges", 
+            "location": "/API/graphOpsAPI/index.html#subsampleedges", 
             "text": "Create a new graph from the old, but keeping edge edge with probability  p  subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)  graphOps.jl:76", 
             "title": "subsampleEdges"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#twolift", 
+            "location": "/API/graphOpsAPI/index.html#twolift", 
             "text": "Creats a 2-lift of a.   flip  is a boolean indicating which edges cross  twoLift(a)\ntwoLift(a, flip::AbstractArray{Bool,1})\ntwoLift(a, k::Integer)  graphOps.jl:99", 
             "title": "twoLift"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#joingraphs", 
+            "location": "/API/graphOpsAPI/index.html#joingraphs", 
             "text": "Create a disjoint union of graphs a and b,  and then put k random edges between them  joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)  graphOps.jl:111", 
             "title": "joinGraphs"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#disjoin", 
+            "location": "/API/graphOpsAPI/index.html#disjoin", 
             "text": "Create a disjoint union of graphs a and b,   with no edges between them.  disjoin(a, b)  graphOps.jl:130", 
             "title": "disjoin"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#plotgraph", 
+            "location": "/API/graphOpsAPI/index.html#plotgraph", 
             "text": "Plots graph gr with coordinates (x,y)  plotGraph(gr, x, y)\nplotGraph(gr, x, y, color)  graphOps.jl:136", 
             "title": "plotGraph"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#spectraldrawing", 
+            "location": "/API/graphOpsAPI/index.html#spectraldrawing", 
             "text": "Computes spectral coordinates, and then uses plotGraph to draw  spectralDrawing(a)  graphOps.jl:173", 
             "title": "spectralDrawing"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#spectralcoords", 
+            "location": "/API/graphOpsAPI/index.html#spectralcoords", 
             "text": "Computes the spectral coordinates of a graph  spectralCoords(a)  graphOps.jl:181", 
             "title": "spectralCoords"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#tounitvector", 
+            "location": "/API/graphOpsAPI/index.html#tounitvector", 
             "text": "Creates a unit vector of length n from a given set of integers, with weights based on the number of occurences  toUnitVector(a::Array{Int64,1}, n)  graphOps.jl:190", 
             "title": "toUnitVector"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#diagmat", 
+            "location": "/API/graphOpsAPI/index.html#diagmat", 
             "text": "Returns the diagonal matrix(as a sparse matrix) of a graph  diagmat{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})  graphOps.jl:212", 
             "title": "diagmat"
         }, 
         {
-            "location": "/graphOpsAPI/index.html#generalizednecklace", 
+            "location": "/API/graphOpsAPI/index.html#generalizednecklace", 
             "text": "Constructs a generalized necklace graph starting with two graphs A and H. The resulting new graph will be constructed by expanding each vertex in H to an instance of A. k random edges will be generated between components. Thus, the resulting graph may have weighted edges.  generalizedNecklace{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, H::SparseMatrixCSC{Tv,Ti :Integer}, k::Int64)  graphOps.jl:232", 
             "title": "generalizedNecklace"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html", 
+            "location": "/API/graphAlgsAPI/index.html", 
             "text": "graphAlgs\n\n\ncomponents\n\n\nComputes the connected components of a graph. Returns them as a vector of length equal to the number of vertices. The vector numbers the components from 1 through the maximum number. For example,\n\n\ngr = ErdosRenyi(10,11)\nc = components(gr)\n\n10-element Array{Int64,1}:\n 1\n 1\n 1\n 1\n 2\n 1\n 1\n 1\n 3\n 2\n\n\n\n\ncomponents{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\ngraphAlgs.jl:65\n\n\nisConnected\n\n\nReturns true if graph is connected.  Calls components.\n\n\nisConnected(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\ngraphAlgs.jl:113\n\n\nvecToComps\n\n\nThis turns a component vector, like that generated by components, into an array of arrays of indices of vertices in each component.  For example,\n\n\ncomps = vecToComps(c)\n\n3-element Array{Array{Int64,1},1}:\n [1,2,3,4,6,7,8]\n [5,10]\n [9]\n\n\n\n\nvecToComps{Ti}(compvec::Array{Ti,1})\n\n\n\n\ngraphAlgs.jl:136\n\n\nbiggestComp\n\n\nReturn the biggest component in a graph, as a graph\n\n\nbiggestComp(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\ngraphAlgs.jl:159\n\n\nshortestPaths\n\n\nComputes the lenghts of shortest paths from \nstart\n. Returns both a vector of the lenghts, and the parent array in the shortest path tree.\n\n\nThis algorithm treats edge weights as reciprocals of distances. DOC BETTER\n\n\nshortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)\nshortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\ngraphAlgs.jl:175\n\n\nshortestPathTree\n\n\nComputes the shortest path tree, and returns it as a sparse matrix. Treats edge weights as reciprocals of lengths. For example:\n\n\na = [0 2 1; 2 0 3; 1 3 0]\ntr = full(shortestPathTree(sparse(a),1))\n\n3x3 Array{Float64,2}:\n 0.0  2.0  0.0\n 2.0  0.0  3.0\n 0.0  3.0  0.0\n\n\n\n\nshortestPathTree(a, start)\n\n\n\n\ngraphAlgs.jl:239\n\n\nkruskal\n\n\nUses Kruskal's algorithm to compute a minimum (or maximum) spanning tree. Set kind=:max if you want the max spanning tree. It returns it a a graph\n\n\nkruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\ngraphAlgs.jl:407\n\n\nprim\n\n\nprim(mat::SparseMatrixCSC; rev=false)\n Compute a minimum spanning tree of the matrix \nmat\n.   If rev is true, computes a maximum spanning tree.\n\n\nprim(mat::SparseMatrixCSC{Tv,Ti\n:Integer})\n\n\n\n\ngraphAlgs.jl:440", 
             "title": "graphAlgs"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html#graphalgs", 
+            "location": "/API/graphAlgsAPI/index.html#graphalgs", 
             "text": "", 
             "title": "graphAlgs"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html#components", 
+            "location": "/API/graphAlgsAPI/index.html#components", 
             "text": "Computes the connected components of a graph. Returns them as a vector of length equal to the number of vertices. The vector numbers the components from 1 through the maximum number. For example,  gr = ErdosRenyi(10,11)\nc = components(gr)\n\n10-element Array{Int64,1}:\n 1\n 1\n 1\n 1\n 2\n 1\n 1\n 1\n 3\n 2  components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})  graphAlgs.jl:65", 
             "title": "components"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html#isconnected", 
+            "location": "/API/graphAlgsAPI/index.html#isconnected", 
             "text": "Returns true if graph is connected.  Calls components.  isConnected(mat::SparseMatrixCSC{Tv,Ti :Integer})  graphAlgs.jl:113", 
             "title": "isConnected"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html#vectocomps", 
+            "location": "/API/graphAlgsAPI/index.html#vectocomps", 
             "text": "This turns a component vector, like that generated by components, into an array of arrays of indices of vertices in each component.  For example,  comps = vecToComps(c)\n\n3-element Array{Array{Int64,1},1}:\n [1,2,3,4,6,7,8]\n [5,10]\n [9]  vecToComps{Ti}(compvec::Array{Ti,1})  graphAlgs.jl:136", 
             "title": "vecToComps"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html#biggestcomp", 
+            "location": "/API/graphAlgsAPI/index.html#biggestcomp", 
             "text": "Return the biggest component in a graph, as a graph  biggestComp(mat::SparseMatrixCSC{Tv,Ti :Integer})  graphAlgs.jl:159", 
             "title": "biggestComp"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html#shortestpaths", 
+            "location": "/API/graphAlgsAPI/index.html#shortestpaths", 
             "text": "Computes the lenghts of shortest paths from  start . Returns both a vector of the lenghts, and the parent array in the shortest path tree.  This algorithm treats edge weights as reciprocals of distances. DOC BETTER  shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)\nshortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})  graphAlgs.jl:175", 
             "title": "shortestPaths"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html#shortestpathtree", 
+            "location": "/API/graphAlgsAPI/index.html#shortestpathtree", 
             "text": "Computes the shortest path tree, and returns it as a sparse matrix. Treats edge weights as reciprocals of lengths. For example:  a = [0 2 1; 2 0 3; 1 3 0]\ntr = full(shortestPathTree(sparse(a),1))\n\n3x3 Array{Float64,2}:\n 0.0  2.0  0.0\n 2.0  0.0  3.0\n 0.0  3.0  0.0  shortestPathTree(a, start)  graphAlgs.jl:239", 
             "title": "shortestPathTree"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html#kruskal", 
+            "location": "/API/graphAlgsAPI/index.html#kruskal", 
             "text": "Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree. Set kind=:max if you want the max spanning tree. It returns it a a graph  kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})  graphAlgs.jl:407", 
             "title": "kruskal"
         }, 
         {
-            "location": "/graphAlgsAPI/index.html#prim", 
+            "location": "/API/graphAlgsAPI/index.html#prim", 
             "text": "prim(mat::SparseMatrixCSC; rev=false)  Compute a minimum spanning tree of the matrix  mat .   If rev is true, computes a maximum spanning tree.  prim(mat::SparseMatrixCSC{Tv,Ti :Integer})  graphAlgs.jl:440", 
             "title": "prim"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html", 
+            "location": "/API/graphUtilsAPI/index.html", 
             "text": "graphUtils\n\n\nwdeg\n\n\nFinds the weighted degree of a vertex in the graph \n\n\nwdeg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)\n\n\n\n\ngraphUtils.jl:19\n\n\nsetValue\n\n\nSets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing \n\n\nsetValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)\n\n\n\n\ngraphUtils.jl:29\n\n\nflipIndex\n\n\nFor a symmetric matrix, this gives the correspondance between pairs of entries in an ijv. So, ai[ind] = aj[flip[ind]].  For example, \n\n\n(ai,aj,av) = findnz(a);\nfl = flipIndex(a)\nind = 10\n@show backind = fl[10]\n@show [ai[ind], aj[ind], av[ind]]\n@show [ai[backind], aj[backind], av[backind]];\n\nbackind = fl[10] = 4\n[ai[ind],aj[ind],av[ind]] = [2.0,4.0,0.7]\n[ai[backind],aj[backind],av[backind]] = [4.0,2.0,0.7]\n\n\n\n\nflipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})\n\n\n\n\ngraphUtils.jl:51\n\n\nbackIndices\n\n\nSame as the above, but now the graph is in adjacency list form \n\n\nComputes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph \n\n\nbackIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})\nbackIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})\n\n\n\n\ngraphUtils.jl:62\n\n\nfindEntries\n\n\nSimilar to findnz, but also returns 0 entries that have an edge in the sparse matrix \n\n\nfindEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})\n\n\n\n\ngraphUtils.jl:141\n\n\ncompConductance\n\n\nReturns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)\n\n\ncompConductance{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\ngraphUtils.jl:163\n\n\ngetVolume\n\n\nComputes the volume of subset s in an unweighted graph G \n\n\ngetVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\ngraphUtils.jl:176\n\n\ngetObound\n\n\nComputes the number of edges leaving s \n\n\ngetObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\ngraphUtils.jl:194", 
             "title": "graphUtils"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html#graphutils", 
+            "location": "/API/graphUtilsAPI/index.html#graphutils", 
             "text": "", 
             "title": "graphUtils"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html#wdeg", 
+            "location": "/API/graphUtilsAPI/index.html#wdeg", 
             "text": "Finds the weighted degree of a vertex in the graph   wdeg{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti)  graphUtils.jl:19", 
             "title": "wdeg"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html#setvalue", 
+            "location": "/API/graphUtilsAPI/index.html#setvalue", 
             "text": "Sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing   setValue{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, v::Ti, i::Ti, a::Tv)  graphUtils.jl:29", 
             "title": "setValue"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html#flipindex", 
+            "location": "/API/graphUtilsAPI/index.html#flipindex", 
             "text": "For a symmetric matrix, this gives the correspondance between pairs of entries in an ijv. So, ai[ind] = aj[flip[ind]].  For example,   (ai,aj,av) = findnz(a);\nfl = flipIndex(a)\nind = 10\n@show backind = fl[10]\n@show [ai[ind], aj[ind], av[ind]]\n@show [ai[backind], aj[backind], av[backind]];\n\nbackind = fl[10] = 4\n[ai[ind],aj[ind],av[ind]] = [2.0,4.0,0.7]\n[ai[backind],aj[backind],av[backind]] = [4.0,2.0,0.7]  flipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})  graphUtils.jl:51", 
             "title": "flipIndex"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html#backindices", 
+            "location": "/API/graphUtilsAPI/index.html#backindices", 
             "text": "Same as the above, but now the graph is in adjacency list form   Computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph   backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})\nbackIndices{Tv1,Tv2}(G::Array{Array{Tuple{Tv1,Tv2},1},1})  graphUtils.jl:62", 
             "title": "backIndices"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html#findentries", 
+            "location": "/API/graphUtilsAPI/index.html#findentries", 
             "text": "Similar to findnz, but also returns 0 entries that have an edge in the sparse matrix   findEntries{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})  graphUtils.jl:141", 
             "title": "findEntries"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html#compconductance", 
+            "location": "/API/graphUtilsAPI/index.html#compconductance", 
             "text": "Returns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)  compConductance{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  graphUtils.jl:163", 
             "title": "compConductance"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html#getvolume", 
+            "location": "/API/graphUtilsAPI/index.html#getvolume", 
             "text": "Computes the volume of subset s in an unweighted graph G   getVolume{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  graphUtils.jl:176", 
             "title": "getVolume"
         }, 
         {
-            "location": "/graphUtilsAPI/index.html#getobound", 
+            "location": "/API/graphUtilsAPI/index.html#getobound", 
             "text": "Computes the number of edges leaving s   getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  graphUtils.jl:194", 
             "title": "getObound"
         }, 
         {
-            "location": "/solversAPI/index.html", 
-            "text": "solvers\n\n\nlapWrapSolver\n\n\nTakes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here\n\n\nlapWrapSolver(solver)\nlapWrapSolver(solver, la::AbstractArray{T,N})\nlapWrapSolver(solver, la::AbstractArray{T,N}, b)\n\n\n\n\nsolvers.jl:178\n\n\naugmentTree\n\n\nTakes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch\n\n\naugmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)\n\n\n\n\nsolvers.jl:208\n\n\naugTreePrecon\n\n\nThis is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.\n\n\naugTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nsolvers.jl:258\n\n\naugTreeSolver\n\n\nThis is the solver that calls augTreePrecon\n\n\naugTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nsolvers.jl:280\n\n\naugTreeLapPrecon\n\n\nA version of augTreePrecon specialized for Laplacians\n\n\naugTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nsolvers.jl:291\n\n\naugTreeLapSolver\n\n\nThis is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.\n\n\naugTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nsolvers.jl:313", 
-            "title": "solvers"
-        }, 
-        {
-            "location": "/solversAPI/index.html#solvers", 
-            "text": "", 
-            "title": "solvers"
-        }, 
-        {
-            "location": "/solversAPI/index.html#lapwrapsolver", 
-            "text": "Takes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here  lapWrapSolver(solver)\nlapWrapSolver(solver, la::AbstractArray{T,N})\nlapWrapSolver(solver, la::AbstractArray{T,N}, b)  solvers.jl:178", 
-            "title": "lapWrapSolver"
-        }, 
-        {
-            "location": "/solversAPI/index.html#augmenttree", 
-            "text": "Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch  augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)  solvers.jl:208", 
-            "title": "augmentTree"
-        }, 
-        {
-            "location": "/solversAPI/index.html#augtreeprecon", 
-            "text": "This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.  augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  solvers.jl:258", 
-            "title": "augTreePrecon"
-        }, 
-        {
-            "location": "/solversAPI/index.html#augtreesolver", 
-            "text": "This is the solver that calls augTreePrecon  augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  solvers.jl:280", 
-            "title": "augTreeSolver"
-        }, 
-        {
-            "location": "/solversAPI/index.html#augtreelapprecon", 
-            "text": "A version of augTreePrecon specialized for Laplacians  augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  solvers.jl:291", 
-            "title": "augTreeLapPrecon"
-        }, 
-        {
-            "location": "/solversAPI/index.html#augtreelapsolver", 
-            "text": "This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.  augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  solvers.jl:313", 
-            "title": "augTreeLapSolver"
-        }, 
-        {
-            "location": "/cutHeuristicsAPI/index.html", 
-            "text": "cutHeuristics\n\n\nrefineCut\n\n\nModify a cluster by adding or removing vertices by picking at each step \nthe vertex that has the maximum value of (Deg_external - Deg_Internal).\nEach vertex can be added in/removed only once.\n\n\n\n\nrefineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\ncutHeuristics.jl:9\n\n\ndumb\n\n\nModify a cluster by passing through all the vertices exactly once and \nadding/removing them based on the value of (Deg_external - Deg_Internal).\n\n\n\n\ndumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\ncutHeuristics.jl:106", 
-            "title": "cutHeuristics"
-        }, 
-        {
-            "location": "/cutHeuristicsAPI/index.html#cutheuristics", 
-            "text": "", 
-            "title": "cutHeuristics"
-        }, 
-        {
-            "location": "/cutHeuristicsAPI/index.html#refinecut", 
-            "text": "Modify a cluster by adding or removing vertices by picking at each step \nthe vertex that has the maximum value of (Deg_external - Deg_Internal).\nEach vertex can be added in/removed only once.  refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  cutHeuristics.jl:9", 
-            "title": "refineCut"
-        }, 
-        {
-            "location": "/cutHeuristicsAPI/index.html#dumb", 
-            "text": "Modify a cluster by passing through all the vertices exactly once and \nadding/removing them based on the value of (Deg_external - Deg_Internal).  dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  cutHeuristics.jl:106", 
-            "title": "dumb"
-        }, 
-        {
-            "location": "/localClusteringAPI/index.html", 
-            "text": "localClustering\n\n\nlocalImprove\n\n\nlocalImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)\n\n\nThe LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.\n\n\nSmall discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.\n\n\n\n\nG is the given graph, A is the initial set \n\n\nepsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA)\n\n\nerr is the numerical error considered throughout the algorithm. It's defaulted to 1e-10\n\n\nmaxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|\n\n\n\n\nlocalImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})\n\n\n\n\nlocalClustering.jl:22\n\n\nprn\n\n\nprn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)\n\n\nThe PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper\n\n\ns is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]\n\n\nphi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality.  b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.\n\n\nprn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)\n\n\n\n\nlocalClustering.jl:374\n\n\napr\n\n\nComputes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes\n\n\napr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)\n\n\n\n\nlocalClustering.jl:440", 
-            "title": "localClustering"
-        }, 
-        {
-            "location": "/localClusteringAPI/index.html#localclustering", 
-            "text": "", 
-            "title": "localClustering"
-        }, 
-        {
-            "location": "/localClusteringAPI/index.html#localimprove", 
-            "text": "localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)  The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.  Small discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.   G is the given graph, A is the initial set   epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA)  err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10  maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|   localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})  localClustering.jl:22", 
-            "title": "localImprove"
-        }, 
-        {
-            "location": "/localClusteringAPI/index.html#prn", 
-            "text": "prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)  The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper  s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]  phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality.  b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.  prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)  localClustering.jl:374", 
-            "title": "prn"
-        }, 
-        {
-            "location": "/localClusteringAPI/index.html#apr", 
-            "text": "Computes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes  apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)  localClustering.jl:440", 
-            "title": "apr"
-        }, 
-        {
-            "location": "/pcgAPI/index.html", 
+            "location": "/API/pcgAPI/index.html", 
             "text": "pcg\n\n\ncg\n\n\ncg(mat, b; tol, maxits, maxtime, verbose)\n solves a symmetric linear system. \ntol\n is set to 1e-6 by default, \nmaxits\n defaults to Inf \nmaxtime\n defaults to Inf.  It measures seconds. \nverbose\n defaults to false\n\n\ncg(mat, b::Array{Float64,1})\ncg(mat, b::Array{Float32,1})\ncg(mat, b)\n\n\n\n\npcg.jl:45\n\n\ncgSolver\n\n\ncgSolver(mat; tol, maxits, maxtime, verbose)\n creates a solver for a PSD system \nmat\n. The parameters are as described in cg.\n\n\ncgSolver(mat)\n\n\n\n\npcg.jl:57\n\n\npcg\n\n\npcg(mat, b, pre; tol, maxits, maxtime, verbose)\n solves a symmetric linear system using preconditioner \npre\n. \npre\n can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact. \ntol\n is set to 1e-6 by default, \nmaxits\n defaults to Inf \nmaxtime\n defaults to Inf.  It measures seconds. \nverbose\n defaults to false\n\n\npcg(mat, b, pre::AbstractArray{T,N})\npcg(mat, b::Array{Float64,1}, pre::Function)\npcg(mat, b::Array{Float32,1}, pre::Function)\npcg(mat, b, pre::Function)\n\n\n\n\npcg.jl:63\n\n\npcgSolver\n\n\npcgSolver(mat, pre; tol, maxits, maxtime, verbose)\n creates a solver for a PSD system using preconditioner \npre\n. The parameters are as described in pcg.\n\n\npcgSolver(mat, pre)\n\n\n\n\npcg.jl:85\n\n\npcgLapSolver\n\n\nCreate a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given\n\n\npcgLapSolver(mat, pre)\n\n\n\n\npcg.jl:91", 
-            "title": "Conjugate Gradient"
+            "title": "pcg"
         }, 
         {
-            "location": "/pcgAPI/index.html#pcg", 
+            "location": "/API/pcgAPI/index.html#pcg", 
             "text": "", 
             "title": "pcg"
         }, 
         {
-            "location": "/pcgAPI/index.html#cg", 
+            "location": "/API/pcgAPI/index.html#cg", 
             "text": "cg(mat, b; tol, maxits, maxtime, verbose)  solves a symmetric linear system.  tol  is set to 1e-6 by default,  maxits  defaults to Inf  maxtime  defaults to Inf.  It measures seconds.  verbose  defaults to false  cg(mat, b::Array{Float64,1})\ncg(mat, b::Array{Float32,1})\ncg(mat, b)  pcg.jl:45", 
             "title": "cg"
         }, 
         {
-            "location": "/pcgAPI/index.html#cgsolver", 
+            "location": "/API/pcgAPI/index.html#cgsolver", 
             "text": "cgSolver(mat; tol, maxits, maxtime, verbose)  creates a solver for a PSD system  mat . The parameters are as described in cg.  cgSolver(mat)  pcg.jl:57", 
             "title": "cgSolver"
         }, 
         {
-            "location": "/pcgAPI/index.html#pcg_1", 
+            "location": "/API/pcgAPI/index.html#pcg_1", 
             "text": "pcg(mat, b, pre; tol, maxits, maxtime, verbose)  solves a symmetric linear system using preconditioner  pre .  pre  can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact.  tol  is set to 1e-6 by default,  maxits  defaults to Inf  maxtime  defaults to Inf.  It measures seconds.  verbose  defaults to false  pcg(mat, b, pre::AbstractArray{T,N})\npcg(mat, b::Array{Float64,1}, pre::Function)\npcg(mat, b::Array{Float32,1}, pre::Function)\npcg(mat, b, pre::Function)  pcg.jl:63", 
             "title": "pcg"
         }, 
         {
-            "location": "/pcgAPI/index.html#pcgsolver", 
+            "location": "/API/pcgAPI/index.html#pcgsolver", 
             "text": "pcgSolver(mat, pre; tol, maxits, maxtime, verbose)  creates a solver for a PSD system using preconditioner  pre . The parameters are as described in pcg.  pcgSolver(mat, pre)  pcg.jl:85", 
             "title": "pcgSolver"
         }, 
         {
-            "location": "/pcgAPI/index.html#pcglapsolver", 
+            "location": "/API/pcgAPI/index.html#pcglapsolver", 
             "text": "Create a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given  pcgLapSolver(mat, pre)  pcg.jl:91", 
             "title": "pcgLapSolver"
         }, 
         {
-            "location": "/akpwAPI/index.html", 
+            "location": "/API/solversAPI/index.html", 
+            "text": "solvers\n\n\nlapWrapSolver\n\n\nTakes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here\n\n\nlapWrapSolver(solver)\nlapWrapSolver(solver, la::AbstractArray{T,N})\nlapWrapSolver(solver, la::AbstractArray{T,N}, b)\n\n\n\n\nsolvers.jl:178\n\n\naugmentTree\n\n\nTakes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch\n\n\naugmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)\n\n\n\n\nsolvers.jl:208\n\n\naugTreePrecon\n\n\nThis is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.\n\n\naugTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nsolvers.jl:258\n\n\naugTreeSolver\n\n\nThis is the solver that calls augTreePrecon\n\n\naugTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nsolvers.jl:280\n\n\naugTreeLapPrecon\n\n\nA version of augTreePrecon specialized for Laplacians\n\n\naugTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nsolvers.jl:291\n\n\naugTreeLapSolver\n\n\nThis is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.\n\n\naugTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})\n\n\n\n\nsolvers.jl:313", 
+            "title": "solvers"
+        }, 
+        {
+            "location": "/API/solversAPI/index.html#solvers", 
+            "text": "", 
+            "title": "solvers"
+        }, 
+        {
+            "location": "/API/solversAPI/index.html#lapwrapsolver", 
+            "text": "Takes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here  lapWrapSolver(solver)\nlapWrapSolver(solver, la::AbstractArray{T,N})\nlapWrapSolver(solver, la::AbstractArray{T,N}, b)  solvers.jl:178", 
+            "title": "lapWrapSolver"
+        }, 
+        {
+            "location": "/API/solversAPI/index.html#augmenttree", 
+            "text": "Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch  augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)  solvers.jl:208", 
+            "title": "augmentTree"
+        }, 
+        {
+            "location": "/API/solversAPI/index.html#augtreeprecon", 
+            "text": "This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.  augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  solvers.jl:258", 
+            "title": "augTreePrecon"
+        }, 
+        {
+            "location": "/API/solversAPI/index.html#augtreesolver", 
+            "text": "This is the solver that calls augTreePrecon  augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  solvers.jl:280", 
+            "title": "augTreeSolver"
+        }, 
+        {
+            "location": "/API/solversAPI/index.html#augtreelapprecon", 
+            "text": "A version of augTreePrecon specialized for Laplacians  augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  solvers.jl:291", 
+            "title": "augTreeLapPrecon"
+        }, 
+        {
+            "location": "/API/solversAPI/index.html#augtreelapsolver", 
+            "text": "This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.  augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})  solvers.jl:313", 
+            "title": "augTreeLapSolver"
+        }, 
+        {
+            "location": "/API/cutHeuristicsAPI/index.html", 
+            "text": "cutHeuristics\n\n\nrefineCut\n\n\nModify a cluster by adding or removing vertices by picking at each step \nthe vertex that has the maximum value of (Deg_external - Deg_Internal).\nEach vertex can be added in/removed only once.\n\n\n\n\nrefineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\ncutHeuristics.jl:9\n\n\ndumb\n\n\nModify a cluster by passing through all the vertices exactly once and \nadding/removing them based on the value of (Deg_external - Deg_Internal).\n\n\n\n\ndumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})\n\n\n\n\ncutHeuristics.jl:106", 
+            "title": "cutHeuristics"
+        }, 
+        {
+            "location": "/API/cutHeuristicsAPI/index.html#cutheuristics", 
+            "text": "", 
+            "title": "cutHeuristics"
+        }, 
+        {
+            "location": "/API/cutHeuristicsAPI/index.html#refinecut", 
+            "text": "Modify a cluster by adding or removing vertices by picking at each step \nthe vertex that has the maximum value of (Deg_external - Deg_Internal).\nEach vertex can be added in/removed only once.  refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  cutHeuristics.jl:9", 
+            "title": "refineCut"
+        }, 
+        {
+            "location": "/API/cutHeuristicsAPI/index.html#dumb", 
+            "text": "Modify a cluster by passing through all the vertices exactly once and \nadding/removing them based on the value of (Deg_external - Deg_Internal).  dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})  cutHeuristics.jl:106", 
+            "title": "dumb"
+        }, 
+        {
+            "location": "/API/localClusteringAPI/index.html", 
+            "text": "localClustering\n\n\nlocalImprove\n\n\nlocalImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)\n\n\nThe LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.\n\n\nSmall discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.\n\n\n\n\nG is the given graph, A is the initial set \n\n\nepsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA)\n\n\nerr is the numerical error considered throughout the algorithm. It's defaulted to 1e-10\n\n\nmaxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|\n\n\n\n\nlocalImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})\n\n\n\n\nlocalClustering.jl:22\n\n\nprn\n\n\nprn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)\n\n\nThe PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper\n\n\ns is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]\n\n\nphi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality.  b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.\n\n\nprn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)\n\n\n\n\nlocalClustering.jl:374\n\n\napr\n\n\nComputes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes\n\n\napr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)\n\n\n\n\nlocalClustering.jl:440", 
+            "title": "localClustering"
+        }, 
+        {
+            "location": "/API/localClusteringAPI/index.html#localclustering", 
+            "text": "", 
+            "title": "localClustering"
+        }, 
+        {
+            "location": "/API/localClusteringAPI/index.html#localimprove", 
+            "text": "localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)  The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.  Small discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.   G is the given graph, A is the initial set   epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA)  err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10  maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|   localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})  localClustering.jl:22", 
+            "title": "localImprove"
+        }, 
+        {
+            "location": "/API/localClusteringAPI/index.html#prn", 
+            "text": "prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)  The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper  s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]  phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality.  b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.  prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)  localClustering.jl:374", 
+            "title": "prn"
+        }, 
+        {
+            "location": "/API/localClusteringAPI/index.html#apr", 
+            "text": "Computes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes  apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)  localClustering.jl:440", 
+            "title": "apr"
+        }, 
+        {
+            "location": "/API/pcgAPI/index.html", 
+            "text": "pcg\n\n\ncg\n\n\ncg(mat, b; tol, maxits, maxtime, verbose)\n solves a symmetric linear system. \ntol\n is set to 1e-6 by default, \nmaxits\n defaults to Inf \nmaxtime\n defaults to Inf.  It measures seconds. \nverbose\n defaults to false\n\n\ncg(mat, b::Array{Float64,1})\ncg(mat, b::Array{Float32,1})\ncg(mat, b)\n\n\n\n\npcg.jl:45\n\n\ncgSolver\n\n\ncgSolver(mat; tol, maxits, maxtime, verbose)\n creates a solver for a PSD system \nmat\n. The parameters are as described in cg.\n\n\ncgSolver(mat)\n\n\n\n\npcg.jl:57\n\n\npcg\n\n\npcg(mat, b, pre; tol, maxits, maxtime, verbose)\n solves a symmetric linear system using preconditioner \npre\n. \npre\n can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact. \ntol\n is set to 1e-6 by default, \nmaxits\n defaults to Inf \nmaxtime\n defaults to Inf.  It measures seconds. \nverbose\n defaults to false\n\n\npcg(mat, b, pre::AbstractArray{T,N})\npcg(mat, b::Array{Float64,1}, pre::Function)\npcg(mat, b::Array{Float32,1}, pre::Function)\npcg(mat, b, pre::Function)\n\n\n\n\npcg.jl:63\n\n\npcgSolver\n\n\npcgSolver(mat, pre; tol, maxits, maxtime, verbose)\n creates a solver for a PSD system using preconditioner \npre\n. The parameters are as described in pcg.\n\n\npcgSolver(mat, pre)\n\n\n\n\npcg.jl:85\n\n\npcgLapSolver\n\n\nCreate a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given\n\n\npcgLapSolver(mat, pre)\n\n\n\n\npcg.jl:91", 
+            "title": "Conjugate Gradient"
+        }, 
+        {
+            "location": "/API/pcgAPI/index.html#pcg", 
+            "text": "", 
+            "title": "pcg"
+        }, 
+        {
+            "location": "/API/pcgAPI/index.html#cg", 
+            "text": "cg(mat, b; tol, maxits, maxtime, verbose)  solves a symmetric linear system.  tol  is set to 1e-6 by default,  maxits  defaults to Inf  maxtime  defaults to Inf.  It measures seconds.  verbose  defaults to false  cg(mat, b::Array{Float64,1})\ncg(mat, b::Array{Float32,1})\ncg(mat, b)  pcg.jl:45", 
+            "title": "cg"
+        }, 
+        {
+            "location": "/API/pcgAPI/index.html#cgsolver", 
+            "text": "cgSolver(mat; tol, maxits, maxtime, verbose)  creates a solver for a PSD system  mat . The parameters are as described in cg.  cgSolver(mat)  pcg.jl:57", 
+            "title": "cgSolver"
+        }, 
+        {
+            "location": "/API/pcgAPI/index.html#pcg_1", 
+            "text": "pcg(mat, b, pre; tol, maxits, maxtime, verbose)  solves a symmetric linear system using preconditioner  pre .  pre  can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact.  tol  is set to 1e-6 by default,  maxits  defaults to Inf  maxtime  defaults to Inf.  It measures seconds.  verbose  defaults to false  pcg(mat, b, pre::AbstractArray{T,N})\npcg(mat, b::Array{Float64,1}, pre::Function)\npcg(mat, b::Array{Float32,1}, pre::Function)\npcg(mat, b, pre::Function)  pcg.jl:63", 
+            "title": "pcg"
+        }, 
+        {
+            "location": "/API/pcgAPI/index.html#pcgsolver", 
+            "text": "pcgSolver(mat, pre; tol, maxits, maxtime, verbose)  creates a solver for a PSD system using preconditioner  pre . The parameters are as described in pcg.  pcgSolver(mat, pre)  pcg.jl:85", 
+            "title": "pcgSolver"
+        }, 
+        {
+            "location": "/API/pcgAPI/index.html#pcglapsolver", 
+            "text": "Create a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given  pcgLapSolver(mat, pre)  pcg.jl:91", 
+            "title": "pcgLapSolver"
+        }, 
+        {
+            "location": "/API/akpwAPI/index.html", 
             "text": "akpw\n\n\nakpwU\n\n\nComputes a low stretch spanning tree of an unweighted \ngraph\n, and returns it as a graph.\n\n\nakpwU(graph)\n\n\n\n\nakpw.jl:166\n\n\nakpw\n\n\nComputes a low stretch spanning tree of \ngraph\n, and returns it as a graph. The default version is 0.  In event of emergency, one can try \nver=2\n.  It is usually slower, but might have slightly better stretch.\n\n\nakpw(graph)\n\n\n\n\nakpw.jl:316", 
             "title": "AKPW"
         }, 
         {
-            "location": "/akpwAPI/index.html#akpw", 
+            "location": "/API/akpwAPI/index.html#akpw", 
             "text": "", 
             "title": "akpw"
         }, 
         {
-            "location": "/akpwAPI/index.html#akpwu", 
+            "location": "/API/akpwAPI/index.html#akpwu", 
             "text": "Computes a low stretch spanning tree of an unweighted  graph , and returns it as a graph.  akpwU(graph)  akpw.jl:166", 
             "title": "akpwU"
         }, 
         {
-            "location": "/akpwAPI/index.html#akpw_1", 
+            "location": "/API/akpwAPI/index.html#akpw_1", 
             "text": "Computes a low stretch spanning tree of  graph , and returns it as a graph. The default version is 0.  In event of emergency, one can try  ver=2 .  It is usually slower, but might have slightly better stretch.  akpw(graph)  akpw.jl:316", 
             "title": "akpw"
         }

@@ -7,16 +7,16 @@
         
         
         
-        <link rel="shortcut icon" href="../../lambda2.ico">
+        <link rel="shortcut icon" href="../../../../lambda2.ico">
         
 
-	<title>AKPW - Laplacians.jl</title>
+	<title>solvers - Laplacians.jl</title>
 
-        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
-        <link href="../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="../css/highlight.css">
-        <link href="../Laplacians.css" rel="stylesheet">
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
+        <link href="../../Laplacians.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -45,7 +45,7 @@
             
 
             <!-- Main title -->
-            <a class="navbar-brand" href="../about/index.html">Laplacians.jl</a>
+            <a class="navbar-brand" href="../../about/index.html">Laplacians.jl</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -56,7 +56,7 @@
                 
                 
                     <li >
-                        <a href="../about/index.html">About</a>
+                        <a href="../../about/index.html">About</a>
                     </li>
                 
                 
@@ -67,37 +67,37 @@
                         
                             
 <li >
-    <a href="../Installation/index.html">Installation</a>
+    <a href="../../Installation/index.html">Installation</a>
 </li>
 
                         
                             
 <li >
-    <a href="../Julia/index.html">Using Julia</a>
+    <a href="../../Julia/index.html">Using Julia</a>
 </li>
 
                         
                             
 <li >
-    <a href="../Examples/index.html">Examples</a>
+    <a href="../../Examples/index.html">Examples</a>
 </li>
 
                         
                             
 <li >
-    <a href="../LSST/index.html">Low Stretch Spanning Trees</a>
+    <a href="../../LSST/index.html">Low Stretch Spanning Trees</a>
 </li>
 
                         
                             
 <li >
-    <a href="../CSCgraph/index.html">Sparse matrices as graphs</a>
+    <a href="../../CSCgraph/index.html">Sparse matrices as graphs</a>
 </li>
 
                         
                             
 <li >
-    <a href="../solvers/index.html">Solvers</a>
+    <a href="../../solvers/index.html">Solvers</a>
 </li>
 
                         
@@ -112,7 +112,7 @@
                         
                             
 <li >
-    <a href="../Developing/index.html">Devleoping Laplacians</a>
+    <a href="../../Developing/index.html">Devleoping Laplacians</a>
 </li>
 
                         
@@ -163,7 +163,13 @@
                         
                             
 <li >
-    <a href="../solversAPI/index.html">solvers</a>
+    <a href="../pcgAPI/index.html">pcg</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="index.html">solvers</a>
 </li>
 
                         
@@ -186,8 +192,8 @@
 
                         
                             
-<li class="active">
-    <a href="index.html">AKPW</a>
+<li >
+    <a href="../akpwAPI/index.html">AKPW</a>
 </li>
 
                         
@@ -210,8 +216,8 @@
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li class="disabled">
-                        <a rel="prev" >
+                    <li >
+                        <a rel="prev" href="../cutHeuristicsAPI/index.html">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -236,30 +242,64 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#akpw">akpw</a></li>
+        <li class="main active"><a href="#solvers">solvers</a></li>
         
-            <li><a href="#akpwu">akpwU</a></li>
+            <li><a href="#lapwrapsolver">lapWrapSolver</a></li>
         
-            <li><a href="#akpw_1">akpw</a></li>
+            <li><a href="#augmenttree">augmentTree</a></li>
+        
+            <li><a href="#augtreeprecon">augTreePrecon</a></li>
+        
+            <li><a href="#augtreesolver">augTreeSolver</a></li>
+        
+            <li><a href="#augtreelapprecon">augTreeLapPrecon</a></li>
+        
+            <li><a href="#augtreelapsolver">augTreeLapSolver</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="akpw">akpw</h1>
-<h3 id="akpwu">akpwU</h3>
-<p>Computes a low stretch spanning tree of an unweighted <code>graph</code>, and returns it as a graph.</p>
-<pre><code class="julia">akpwU(graph)
+<h1 id="solvers">solvers</h1>
+<h3 id="lapwrapsolver">lapWrapSolver</h3>
+<p>Takes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here</p>
+<pre><code class="julia">lapWrapSolver(solver)
+lapWrapSolver(solver, la::AbstractArray{T,N})
+lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 </code></pre>
 
-<p>akpw.jl:166</p>
-<h3 id="akpw_1">akpw</h3>
-<p>Computes a low stretch spanning tree of <code>graph</code>, and returns it as a graph. The default version is 0.  In event of emergency, one can try <code>ver=2</code>.  It is usually slower, but might have slightly better stretch.</p>
-<pre><code class="julia">akpw(graph)
+<p>solvers.jl:178</p>
+<h3 id="augmenttree">augmentTree</h3>
+<p>Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch</p>
+<pre><code class="julia">augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)
 </code></pre>
 
-<p>akpw.jl:316</p></div>
+<p>solvers.jl:208</p>
+<h3 id="augtreeprecon">augTreePrecon</h3>
+<p>This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.</p>
+<pre><code class="julia">augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>solvers.jl:258</p>
+<h3 id="augtreesolver">augTreeSolver</h3>
+<p>This is the solver that calls augTreePrecon</p>
+<pre><code class="julia">augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>solvers.jl:280</p>
+<h3 id="augtreelapprecon">augTreeLapPrecon</h3>
+<p>A version of augTreePrecon specialized for Laplacians</p>
+<pre><code class="julia">augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>solvers.jl:291</p>
+<h3 id="augtreelapsolver">augTreeLapSolver</h3>
+<p>This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.</p>
+<pre><code class="julia">augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>solvers.jl:313</p></div>
             
         </div>
 
@@ -269,14 +309,14 @@
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
 
-        <script src="../js/jquery-1.10.2.min.js"></script>
-        <script src="../js/bootstrap-3.0.3.min.js"></script>
-        <script src="../js/highlight.pack.js"></script>
-        <script>var base_url = '..';</script>
-        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
-        <script src="../js/base.js"></script>
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script>
+        <script>var base_url = '../..';</script>
+        <script data-main="../../mkdocs/js/search.js" src="../../mkdocs/js/require.js"></script>
+        <script src="../../js/base.js"></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
-        <script src="../mathjaxhelper.js"></script>
+        <script src="../../mathjaxhelper.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
             <div class="modal-dialog">

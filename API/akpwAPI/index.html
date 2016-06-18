@@ -7,16 +7,16 @@
         
         
         
-        <link rel="shortcut icon" href="../../lambda2.ico">
+        <link rel="shortcut icon" href="../../../../lambda2.ico">
         
 
-	<title>cutHeuristics - Laplacians.jl</title>
+	<title>AKPW - Laplacians.jl</title>
 
-        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
-        <link href="../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="../css/highlight.css">
-        <link href="../Laplacians.css" rel="stylesheet">
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
+        <link href="../../Laplacians.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -45,7 +45,7 @@
             
 
             <!-- Main title -->
-            <a class="navbar-brand" href="../about/index.html">Laplacians.jl</a>
+            <a class="navbar-brand" href="../../about/index.html">Laplacians.jl</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -56,7 +56,7 @@
                 
                 
                     <li >
-                        <a href="../about/index.html">About</a>
+                        <a href="../../about/index.html">About</a>
                     </li>
                 
                 
@@ -67,37 +67,37 @@
                         
                             
 <li >
-    <a href="../Installation/index.html">Installation</a>
+    <a href="../../Installation/index.html">Installation</a>
 </li>
 
                         
                             
 <li >
-    <a href="../Julia/index.html">Using Julia</a>
+    <a href="../../Julia/index.html">Using Julia</a>
 </li>
 
                         
                             
 <li >
-    <a href="../Examples/index.html">Examples</a>
+    <a href="../../Examples/index.html">Examples</a>
 </li>
 
                         
                             
 <li >
-    <a href="../LSST/index.html">Low Stretch Spanning Trees</a>
+    <a href="../../LSST/index.html">Low Stretch Spanning Trees</a>
 </li>
 
                         
                             
 <li >
-    <a href="../CSCgraph/index.html">Sparse matrices as graphs</a>
+    <a href="../../CSCgraph/index.html">Sparse matrices as graphs</a>
 </li>
 
                         
                             
 <li >
-    <a href="../solvers/index.html">Solvers</a>
+    <a href="../../solvers/index.html">Solvers</a>
 </li>
 
                         
@@ -112,7 +112,7 @@
                         
                             
 <li >
-    <a href="../Developing/index.html">Devleoping Laplacians</a>
+    <a href="../../Developing/index.html">Devleoping Laplacians</a>
 </li>
 
                         
@@ -163,13 +163,19 @@
                         
                             
 <li >
+    <a href="../pcgAPI/index.html">pcg</a>
+</li>
+
+                        
+                            
+<li >
     <a href="../solversAPI/index.html">solvers</a>
 </li>
 
                         
                             
-<li class="active">
-    <a href="index.html">cutHeuristics</a>
+<li >
+    <a href="../cutHeuristicsAPI/index.html">cutHeuristics</a>
 </li>
 
                         
@@ -186,8 +192,8 @@
 
                         
                             
-<li >
-    <a href="../akpwAPI/index.html">AKPW</a>
+<li class="active">
+    <a href="index.html">AKPW</a>
 </li>
 
                         
@@ -206,12 +212,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../solversAPI/index.html">
+                        <a rel="next" href="../pcgAPI/index.html">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../localClusteringAPI/index.html">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -236,37 +242,30 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#cutheuristics">cutHeuristics</a></li>
+        <li class="main active"><a href="#akpw">akpw</a></li>
         
-            <li><a href="#refinecut">refineCut</a></li>
+            <li><a href="#akpwu">akpwU</a></li>
         
-            <li><a href="#dumb">dumb</a></li>
+            <li><a href="#akpw_1">akpw</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="cutheuristics">cutHeuristics</h1>
-<h3 id="refinecut">refineCut</h3>
-<pre><code>Modify a cluster by adding or removing vertices by picking at each step 
-the vertex that has the maximum value of (Deg_external - Deg_Internal).
-Each vertex can be added in/removed only once.
+<h1 id="akpw">akpw</h1>
+<h3 id="akpwu">akpwU</h3>
+<p>Computes a low stretch spanning tree of an unweighted <code>graph</code>, and returns it as a graph.</p>
+<pre><code class="julia">akpwU(graph)
 </code></pre>
 
-<pre><code class="julia">refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+<p>akpw.jl:166</p>
+<h3 id="akpw_1">akpw</h3>
+<p>Computes a low stretch spanning tree of <code>graph</code>, and returns it as a graph. The default version is 0.  In event of emergency, one can try <code>ver=2</code>.  It is usually slower, but might have slightly better stretch.</p>
+<pre><code class="julia">akpw(graph)
 </code></pre>
 
-<p>cutHeuristics.jl:9</p>
-<h3 id="dumb">dumb</h3>
-<pre><code>Modify a cluster by passing through all the vertices exactly once and 
-adding/removing them based on the value of (Deg_external - Deg_Internal).
-</code></pre>
-
-<pre><code class="julia">dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
-</code></pre>
-
-<p>cutHeuristics.jl:106</p></div>
+<p>akpw.jl:316</p></div>
             
         </div>
 
@@ -276,14 +275,14 @@ adding/removing them based on the value of (Deg_external - Deg_Internal).
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
 
-        <script src="../js/jquery-1.10.2.min.js"></script>
-        <script src="../js/bootstrap-3.0.3.min.js"></script>
-        <script src="../js/highlight.pack.js"></script>
-        <script>var base_url = '..';</script>
-        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
-        <script src="../js/base.js"></script>
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script>
+        <script>var base_url = '../..';</script>
+        <script data-main="../../mkdocs/js/search.js" src="../../mkdocs/js/require.js"></script>
+        <script src="../../js/base.js"></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
-        <script src="../mathjaxhelper.js"></script>
+        <script src="../../mathjaxhelper.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
             <div class="modal-dialog">

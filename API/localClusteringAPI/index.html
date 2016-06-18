@@ -7,16 +7,16 @@
         
         
         
-        <link rel="shortcut icon" href="../../lambda2.ico">
+        <link rel="shortcut icon" href="../../../../lambda2.ico">
         
 
-	<title>Conjugate Gradient - Laplacians.jl</title>
+	<title>localClustering - Laplacians.jl</title>
 
-        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
-        <link href="../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="../css/highlight.css">
-        <link href="../Laplacians.css" rel="stylesheet">
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
+        <link href="../../Laplacians.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -45,7 +45,7 @@
             
 
             <!-- Main title -->
-            <a class="navbar-brand" href="../about/index.html">Laplacians.jl</a>
+            <a class="navbar-brand" href="../../about/index.html">Laplacians.jl</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -56,7 +56,7 @@
                 
                 
                     <li >
-                        <a href="../about/index.html">About</a>
+                        <a href="../../about/index.html">About</a>
                     </li>
                 
                 
@@ -67,37 +67,37 @@
                         
                             
 <li >
-    <a href="../Installation/index.html">Installation</a>
+    <a href="../../Installation/index.html">Installation</a>
 </li>
 
                         
                             
 <li >
-    <a href="../Julia/index.html">Using Julia</a>
+    <a href="../../Julia/index.html">Using Julia</a>
 </li>
 
                         
                             
 <li >
-    <a href="../Examples/index.html">Examples</a>
+    <a href="../../Examples/index.html">Examples</a>
 </li>
 
                         
                             
 <li >
-    <a href="../LSST/index.html">Low Stretch Spanning Trees</a>
+    <a href="../../LSST/index.html">Low Stretch Spanning Trees</a>
 </li>
 
                         
                             
 <li >
-    <a href="../CSCgraph/index.html">Sparse matrices as graphs</a>
+    <a href="../../CSCgraph/index.html">Sparse matrices as graphs</a>
 </li>
 
                         
                             
 <li >
-    <a href="../solvers/index.html">Solvers</a>
+    <a href="../../solvers/index.html">Solvers</a>
 </li>
 
                         
@@ -112,7 +112,7 @@
                         
                             
 <li >
-    <a href="../Developing/index.html">Devleoping Laplacians</a>
+    <a href="../../Developing/index.html">Devleoping Laplacians</a>
 </li>
 
                         
@@ -163,6 +163,12 @@
                         
                             
 <li >
+    <a href="../pcgAPI/index.html">pcg</a>
+</li>
+
+                        
+                            
+<li >
     <a href="../solversAPI/index.html">solvers</a>
 </li>
 
@@ -174,14 +180,14 @@
 
                         
                             
-<li >
-    <a href="../localClusteringAPI/index.html">localClustering</a>
+<li class="active">
+    <a href="index.html">localClustering</a>
 </li>
 
                         
                             
-<li class="active">
-    <a href="index.html">Conjugate Gradient</a>
+<li >
+    <a href="../pcgAPI/index.html">Conjugate Gradient</a>
 </li>
 
                         
@@ -206,12 +212,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../localClusteringAPI/index.html">
+                        <a rel="next" href="../cutHeuristicsAPI/index.html">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../akpwAPI/index.html">
+                        <a rel="prev" href="../pcgAPI/index.html">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -236,59 +242,49 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#pcg">pcg</a></li>
+        <li class="main active"><a href="#localclustering">localClustering</a></li>
         
-            <li><a href="#cg">cg</a></li>
+            <li><a href="#localimprove">localImprove</a></li>
         
-            <li><a href="#cgsolver">cgSolver</a></li>
+            <li><a href="#prn">prn</a></li>
         
-            <li><a href="#pcg_1">pcg</a></li>
-        
-            <li><a href="#pcgsolver">pcgSolver</a></li>
-        
-            <li><a href="#pcglapsolver">pcgLapSolver</a></li>
+            <li><a href="#apr">apr</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="pcg">pcg</h1>
-<h3 id="cg">cg</h3>
-<p><code>cg(mat, b; tol, maxits, maxtime, verbose)</code> solves a symmetric linear system. <code>tol</code> is set to 1e-6 by default, <code>maxits</code> defaults to Inf <code>maxtime</code> defaults to Inf.  It measures seconds. <code>verbose</code> defaults to false</p>
-<pre><code class="julia">cg(mat, b::Array{Float64,1})
-cg(mat, b::Array{Float32,1})
-cg(mat, b)
+<h1 id="localclustering">localClustering</h1>
+<h3 id="localimprove">localImprove</h3>
+<p>localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)</p>
+<p>The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance based on the starting set using a localized version of max-flow.</p>
+<p>Small discussion: When adding in the neighbors of the initial component, if the resulting  conductance is worse than the initial one,  the algorithm will add more and more vertices until hitting a better conductance. However, if we fix a certain  maximum size for our component,  it might be the case that this new conductance will always be worse than what we had initially. Thus, if we run the algorithm with a small maxSize,  our initial conductance might be the best solution we can raech.</p>
+<ul>
+<li>G is the given graph, A is the initial set </li>
+<li>epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(VA)</li>
+<li>err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10</li>
+<li>maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|</li>
+</ul>
+<pre><code class="julia">localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1})
 </code></pre>
 
-<p>pcg.jl:45</p>
-<h3 id="cgsolver">cgSolver</h3>
-<p><code>cgSolver(mat; tol, maxits, maxtime, verbose)</code> creates a solver for a PSD system <code>mat</code>. The parameters are as described in cg.</p>
-<pre><code class="julia">cgSolver(mat)
+<p>localClustering.jl:22</p>
+<h3 id="prn">prn</h3>
+<p>prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)</p>
+<p>The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper</p>
+<p>s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]</p>
+<p>phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality.  b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.</p>
+<pre><code class="julia">prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)
 </code></pre>
 
-<p>pcg.jl:57</p>
-<h3 id="pcg_1">pcg</h3>
-<p><code>pcg(mat, b, pre; tol, maxits, maxtime, verbose)</code> solves a symmetric linear system using preconditioner <code>pre</code>. <code>pre</code> can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact. <code>tol</code> is set to 1e-6 by default, <code>maxits</code> defaults to Inf <code>maxtime</code> defaults to Inf.  It measures seconds. <code>verbose</code> defaults to false</p>
-<pre><code class="julia">pcg(mat, b, pre::AbstractArray{T,N})
-pcg(mat, b::Array{Float64,1}, pre::Function)
-pcg(mat, b::Array{Float32,1}, pre::Function)
-pcg(mat, b, pre::Function)
+<p>localClustering.jl:374</p>
+<h3 id="apr">apr</h3>
+<p>Computes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes</p>
+<pre><code class="julia">apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64, eps::Float64)
 </code></pre>
 
-<p>pcg.jl:63</p>
-<h3 id="pcgsolver">pcgSolver</h3>
-<p><code>pcgSolver(mat, pre; tol, maxits, maxtime, verbose)</code> creates a solver for a PSD system using preconditioner <code>pre</code>. The parameters are as described in pcg.</p>
-<pre><code class="julia">pcgSolver(mat, pre)
-</code></pre>
-
-<p>pcg.jl:85</p>
-<h3 id="pcglapsolver">pcgLapSolver</h3>
-<p>Create a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given</p>
-<pre><code class="julia">pcgLapSolver(mat, pre)
-</code></pre>
-
-<p>pcg.jl:91</p></div>
+<p>localClustering.jl:440</p></div>
             
         </div>
 
@@ -298,14 +294,14 @@ pcg(mat, b, pre::Function)
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
 
-        <script src="../js/jquery-1.10.2.min.js"></script>
-        <script src="../js/bootstrap-3.0.3.min.js"></script>
-        <script src="../js/highlight.pack.js"></script>
-        <script>var base_url = '..';</script>
-        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
-        <script src="../js/base.js"></script>
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script>
+        <script>var base_url = '../..';</script>
+        <script data-main="../../mkdocs/js/search.js" src="../../mkdocs/js/require.js"></script>
+        <script src="../../js/base.js"></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
-        <script src="../mathjaxhelper.js"></script>
+        <script src="../../mathjaxhelper.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
             <div class="modal-dialog">

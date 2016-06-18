@@ -62,67 +62,73 @@
     
         
     <url>
-     <loc>None/wholeAPI/index.html</loc>
+     <loc>None/API/wholeAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/graphGeneratorsAPI/index.html</loc>
+     <loc>None/API/graphGeneratorsAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/IOAPI/index.html</loc>
+     <loc>None/API/IOAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/graphOpsAPI/index.html</loc>
+     <loc>None/API/graphOpsAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/graphAlgsAPI/index.html</loc>
+     <loc>None/API/graphAlgsAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/graphUtilsAPI/index.html</loc>
+     <loc>None/API/graphUtilsAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/solversAPI/index.html</loc>
+     <loc>None/API/pcgAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/cutHeuristicsAPI/index.html</loc>
+     <loc>None/API/solversAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/localClusteringAPI/index.html</loc>
+     <loc>None/API/cutHeuristicsAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/pcgAPI/index.html</loc>
+     <loc>None/API/localClusteringAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/akpwAPI/index.html</loc>
+     <loc>None/API/pcgAPI/index.html</loc>
+     <lastmod>2016-06-17</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/API/akpwAPI/index.html</loc>
      <lastmod>2016-06-17</lastmod>
      <changefreq>daily</changefreq>
     </url>

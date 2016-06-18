@@ -1,7 +1,7 @@
 using Laplacians
 
 
-fileName = "docs/wholeAPI.md"
+fileName = "docs/API/wholeAPI.md"
 
 function extraInfo(x)
     fh = IOBuffer()
@@ -95,7 +95,7 @@ for j in 1:length(u)
 
     fn = split(u[j],'.')[1]
     
-    fileName = "docs/" * fn * "API.md"
+    fileName = "docs/API/" * fn * "API.md"
     println(fileName)
     fh = open(fileName,"w")
 
