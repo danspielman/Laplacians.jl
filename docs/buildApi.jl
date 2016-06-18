@@ -1,7 +1,7 @@
 using Laplacians
 
 
-fileName = "docs/wholeAPI.md"
+fileName = "docs/API/wholeAPI.md"
 
 function extraInfo(fh, x)
     if isa(x,Function)
