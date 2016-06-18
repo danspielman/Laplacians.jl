@@ -432,9 +432,17 @@ function kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}; kind=:min)
 end
 
 
-function prim(mat::SparseMatrixCSC)
+"""`prim(mat::SparseMatrixCSC; rev=false)`
+Compute a minimum spanning tree of the matrix `mat`.  
+If rev is true, computes a maximum spanning tree."""
+function prim(mat::SparseMatrixCSC; rev=false)
 
-
+    origmat = mat
+    if rev
+        mat = copy(origmat)
+        mat.nzval = -mat.nzval
+    end
+    
   nVertices = mat.n
   nh = intHeap(nVertices)
 
@@ -486,7 +494,7 @@ function prim(mat::SparseMatrixCSC)
 
   t2 = treeInds[2:nVertices];
 
-  (ai,aj,av) = findnz(mat);
+    (ai,aj,av) = findnz(origmat);
   tr2 = sparse(ai[t2],aj[t2],av[t2],nVertices,nVertices)
   tr2 = tr2 + tr2';
 

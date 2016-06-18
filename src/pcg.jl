@@ -27,6 +27,20 @@ function cg end
 """
 function pcg end
 
+
+"""
+`cgSolver(mat; tol, maxits, maxtime, verbose)` creates a solver for a PSD system `mat`.
+The parameters are as described in cg.
+"""
+function cgSolver end
+
+
+"""
+`pcgSolver(mat, pre; tol, maxits, maxtime, verbose)` creates a solver for a PSD system using preconditioner `pre`.
+The parameters are as described in pcg.
+"""
+function pcgSolver end
+
 function cg(mat, b::Array{Float64,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
     cgBLAS(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
@@ -39,7 +53,6 @@ function cg(mat, b; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=true)
     cgSlow(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
 
-"""Create a solver that uses cg to solve systems in mat.  Fix the default parameters of the solver as given"""
 function cgSolver(mat; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
     f(b; tol::Real=1e-6, maxits=maxits, maxtime=maxtime, verbose=verbose) = cg(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
@@ -68,7 +81,6 @@ function pcg(mat, b, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, ver
 end
 
 
-"""Create a solver that uses pcg to solve systems in mat.  Fix the default parameters of the solver as given"""
 function pcgSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
     f(b; tol::Real=1e-6, maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 

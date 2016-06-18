@@ -122,3 +122,15 @@ graphAlgs.jl:407
 
 
 
+### prim
+`prim(mat::SparseMatrixCSC; rev=false)` Compute a minimum spanning tree of the matrix `mat`.   If rev is true, computes a maximum spanning tree.
+
+
+```julia
+prim(mat::SparseMatrixCSC{Tv,Ti<:Integer})
+```
+
+graphAlgs.jl:440
+
+
+

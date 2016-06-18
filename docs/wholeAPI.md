@@ -180,7 +180,18 @@ cg(mat, b::Array{Float32,1})
 cg(mat, b)
 ```
 
- at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:31
+ at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:45
+
+
+### cgSolver
+`cgSolver(mat; tol, maxits, maxtime, verbose)` creates a solver for a PSD system `mat`. The parameters are as described in cg.
+
+
+```julia
+cgSolver(mat)
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:57
 
 
 ### chimera
@@ -662,16 +673,39 @@ pathGraph(n::Int64)
 
 
 ### pcg
-`pcg(mat, b, pre; tol, maxits, maxtime, verbose)` solves a symmetric linear system using preconditioner `pre`. `pre` should be a function `tol` is set to 1e-6 by default, `maxits` defaults to Inf `maxtime` defaults to Inf.  It measures seconds. `verbose` defaults to false
+`pcg(mat, b, pre; tol, maxits, maxtime, verbose)` solves a symmetric linear system using preconditioner `pre`. `pre` can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact. `tol` is set to 1e-6 by default, `maxits` defaults to Inf `maxtime` defaults to Inf.  It measures seconds. `verbose` defaults to false
 
 
 ```julia
-pcg(mat, b::Array{Float64,1}, pre)
-pcg(mat, b::Array{Float32,1}, pre)
-pcg(mat, b, pre)
+pcg(mat, b, pre::AbstractArray{T,N})
+pcg(mat, b::Array{Float64,1}, pre::Function)
+pcg(mat, b::Array{Float32,1}, pre::Function)
+pcg(mat, b, pre::Function)
 ```
 
- at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:44
+ at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:63
+
+
+### pcgLapSolver
+Create a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given
+
+
+```julia
+pcgLapSolver(mat, pre)
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:91
+
+
+### pcgSolver
+`pcgSolver(mat, pre; tol, maxits, maxtime, verbose)` creates a solver for a PSD system using preconditioner `pre`. The parameters are as described in pcg.
+
+
+```julia
+pcgSolver(mat, pre)
+```
+
+ at /Users/spielman/.julia/v0.4/Laplacians/src/pcg.jl:85
 
 
 ### plotGraph
@@ -698,12 +732,14 @@ prefAttach(n::Int64, k::Int64, p::Float64)
 
 
 ### prim
+`prim(mat::SparseMatrixCSC; rev=false)` Compute a minimum spanning tree of the matrix `mat`.   If rev is true, computes a maximum spanning tree.
+
 
 ```julia
 prim(mat::SparseMatrixCSC{Tv,Ti<:Integer})
 ```
 
- at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:438
+ at /Users/spielman/.julia/v0.4/Laplacians/src/graphAlgs.jl:440
 
 
 ### prn
