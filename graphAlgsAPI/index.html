@@ -252,6 +252,8 @@
         
             <li><a href="#kruskal">kruskal</a></li>
         
+            <li><a href="#prim">prim</a></li>
+        
     
     </ul>
 </div></div>
@@ -334,7 +336,13 @@ tr = full(shortestPathTree(sparse(a),1))
 <pre><code class="julia">kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>graphAlgs.jl:407</p></div>
+<p>graphAlgs.jl:407</p>
+<h3 id="prim">prim</h3>
+<p><code>prim(mat::SparseMatrixCSC; rev=false)</code> Compute a minimum spanning tree of the matrix <code>mat</code>.   If rev is true, computes a maximum spanning tree.</p>
+<pre><code class="julia">prim(mat::SparseMatrixCSC{Tv,Ti&lt;:Integer})
+</code></pre>
+
+<p>graphAlgs.jl:440</p></div>
             
         </div>
 
