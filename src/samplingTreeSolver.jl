@@ -2,6 +2,10 @@
 
 #=
     Some historically good parameters:
+<<<<<<< HEAD
+=======
+    k in [1/4, 1/2]
+>>>>>>> a4785889a208bfc626a5144e720c16723cb12674
     sampConst in [0.001, 0.03]
     beta in [30,200]
 =#
@@ -71,7 +75,11 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     toc()
 
     # Get u and d such that u d u' = -a (doesn't affect solver)
+<<<<<<< HEAD
     U,d = samplingLDL(a, stretch, ceil(Ti, sum(stretch) + rho * (n - 1)), rho)
+=======
+    U,d = samplingLDL(a, stretch, ceil(Ti, sum(stretch) + rho * (n - 1)))
+>>>>>>> a4785889a208bfc626a5144e720c16723cb12674
     Ut = U'
 
     # Create the solver function
@@ -133,6 +141,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     gOp = SqLinOp(true,1.0,n,g)
 
     if returnCN
+<<<<<<< HEAD
 	    tic()
 	    cn = computeCN(lap(a2),U,Ut,d)
 	    cntime = toc()
@@ -142,6 +151,11 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
         return f,gOp,U,d,ord,cn,cntime,(meanStretch,maxStretch)
     else
         return f,gOp,U,d,ord,(0.0, 0.0),0.0,(0.0, 0.0)
+=======
+        return f,gOp,U,d,ord,computeCN(lap(a2),U,Ut,d),(meanStretch,maxStretch)
+    else
+        return f,gOp,U,d,ord,(0.0, 0.0), (0.0, 0.0)
+>>>>>>> a4785889a208bfc626a5144e720c16723cb12674
     end
 end
 
@@ -232,7 +246,11 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
 end
 
 # a is an adjacency matrix
+<<<<<<< HEAD
 function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, totalSize::Ti, rho::Float64)
+=======
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, totalSize::Ti)
+>>>>>>> a4785889a208bfc626a5144e720c16723cb12674
     n = a.n
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
@@ -275,7 +293,11 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
         # wNeigh - list of weights correspongind to each neighbors
         # multNeigh - list of number of multiedges to each neighbor
         # indNeigh - the indices of the neighboring vertices
+<<<<<<< HEAD
         wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh, rho = rho)
+=======
+        wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh)
+>>>>>>> a4785889a208bfc626a5144e720c16723cb12674
 
         # need to divide weights by the diagonal entry
         for j in 1:numPurged
