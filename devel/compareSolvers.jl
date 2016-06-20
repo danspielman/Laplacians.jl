@@ -105,3 +105,26 @@ function treeSolver(a,treeAlg;maxtime=Inf)
     lt = lap(t)
     f = pcgLapSolver(la,lt;maxtime=maxtime)
 end
+
+
+# try permuting before factorization
+# this seems to give a slightly faster solve, although it takes longer to build.
+# and, need to figure out how to get the order
+function treeSolverp(a,treeAlg=akpw;maxtime=Inf)
+    n = size(a,1)
+    t = treeAlg(a)
+    lt = lap(t)
+    ord = Laplacians.bfsOrder(t,1);
+    ord = ord[n:-1:1]
+    ltord = lt[ord,ord];
+
+    iord = zeros(Int,size(ord));
+    iord[ord] = collect(1:n);
+    
+    fordp = cholfact(ltord)
+    laord = la[ord,ord]
+    f1 = pcgLapSolver(laord,ltord)    
+
+    fp(b; maxtime=maxtime) = f1(b[ord], maxtime=maxtime)[iord]
+end
+
