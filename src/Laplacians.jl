@@ -1,4 +1,4 @@
-#__precompile__()
+__precompile__()
 
 """A package for graph computations related to graph Laplacians
 
@@ -32,7 +32,13 @@ and exports the functions for which it seems appropriate.
 
   #  ENV["PYTHON"]=""
   #  Pkg.build("PyCall")
-  using PyPlot
+
+  if !isdefined(Main, :LAPLACIANS_NOPLOT)
+      using PyPlot
+      println("using plot")
+  else
+      println("no plot")
+  end
 
   include("graphUtils.jl")
 
