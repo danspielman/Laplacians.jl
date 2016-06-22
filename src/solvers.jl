@@ -250,10 +250,10 @@ end
     
 """This is an augmented spanning tree preconditioner for diagonally dominant
 linear systems.  It takes as optional input a tree growing algorithm.
-The default is a randomized variant of Kruskal.
-It adds back 2sqrt(n) edges via augmentTree.
-With the right tree, it should never be too bad."""
-function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishKruskal)
+It adds back 2sqrt(n) edges via augmentTree: the sqrt(n) of highest stretch
+and another sqrt(n) sampled according to stretch.
+For most purposes, one should directly call `augTreeSolver`."""
+function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 
   adjmat = -triu(ddmat,1)
   adjmat = adjmat + adjmat'
@@ -274,18 +274,31 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishKrus
 
 end
 
-"""This is the solver that calls augTreePrecon"""
-function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, treeAlg=akpw)
+"""
+An "augmented spanning tree" solver for positive definite diagonally dominant matrices.
+It works by adding edges to a low stretch spanning tree.  It calls `augTreePrecon` to form
+the preconditioner.
+
+~~~julia
+ augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+~~~
+"""
+function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 
   F = augTreePrecon(ddmat, treeAlg=treeAlg)
 
-  f(b) = pcg(ddmat, b, F, tol=tol, maxits=maxits)
+  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+  
     
   return f
 
 end
 
-"""A version of augTreePrecon specialized for Laplacians"""
+"""This is an augmented spanning tree preconditioner for Laplacians.  
+It takes as optional input a tree growing algorithm.
+It adds back 2sqrt(n) edges via `augmentTree`: the sqrt(n) of highest stretch
+and another sqrt(n) sampled according to stretch.
+For most purposes, one should directly call `augTreeLapSolver`."""
 function augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 
   adjmat = -triu(ddmat,1)
@@ -307,8 +320,16 @@ function augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 
 end
 
-"""This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians."""
-function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, maxtime=Inf, verbose=false, treeAlg=akpw)
+"""
+An "augmented spanning tree" solver for Laplacian matrices.
+It works by adding edges to a low stretch spanning tree.  It calls `augTreeLapPrecon` to form
+the preconditioner.
+
+~~~julia
+ augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+~~~
+"""
+function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 
   F = augTreeLapPrecon(ddmat, treeAlg=treeAlg)
 
