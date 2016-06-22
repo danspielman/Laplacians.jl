@@ -35,9 +35,6 @@ and exports the functions for which it seems appropriate.
 
   if !isdefined(Main, :LAPLACIANS_NOPLOT)
       using PyPlot
-      println("using plot")
-  else
-      println("no plot")
   end
 
   include("graphUtils.jl")
