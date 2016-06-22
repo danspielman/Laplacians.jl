@@ -80,6 +80,8 @@ and exports the functions for which it seems appropriate.
 
   include("IO.jl")
   export readIJ, readIJV, writeIJV
+  export writeToFile
+  export readFromFile
 
   include("graphOps.jl")
 

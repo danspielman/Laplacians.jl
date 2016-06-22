@@ -107,7 +107,8 @@ function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{T
                 @assert(false, "current element = neigh in purge")
             else
             	# this is an edge between pos and neigh. if capEdge is true, we will use the effective resistance estimates to cap this edge
-                actualMult = min(auxMult[neigh], rho)
+                # actualMult = min(auxMult[neigh], rho)
+                actualMult = auxMult[neigh]
 
                 if capEdge
                 	p = pos

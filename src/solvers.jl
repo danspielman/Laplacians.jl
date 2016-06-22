@@ -275,11 +275,11 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=randishKrus
 end
 
 """This is the solver that calls augTreePrecon"""
-function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, treeAlg=akpw)
+function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=100, treeAlg=akpw, verbose::Bool=false)
 
   F = augTreePrecon(ddmat, treeAlg=treeAlg)
 
-  f(b) = pcg(ddmat, b, F, tol=tol, maxits=maxits)
+  f(b) = pcg(ddmat, b, F, tol=tol, maxits=maxits,verbose=verbose)
     
   return f
 

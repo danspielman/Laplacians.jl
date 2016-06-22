@@ -206,4 +206,3 @@ function getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
   return obound
 
 end #getObound
-

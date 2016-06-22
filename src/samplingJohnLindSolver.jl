@@ -8,7 +8,8 @@ include("linkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
-                                eps::Float64 = 0.5, sampConst::Float64 = 0.02, JLeps = 0.5, resetMultCounts::Bool = true)
+                                eps::Float64 = 0.5, sampConst::Float64 = 0.02, divk::Float64 = 1.0, 
+                                JLeps::Tv = 0.5, resetMultCounts::Bool = true)
 
     n = a.n
 
@@ -28,7 +29,13 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
     return eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
 end
 
-function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Tv = 0.5, sampConst::Tv = 0.02,
+#=
+	eps and sampConst give rho
+	divk is a scalar by which we divide all multiedge counts
+	JLeps is the epsilon for the JohnLind solver
+	resetMultCounts will trigger log(n) reweighings if set to true
+=#
+function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Tv = 0.5, sampConst::Tv = 0.02, divk::Tv = 1.0,
                             returnCN::Bool = false, JLeps::Tv = 0.5, resetMultCounts::Bool = true)
 
     n = a.n;
@@ -42,7 +49,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Tv = 0.5, sampConst:
     toc()
 
     # Get u and d such that u d u' = -a (doesn't affect solver)
-    U,d = samplingLDL(a, xhat, rho, resetMultCounts)
+    U,d = samplingLDL(a, xhat, rho, divk, resetMultCounts)
     Ut = U'
 
     # println(full(U.data))
@@ -197,7 +204,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, xhat::Array{Tv,2}, rho::Tv, resetMultCounts::Bool)
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, xhat::Array{Tv,2}, rho::Tv, divk::Tv, resetMultCounts::Bool)
     n = a.n
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
@@ -232,7 +239,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, xhat::Array{Tv,2}, rho::T
                 q = i
                 lev = a.nzval[j] * norm(xhat[p,:] - xhat[q,:])^2
 
-                totalLev += lev
+                totalLev += lev / divk
 
                 # set the value min between rho and the stretch
                 llsAdd(neigh, i, (a.nzval[j], min(rho, lev * rho), a.rowval[j]))
@@ -258,7 +265,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, xhat::Array{Tv,2}, rho::T
         numPurged = 0
 
         if lastOpt / 2 > i || resetMultCounts == false
-            wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh)
+            wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh, rho = rho)
         else
             lastOpt = i
             wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh, 
@@ -303,7 +310,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, xhat::Array{Tv,2}, rho::T
                 sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
                 
                 # push!(neigh[posj], (wj * wk / sampScaling, 1, posk))
-                llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
+                llsAdd(neigh, posj, (wj * wk / sampScaling, 1 / divk, posk))
             end
         end  
     end

@@ -84,7 +84,12 @@ function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
         F(y) = mu0*norm(y-v)^2 - sum(log(Bt*y))
         centered = false
         while !centered
-            (H,xNewton) = l2NewtonStep( Bt,x,v,mu0, solver )
+            (H,xNewton,case) = l2NewtonStep( Bt,x,v,mu0, solver )
+            if case == "verbose"
+            	return H,xNewton,"hard graph"
+            end
+
+
             s = Bt*x
             gradF = 2*mu0*(x-v) - Bt'*(1./s)
             x = backtrackLineSearch(F,gradF,Bt,xNewton,x)
@@ -146,26 +151,39 @@ function l2NewtonStep{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
     adjH = -triu(H)
     adjH = -(H + adjH) + -(H + adjH)'
     tic()
-    myf = samplingSolver(adjH, eps = 0.5, sampConst = 0.02, k = 0.5, beta = 100.0)
+    myf = samplingSolver(adjH, tol=1e-6,maxits=1000,verbose=true,
+        eps = 0.5, sampConst = 0.02, beta = 1000.0)
+    myf2 = samplingSolver(adjH, tol=1e-6,maxits=1000,verbose=true,
+        eps = 0.5, sampConst = 0.02, beta = 1000.0)
     print("My build time: ")
-    toc()
+    bt = toc() / 2
     tic()
     myx = myf(grad)
+    myx2 = myf2(grad)
     print("My solve time: ")
-    toc()
+    st = toc() / 2
+    mynorm = min(norm(lap(adjH) * myx - grad),
+        norm(lap(adjH) * myx2 - grad))
+    println(mynorm)
     println()
     
     tic()
-    danF = solver(lap(adjH))
+    danf = augTreeSolver(lap(adjH),tol=1e-6,maxits=1000,verbose=true)
     print("Dan's build time: ")
-    toc()
+    danbt = toc()
     tic()
-    danX = danF(grad)
+    danx = danf(grad)
     print("Dan's solve time: ")
-    toc()
+    danst = toc()
+    dannorm = norm(lap(adjH) * danx - grad)
+    println(dannorm)
     println()
 
-    return (H,xNewton)
+    if mynorm > 1e-4 || (mynorm < 1e-5 && dannorm > 1e-4)
+	    return (adjH,grad,"verbose")
+    end
+
+    return (H,xNewton,"")
 end
 
 function dualVal{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
