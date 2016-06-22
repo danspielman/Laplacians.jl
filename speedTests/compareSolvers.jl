@@ -1,74 +1,83 @@
 
-
-function compareSolversOut(n, nruns; maxtime=Inf)
-
-    t1 = time()
-
+# totTime should be in hours
+function compareSolversOut(n, totTime)
+    
     # first, force a compile
-    tab = compareSolvers(1000,2)
+    tab = compareSolversRuns(1000,2)
 
-    tab = compareSolvers(n, nruns, maxtime=maxtime)
+    tab = compareSolversTime(n, totTime)
+    nruns = size(tab,1)-1
     fn = string("compSolvers", n , "x", nruns, ".csv")
     writecsv(fn,tab)
 
-    t2 = time() - t1
-    println("Took ", t2, " seconds.")
 end
 
 
-function compareSolvers(n, nruns; maxtime=Inf)
+compareSolversRuns(n, nruns, maxtime=Inf) = compareSolvers(n, nruns=nruns, maxtime=maxtime)
+compareSolversTime(n, totTime) = compareSolvers(n, totTime=totTime)
 
-    akpwBuild = Array(Float64,nruns)
-    akpwSolve = Array(Float64,nruns)
-    primBuild = Array(Float64,nruns)
-    primSolve = Array(Float64,nruns)
-    augBuild = Array(Float64,nruns)
-    augSolve = Array(Float64,nruns)
 
-    nedges = Array(Int64,nruns)
-    nlist = Array(Int64,nruns)
-    ilist = Array(Int64,nruns)
 
-    for i in 1:nruns
+# totTime comes in hours, convert to seconds
+function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10)
+
+    totTime = totTime*60*60
+
+    akpwBuild = Array(Float64,0)
+    akpwSolve = Array(Float64,0)
+    primBuild = Array(Float64,0)
+    primSolve = Array(Float64,0)
+    augBuild = Array(Float64,0)
+    augSolve = Array(Float64,0)
+
+    nedges = Array(Int64,0)
+    nlist = Array(Int64,0)
+    ilist = Array(Int64,0)
+
+    i = 0
+    t1 = time()
+
+    while (i < nruns) && (time() <= t1+totTime)
+        i = i + 1
         a = wtedChimera(n,i)
         la = lap(a)
         
         b = randn(n)
         b = b - mean(b)
-        
-        nlist[i] = n
-        ilist[i] = i
-        nedges[i] = nnz(a)
+
+        push!(nlist, n)
+        push!(ilist ,i)
+        push!(nedges, nnz(a))
         
         tic()
         f = treeSolver(a,akpw)
         t = toq()
-        akpwBuild[i] = t
+        push!(akpwBuild, t)
         
         tic()
         x = f(b, maxtime=maxtime)
         t = toq()
-        akpwSolve[i] = t
+        push!(akpwSolve, t)
         
         tic()
         f = treeSolver(a,prim)
         t = toq()
-        primBuild[i] = t
+        push!(primBuild, t)
         
         tic()
         x = f(b, maxtime=maxtime)
         t = toq()
-        primSolve[i] = t
+        push!(primSolve, t)
         
         tic()
         f = augTreeLapSolver(la)
         t = toq()
-        augBuild[i] = t
+        push!(augBuild, t)
         
         tic()
         x = f(b, maxtime=maxtime)
         t = toq()
-        augSolve[i] = t
+        push!(augSolve, t)
         
         print(".")
     end
