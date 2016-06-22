@@ -329,7 +329,7 @@ the preconditioner.
  augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 ~~~
 """
-function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits::Integer=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 
   F = augTreeLapPrecon(ddmat, treeAlg=treeAlg)
 
