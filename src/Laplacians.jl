@@ -28,14 +28,14 @@ and exports the functions for which it seems appropriate.
 
 =#
 
-  using DataStructures
 
-  #  ENV["PYTHON"]=""
-  #  Pkg.build("PyCall")
-
-  if !isdefined(Main, :LAPLACIANS_NOPLOT)
-      using PyPlot
+  function __init__()
+    if !isdefined(Main, :LAPLACIANS_NOPLOT)
+        eval(Expr(:using, :PyPlot))
+    end
   end
+
+  using DataStructures
 
   include("graphUtils.jl")
 
