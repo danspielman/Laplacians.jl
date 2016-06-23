@@ -16,7 +16,7 @@ end
 compareSolversRuns(n, nruns, maxtime=Inf) = compareSolvers(n, nruns=nruns, maxtime=maxtime)
 compareSolversTime(n, totTime) = compareSolvers(n, totTime=totTime)
 
-
+mst(a) = kruskal(a)
 
 # totTime comes in hours, convert to seconds
 function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10)
@@ -25,10 +25,12 @@ function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10)
 
     akpwBuild = Array(Float64,0)
     akpwSolve = Array(Float64,0)
-    primBuild = Array(Float64,0)
-    primSolve = Array(Float64,0)
+    mstBuild = Array(Float64,0)
+    mstSolve = Array(Float64,0)
     augBuild = Array(Float64,0)
     augSolve = Array(Float64,0)
+    cgBuild = Array(Float64,0)
+    cgSolve = Array(Float64,0)
 
     nedges = Array(Int64,0)
     nlist = Array(Int64,0)
@@ -60,14 +62,14 @@ function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10)
         push!(akpwSolve, t)
         
         tic()
-        f = treeSolver(a,prim)
+        f = treeSolver(a,mst)
         t = toq()
-        push!(primBuild, t)
+        push!(mstBuild, t)
         
         tic()
         x = f(b, maxtime=maxtime)
         t = toq()
-        push!(primSolve, t)
+        push!(mstSolve, t)
         
         tic()
         f = augTreeLapSolver(la)
@@ -79,6 +81,16 @@ function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10)
         t = toq()
         push!(augSolve, t)
         
+        tic()
+        f = cgSolver(la)
+        t = toq()
+        push!(cgBuild, t)
+        
+        tic()
+        x = f(b, maxtime=maxtime)
+        t = toq()
+        push!(cgSolve, t)
+        
         print(".")
     end
 
@@ -87,10 +99,12 @@ function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10)
     tab = [tab ["nedges"; nedges]]
     tab = [tab ["akpwBuild"; akpwBuild]]
     tab = [tab ["akpwSolve"; akpwSolve]]
-    tab = [tab ["primBuild"; primBuild]]
-    tab = [tab ["primSolve"; primSolve]]
+    tab = [tab ["mstBuild"; mstBuild]]
+    tab = [tab ["mstSolve"; mstSolve]]
     tab = [tab ["augBuild"; augBuild]]
     tab = [tab ["augSolve"; augSolve]]
+    tab = [tab ["cgBuild"; cgBuild]]
+    tab = [tab ["cgSolve"; cgSolve]]
 
     #=
     tab = makeColumn(:nlist)
