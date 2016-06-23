@@ -2,7 +2,7 @@
 # applies the jacobi preconditioner of the laplacian (diagonal entries)
 function jacobi{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
 	
-	d = 1 ./ diag(la)
+	d = diag(la)
 
 	f = function(b::Array{Float64,1})
 		res = copy(b) - mean(b)
@@ -27,7 +27,7 @@ function gs{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
 		res = copy(b) - mean(b)
 
 		res = m3 \ res
-		res = res ./ (1 ./ m2)
+		res = res ./ m2
 		res = m1 \ res
 
 		return res - mean(res)

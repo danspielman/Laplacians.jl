@@ -10,16 +10,17 @@ using Laplacians
 
 include("akpw.jl")
 include("fastSampler.jl")
-include("linkedListFloatStorage.jl")
+include("revampedLinkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
 
-function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, 
-                                eps::Float64 = 0.5, sampConst::Float64 = 0.02, beta::Float64 = 100.0,
-                                verbose=false)
+function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits::Ti=100, verbose::Bool = false,
+                                eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 100.0,
+                                startingSize::Ti = 1000, blockSize::Ti = 20)
 
     n = a.n
 
-    F,_,_,_,ord,_ = buildSolver(a, eps = eps, sampConst = sampConst, beta = beta)
+    F,_,_,_,ord,_ = buildSolver(a, eps = eps, sampConst = sampConst, beta = beta, 
+        startingSize = startingSize, blockSize = blockSize)
 
     invperm = collect(1:n)
     sort!(invperm, by=x->ord[x])
@@ -40,6 +41,7 @@ end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
                             eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 100.0,
+                            startingSize::Ti = 1000, blockSize::Ti = 20,
                             returnCN::Bool = false)
 
     n = a.n;
@@ -48,7 +50,6 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     println("rho = ", rho)
 
     tic()
-
     tree = akpw(a);
     ord = reverse!(dfsOrder(tree));
 
@@ -71,7 +72,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     toc()
 
     # Get u and d such that u d u' = -a (doesn't affect solver)
-    U,d = samplingLDL(a, stretch, ceil(Ti, sum(stretch) + rho * (n - 1)), rho)
+    U,d = samplingLDL(a, stretch, rho, startingSize, blockSize)
     Ut = U'
 
     # Create the solver function
@@ -232,7 +233,9 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, totalSize::Ti, rho::Float64)
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
+    startingSize::Ti, blockSize::Ti)
+
     n = a.n
 
     # later will have to do a permutation here, for now consider the matrix is already permuted
@@ -253,7 +256,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     # note neigh[i] only stores neighbors j such that j > i
     # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
 
-    neigh = llsInit(a, totalSize)
+    neigh = llsInit(a, startingSize = startingSize, blockSize = blockSize)
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
@@ -322,6 +325,11 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     # add the last diagonal term
     push!(u[n], (1, n))
     d[n] = 0
+
+    println()
+    println("The total size of the linked list data structure should be at most ", ceil(Ti, sum(stretch) + rho * (n - 1)) + 20 * n)
+    println("The actual size is ", neigh.size)
+    println()
 
     return constructLowerTriangularMat(u), d
 end

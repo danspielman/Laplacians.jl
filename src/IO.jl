@@ -81,7 +81,7 @@ end
 
 " Reads a spare matrix from a given text file "
 function readFromFile(filename::ASCIIString)
-    r = readdlm("test.txt", ' ')
+    r = readdlm(filename, ' ')
     
     m::Int64 = r[1,1]
     n::Int64 = r[1,2]
