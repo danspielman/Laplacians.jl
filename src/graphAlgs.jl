@@ -400,10 +400,11 @@ function intHeapSet!{Tkey,Tind}(nh::intHeap, node::Tind, key::Tkey)
   end
 end # intHeapSet!
 
-"""Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree.
-Set kind=:max if you want the max spanning tree.
+"""`(kruskal::SparseMatrixCSC; kind=:max)`
+Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree.
+Set kind=:min if you want the min spanning tree.
 It returns it a a graph"""
-function kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}; kind=:min)
+function kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}; kind=:max)
   n = size(mat)[1]
   (ai,aj,av) = findnz(triu(mat))
   if (kind == :min)
@@ -432,13 +433,13 @@ function kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}; kind=:min)
 end
 
 
-"""`prim(mat::SparseMatrixCSC; rev=false)`
-Compute a minimum spanning tree of the matrix `mat`.  
-If rev is true, computes a maximum spanning tree."""
-function prim(mat::SparseMatrixCSC; rev=false)
+"""`prim(mat::SparseMatrixCSC; kind=:max)`
+Compute a maximum spanning tree of the matrix `mat`.  
+If `kind=:min`, computes a minimum spanning tree."""
+function prim(mat::SparseMatrixCSC; kind=:max)
 
     origmat = mat
-    if rev
+    if kind==:max
         mat = copy(origmat)
         mat.nzval = -mat.nzval
     end
