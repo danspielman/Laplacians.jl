@@ -153,17 +153,13 @@ function l2NewtonStep{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
     tic()
     myf = samplingSolver(adjH, tol=1e-6,maxits=1000,verbose=true,
         eps = 0.5, sampConst = 0.02, beta = 1000.0)
-    myf2 = samplingSolver(adjH, tol=1e-6,maxits=1000,verbose=true,
-        eps = 0.5, sampConst = 0.02, beta = 1000.0)
     print("My build time: ")
-    bt = toc() / 2
+    bt = toc()
     tic()
     myx = myf(grad)
-    myx2 = myf2(grad)
     print("My solve time: ")
-    st = toc() / 2
-    mynorm = min(norm(lap(adjH) * myx - grad),
-        norm(lap(adjH) * myx2 - grad))
+    st = toc()
+    mynorm = norm(lap(adjH) * myx - grad) / norm(grad)
     println(mynorm)
     println()
     
@@ -175,7 +171,7 @@ function l2NewtonStep{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
     danx = danf(grad)
     print("Dan's solve time: ")
     danst = toc()
-    dannorm = norm(lap(adjH) * danx - grad)
+    dannorm = norm(lap(adjH) * danx - grad) / norm(grad)
     println(dannorm)
     println()
 

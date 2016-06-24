@@ -1,7 +1,7 @@
 # Implements the Johnson-Lindenstauss resistance upperbounding
 # TODO: not optimized for speed - let's see how resistance estimates improve the number of nonzeros at the end
 
-function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64; retXhat::Bool = false)
+function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, retXhat::Bool = false)
 
 	n = a.n
 	# m = ceil(Int64, length(a.nzval) / 2)

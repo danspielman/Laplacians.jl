@@ -8,12 +8,11 @@
 
 using Laplacians
 
-include("akpw.jl")
 include("fastSampler.jl")
 include("revampedLinkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
 
-function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits::Ti=100, verbose::Bool = false,
+function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits::Ti=100, maxtime=100, verbose::Bool = false,
                                 eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 100.0,
                                 startingSize::Ti = 1000, blockSize::Ti = 20)
 
@@ -57,7 +56,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     tree = tree[ord, ord];
 
     # blow up the tree by beta
-    a2 = copy(a)                   
+    a2 = copy(a)
     a = a + (beta - 1) * tree
 
     stretch = compStretches(beta * tree, a)
