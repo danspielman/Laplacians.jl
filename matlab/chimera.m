@@ -8,7 +8,7 @@ nm = [tempname, '.txt'];
 
 cmd = ['julia '];
 
-cmd = [cmd, ' -e ''using Laplacians; writeIJV("', nm, '",' ...
+cmd = [cmd, ' -e ''LAPLACIANS_NOPLOT=true; using Laplacians; writeIJV("', nm, '",' ...
                     'chimera('];
        
 cmd = [cmd, num2str(n), ',', num2str(i) '))'' '];
