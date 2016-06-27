@@ -1,3 +1,24 @@
+function appendcsv(filename, data)
+
+    (n1,n2) = size(data)
+    
+    fh = open(filename,"a")
+    for i in 1:n1
+        for j in 1:n2
+            write(fh, string(data[i,j]))
+            if j < n2
+                write(fh, ", ")
+            end
+        end
+        write(fh, "\n")
+    end
+
+    close(fh)
+end
+
+
+
+
 
 # totTime should be in hours
 function compareSolversOut(n, totTime)
@@ -8,7 +29,13 @@ function compareSolversOut(n, totTime)
     tab = compareSolversTime(n, totTime)
     nruns = size(tab,1)-1
     fn = string("compSolvers", n , "x", nruns, ".csv")
-    writecsv(fn,tab)
+    h = open(fn,"w")
+    write(h, chomp(readall(`hostname`)))
+    write(h, "  ")
+    write(h, string(now()))
+    write(h,"\n")
+
+    appendcsv(fn,tab)
 
 end
 
