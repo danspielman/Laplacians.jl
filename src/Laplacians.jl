@@ -105,6 +105,7 @@ and exports the functions for which it seems appropriate.
   export shortIntGraph, floatGraph
 
   export lap
+  export adj
   export spectralCoords
   export spectralDrawing
 

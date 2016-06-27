@@ -18,7 +18,7 @@ On input ‘A’ and ‘v’, the code computes a vector ‘x’ of same length 
 and multiplicative error param eps,
 using a PD SDD linear system solver, given by argument *solver*."""
 function isotonicIPMrelEps{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
-                                  v::Array{Tv,1};
+                                  v::Array{Tv,1},
                                   eps::Real=0.1,
                                   solver=(H -> augTreeSolver(H,tol=1e-1,maxits=1000)))
     return isotonicIPM(A,v,eps,solver,true)
@@ -29,7 +29,7 @@ and additive error param eps,
 using a PD SDD linear system solver, given by argument *solver*.
 Setting relGapTermination=true means the IPM continues until a multiplicative error of eps is reached."""
 function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
-                            v::Array{Tv,1};
+                            v::Array{Tv,1},
                             eps::Tv=0.1,
                             solver=(H -> augTreeSolver(H,tol=1e-1,maxits=1000)),
                             relGapTermination::Bool=false)
@@ -80,10 +80,18 @@ function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
     i=0;    
     muTooSmall = mu0 < eTa2
     
+    numSteps = 0
+
     while muTooSmall
         F(y) = mu0*norm(y-v)^2 - sum(log(Bt*y))
         centered = false
         while !centered
+            numSteps += 1
+            if numSteps % 30 == 1
+                println("So far ", numSteps, " steps were made")
+            end
+
+
             (H,xNewton) = l2NewtonStep( Bt,x,v,mu0, solver )
             s = Bt*x
             gradF = 2*mu0*(x-v) - Bt'*(1./s)

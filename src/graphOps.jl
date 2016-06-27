@@ -11,6 +11,14 @@ floatGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int64}(a.m, a.n, a.colp
 We might want to do this differently, say by enforcing symmetry"""
 lap(a) = spdiagm(a*ones(size(a)[1])) - a
 
+"""Create an adjacency matrix and a diagonal vector from a Laplacian with added diagonal weights"""
+function adj{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
+  a = -(2 * la - triu(la) - tril(la))
+  d = diag(la) - diag(lap(a))
+  return a,d
+end
+
+
 """Create a new graph in that is the same as the original, but with all edge weights 1"""
 function unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
     a = copy(ain)

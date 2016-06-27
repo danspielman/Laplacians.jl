@@ -87,6 +87,9 @@ function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
             (H,xNewton,case) = l2NewtonStep( Bt,x,v,mu0, solver )
             if case == "verbose"
             	return H,xNewton,"hard graph"
+            else
+            	push!(Laps, H)
+            	push!(bs, xNewton)
             end
 
 
