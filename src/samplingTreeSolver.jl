@@ -12,8 +12,8 @@ include("fastSampler.jl")
 include("revampedLinkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
 
-function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits::Ti=100, maxtime=100, verbose::Bool = false,
-                                eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 100.0,
+function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=100, maxtime=Inf, verbose::Bool = false,
+                                eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
                                 startingSize::Ti = 1000, blockSize::Ti = 20)
 
     n = a.n
@@ -26,7 +26,7 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits::
 
     la = lap(a[ord,ord])
     function f(b)
-        ret = pcg(la, b[ord], F, tol=tol, maxits=maxits, verbose=verbose)
+        ret = pcg(la, b[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
         return ret[invperm]
     end
     
@@ -39,7 +39,7 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
 end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                            eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 100.0,
+                            eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
                             startingSize::Ti = 1000, blockSize::Ti = 20,
                             returnCN::Bool = false)
 
@@ -59,8 +59,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     a2 = copy(a)
     a = a + (beta - 1) * tree
 
-    stretch = compStretches(beta * tree, a)
-    stretch = stretch * rho
+    stretch = rho * compStretches(beta * tree, a)
 
     meanStretch = mean(stretch.nzval)
     println("Average number of multiedges = ", mean(stretch.nzval))

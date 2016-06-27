@@ -146,38 +146,44 @@ function l2NewtonStep{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
     F = solver(invMinEntryH * H)
     xNewton = -F(grad)*invMinEntryH
 
+
+    #################################### Debugging and testing on hard graphs ####################################
 	println("*****************", "\n")
     
     adjH = -triu(H)
     adjH = -(H + adjH) + -(H + adjH)'
+    addD = diag(H - lap(adjH))
+
     tic()
-    myf = samplingSolver(adjH, tol=1e-6,maxits=1000,verbose=true,
-        eps = 0.5, sampConst = 0.02, beta = 1000.0)
+    myf = samplingSolver(adjH, addD,
+    	tol=1e-6,maxits=Inf,maxtime=20,verbose=true,
+        eps = 0.5, sampConst = 3.0, beta = 1000.0)
     print("My build time: ")
     bt = toc()
     tic()
     myx = myf(grad)
     print("My solve time: ")
     st = toc()
-    mynorm = norm(lap(adjH) * myx - grad) / norm(grad)
+    mynorm = norm(H * myx - grad) / norm(grad)
     println(mynorm)
     println()
     
     tic()
-    danf = augTreeSolver(lap(adjH),tol=1e-6,maxits=1000,verbose=true)
+    danf = augTreeSolver(H,tol=1e-6,maxits=Inf,maxtime=20,verbose=true)
     print("Dan's build time: ")
     danbt = toc()
     tic()
     danx = danf(grad)
     print("Dan's solve time: ")
     danst = toc()
-    dannorm = norm(lap(adjH) * danx - grad) / norm(grad)
+    dannorm = norm(H * danx - grad) / norm(grad)
     println(dannorm)
     println()
 
-    if mynorm > 1e-4 || (mynorm < 1e-5 && dannorm > 1e-4)
-	    return (adjH,grad,"verbose")
+    if mynorm > 1e-3 || (mynorm < 1e-5 && dannorm > 1e-4)
+	    return (H,grad,"verbose")
     end
+    ############################################################################################################
 
     return (H,xNewton,"")
 end

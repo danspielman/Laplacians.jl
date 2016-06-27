@@ -1,33 +1,298 @@
 # Rasmus' linear system sovler. 
 
+#=
+    Some historically good parameters:
+    sampConst in [0.001, 0.03]
+    beta in [30,200]
+=#
+
 using Laplacians
 
 include("fastSampler.jl")
+include("revampedLinkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
 
-function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, eps::Float64 = 0.5, sampConst::Float64 = 10.0)
+function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
+                                tol::Tv=1e-6, maxits=100, maxtime=Inf, verbose::Bool = false,
+                                eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
+                                startingSize::Ti = 1000, blockSize::Ti = 20)
 
-    F = buildSolver(a, eps = eps, sampConst = sampConst)
+    a = extendedLaplacian(a, diag)
+    n = a.n
 
-    la = lap(a)
-    f(b) = pcg(la, b, F, tol=tol, maxits=maxits, verbose=true)
+    F,gOp,_,_,ord,cn,cntime,_ = buildSolver(a, eps = eps, sampConst = sampConst, beta = beta, 
+        startingSize = startingSize, blockSize = blockSize, returnCN = verbose)
 
+    if cntime != 0.0
+        println()
+        println("Eps error: ", checkError(gOp))
+        println("Condition number: ", cn)
+        println()
+    end 
+
+    invperm = collect(1:n)
+    sort!(invperm, by=x->ord[x])
+
+    la = lap(a[ord,ord])
+    function f(b)
+        #= 
+            We need to add an extra entry to b to make it match the size of a. The extra vertex in a is
+            vertex n, thus, we will add the new entry in b on position n as well.
+        =#
+        auxb = copy(b)
+        push!(auxb, -sum(auxb))
+
+        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+        ret = ret[invperm]
+
+        # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
+        ret = ret - ret[n]
+
+        return ret[1:(n-1)]
+    end
+    
     return f
 
 end
 
-function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti})
-    return eigs(gOp;nev=1,which=:LM)[1][1]
+# Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight
+function extendedLaplacian{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
+
+    u,v,w = findnz(a)
+    for i in 1:n
+        push!(u, i)
+        push!(v, n + 1)
+        push!(w, diag[i])
+
+        push!(u, n + 1)
+        push!(v, i)
+        push!(w, diag[i])
+    end
+    
+    return sparse(u,v,w)
+
 end
 
-function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampConst::Float64 = 10.0)
+function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
+                            eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
+                            startingSize::Ti = 1000, blockSize::Ti = 20,
+                            returnCN::Bool = false)
+
+    # compute rho
+    n = a.n;
+    rho::Tv = sampConst * log(n) ^ 2 / eps ^ 2
+    println("rho = ", rho)
+
+    tic()
+    #=
+        Note: The n'th vertex will correspond to the vertex used to solve Laplacian systems
+        with extra weight on the diagonal. Thus, we want to eliminate it last.
+    =#
+
+    tree = akpw(a);
+
+    ord = reverse!(dfsOrder(tree, start = n));
+
+    a = a[ord, ord];
+    tree = tree[ord, ord];
+
+    # Blow up the tree and compute the stretches
+    a2 = copy(a)
+    a = a + (beta - 1) * tree
+
+    stretch = rho * compStretches(beta * tree, a)
+    stretch.nzval = min(rho, stretch.nzval)
+
+    meanStretch = mean(stretch.nzval)
+    println("Average number of multiedges = ", mean(stretch.nzval))
+    maxStretch = maximum(stretch.nzval)
+    println("Maximum number of multiedges = ", maximum(stretch.nzval))
+  
+    print("Time to build the tree and compute the stretch: ")
+    toc()
 
     # Get u and d such that u d u' = -a (doesn't affect solver)
-    u,d = samplingLDL(a, eps, sampConst)
+    U,d = samplingLDL(a, stretch, rho, startingSize, blockSize)
+    Ut = U'
 
-    # Initialize the data structures
-    n = length(d)
-    m = n
+    println("nnz in U matrix: ", length(U.data.nzval))
+
+    # Create the solver function
+    f = function(b::Array{Float64,1})
+        # center
+        res = copy(b)
+        res = res - sum(res) / n
+
+        # forward solve
+        res = U \ res
+
+        # diag inverse
+        for i in 1:(n - 1)
+            res[i] = res[i] / d[i]
+        end
+
+        # backward solve
+        res = Ut \ res
+
+        # center
+        res = res - sum(res) / n
+        
+        return res
+    end
+
+    # Create the error check function
+    la = lap(a)   
+    g = function(b::Array{Float64,1})
+        res = copy(b)   
+        res[n] = 0
+            
+        # diag sqrt inverse 
+        for i in 1:(n - 1)
+            res[i] = res[i] * d[i]^(-1/2)
+        end
+
+        # backward solve #TODO?
+        res = Ut \ res
+
+        # apply lapl
+        res = la * res
+
+        # forward solve #TODO?
+        res = U \ res
+
+        # diag sqrt inverse
+        for i in 1:(n - 1)
+            res[i] = res[i] * d[i]^(-1/2)
+        end
+
+        # subtract identity, except we haven't zeroed out last coord
+        res = res - b 
+
+        #zero out last coord
+        res[n] = 0 #TODO?
+            
+        return res
+    end
+    gOp = SqLinOp(true,1.0,n,g)
+
+    if returnCN
+	    tic()
+	    cn = computeCN(lap(a2),U,Ut,d)
+	    cntime = toc()
+    end
+
+    if returnCN
+        return f,gOp,U,d,ord,cn,cntime,(meanStretch,maxStretch)
+    else
+        return f,gOp,U,d,ord,(0.0, 0.0),0.0,(0.0, 0.0)
+    end
+end
+
+# a is an adjacency matrix
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
+    startingSize::Ti, blockSize::Ti)
+
+    n = a.n
+
+    # later will have to do a permutation here, for now consider the matrix is already permuted
+
+    # some extra memory to be used later in the algorithm. this can be later pulled out of this function
+    # into an external recipient, to be used on subsequent runs of the solver
+    auxVal = zeros(Tv, n)                       # used to sum weights from multiedges
+    auxMult = zeros(Tv, n)                      # used to count the number of multiedges
+
+    wNeigh = zeros(Tv, n)
+    multNeigh = zeros(Tv, n)
+    indNeigh = zeros(Ti, n)
+    
+    u = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
+    d = zeros(Tv, n)                            # the d matrix part of u d u'
+
+    # neigh[i] = the list of neighbors for vertex i with their corresponding weights
+    # note neigh[i] only stores neighbors j such that j > i
+    # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
+
+    neigh = llsInit(a, startingSize = startingSize, blockSize = blockSize)
+
+    # gather the info in a and put it into neigh and w
+    for i in 1:length(a.colptr) - 1
+        # push!(neigh, Tuple{Tv,Ti,Ti}[])
+
+        for j in a.colptr[i]:a.colptr[i + 1] - 1
+            if a.rowval[j] > i
+                llsAdd(neigh, i, (a.nzval[j], stretch.nzval[j], a.rowval[j]))
+            end
+        end
+    end
+
+    # Now, for every i, we will compute the i'th column in U
+    for i in 1:(n - 1)
+        # We will get rid of duplicate edges
+        # wSum - sum of weights of edges
+        # multSum - sum of number of edges (including multiedges)
+        # numPurged - the size in use of wNeigh, multNeigh and indNeigh
+        # wNeigh - list of weights correspongind to each neighbors
+        # multNeigh - list of number of multiedges to each neighbor
+        # indNeigh - the indices of the neighboring vertices
+        wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh, rho = rho)
+
+        # need to divide weights by the diagonal entry
+        for j in 1:numPurged
+            push!(u[i], (-wNeigh[j] / wSum, indNeigh[j]))
+        end
+        push!(u[i], (1, i)) #diag term
+        d[i] = wSum
+
+        multSum = ceil(Int64, multSum)
+        wSamp = sampler(wNeigh[1:numPurged])
+        multSamp = sampler(multNeigh[1:numPurged])
+        
+        jSamples = sampleMany(wSamp, multSum)
+        kSamples = sampleMany(multSamp, multSum)
+        
+        # now propagate the clique to the neighbors of i
+        for l in 1:multSum
+            # newSeed = rand(UInt32)
+            # srand(newSeed)
+            
+            j = jSamples[l]
+            k = kSamples[l]
+
+            if j != k
+                posj = indNeigh[j]
+                posk = indNeigh[k]
+
+                # swap so posj is smaller
+                if posk < posj  
+                    j, k = k, j
+                    posj, posk = posk, posj
+                end
+
+                wj = wNeigh[j]                
+                wk = wNeigh[k]
+
+                sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
+                
+                llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
+            end
+        end  
+    end
+
+    # add the last diagonal term
+    push!(u[n], (1, n))
+    d[n] = 0
+
+    println()
+    println("The total size of the linked list data structure should be at most ", ceil(Ti, sum(stretch) + rho * (n - 1)) + 20 * n)
+    println("The actual size is ", neigh.size)
+    println()
+
+    return constructLowerTriangularMat(u), d
+end
+
+# u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
+function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
+    n = length(u)
 
     nnz = 0
     for i in 1:n
@@ -67,40 +332,23 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampC
         end
     end
 
-    # Get U as sparse matrix
-    U = LowerTriangular(SparseMatrixCSC(n, n, colptr, rowval, nzval))
-    Ut = U'
+    return LowerTriangular(SparseMatrixCSC(n, n, colptr, rowval, nzval))
+end
 
-    # Create the solver function
-    f = function(b::Array{Float64,1})
-        # center
-        res = copy(b)
-        res = res - sum(res) / n
+function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
+    return eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
+end
 
-        # forward solve
-        res = U \ res
+function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, 
+    Ut::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, d::Array{Tv,1})
 
-        # diag inverse
-        for i in 1:(n - 1)
-            res[i] = res[i] / d[i]
-        end
+    n = la.n
 
-        # backward solve
-        res = Ut \ res
-
-        # center
-        res = res - sum(res) / n
-        
-        return res
-    end
-
-    # Create the error check function
-    la = lap(a)   
     g = function(b::Array{Float64,1})
-        res = copy(b)
+        res = copy(b)   
         res[n] = 0
             
-        # diag sqrt inverse
+        # diag sqrt inverse 
         for i in 1:(n - 1)
             res[i] = res[i] * d[i]^(-1/2)
         end
@@ -119,189 +367,58 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, sampC
             res[i] = res[i] * d[i]^(-1/2)
         end
 
-        # subtract identity, except we haven't zeroed out last coord
-        res = res - b 
-
         #zero out last coord
         res[n] = 0 #TODO?
             
         return res
     end
-
     gOp = SqLinOp(true,1.0,n,g)
 
-    return f,gOp,U,d
-end
+    lambdaMax = checkError(gOp)
 
-# a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, eps::Float64, sampConst::Float64)
-    n = a.n
+    # now build a linear operator that computes lambda max of 1 - M / lambdaMax. this will be 1 - 1/K
+    h = function(b::Array{Float64,1})
+        res2 = copy(b)
 
-    rho = ceil(Ti, sampConst * log(n) ^ 2 / eps ^ 2)
-
-    # later will have to do a permutation here, for now consider the matrix is already permuted
-
-    # some extra memory to be used later in the algorithm. this can be later pulled out of this function
-    # into an external recipient, to be used on subsequent runs of the solver
-    auxVal = zeros(Tv, n)                       # used to sum weights from multiedges
-    auxMult = zeros(Ti, n)                      # used to counte the number of multiedges
-    
-    u = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
-    d = zeros(Tv, n)                            # the d matrix part of u d u'
-
-    # neigh[i] = the list of neighbors for vertex i with their corresponding weights
-    # note neigh[i] only stores neighbors j such that j > i
-    # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
-    neigh = Array{Tuple{Tv,Ti,Ti},1}[]
-
-    # gather the info in a and put it into neigh and w
-    for i in 1:length(a.colptr) - 1
-        push!(neigh, Tuple{Tv,Ti,Ti}[])
-
-        for j in a.colptr[i]:a.colptr[i + 1] - 1
-            if a.rowval[j] > i
-                push!(neigh[i], (a.nzval[j], rho, a.rowval[j]))
-            end
-        end
-    end
-
-    # Now, for every i, we will compute the i'th column in U
-    for i in 1:(n - 1)
-        # if i == n - 3000
-        #     break
-        # end
-
-        # We will get rid of duplicate edges
-        # wSum -  sum of weights of edges
-        # wNeigh - list of weights correspongind to each neighbors
-        # multSum - sum of number of edges (including multiedges)
-        # multNeigh - list of number of multiedges to each neighbor
-        # indNeigh - the indices of the neighboring vertices
-        wSum, wNeigh, multSum, multNeigh, indNeigh = purge(i, rho, neigh[i], auxVal, auxMult)
-        
-        # need to divide weights by the diagonal entry
-        for j in 1:length(indNeigh)
-            push!(u[i], (-wNeigh[j] / wSum, indNeigh[j]))
-        end
-        push!(u[i], (1, i)) #diag term
-        d[i] = wSum
-
-        # wSamp = sampler(wNeigh)
-        # multSamp = sampler(convert(Array{Tv,1}, multNeigh))
-        
-        # jSamples = sampleMany(wSamp, multSum)
-        # kSamples = sampleMany(multSamp, multSum)
-
-        wSamp = sampler(wNeigh)
-        jSamples = sampleMany(wSamp, multSum)
-
-        kSamples = Ti[]
-        ind = 0
-        for j in 1:length(indNeigh)
-            for k in 1:multNeigh[j]
-                push!(kSamples, j)
-            end
-        end
-        
-        # now propagate the clique to the neighbors of i
-        for l in 1:multSum
-            # newSeed = rand(UInt32)
-            # srand(newSeed)
+        res = copy(b) / lambdaMax
+        res[n] = 0
             
-            j = jSamples[l]
-            k = kSamples[l]
-            if j != k
-                posj = indNeigh[j]
-                posk = indNeigh[k]
-
-                # swap so posj is smaller
-                if posk < posj  
-                    j, k = k, j
-                    posj, posk = posk, posj
-                end
-
-                wj = wNeigh[j]                
-                wk = wNeigh[k]
-
-                sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
-                
-                push!(neigh[posj], (wj * wk / sampScaling, 1, posk))
-            end
-        end  
-    end
-
-    # add the last diagonal term
-    push!(u[n], (1, n))
-    d[n] = 0
-
-    return u, d
-    # return u, d, sparse(tomatrix(u, d))
-end
-
-# see description in samplingSolver
-function purge{Tv,Ti}(col::Ti, rho::Int64, v::Array{Tuple{Tv,Ti,Ti},1}, auxVal::Array{Tv,1}, auxMult::Array{Ti,1})
-
-    multSum::Ti = 0
-    diag::Tv = 0
-    for i in 1:length(v)
-        neigh = v[i][3]
-        w = v[i][1]
-        e = v[i][2]
-
-        auxVal[neigh] += w
-        diag += w
-        auxMult[neigh] += e
-    end
-
-    res = Tv[]
-    mult = Ti[]
-    ind = Ti[]
-    
-    for i in 1:length(v)
-        neigh = v[i][3]
-
-        if auxVal[neigh] != 0
-            @assert(col < neigh, "col < neigh in purge")
-            if neigh == col
-                @assert(false, "col = neigh in purge")
-            else
-                # we want to cap the number of multiedges at rho
-                # actualMult = min(rho, auxMult[neigh])
-                actualMult = auxMult[neigh]
-
-                push!(res, auxVal[neigh])
-                push!(mult, actualMult)
-                push!(ind, neigh)
-
-                multSum = multSum + actualMult
-
-                auxVal[neigh] = 0
-                auxMult[neigh] = 0
-            end
+        # diag sqrt inverse 
+        for i in 1:(n - 1)
+            res[i] = res[i] * d[i]^(-1/2)
         end
+
+        # backward solve #TODO?
+        res = Ut \ res
+
+        # apply lapl
+        res = la * res
+
+        # forward solve #TODO?
+        res = U \ res
+
+        # diag sqrt inverse
+        for i in 1:(n - 1)
+            res[i] = res[i] * d[i]^(-1/2)
+        end
+
+        #zero out last coord
+        res[n] = 0 #TODO?
+        res2[n] = 0 # ???
+            
+        return res2 - res
     end
+    hOp = SqLinOp(true,1.0,n,h)
 
-    return diag, res, multSum, mult, ind
+    eps = 0.0002
+    R = checkError(hOp, tol = eps)
+
+    Kmin = 1 / (1 - R)
+    Kmax = 1 / (1 - R - eps)
+
+    # K = 1 / (-checkError(hOp, tol = eps) + 1)
+
+    print("computing the condition number takes: ")
+
+    return (Kmin, Kmax)
 end
-
-# this is a debug function, it returns u' * d * u
-# function tomatrix{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1}}, d::Array{Tv,1})
-#     n = length(d)
-#     matu = zeros(n, n)
-#     matd = zeros(n, n)
-
-#     for i in 1:n
-#       matd[i, i] = d[i]
-#     end
-
-#     for i in 1:n
-#       for j in 1:length(u[i])
-#           pos = u[i][j][2]
-#           val = u[i][j][1]
-#           matu[pos, i] = val
-#       end
-#     end
-
-#     return matu * matd * matu'
-
-# end
