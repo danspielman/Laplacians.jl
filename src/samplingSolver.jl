@@ -410,7 +410,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,Spar
     end
     hOp = SqLinOp(true,1.0,n,h)
 
-    eps = 0.0002
+    eps = 0.000002
     R = checkError(hOp, tol = eps)
 
     Kmin = 1 / (1 - R)

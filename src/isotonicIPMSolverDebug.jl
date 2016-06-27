@@ -87,11 +87,7 @@ function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
             (H,xNewton,case) = l2NewtonStep( Bt,x,v,mu0, solver )
             if case == "verbose"
             	return H,xNewton,"hard graph"
-            else
-            	push!(Laps, H)
-            	push!(bs, xNewton)
             end
-
 
             s = Bt*x
             gradF = 2*mu0*(x-v) - Bt'*(1./s)
@@ -160,7 +156,7 @@ function l2NewtonStep{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
     tic()
     myf = samplingSolver(adjH, addD,
     	tol=1e-6,maxits=Inf,maxtime=20,verbose=true,
-        eps = 0.5, sampConst = 3.0, beta = 1000.0)
+        eps = 0.5, sampConst = 0.3, beta = 100000.0)
     print("My build time: ")
     bt = toc()
     tic()
