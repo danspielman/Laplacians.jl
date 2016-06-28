@@ -339,6 +339,44 @@ function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
     return eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
 end
 
+# la is the initial laplacian, M is the preconditioner, we are inputed the invm as a function
+function computeCN2{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, invm)
+    f = function(b::Array{Float64,1})
+        res = copy(b)
+        res[n] = 0
+        res = invm(res)
+        res = la * res
+        res[n] = 0
+        return res
+    end
+    fOp = SqLinOp(true, 1.0, n, f)
+    lambdaMax = checkError(fOp)
+
+    println(lambdaMax)
+
+    # 1 - M / lambdaMax
+    g = function(b::Array{Float64,1})
+        res2 = copy(b)
+        res = copy(b) / lambdaMax
+        res[n] = 0
+        res = invm(res)
+        res = la * res
+        res[n] = res2[n] = 0
+
+        return res2 - res
+    end
+    gOp = SqLinOp(true,1.0,n,g)
+    eps = 0.000002
+    R = checkError(gOp, tol = eps)
+
+    println(R)
+
+    Kmin = 1 / (1 - R)
+    Kmax = 1 / (1 - R - eps)
+
+    return (Kmin, Kmax)
+end
+
 function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, 
     Ut::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, d::Array{Tv,1})
 
