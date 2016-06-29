@@ -58,6 +58,7 @@ end
 # Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight
 function extendedLaplacian{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
 
+    n = a.n
     u,v,w = findnz(a)
     for i in 1:n
         push!(u, i)
@@ -91,6 +92,12 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     tree = akpw(a);
 
+    # isotonic debug
+    # println()
+    # println()
+    # println(full(a))
+    # println(full(tree))
+
     ord = reverse!(dfsOrder(tree, start = n));
 
     a = a[ord, ord];
@@ -103,6 +110,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     stretch = rho * compStretches(beta * tree, a)
     stretch.nzval = min(rho, stretch.nzval)
 
+    println("Initial number of edges = ", length(a.nzval))
     meanStretch = mean(stretch.nzval)
     println("Average number of multiedges = ", mean(stretch.nzval))
     maxStretch = maximum(stretch.nzval)
@@ -337,44 +345,6 @@ end
 
 function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
     return eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
-end
-
-# la is the initial laplacian, M is the preconditioner, we are inputed the invm as a function
-function computeCN2{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, invm)
-    f = function(b::Array{Float64,1})
-        res = copy(b)
-        res[n] = 0
-        res = invm(res)
-        res = la * res
-        res[n] = 0
-        return res
-    end
-    fOp = SqLinOp(true, 1.0, n, f)
-    lambdaMax = checkError(fOp)
-
-    println(lambdaMax)
-
-    # 1 - M / lambdaMax
-    g = function(b::Array{Float64,1})
-        res2 = copy(b)
-        res = copy(b) / lambdaMax
-        res[n] = 0
-        res = invm(res)
-        res = la * res
-        res[n] = res2[n] = 0
-
-        return res2 - res
-    end
-    gOp = SqLinOp(true,1.0,n,g)
-    eps = 0.000002
-    R = checkError(gOp, tol = eps)
-
-    println(R)
-
-    Kmin = 1 / (1 - R)
-    Kmax = 1 / (1 - R - eps)
-
-    return (Kmin, Kmax)
 end
 
 function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, 

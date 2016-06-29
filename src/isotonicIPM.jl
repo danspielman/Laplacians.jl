@@ -80,19 +80,20 @@ function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
     i=0;    
     muTooSmall = mu0 < eTa2
     
-    numSteps = 0
+    # numSteps = 0
 
     while muTooSmall
         F(y) = mu0*norm(y-v)^2 - sum(log(Bt*y))
         centered = false
         while !centered
-            numSteps += 1
-            if numSteps % 30 == 1
-                println("So far ", numSteps, " steps were made")
-            end
+            # numSteps += 1
+            # if numSteps % 30 == 1
+            #     println("So far ", numSteps, " steps were made")
+            # end
 
 
             (H,xNewton) = l2NewtonStep( Bt,x,v,mu0, solver )
+            
             s = Bt*x
             gradF = 2*mu0*(x-v) - Bt'*(1./s)
             x = backtrackLineSearch(F,gradF,Bt,xNewton,x)
