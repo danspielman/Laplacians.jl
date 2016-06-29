@@ -83,8 +83,6 @@ and exports the functions for which it seems appropriate.
 
   include("IO.jl")
   export readIJ, readIJV, writeIJV
-  export writeToFile
-  export readFromFile
 
   include("graphOps.jl")
 
@@ -105,7 +103,6 @@ and exports the functions for which it seems appropriate.
   export shortIntGraph, floatGraph
 
   export lap
-  export adj
   export spectralCoords
   export spectralDrawing
 
@@ -125,8 +122,6 @@ and exports the functions for which it seems appropriate.
 
   include("treeAlgs.jl")
 
-  export dfsOrder
-  export bfsOrder
   export RootedTree
   export matToTree
   export matToTreeDepth
@@ -162,6 +157,9 @@ and exports the functions for which it seems appropriate.
 
   include("randTrees.jl")
   export randishKruskal, randishPrim
+
+  include("sampler.jl")
+  include("fastSampler.jl")
 
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
