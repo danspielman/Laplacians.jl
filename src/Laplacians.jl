@@ -1,5 +1,3 @@
-__precompile__()
-
 """A package for graph computations related to graph Laplacians
 
 Graphs are represented by sparse adjacency matrices, etc.
@@ -36,6 +34,7 @@ and exports the functions for which it seems appropriate.
   end
 
   using DataStructures
+  using PyAMG
 
   include("graphUtils.jl")
 
@@ -133,6 +132,7 @@ and exports the functions for which it seems appropriate.
 
   export cg, cgSolver
   export pcg, pcgSolver, pcgLapSolver
+  export amgSolver
 
   include("flow.jl")
 
