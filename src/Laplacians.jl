@@ -158,6 +158,9 @@ and exports the functions for which it seems appropriate.
   include("randTrees.jl")
   export randishKruskal, randishPrim
 
+  include("sampler.jl")
+  include("fastSampler.jl")
+
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
