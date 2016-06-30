@@ -21,9 +21,9 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
     n = a.n
 
     F,gOp,_,_,ord,cn,cntime,_ = buildSolver(a, eps = eps, sampConst = sampConst, beta = beta, 
-        startingSize = startingSize, blockSize = blockSize, returnCN = verbose)
+        startingSize = startingSize, blockSize = blockSize, returnCN = verbose, verbose = verbose)
 
-    if cntime != 0.0
+    if verbose
         println()
         println("Eps error: ", checkError(gOp))
         println("Condition number: ", cn)
@@ -77,14 +77,18 @@ end
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
                             eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
                             startingSize::Ti = 1000, blockSize::Ti = 20,
-                            returnCN::Bool = false)
+                            returnCN::Bool = false, verbose::Bool = false)
 
     # compute rho
     n = a.n;
     rho::Tv = sampConst * log(n) ^ 2 / eps ^ 2
-    println("rho = ", rho)
+    if verbose
+	    println("rho = ", rho)
+    end
 
-    tic()
+    if verbose
+	    tic()
+    end
     #=
         Note: The n'th vertex will correspond to the vertex used to solve Laplacian systems
         with extra weight on the diagonal. Thus, we want to eliminate it last.
@@ -110,20 +114,26 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     stretch = rho * compStretches(beta * tree, a)
     stretch.nzval = min(rho, stretch.nzval)
 
-    println("Initial number of edges = ", length(a.nzval))
-    meanStretch = mean(stretch.nzval)
-    println("Average number of multiedges = ", mean(stretch.nzval))
-    maxStretch = maximum(stretch.nzval)
-    println("Maximum number of multiedges = ", maximum(stretch.nzval))
-  
-    print("Time to build the tree and compute the stretch: ")
-    toc()
+    if verbose
+	    println("Initial number of edges = ", length(a.nzval))
+	    meanStretch = mean(stretch.nzval)
+	    println("Average number of multiedges = ", mean(stretch.nzval))
+	    maxStretch = maximum(stretch.nzval)
+	    println("Maximum number of multiedges = ", maximum(stretch.nzval))
+    end
+
+  	if verbose
+	    print("Time to build the tree and compute the stretch: ")
+	    toc()
+    end
 
     # Get u and d such that u d u' = -a (doesn't affect solver)
-    U,d = samplingLDL(a, stretch, rho, startingSize, blockSize)
+    U,d = samplingLDL(a, stretch, rho, startingSize, blockSize, verbose)
     Ut = U'
 
-    println("nnz in U matrix: ", length(U.data.nzval))
+    if verbose
+	    println("nnz in U matrix: ", length(U.data.nzval))
+    end
 
     # Create the solver function
     f = function(b::Array{Float64,1})
@@ -198,7 +208,7 @@ end
 
 # a is an adjacency matrix
 function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
-    startingSize::Ti, blockSize::Ti)
+    startingSize::Ti, blockSize::Ti, verbose::Bool=false)
 
     n = a.n
 
@@ -252,8 +262,8 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
         d[i] = wSum
 
         multSum = ceil(Int64, multSum)
-        wSamp = sampler(wNeigh[1:numPurged])
-        multSamp = sampler(multNeigh[1:numPurged])
+        wSamp = FastSampler(wNeigh[1:numPurged])
+        multSamp = FastSampler(multNeigh[1:numPurged])
         
         jSamples = sampleMany(wSamp, multSum)
         kSamples = sampleMany(multSamp, multSum)
@@ -290,10 +300,12 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     push!(u[n], (1, n))
     d[n] = 0
 
-    println()
-    println("The total size of the linked list data structure should be at most ", ceil(Ti, sum(stretch) + rho * (n - 1)) + 20 * n)
-    println("The actual size is ", neigh.size)
-    println()
+    if verbose
+	    println()
+	    println("The total size of the linked list data structure should be at most ", ceil(Ti, sum(stretch) + rho * (n - 1)) + 20 * n)
+	    println("The actual size is ", neigh.size)
+	    println()
+    end
 
     return constructLowerTriangularMat(u), d
 end

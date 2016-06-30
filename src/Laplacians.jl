@@ -103,6 +103,7 @@ and exports the functions for which it seems appropriate.
   export shortIntGraph, floatGraph
 
   export lap
+  export adj
   export spectralCoords
   export spectralDrawing
 
@@ -128,6 +129,7 @@ and exports the functions for which it seems appropriate.
   export tarjanStretch
   export compDepth
   export compStretches
+  export dfsOrder
 
   include("pcg.jl")
 
