@@ -313,7 +313,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     if verbose
 	    println()
 	    println("The total size of the linked list data structure should be at most ", ceil(Ti, sum(stretch) + rho * (n - 1)) + 20 * n)
-	    println("The actual size is ", neigh.size)
+	    println("The actual size is ", neigh.size * neigh.blockSize)
 	    println()
     end
 
