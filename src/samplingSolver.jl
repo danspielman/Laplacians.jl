@@ -11,6 +11,7 @@ using Laplacians
 include("fastSampler.jl")
 include("revampedLinkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
+include("fastCSC.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
                                 tol::Tv=1e-6, maxits=100, maxtime=Inf, verbose::Bool = false,
@@ -30,10 +31,17 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
         println()
     end 
 
-    invperm = collect(1:n)
-    sort!(invperm, by=x->ord[x])
+    # invperm = collect(1:n)
+    # sort!(invperm, by=x->ord[x])
+    invperm = zeros(Int64, n)
+    for i in 1:n
+    	invperm[ord[i]] = i
+    end
 
-    la = lap(a[ord,ord])
+    # aord = symperm(a, ord)
+    # la = lap(aord + aord')
+    # la = lap(a[ord,ord])
+    la = lap(sympermute(a, ord))
     function f(b)
         #= 
             We need to add an extra entry to b to make it match the size of a. The extra vertex in a is
@@ -104,8 +112,10 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     ord = reverse!(dfsOrder(tree, start = n));
 
-    a = a[ord, ord];
-    tree = tree[ord, ord];
+    # a = a[ord, ord];
+    # tree = tree[ord, ord];
+    a = sympermute(a, ord)
+    tree = sympermute(tree, ord)
 
     # Blow up the tree and compute the stretches
     a2 = copy(a)
