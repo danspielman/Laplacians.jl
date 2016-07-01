@@ -12,6 +12,7 @@ include("fastSampler.jl")
 include("revampedLinkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
 include("fastCSC.jl")
+include("condNumber.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
                                 tol::Tv=1e-6, maxits=100, maxtime=Inf, verbose::Bool = false,
@@ -137,9 +138,9 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 	    toc()
     end
 
-    # Get u and d such that u d u' = -a (doesn't affect solver)
-    U,d = samplingLDL(a, stretch, rho, startingSize, blockSize, verbose)
-    Ut = U'
+    # Get u and d such that ut d u = -a (doesn't affect solver)
+    Ut,d = samplingLDL(a, stretch, rho, startingSize, blockSize, verbose)
+    U = Ut'
 
     if verbose
 	    println("nnz in U matrix: ", length(U.data.nzval))
@@ -152,7 +153,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
         res = res - sum(res) / n
 
         # forward solve
-        res = U \ res
+        res = Ut \ res
 
         # diag inverse
         for i in 1:(n - 1)
@@ -160,7 +161,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
         end
 
         # backward solve
-        res = Ut \ res
+        res = U \ res
 
         # center
         res = res - sum(res) / n
@@ -180,13 +181,13 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
         end
 
         # backward solve #TODO?
-        res = Ut \ res
+        res = U \ res
 
         # apply lapl
         res = la * res
 
         # forward solve #TODO?
-        res = U \ res
+        res = Ut \ res
 
         # diag sqrt inverse
         for i in 1:(n - 1)
@@ -205,14 +206,15 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     if returnCN
 	    tic()
-	    cn = computeCN(lap(a2),U,Ut,d)
+        cn = condNumber(lap(a2), U, d)
+        print("computing the condition number takes: ")
 	    cntime = toc()
     end
 
     if returnCN
-        return f,gOp,U,d,ord,cn,cntime,(meanStretch,maxStretch)
+        return f,gOp,U,d,ord,cn,cntime
     else
-        return f,gOp,U,d,ord,(0.0, 0.0),0.0,(0.0, 0.0)
+        return f,gOp,U,d,ord,(0.0, 0.0),0.0
     end
 end
 
@@ -367,88 +369,4 @@ end
 
 function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
     return eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
-end
-
-function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::LowerTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, 
-    Ut::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, d::Array{Tv,1})
-
-    n = la.n
-
-    g = function(b::Array{Float64,1})
-        res = copy(b)   
-        res[n] = 0
-            
-        # diag sqrt inverse 
-        for i in 1:(n - 1)
-            res[i] = res[i] * d[i]^(-1/2)
-        end
-
-        # backward solve #TODO?
-        res = Ut \ res
-
-        # apply lapl
-        res = la * res
-
-        # forward solve #TODO?
-        res = U \ res
-
-        # diag sqrt inverse
-        for i in 1:(n - 1)
-            res[i] = res[i] * d[i]^(-1/2)
-        end
-
-        #zero out last coord
-        res[n] = 0 #TODO?
-            
-        return res
-    end
-    gOp = SqLinOp(true,1.0,n,g)
-
-    lambdaMax = checkError(gOp)
-
-    # now build a linear operator that computes lambda max of 1 - M / lambdaMax. this will be 1 - 1/K
-    h = function(b::Array{Float64,1})
-        res2 = copy(b)
-
-        res = copy(b) / lambdaMax
-        res[n] = 0
-            
-        # diag sqrt inverse 
-        for i in 1:(n - 1)
-            res[i] = res[i] * d[i]^(-1/2)
-        end
-
-        # backward solve #TODO?
-        res = Ut \ res
-
-        # apply lapl
-        res = la * res
-
-        # forward solve #TODO?
-        res = U \ res
-
-        # diag sqrt inverse
-        for i in 1:(n - 1)
-            res[i] = res[i] * d[i]^(-1/2)
-        end
-
-        #zero out last coord
-        res[n] = 0 #TODO?
-        res2[n] = 0 # ???
-            
-        return res2 - res
-    end
-    hOp = SqLinOp(true,1.0,n,h)
-
-    eps = 0.000002
-    R = checkError(hOp, tol = eps)
-
-    Kmin = 1 / (1 - R)
-    Kmax = 1 / (1 - R - eps)
-
-    # K = 1 / (-checkError(hOp, tol = eps) + 1)
-
-    print("computing the condition number takes: ")
-
-    return (Kmin, Kmax)
 end
