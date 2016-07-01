@@ -339,7 +339,7 @@ function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, 
 
 end
     
-"""A warpper for the PyAMG solver."""
+"""A wrapper for the PyAMG solver."""
 function amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, accel::ASCIIString = "")
 
   amg = PyAMG.RugeStubenSolver(ddmat)
