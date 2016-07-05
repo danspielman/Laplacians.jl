@@ -8,6 +8,9 @@ immutable element{Tv,Ti}
 	edgeCount::Tv
 	neighbor::Ti
 	next::Ti
+
+	# this is for debug purposes
+	usedBy::Ti
 end
 
 #=
@@ -50,6 +53,8 @@ end
 
 function llsAdd{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, v::Ti, t::Tuple{Tv,Tv,Ti})
 
+	@assert(v < t[3], "Adding $(t[3]) to $v's linked list")
+
 	if lls.last[v] == -1
 		# nothing was added to the current element's linked list so far
 
@@ -65,14 +70,14 @@ function llsAdd{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, v::Ti, t::Tuple{Tv,Tv,Ti})
 
 		# this new block will be the starting point for v's linked list
 		lls.first[v] = lls.last[v] = ind
-		lls.val[ind] = element(t[1], t[2], t[3], -1)
+		lls.val[ind] = element(t[1], t[2], t[3], -1, v)
 
 		# set lls.right on the first insertion
 		if lls.right == -1
 			lls.right = lls.left
 		end
 	else
-		# we're adding element to an already existing linked list
+		# we're adding an element to an already existing linked list
 
 		# check if we still have space in the current block
 		if lls.last[v] % lls.blockSize != 0
@@ -90,11 +95,11 @@ function llsAdd{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, v::Ti, t::Tuple{Tv,Tv,Ti})
 
 		# update the 'next' field for the last element in v' linked list
 		prev = lls.last[v]
-		lls.val[prev] = element(lls.val[prev].edgeWeight, lls.val[prev].edgeCount, lls.val[prev].neighbor, ind)
+		lls.val[prev] = element(lls.val[prev].edgeWeight, lls.val[prev].edgeCount, lls.val[prev].neighbor, ind, v)
 
 		# add in the new element to the linked list
 		lls.last[v] = ind
-		lls.val[ind] = element(t[1], t[2], t[3], -1)
+		lls.val[ind] = element(t[1], t[2], t[3], -1, v)
 	end
 
 end
@@ -107,6 +112,8 @@ function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{T
 
 	i = lls.first[pos]
 	while i != -1
+		@assert(pos == lls.val[i].usedBy, "accessing storage blocks for $(lls.val[i].usedBy) instead of $pos")
+
 		neigh = lls.val[i].neighbor
 		w = lls.val[i].edgeWeight
 		e = lls.val[i].edgeCount
@@ -156,8 +163,12 @@ function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{T
 
         # i was just freed
         if i % lls.blockSize == 0
-        	lls.right = moduloNext(lls.right, lls.size)
+        	# if i == 20
+        	# 	println("block ", i / lls.blockSize, " was freed by ", pos)
+        	# end
+
         	lls.free[lls.right] = i / lls.blockSize
+        	lls.right = moduloNext(lls.right, lls.size)
         end
 
         i = lls.val[i].next

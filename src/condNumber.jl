@@ -2,28 +2,22 @@
 Compute the condition number given the initial graph and the preconditioner.
 Uses cholfact, so, if the initial graph is not sdd or if inverse has a lot of nonzeros this fails. 
 =#
-function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, prec::SparseMatrixCSC{Tv,Ti}; tol = 1e-6)
-
+function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, prec::SparseMatrixCSC{Tv,Ti}; tol = 1e-3)
 	cf = cholfact(prec)
-	return computeCN(la, LowerTriangular(sparse(cf[:L]))', ones(Tv, la.n), tol = tol)
-
+	return computeCN(la, LowerTriangular(sparse(cf[:L]))', ones(Tv, la.n), tol=tol)
 end
 
 # M = Ut * d * U
-function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, d::Array{Tv,1}; tol = 1e-6)
-
-	return computeCN(la, U, d, tol = tol)
-
+function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, d::Array{Tv,1}; tol = 1e-3)
+	return computeCN(la, U, d, tol=tol)
 end
 
 # M = Ut * U
-function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}; tol = 1e-6)
-
-	return computeCN(la, U, ones(a.n), tol = tol)
-
+function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}; tol = 1e-3)
+	return computeCN(la, U, ones(a.n), tol=tol)
 end
 
-function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, d::Array{Tv,1}; tol = 1e-6)
+function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, d::Array{Tv,1}; tol=1e-3)
 
 	n = la.n
 
@@ -48,7 +42,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,Spar
 	fOp = SqLinOp(true,1.0,n,f)
 	lmax = eigs(fOp;nev=1,which=:LM,tol=0.0)[1][1]
 
-	# get the max eigenvalue of 1 - M / lambdaMax
+	# get the max eigenvalue of 1 - (M^-1/2 L M^-1/2) / lambdaMax
 	g = function(b::Array{Float64,1})
 		res2 = copy(b)
 		res = copy(b) / lmax
@@ -69,7 +63,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,Spar
 	end
 	gOp = SqLinOp(true,1.0,n,g)
 
-	R = checkError(gOp, tol = tol)
+	R = checkError(gOp, tol=tol)
 
     Kmin = 1 / (1 - R)
     Kmax = 1 / (1 - R - tol)

@@ -314,7 +314,7 @@ function augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 
   augDD = Dx + spdiagm(augtree*ones(n)) - augtree
 
-    F = lapWrapSolver(cholfact,augDD)
+  F = lapWrapSolver(cholfact,augDD)
 
   return F
 

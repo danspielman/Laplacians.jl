@@ -1,7 +1,9 @@
 # Implements the Johnson-Lindenstauss resistance upperbounding
-# TODO: not optimized for speed - let's see how resistance estimates improve the number of nonzeros at the end
 
-function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, retXhat::Bool = false)
+function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; 
+						eps::Tv = 0.5, 
+						solver=(la -> augTreeSolver(la,tol=1e-2,maxits=1000,maxtime=10)), 
+						retXhat::Bool = false)
 
 	n = a.n
 	# m = ceil(Int64, length(a.nzval) / 2)
@@ -55,8 +57,7 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; eps::Float64 = 0.5, retXhat:
 	# Get bs = P * W^(1/2) * B. We already multiplied W by B. Solve for each line. dims are dhat x n
 	bs = P * B / sqrt(2)
 
-	la = lap(a)
-	f = lapWrapSolver(augTreeSolver,la,tol=1e-6,maxits=1000)
+	f = solver(lap(a) + speye(a.n) * 1e-15)
 
 	# xhat = P * W^(1/2) * B * L ^-1 * ei
 	xhat = zeros(n, dhat)

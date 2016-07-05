@@ -9,24 +9,26 @@
 using Laplacians
 
 include("fastSampler.jl")
+include("johnlind.jl")
 include("revampedLinkedListFloatStorage.jl")
 include("sqLinOpWrapper.jl")
 include("fastCSC.jl")
 include("condNumber.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
-                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
-                                verbose::Bool=false, returnCN=false,
-                                eps::Tv=0.5, sampConst::Tv=0.02, beta::Tv=1000.0,
-                                startingSize::Ti=1000, blockSize::Ti=20)
-
-    srand(1234)
+                                tol::Tv=1e-6, maxits=100, maxtime=Inf, verbose::Bool = false,
+                                eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
+                                JLEps::Tv = 0.5, JLSolver=(la -> augTreeSolver(la,tol=1e-2,maxits=1000,maxtime=10)),
+                                startingSize::Ti = 1000, blockSize::Ti = 20,
+                                returnCN::Bool = false)
 
     a = extendedLaplacian(a, diag)
     n = a.n
 
-    F,gOp,_,_,ord,cn,cntime = buildSolver(a, eps=eps, sampConst=sampConst, beta=beta, 
-        startingSize=startingSize, blockSize=blockSize, returnCN=returnCN, verbose=verbose)
+    F,gOp,_,_,ord,cn,cntime = buildSolver(a, eps = eps, sampConst = sampConst, beta = beta, 
+        JLEps = JLEps, JLSolver = JLSolver,
+        startingSize = startingSize, blockSize = blockSize, 
+        returnCN = returnCN, verbose = verbose)
 
     if verbose
         println()
@@ -35,16 +37,11 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
         println()
     end 
 
-    # invperm = collect(1:n)
-    # sort!(invperm, by=x->ord[x])
     invperm = zeros(Int64, n)
     for i in 1:n
     	invperm[ord[i]] = i
     end
 
-    # aord = symperm(a, ord)
-    # la = lap(aord + aord')
-    # la = lap(a[ord,ord])
     la = lap(sympermute(a, ord))
     function f(b)
         #= 
@@ -88,6 +85,7 @@ end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
                             eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
+                            JLEps::Tv = 0.5, JLSolver=(la -> augTreeSolver(la,tol=1e-2,maxits=1000,maxtime=10)),
                             startingSize::Ti = 1000, blockSize::Ti = 20,
                             returnCN::Bool = false, verbose::Bool = false)
 
@@ -106,43 +104,31 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
         with extra weight on the diagonal. Thus, we want to eliminate it last.
     =#
 
+    # augment the tree
     tree = akpw(a);
-
-    # isotonic debug
-    # println()
-    # println()
-    # println(full(a))
-    # println(full(tree))
+    augTree = augmentTree(tree,a,convert(Int,round(sqrt(n))))
 
     ord = reverse!(dfsOrder(tree, start = n));
 
-    # a = a[ord, ord];
-    # tree = tree[ord, ord];
     a = sympermute(a, ord)
-    tree = sympermute(tree, ord)
+    augTree = sympermute(augTree, ord)
 
-    # Blow up the tree and compute the stretches
+    # Blow up the augTree
     a2 = copy(a)
-    a = a + (beta - 1) * tree
 
-    stretch = rho * compStretches(beta * tree, a)
-    stretch.nzval = min(rho, stretch.nzval)
+    a = a + (beta - 1) * augTree
+    xhat = johnlind(a, eps=JLEps, solver=JLSolver, retXhat=true)
 
-    if verbose
-	    println("Initial number of edges = ", length(a.nzval))
-	    meanStretch = mean(stretch.nzval)
-	    println("Average number of multiedges = ", mean(stretch.nzval))
-	    maxStretch = maximum(stretch.nzval)
-	    println("Maximum number of multiedges = ", maximum(stretch.nzval))
-    end
+    # stretch = rho * compStretches(beta * tree, a)
+    # stretch.nzval = min(rho, stretch.nzval)
 
   	if verbose
-	    print("Time to build the tree and compute the stretch: ")
+	    print("Time to build the augTree and run JL : ")
 	    toc()
     end
 
     # Get u and d such that ut d u = -a (doesn't affect solver)
-    Ut,d = samplingLDL(a, stretch, rho, startingSize, blockSize, verbose)
+    Ut,d = samplingLDL(a, xhat, rho, startingSize, blockSize, verbose)
     U = Ut'
 
     if verbose
@@ -209,20 +195,24 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     if returnCN
 	    tic()
-        cn = condNumber(lap(a2), U, d, tol=1e-3)
-        print("computing the condition number takes: ")
+        cn = condNumber(lap(a2), U, d)
+        print("computing the condition number ", cn, " takes: ")
 	    cntime = toc()
+    end
+
+    if verbose
+        print("Preconditioner has ", nnz(U.data), " nonzeros")
     end
 
     if returnCN
         return f,gOp,U,d,ord,cn,cntime
     else
-        return f,gOp,U,d,ord,(0.0,0.0),0.0
+        return f,gOp,U,d,ord,(0.0, 0.0),0.0
     end
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, xhat::Array{Tv,2}, rho::Tv,
     startingSize::Ti, blockSize::Ti, verbose::Bool=false)
 
     n = a.n
@@ -247,15 +237,27 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 
     neigh = llsInit(a, startingSize = startingSize, blockSize = blockSize)
 
+    totalLev = 0
+
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
         # push!(neigh, Tuple{Tv,Ti,Ti}[])
 
         for j in a.colptr[i]:a.colptr[i + 1] - 1
             if a.rowval[j] > i
-                llsAdd(neigh, i, (a.nzval[j], stretch.nzval[j], a.rowval[j]))
+                p = a.rowval[j]
+                q = i
+                lev = a.nzval[j] * norm(xhat[p,:] - xhat[q,:])^2
+
+                totalLev += lev
+
+                llsAdd(neigh, i, (a.nzval[j], min(rho, rho * lev), a.rowval[j]))
             end
         end
+    end
+
+    if verbose
+        println("Sum of leverage scores: ", totalLev)
     end
 
     # Now, for every i, we will compute the i'th column in U
@@ -317,8 +319,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 
     if verbose
 	    println()
-	    println("The total size of the linked list data structure should be at most ", ceil(Ti, sum(stretch) + rho * (n - 1)) + 20 * n)
-	    println("The actual size is ", neigh.size * neigh.blockSize)
+	    println("The size of the linked list data structure is ", neigh.size * neigh.blockSize)
 	    println()
     end
 
