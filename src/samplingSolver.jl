@@ -16,17 +16,18 @@ include("condNumber.jl")
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
-                                verbose::Bool=false, returnCN=false,
+                                verbose::Bool=false, returnCN=false, CNTol::Tv=1e-3,
                                 eps::Tv=0.5, sampConst::Tv=0.02, beta::Tv=1000.0,
                                 startingSize::Ti=1000, blockSize::Ti=20)
 
     srand(1234)
+    println("\n\n")
 
     a = extendedLaplacian(a, diag)
     n = a.n
 
     F,gOp,_,_,ord,cn,cntime = buildSolver(a, eps=eps, sampConst=sampConst, beta=beta, 
-        startingSize=startingSize, blockSize=blockSize, returnCN=returnCN, verbose=verbose)
+        startingSize=startingSize, blockSize=blockSize, returnCN=returnCN, CNTol=CNTol, verbose=verbose)
 
     if verbose
         println()
@@ -89,7 +90,7 @@ end
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
                             eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
                             startingSize::Ti = 1000, blockSize::Ti = 20,
-                            returnCN::Bool = false, verbose::Bool = false)
+                            returnCN::Bool = false, CNTol=1e-3, verbose::Bool = false)
 
     # compute rho
     n = a.n;
@@ -129,7 +130,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     stretch.nzval = min(rho, stretch.nzval)
 
     if verbose
-	    println("Initial number of edges = ", length(a.nzval))
+	    println("Initial number of multiedges = ", ceil(Int64,sum(stretch.nzval)), " . Nonzeros in a = ", nnz(a))
 	    meanStretch = mean(stretch.nzval)
 	    println("Average number of multiedges = ", mean(stretch.nzval))
 	    maxStretch = maximum(stretch.nzval)
@@ -209,7 +210,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     if returnCN
 	    tic()
-        cn = condNumber(lap(a2), U, d, tol=1e-3)
+        cn = condNumber(lap(a2), U, d, tol=CNTol)
         print("computing the condition number takes: ")
 	    cntime = toc()
     end

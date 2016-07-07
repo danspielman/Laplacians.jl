@@ -2,7 +2,7 @@
 
 function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; 
 						eps::Tv = 0.5, 
-						solver=(la -> augTreeSolver(la,tol=1e-2,maxits=1000,maxtime=10)), 
+						solver=(la -> augTreeSolver(la,tol=1e-1,maxits=1000,maxtime=10)), 
 						retXhat::Bool = false)
 
 	n = a.n
@@ -57,7 +57,7 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 	# Get bs = P * W^(1/2) * B. We already multiplied W by B. Solve for each line. dims are dhat x n
 	bs = P * B / sqrt(2)
 
-	f = solver(lap(a) + speye(a.n) * 1e-15)
+	f = solver(lap(a) + speye(a.n) * 1e-10)
 
 	# xhat = P * W^(1/2) * B * L ^-1 * ei
 	xhat = zeros(n, dhat)

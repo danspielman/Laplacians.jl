@@ -18,9 +18,9 @@ include("condNumber.jl")
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
                                 tol::Tv=1e-6, maxits=100, maxtime=Inf, verbose::Bool = false,
                                 eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
-                                JLEps::Tv = 0.5, JLSolver=(la -> augTreeSolver(la,tol=1e-2,maxits=1000,maxtime=10)),
+                                JLEps::Tv = 0.5, JLSolver=(la -> augTreeSolver(la,tol=1e-1,maxits=1000,maxtime=10)),
                                 startingSize::Ti = 1000, blockSize::Ti = 20,
-                                returnCN::Bool = false)
+                                returnCN::Bool = false, CNTol::Tv=1e-3)
 
     a = extendedLaplacian(a, diag)
     n = a.n
@@ -85,9 +85,9 @@ end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
                             eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
-                            JLEps::Tv = 0.5, JLSolver=(la -> augTreeSolver(la,tol=1e-2,maxits=1000,maxtime=10)),
+                            JLEps::Tv = 0.5, JLSolver=(la -> augTreeSolver(la,tol=1e-1,maxits=1000,maxtime=10)),
                             startingSize::Ti = 1000, blockSize::Ti = 20,
-                            returnCN::Bool = false, verbose::Bool = false)
+                            returnCN::Bool = false, CNTol::Tv=1e-3, verbose::Bool = false)
 
     # compute rho
     n = a.n;
@@ -195,7 +195,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     if returnCN
 	    tic()
-        cn = condNumber(lap(a2), U, d)
+        cn = condNumber(lap(a2), U, d, tol=CNTol)
         print("computing the condition number ", cn, " takes: ")
 	    cntime = toc()
     end

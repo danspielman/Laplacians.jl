@@ -1,34 +1,36 @@
 # get the max eigenvalue using the power method
-function powerIteration{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol=1e-3, maxit = Inf, verbose=false)
+function powerIteration{Tv,Ti}(op::SqLinOp{Tv,Ti}; tol=1e-3, maxit = Inf, verbose=false)
 
-	n = a.n
+	n = op.n
 
-	notConverged = true
 	b = rand(n)
+	prevLam = 0
+	lam = 0
+	err = 0
 
 	iter = 0
 	while iter < maxit
 		iter = iter + 1
 
-		newb = a * b / norm(a * b)
+		newb = op.multFn(b) / norm(op.multFn(b))
 		b = newb
 
-		lam = norm(a * b) / norm(b)
-		if norm(a * b - lam * b) < tol
-			notConverged = false
+		prevLam = lam
+		lam = norm(op.multFn(b)) / norm(b)
+		err = abs(prevLam - lam)
 
+		if err < tol && iter > 1
 			if verbose
-				println("Converged after ", iter, " iterations with error ", norm(a * b - lam * b))
+				println("Converged after ", iter, " iterations with error ", err)
 			end
 
-			return norm(a * b) / norm(b)
+			return lam
 		end
 
 	end
 
 	if verbose
-		lam = norm(a * b) / norm(b)
-		println("Stopped after ", iter, " iterations with error ", norm(a * b - lam * b))
+		println("Failed to converge after ", iter, " iterations with error ", err)
 	end
 
 	return b

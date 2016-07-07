@@ -37,10 +37,12 @@ end
 # initialize the sampler. To get the residual error after building the sampler, set residual to true
 function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
 
+    @assert(minimum(p) > 0, "The probability vector has a negative entry")
+
     n = length(p)
 
     # generate the Sampler
-    F = Array{Tv}(n)
+    F = Array{Float64}(n)
     A = Array{Int64}(n)
     V = Array{Int64}(n)
     
@@ -60,7 +62,6 @@ function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
     end
 
     err = 0
-    
     for i in 1:n
         if newp[i] >= 1 
             val = newp[i]
