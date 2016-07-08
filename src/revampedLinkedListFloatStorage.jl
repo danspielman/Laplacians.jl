@@ -109,7 +109,7 @@ function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{T
 
  	multSum::Tv = 0
  	diag::Tv = 0
-
+ 	
 	i = lls.first[pos]
 	while i != -1
 		@assert(pos == lls.val[i].usedBy, "accessing storage blocks for $(lls.val[i].usedBy) instead of $pos")

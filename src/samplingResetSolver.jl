@@ -23,7 +23,7 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
     srand(1234)
     println("\n\n")
 
-    a = extendMatrix(a, diag)
+    a = extendedMatrix(a, diag)
     n = a.n
 
     F,gOp,_,_,ord,cn,cntime = buildSolver(a, eps=eps, sampConst=sampConst, beta=beta, 
@@ -68,8 +68,8 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
 
 end
 
-# Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight
-function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
+# Add a new vertex to a with weights to the other vertices corresponding to the diagonal surplus weight
+function extendedMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
 
     n = a.n
     u,v,w = findnz(a)
@@ -145,7 +145,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     end
 
     # Get u and d such that ut d u = -a (doesn't affect solver)
-    Ut,d = samplingLDL(a, stretch, rho, startingSize, blockSize, verbose)
+    Ut,d = samplingLDL(a, stretch, rho, beta, startingSize, blockSize, verbose)
     U = Ut'
 
     if verbose
@@ -225,7 +225,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
+function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv, beta::Tv, 
     startingSize::Ti, blockSize::Ti, verbose::Bool=false)
 
     n = a.n
@@ -262,19 +262,69 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     end
 
     # Now, for every i, we will compute the i'th column in U
+    lastReset = 1
     for i in 1:(n - 1)
+        # reset multiedge counts here
+        if i == ceil(Int64, 3/8 * n) || i == ceil(Int64, 6/8 * n)
+            tic()
+
+            U = Ti[]
+            V = Ti[]
+            W = Tv[]
+            for j in i:n
+                wSum, multSum, numPurged = llsPurge(neigh, j - lastReset + 1, auxVal, auxMult, wNeigh, multNeigh, indNeigh, rho = rho)
+
+                for k in 1:numPurged
+                    push!(U, j)
+                    push!(V, indNeigh[k] + lastReset - 1)
+                    push!(W, wNeigh[k])
+
+                    push!(U, indNeigh[k] + lastReset - 1)
+                    push!(V, j)
+                    push!(W, wNeigh[k])
+                end
+            end
+
+            b = sparse(U - i + 1, V - i + 1, W)
+            tree = akpw(b)
+
+            # println(b)
+            # println(tree)
+
+            beta = beta * log(n)
+            stretch = rho * compStretches(tree * beta, b + tree * (beta - 1))
+            stretch.nzval = min(rho, stretch.nzval)
+
+            neigh = llsInit(b, startingSize=startingSize, blockSize=blockSize)
+            for j in 1:length(b.colptr) - 1
+                for k in b.colptr[j]:b.colptr[j + 1] - 1
+                    if b.rowval[k] > j
+                        llsAdd(neigh, j, (b.nzval[k], stretch.nzval[k], b.rowval[k]))
+                    end
+                end
+            end
+
+            lastReset = i
+
+            print("Resetting the data structures takes ")
+            toc()
+        end
+
+
         # We will get rid of duplicate edges
         # wSum - sum of weights of edges
-        # multSum - sum of number of edges (including multiedges)
+        # multSum - sum of number of multiedges
         # numPurged - the size in use of wNeigh, multNeigh and indNeigh
         # wNeigh - list of weights correspongind to each neighbors
         # multNeigh - list of number of multiedges to each neighbor
         # indNeigh - the indices of the neighboring vertices
-        wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh, rho = rho)
+        wSum, multSum, numPurged = llsPurge(neigh, i - lastReset + 1, auxVal, auxMult, wNeigh, multNeigh, indNeigh, rho = rho)
+
+        # println(i, " ", indNeigh[1:numPurged])
 
         # need to divide weights by the diagonal entry
         for j in 1:numPurged
-            push!(u[i], (-wNeigh[j] / wSum, indNeigh[j]))
+            push!(u[i], (-wNeigh[j] / wSum, indNeigh[j] + lastReset - 1))
         end
         push!(u[i], (1, i)) #diag term
         d[i] = wSum
