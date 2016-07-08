@@ -73,7 +73,8 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U, d::Array{Tv,1}; tol=1e-
 	end
 	gOp = SqLinOp(true,1.0,n,g)
 
-	R = powerIteration(gOp, tol=1e-1)
+    #R = eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
+	R = powerIteration(gOp, tol=tol)
 
     Kmin = 1 / (1 - R)
     Kmax = 1 / (1 - R - tol)
