@@ -1,6 +1,9 @@
 #=
 
 An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
+
+KMP with the sampling scheme from augTreeSolver
+
 =#
 
 include("fastCSC.jl")
@@ -26,7 +29,7 @@ type KMPparams
     treeAlg # :akpw or :rand
 end
 
-defaultKMPparams = KMPparams(1/36, 6, 0.125, 600, :akpw)
+defaultKMPparams = KMPparams(1/36, 6, 1/8, 600, :akpw)
 
 # this is just for Laplacians, not general SDD
 immutable elimLeafNode
@@ -476,49 +479,28 @@ This will mostly be the "uniform sampling" envisioned by KMP.
 =#
 function stretchSample(ijvs::IJVS,stretchTarget::Float64,frac::Float64)
 
-    sampi = Array{Int64}(0)
-    sampj = Array{Int64}(0)
-    sampv = Array{Float64}(0)
-    samps = Array{Float64}(0)
-
     m = size(ijvs.i,1)
+    k = 3 * ceil(Int64, m * frac)
 
-    stot = sum(ijvs.s)
+    ord = sortperm(ijvs.s, rev=true)
+    edgeinds = zeros(Bool,length(ijvs.i))
 
-    # fac = m * frac / stot
-    # p = ijvs.s[ind] * fac
+    # sample k edges form k+1 to m uniformly
+    s = sum(ijvs.s[ord[(k+1):end]])
+    probs = ones(m) * k / s
 
-    for ind in 1:m
-        if ijvs.s[ind] <= stretchTarget
+    # take the first k edges (the ones of highest stretch)
+    probs[ord[1:k]] = 1
 
-            if rand() < frac
-                push!(sampi,ijvs.i[ind])
-                push!(sampj,ijvs.j[ind])
-                push!(sampv,ijvs.v[ind])
-                push!(samps,ijvs.s[ind])
-            end
+    edgeinds[rand(m) .< probs] = true
 
+    sampi = ijvs.i[edgeinds]
+    sampj = ijvs.j[edgeinds]
+    sampv = ijvs.v[edgeinds]
+    samps = ijvs.s[edgeinds]
 
-        elseif ijvs.s[ind] <= stretchTarget/frac
+    println("adding ", length(sampi), " edges back")
 
-            if rand() < frac *  ijvs.s[ind]/ stretchTarget 
-
-                push!(sampi,ijvs.i[ind])
-                push!(sampj,ijvs.j[ind])
-                push!(sampv,ijvs.v[ind] * stretchTarget / ijvs.s[ind])
-                push!(samps,stretchTarget)
-            end
-
-            
-        else
-
-            push!(sampi,ijvs.i[ind])
-            push!(sampj,ijvs.j[ind])
-            push!(sampv,ijvs.v[ind]*frac)
-            push!(samps,ijvs.s[ind]*frac)
-
-        end
-    end
     return IJVS(sampi,sampj,sampv, samps)
 
 end

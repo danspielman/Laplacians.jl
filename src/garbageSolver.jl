@@ -4,6 +4,7 @@ An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
 =#
 
 include("fastCSC.jl")
+include("samplingSolver.jl")
 
 global KMP_SAVEMATS=false
 
@@ -225,26 +226,19 @@ end
 function KMPLapSolver(a; verbose=false,
                       tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
 
-
-
     if (minimum(a) < 0)
         error("The adjacency matrix cannot have negative entries.")
     end
-    
 
     co = components(a)
     if maximum(co) == 1
-
         return KMPLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits,  params=params)
-
     else
-
         comps = vecToComps(co)
 
         if verbose
             println("The graph has $(length(comps)) components.")
         end
-
 
         solvers = []
         for i in 1:length(comps)
@@ -261,9 +255,7 @@ function KMPLapSolver(a; verbose=false,
             push!(solvers, subSolver)
         end
 
-
         return Laplacians.blockSolver(comps,solvers)
-
     end
     
 end
@@ -282,7 +274,6 @@ function KMPLapSolver1(a; verbose=false,
         return lapWrapSolver(cholfact, lap(a))
     end
 
-
     if (nnz(a) == 2*(a.n - 1))
         if verbose
             println("The graph is a tree.  Solve directly")
@@ -290,7 +281,6 @@ function KMPLapSolver1(a; verbose=false,
         
         return lapWrapSolver(cholfact, lap(a))
     end
-
 
     if params.treeAlg == :rand
         tree = randishPrim(a)
@@ -312,12 +302,10 @@ function KMPLapSolver1(a; verbose=false,
     
     la = lap(aord)
 
-
     if KMP_SAVEMATS
         KMP_MATS = []
         push!(KMP_MATS,la)
     end
-
 
     fsub = KMPLapPrecon(aord, tord, params, verbose=verbose)
 
@@ -338,11 +326,9 @@ function KMPLapSolver1(a; verbose=false,
         push!(KMP_FS,f)
     end
 
-        
     return f
 
 end
-
 
 
 function KMPLapPrecon(a, t, params; verbose=false)
@@ -403,19 +389,28 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
         return lapWrapSolver(cholfact, la)
     end
 
-
     ijvs1 = stretchSample(ijvs,targetStretch,params.frac)
     
-
-    if (length(ijvs1.i) <= params.n0)
-
-        # solve directly
+    if (length(ijvs1.i) <= params.n0 || level > 0)
 
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
+        adj = rest + rest' + tree
         la = lap(rest + rest' + tree)
 
-        f = lapWrapSolver(cholfact, la)
-        
+        F = samplingSolver(adj, zeros(adj.n), eps=0.5, sampConst=0.02, beta=1e3, verbose=true)
+        # F = amgSolver(la)
+
+        f = function(b::Array{Float64,1})
+        	subMean!(b)
+        	x = F(b)
+        	subMean!(x)
+
+        	return x
+        end
+
+        # println(adj.n, " ", length(f(rand(adj.n))))
+
+        # f = lapWrapSolver(cholfact, la)
     else
 
         marked = ones(Int64,n)
@@ -453,8 +448,6 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
 
             return x
         end
-        
-
     end
 
     if KMP_SAVEMATS
@@ -462,7 +455,6 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
     end
 
     return f
-
     
 end
 
@@ -498,7 +490,6 @@ function stretchSample(ijvs::IJVS,stretchTarget::Float64,frac::Float64)
                 push!(samps,ijvs.s[ind])
             end
 
-
         elseif ijvs.s[ind] <= stretchTarget/frac
 
             if rand() < frac *  ijvs.s[ind]/ stretchTarget 
@@ -508,8 +499,7 @@ function stretchSample(ijvs::IJVS,stretchTarget::Float64,frac::Float64)
                 push!(sampv,ijvs.v[ind] * stretchTarget / ijvs.s[ind])
                 push!(samps,stretchTarget)
             end
-
-            
+          
         else
 
             push!(sampi,ijvs.i[ind])

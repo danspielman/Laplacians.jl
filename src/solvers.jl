@@ -225,7 +225,7 @@ function augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{T
         edgeinds[ord[i]] = true
     end
 
-    s = sum(av[(k+1):end])
+    s = sum(av[ord[(k+1):end]])
     probs = av * k / s
     probs[ord[1:k]] = 0
     edgeinds[rand(length(av)) .< probs] = true
