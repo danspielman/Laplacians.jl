@@ -338,24 +338,24 @@ function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, 
   return f
 
 end
-    
-"""A wrapper for the PyAMG solver."""
-function amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=100, accel::ASCIIString = "")
+     
+"""
+A wrapper for the PyAMG solver.
 
-  amg = PyAMG.RugeStubenSolver(ddmat)
+~~~julia
+ amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=Inf, maxtime=Inf, verbose=false)
+~~~
+"""
+function amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 
-  if accel != ""
-    function f(b)
-      return PyAMG.solve(amg, b; tol=tol, maxiter=maxits, accel=accel)
-    end
-
-    return f
-  else
-    function f(b)
-      return PyAMG.solve(amg, b; tol=tol, maxiter=maxits)
-    end
-
-    return f
+  amg = PyAMG.RugeStubenSolver(ddmat);
+  M = PyAMG.aspreconditioner(amg);
+  function F(b)
+    return M \ b;
   end
+
+  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+
+  return f
   
 end

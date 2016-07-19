@@ -287,8 +287,8 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
         end
     end
 
-    tics = ceil(Int64, n * [1/n,1/2,2/3,3/4,7/8,12/13,19/20,60/61,n-2/n])
-    tocs = ceil(Int64, n * [1/2,2/3,3/4,7/8,12/13,19/20,60/61,(n-1)/n])
+    tics = ceil(Int64, n * [1/n,1/2,3/4])
+    tocs = ceil(Int64, n * [1/2,3/4,(n-1)/n])
     tot = 0
 
     # Now, for every i, we will compute the i'th column in U

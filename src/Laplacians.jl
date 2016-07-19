@@ -134,6 +134,7 @@ and exports the functions for which it seems appropriate.
 
   export cg, cgSolver
   export pcg, pcgSolver, pcgLapSolver
+  export amgSolver
 
   include("flow.jl")
 
