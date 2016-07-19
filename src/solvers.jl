@@ -294,7 +294,7 @@ function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, max
 
 end
 
-"""This is an augmented spanning tree preconditioner for Laplacians.  
+"""This is an augmented spanning tree preconditioner for Laplacians.
 It takes as optional input a tree growing algorithm.
 It adds back 2sqrt(n) edges via `augmentTree`: the sqrt(n) of highest stretch
 and another sqrt(n) sampled according to stretch.

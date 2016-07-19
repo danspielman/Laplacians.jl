@@ -10,9 +10,24 @@ using Laplacians
 
 include("fastSampler.jl")
 include("revampedLinkedListFloatStorage.jl")
-include("sqLinOpWrapper.jl")
 include("fastCSC.jl")
 include("condNumber.jl")
+
+function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
+                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
+                                verbose::Bool=false, returnCN=false, CNTol::Tv=1e-3,
+                                eps::Tv=0.5, sampConst::Tv=0.02, beta::Tv=1e3,
+                                startingSize::Ti=1000, blockSize::Ti=20)
+
+	n = a.n;
+
+	return samplingSolver(a, zeros(Tv,n),
+		tol=tol,maxits=maxits,maxtime=maxtime,
+		verbose=verbose,returnCN=returnCN,CNTol=CNTol,
+		eps=eps,sampConst=sampConst,beta=beta,
+		startingSize=startingSize,blockSize=blockSize)
+
+end
 
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
@@ -272,8 +287,21 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
         end
     end
 
+    tics = ceil(Int64, n * [1/n,1/2,2/3,3/4,7/8,12/13,19/20,60/61,n-2/n])
+    tocs = ceil(Int64, n * [1/2,2/3,3/4,7/8,12/13,19/20,60/61,(n-1)/n])
+    tot = 0
+
     # Now, for every i, we will compute the i'th column in U
-    for i in 1:(n - 1)
+    for i in 1:(n-1)
+        if (i in tocs) && verbose
+            print("From last checkpoint until ", i, " we have ")
+            toc()
+        end
+
+        if (i in tics) && verbose
+            tic()
+        end
+
         # We will get rid of duplicate edges
         # wSum - sum of weights of edges
         # multSum - sum of number of edges (including multiedges)

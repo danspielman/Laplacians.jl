@@ -12,8 +12,7 @@ function powerIteration{Tv,Ti}(op::SqLinOp{Tv,Ti}; tol=1e-3, maxit = Inf, verbos
 	while iter < maxit
 		iter = iter + 1
 
-		newb = op.multFn(b) / norm(op.multFn(b))
-		b = newb
+		b = op.multFn(b) / norm(op.multFn(b))
 
 		prevLam = lam
 		lam = norm(op.multFn(b)) / norm(b)
