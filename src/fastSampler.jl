@@ -42,7 +42,7 @@ function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
     n = length(p)
 
     # generate the Sampler
-    F = Array{Float64}(n)
+    F = Array{Tv}(n)
     A = Array{Int64}(n)
     V = Array{Int64}(n)
     

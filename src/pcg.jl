@@ -1,4 +1,4 @@
-#=
+ #=
 
 Implementations of cg and pcg that use BLAS when they can.
 
@@ -66,6 +66,10 @@ function pcg(mat, b, pre::Union{AbstractArray,Matrix}; tol::Real=1e-6, maxits=In
 end
 
 
+function pcg(mat, b::Array{BigFloat,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+end
+
 function pcg(mat, b::Array{Float64,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
     pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
@@ -83,7 +87,6 @@ end
 
 function pcgSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
     f(b; tol::Real=1e-6, maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
-
 end
 
 """Create a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given"""
@@ -283,9 +286,9 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
 
 
 
-        # p = z + beta*p
-        BLAS.scal!(n,beta,p,1) # p *= beta
-        BLAS.axpy!(1.0,z,p) # p += z
+        p = z + beta*p
+        # BLAS.scal!(n,beta,p,1) # p *= beta
+        # BLAS.axpy!(1.0,z,p) # p += z
 
         if (time() - t1) > maxtime
             if verbose

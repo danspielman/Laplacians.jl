@@ -11,21 +11,38 @@ using Laplacians
 include("fastSampler.jl")
 include("johnlind.jl")
 include("revampedLinkedListFloatStorage.jl")
-include("sqLinOpWrapper.jl")
 include("fastCSC.jl")
 include("condNumber.jl")
 
+function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
+                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
+                                verbose::Bool=false, returnCN=false, CNTol::Tv=1e-3,
+                                eps::Tv=0.5, sampConst::Tv=0.02,
+                                startingSize::Ti=1000, blockSize::Ti=20)
+
+    n = a.n;
+
+    return samplingSolver(a, zeros(Tv,n),
+        tol=tol,maxits=maxits,maxtime=maxtime,
+        verbose=verbose,returnCN=returnCN,CNTol=CNTol,
+        eps=eps,sampConst=sampConst,
+        startingSize=startingSize,blockSize=blockSize)
+
+end
+
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
                                 tol::Tv=1e-6, maxits=100, maxtime=Inf, verbose::Bool = false,
-                                eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
+                                eps::Tv = 0.5, sampConst::Tv = 0.02,
                                 JLEps::Tv = 0.5, JLSolver=(la -> augTreeSolver(la,tol=1e-1,maxits=1000,maxtime=10)),
                                 startingSize::Ti = 1000, blockSize::Ti = 20,
                                 returnCN::Bool = false, CNTol::Tv=1e-3)
 
-    a = extendedLaplacian(a, diag)
+    srand(1234)
+
+    a = extendMatrix(a, diag)
     n = a.n
 
-    F,gOp,_,_,ord,cn,cntime = buildSolver(a, eps = eps, sampConst = sampConst, beta = beta, 
+    F,gOp,_,_,ord,cn,cntime = buildSolver(a, eps = eps, sampConst = sampConst, 
         JLEps = JLEps, JLSolver = JLSolver,
         startingSize = startingSize, blockSize = blockSize, 
         returnCN = returnCN, verbose = verbose)
@@ -42,7 +59,7 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
     	invperm[ord[i]] = i
     end
 
-    la = lap(sympermute(a, ord))
+    la = lap(symPermuteCSC(a, ord))
     function f(b)
         #= 
             We need to add an extra entry to b to make it match the size of a. The extra vertex in a is
@@ -57,7 +74,11 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
         # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
         ret = ret - ret[n]
 
-        return ret[1:(n-1)]
+        if sum(diag) != 0
+            pop!(ret)
+        end
+
+        return ret
     end
     
     return f
@@ -65,18 +86,24 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
 end
 
 # Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight
-function extendedLaplacian{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
+function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
 
+    if sum(diag) == 0
+        return a
+    end
+    
     n = a.n
     u,v,w = findnz(a)
     for i in 1:n
-        push!(u, i)
-        push!(v, n + 1)
-        push!(w, diag[i])
+        if diag[i] > 0
+            push!(u, i)
+            push!(v, n + 1)
+            push!(w, diag[i])
 
-        push!(u, n + 1)
-        push!(v, i)
-        push!(w, diag[i])
+            push!(u, n + 1)
+            push!(v, i)
+            push!(w, diag[i])
+        end
     end
     
     return sparse(u,v,w)
@@ -84,7 +111,7 @@ function extendedLaplacian{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
 end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                            eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
+                            eps::Tv = 0.5, sampConst::Tv = 0.02,
                             JLEps::Tv = 0.5, JLSolver=(la -> augTreeSolver(la,tol=1e-1,maxits=1000,maxtime=10)),
                             startingSize::Ti = 1000, blockSize::Ti = 20,
                             returnCN::Bool = false, CNTol::Tv=1e-3, verbose::Bool = false)
@@ -104,19 +131,6 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
         with extra weight on the diagonal. Thus, we want to eliminate it last.
     =#
 
-    # augment the tree
-    tree = akpw(a);
-    augTree = augmentTree(tree,a,convert(Int,round(sqrt(n))))
-
-    ord = reverse!(dfsOrder(tree, start = n));
-
-    a = sympermute(a, ord)
-    augTree = sympermute(augTree, ord)
-
-    # Blow up the augTree
-    a2 = copy(a)
-
-    a = a + (beta - 1) * augTree
     xhat = johnlind(a, eps=JLEps, solver=JLSolver, retXhat=true)
 
     # stretch = rho * compStretches(beta * tree, a)
@@ -200,10 +214,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 	    cntime = toc()
     end
 
-    if verbose
-        print("Preconditioner has ", nnz(U.data), " nonzeros")
-    end
-
+    ord = collect(1:n)
     if returnCN
         return f,gOp,U,d,ord,cn,cntime
     else
