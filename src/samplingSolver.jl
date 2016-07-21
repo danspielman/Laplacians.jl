@@ -56,10 +56,10 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
 
     # invperm = collect(1:n)
     # sort!(invperm, by=x->ord[x])
-    invperm = zeros(Int64, n)
-    for i in 1:n
-    	invperm[ord[i]] = i
-    end
+    # invperm = zeros(Int64, n)
+    # for i in 1:n
+    # 	invperm[ord[i]] = i
+    # end
 
     # aord = symperm(a, ord)
     # la = lap(aord + aord')
@@ -74,7 +74,7 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
         push!(auxb, -sum(auxb))
 
         ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
-        ret = ret[invperm]
+        ret = ret[invperm(ord)]
 
         # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
         ret = ret - ret[n]

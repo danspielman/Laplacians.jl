@@ -397,7 +397,7 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
         adj = rest + rest' + tree
         la = lap(rest + rest' + tree)
 
-        F = samplingSolver(adj, tol=1e-1, eps=0.5, sampConst=2.0, beta=1.0, verbose=verbose)
+        F = samplingSolver(adj, tol=1e-1, eps=0.5, sampConst=0.02, beta=1e3, verbose=verbose)
         # F = amgSolver(la)
 
         f = function(b::Array{Float64,1})

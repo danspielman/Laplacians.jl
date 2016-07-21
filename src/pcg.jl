@@ -259,10 +259,6 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
     itcnt = 0
     while itcnt < maxits
         itcnt = itcnt+1
-
-        if itcnt % 10 == 0
-            println("Working on the ", itcnt, "th iteration")
-        end
         
         q = mat*p
 
