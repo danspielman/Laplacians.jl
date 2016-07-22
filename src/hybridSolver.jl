@@ -1,12 +1,11 @@
 #=
 
 An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
-
-KMP with the sampling scheme from augTreeSolver
-
 =#
 
 include("fastCSC.jl")
+# include("samplingJLSolver.jl")
+include("samplingSolver.jl")
 
 global KMP_SAVEMATS=false
 
@@ -29,7 +28,7 @@ type KMPparams
     treeAlg # :akpw or :rand
 end
 
-defaultKMPparams = KMPparams(1/36, 6, 1/8, 600, :akpw)
+defaultKMPparams = KMPparams(1/36, 6, 0.125, 600, :akpw)
 
 # this is just for Laplacians, not general SDD
 immutable elimLeafNode
@@ -228,26 +227,19 @@ end
 function KMPLapSolver(a; verbose=false,
                       tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
 
-
-
     if (minimum(a) < 0)
         error("The adjacency matrix cannot have negative entries.")
     end
-    
 
     co = components(a)
     if maximum(co) == 1
-
         return KMPLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits,  params=params)
-
     else
-
         comps = vecToComps(co)
 
         if verbose
             println("The graph has $(length(comps)) components.")
         end
-
 
         solvers = []
         for i in 1:length(comps)
@@ -264,9 +256,7 @@ function KMPLapSolver(a; verbose=false,
             push!(solvers, subSolver)
         end
 
-
         return Laplacians.blockSolver(comps,solvers)
-
     end
     
 end
@@ -285,7 +275,6 @@ function KMPLapSolver1(a; verbose=false,
         return lapWrapSolver(cholfact, lap(a))
     end
 
-
     if (nnz(a) == 2*(a.n - 1))
         if verbose
             println("The graph is a tree.  Solve directly")
@@ -293,7 +282,6 @@ function KMPLapSolver1(a; verbose=false,
         
         return lapWrapSolver(cholfact, lap(a))
     end
-
 
     if params.treeAlg == :rand
         tree = randishPrim(a)
@@ -315,12 +303,10 @@ function KMPLapSolver1(a; verbose=false,
     
     la = lap(aord)
 
-
     if KMP_SAVEMATS
         KMP_MATS = []
         push!(KMP_MATS,la)
     end
-
 
     fsub = KMPLapPrecon(aord, tord, params, verbose=verbose)
 
@@ -341,11 +327,9 @@ function KMPLapSolver1(a; verbose=false,
         push!(KMP_FS,f)
     end
 
-        
     return f
 
 end
-
 
 
 function KMPLapPrecon(a, t, params; verbose=false)
@@ -406,19 +390,29 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
         return lapWrapSolver(cholfact, la)
     end
 
-
     ijvs1 = stretchSample(ijvs,targetStretch,params.frac)
     
-
-    if (length(ijvs1.i) <= params.n0)
-
-        # solve directly
+    if (length(ijvs1.i) <= params.n0 || level > 0)
 
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
+        adj = rest + rest' + tree
         la = lap(rest + rest' + tree)
 
-        f = lapWrapSolver(cholfact, la)
-        
+        # F = samplingSolver(adj, tol=1e-1, eps=0.5, sampConst=2.0, verbose=true)
+        F = samplingSolver(adj, tol=1e-1, eps=0.5, sampConst=5.0, beta=1.0, verbose=false)
+        # F = amgSolver(la)
+
+        f = function(b::Array{Float64,1})
+        	subMean!(b)
+        	x = F(b)
+        	subMean!(x)
+
+        	return x
+        end
+
+        # println(adj.n, " ", length(f(rand(adj.n))))
+
+        # f = lapWrapSolver(cholfact, la)
     else
 
         marked = ones(Int64,n)
@@ -456,8 +450,6 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
 
             return x
         end
-        
-
     end
 
     if KMP_SAVEMATS
@@ -465,7 +457,6 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
     end
 
     return f
-
     
 end
 
@@ -480,17 +471,25 @@ This will mostly be the "uniform sampling" envisioned by KMP.
 function stretchSample(ijvs::IJVS,stretchTarget::Float64,frac::Float64)
 
     m = size(ijvs.i,1)
-    k = ceil(Int64, m * frac)
+    k = ceil(Int64, m * frac / 2)
+
+    take1 = ceil(Int64, 1/8 * k)
+    take2 = ceil(Int64, 7/8 * k)
+    # take1 = 1
+    # take2 = k
+
+    # make sure we sample less than m edges
+    take2 = min(take2, m - take1)
 
     ord = sortperm(ijvs.s, rev=true)
     edgeinds = zeros(Bool,length(ijvs.i))
 
-    # sample k edges form k+1 to m proportional to stretch
-    s = sum(ijvs.s[ord[(k+1):end]])
-    probs = ijvs.s * k / s
+    # sample take2 edges form take1+1 to m proportional to stretch
+    s = sum(ijvs.s[ord[(take1+1):end]])
+    probs = ijvs.s * take2 / s
 
     # take the first k edges (the ones of highest stretch)
-    probs[ord[1:k]] = 1
+    probs[ord[1:take1]] = 1
 
     edgeinds[rand(m) .< probs] = true
 
@@ -498,19 +497,6 @@ function stretchSample(ijvs::IJVS,stretchTarget::Float64,frac::Float64)
     sampj = ijvs.j[edgeinds]
     sampv = ijvs.v[edgeinds]
     samps = ijvs.s[edgeinds]
-
-    # add this to make the condition number better??
-    for i in 1:length(sampi)
-        if samps[i] > stretchTarget / frac
-            sampv[i] *= frac
-            samps[i] *= frac
-        else
-            if samps[i] > stretchTarget
-                sampv[i] *= (stretchTarget / samps[i])
-                samps[i] = stretchTarget
-            end
-        end
-    end
 
     return IJVS(sampi,sampj,sampv, samps)
 
