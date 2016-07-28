@@ -67,13 +67,15 @@ function writeToFile{Tv,Ti}(filename::ASCIIString, a::SparseMatrixCSC{Tv,Ti})
     
     println(f, a.n, " ", a.m, " ", length(a.nzval))
 
+    mat = tril(a);
+
     pos = 1
-    for i in 1:length(a.nzval)
-        while a.colptr[pos + 1] <= i
+    for i in 1:length(mat.nzval)
+        while mat.colptr[pos + 1] <= i
             pos = pos + 1
         end
         
-        println(f, a.rowval[i], " ", pos, " ", a.nzval[i])
+        println(f, mat.rowval[i], " ", pos, " ", mat.nzval[i])
     end
     
     close(f)
@@ -93,6 +95,10 @@ function readFromFile(filename::ASCIIString)
     for i in 2:(nz+1)
         push!(U, r[i,1])
         push!(V, r[i,2])
+        push!(W, r[i,3])
+
+        push!(U, r[i,2])
+        push!(V, r[i,1])
         push!(W, r[i,3])
     end
     

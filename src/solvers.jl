@@ -343,7 +343,7 @@ end
 A wrapper for the PyAMG solver.
 
 ~~~julia
- amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits::Int64=Inf, maxtime=Inf, verbose=false)
+ amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 ~~~
 """
 function amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
