@@ -1,5 +1,3 @@
-__precompile__()
-
 """A package for graph computations related to graph Laplacians
 
 Graphs are represented by sparse adjacency matrices, etc.
@@ -36,6 +34,7 @@ and exports the functions for which it seems appropriate.
   end
 
   using DataStructures
+  using PyAMG
 
   include("graphUtils.jl")
 
@@ -103,6 +102,7 @@ and exports the functions for which it seems appropriate.
   export shortIntGraph, floatGraph
 
   export lap
+  export adj
   export spectralCoords
   export spectralDrawing
 
@@ -128,11 +128,13 @@ and exports the functions for which it seems appropriate.
   export tarjanStretch
   export compDepth
   export compStretches
+  export dfsOrder
 
   include("pcg.jl")
 
   export cg, cgSolver
   export pcg, pcgSolver, pcgLapSolver
+  export amgSolver
 
   include("flow.jl")
 
@@ -164,6 +166,7 @@ and exports the functions for which it seems appropriate.
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
+  export amgSolver
 
   include("toposort.jl")
   export toposort, dirEdgeVertexMat
