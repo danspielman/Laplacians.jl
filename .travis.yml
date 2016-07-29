@@ -5,7 +5,7 @@ julia:
 
 script:  
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'Pkg.clone("PyPlot"); Pkg.build("PyPlot")'
+  - julia -e 'ENV["PYTHON"]=""; Pkg.clone("PyPlot"); Pkg.build("PyPlot")'
   - julia -e 'Pkg.clone("PyAMG"); Pkg.build("PyAMG")'
   - julia -e 'Pkg.clone(pwd()); Pkg.build("Laplacians"); Pkg.test("Laplacians"; coverage=true)'
   
