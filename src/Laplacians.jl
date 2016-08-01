@@ -34,7 +34,7 @@ and exports the functions for which it seems appropriate.
   end
 
   using DataStructures
-  using PyAMG
+  #using PyAMG
 
   include("graphUtils.jl")
 
