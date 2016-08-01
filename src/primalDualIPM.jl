@@ -49,10 +49,10 @@ n2 = size(A)[2]
 trunc = 0.995;
 
 #solve = ((rb,rc,rd,x,s) -> solver1(A,rb,rc,rd,x,s,n1,n2))
-solve = ((rb,rc,rd,x,s) -> solver3(Bt,A,rb,rc,rd,x,s,shur))
+#solve = ((rb,rc,rd,x,s) -> solver3(Bt,A,rb,rc,rd,x,s,shur))
 
 #computing the intial point
-(x,y,s) = initialPoint1(A,b,c,shur)
+(x,y,s) = initialPoint(A,b,c,shur)
 
 for i=1:maxIter
    
@@ -86,8 +86,9 @@ mu_cur = BLAS.dot(x,s)/n2  #current mu
  #    dy = dxy[n2+1:n1+n2]
  #    ds = -d.*dx - (x.^-1).*rd
 
-
-    (dx,dy,ds) = solve(rb,rc,rd,x,s)
+    invSol = shur(x,s)
+    #(dx,dy,ds) = solve(rb,rc,rd,x,s)
+    (dx,dy,ds) = solver3(A,rb,rc,rd,x,s,invSol)
     
     id = find(dx.<0)
     if(isempty(id))
@@ -113,7 +114,10 @@ mu_cur = BLAS.dot(x,s)/n2  #current mu
 
 #corrector step
 	rd = rd + dx.*ds - (sig*mu_cur)[1,1]
-	(dx,dy,ds) = solve(rb,rc,rd,x,s)
+
+    #invSol = shur(x,s)
+	#(dx,dy,ds) = solve(rb,rc,rd,x,s)
+    (dx,dy,ds) = solver3(A,rb,rc,rd,x,s,invSol)
     
     # b1 = rc - (x.^-1).*rd
     # b2 = rb
@@ -244,7 +248,7 @@ return(dx,dy,ds)
 end
 
 
-function solver3(Bt,A,rb,rc,rd,x,s,shur)
+function solver3(A,rb,rc,rd,x,s,invSol)
     
     #x1 = x[1:m,1]
     #x2 = x[m+1:2*m,1]
@@ -281,7 +285,7 @@ function solver3(Bt,A,rb,rc,rd,x,s,shur)
 ##
    # dy = [ df;dw]
     #dy = shurSolve(Bt,A,rhs,x,s,m,n,lapSolver)
-    dy = shur(rhs,x,s)
+    dy = invSol(rhs)
     ds = -rc - A'*dy
     dx = -Sinv*rd - X*(Sinv*ds) 
 ##
@@ -289,7 +293,7 @@ function solver3(Bt,A,rb,rc,rd,x,s,shur)
 return(dx,dy,ds)
 end
 
-function shurSolve(Bt,A,rhs,x,s,m,n,lapSolver)
+function shurSolve(Bt,A,x,s,m,n,lapSolver)
 
     x1 = x[1:m,1]
     x2 = x[m+1:2*m,1]
@@ -318,11 +322,21 @@ function shurSolve(Bt,A,rhs,x,s,m,n,lapSolver)
     #display(minimum(eigs(la)))
     #df = la\(rhs1 - Bt*D1*Dinv*rhs2)
     laInv = lapSolver(la)
-    df = laInv((rhs1 - Bt*D1*Dinv*rhs2))
-    dw = Dinv*(rhs2 - D1*Bt'*df)
-## 
-    dy = [ df;dw]
+#    df = laInv((rhs1 - Bt*D1*Dinv*rhs2))
+#    dw = Dinv*(rhs2 - D1*Bt'*df)
 
-return dy
+ #   dy = [ df;dw]
+##
+    function fn(rhs)
+        df = laInv((rhs1 - Bt*D1*Dinv*rhs2))
+        dw = Dinv*(rhs2 - D1*Bt'*df) 
+        dy = [ df;dw]
+        return dy 
+    end
+##
+
+
+#return dy
+return fn 
 end
 
