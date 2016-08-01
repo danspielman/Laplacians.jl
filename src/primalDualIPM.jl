@@ -9,6 +9,7 @@ function minCostFlow{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
                             b1::Array{Tv,1},
                             c1::Array{Tv,1},
                             u::Array{Tv,1};
+                            lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)),
                              tol::Real=1e-6)
 
 	m = size(Bt)[2]
@@ -18,10 +19,10 @@ function minCostFlow{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
 	b = [b1;u]
 	c = [c1;zeros(m,1)]
     
-	lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000))
+	#lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000))
     hessSolve = ((x,s) -> shurSolve(Bt,A,x,s,m,n,lapSolver))
 
-	(x,y,s) = primalDualIPM(A,b,c,hessSolve; tol=tol)
+	(x,y,s) = primalDualIPM(A,b,c,hessSolve, tol=tol)
 
 	return (x,y,s)
 
@@ -44,7 +45,7 @@ trunc = 0.995;
 #solve = ((rb,rc,rd,x,s) -> solver3(Bt,A,rb,rc,rd,x,s,shur))
 
 #computing the intial point
-(x,y,s) = initialPoint(A,b,c,hessSolve)
+(x,y,s) = initialPoint1(A,b,c,hessSolve)
 
 for i=1:maxIter
    
@@ -122,7 +123,10 @@ return(x,y,s)
 
 end
 
-function initialPoint(A,b,c,hessSolve)
+function initialPoint{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
+                             b::Array{Tv,1},
+                             c::Array{Tv,1},
+                             hessSolve)
 A2 = A*A'
 x0 = A'*(A2\b)
 y0 = A2\(A*c)
@@ -143,13 +147,20 @@ return (x0,y0,s0)
 
 end
 
-function initialPoint1(A,b,c,shur)
+function initialPoint1{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
+                              b::Array{Tv,1},
+                              c::Array{Tv,1},
+                              hessSolve)
+
 #A2 = A*A'
 #x0 = A'*(A2\b)
 n2 = size(A)[2]
-x0 = A'*shur(b,ones(n2,1),ones(n2,1))
+Hinv = hessSolve(ones(n2,1),ones(n2,1))
+#x0 = A'*shur(b,ones(n2,1),ones(n2,1))
+x0 = A'*Hinv(b)
 #y0 = A2\(A*c)
-y0 = shur(A*c,ones(n2,1),ones(n2,1))
+#y0 = shur(A*c,ones(n2,1),ones(n2,1))
+y0 = Hinv(A*c)
 s0 = c - A'*y0
 del_x = max(-1.5*minimum(x0),0)
     del_s = max(-1.5*minimum(s0),0)
@@ -191,11 +202,7 @@ function solver2(A,rb,rc,rd,x,s,n1,n2)
 	d = (s.^-1.*(x))  #might need to add back the 1e+16 term
     D = spdiagm(d[:,1])
 
-    #H = [D -A';-A zeros(n1,n1)] 
     B = A*D*A'
-
-    #b1 = rc - (x.^-1).*rd
-    #b2 = rb
 
     Sinv = spdiagm((s.^-1)[:,1])
     X = spdiagm(x[:,1])
@@ -203,10 +210,6 @@ function solver2(A,rb,rc,rd,x,s,n1,n2)
     dy = B\(-rb - A*(X*(Sinv*rc)) + A*(Sinv*rd)) 
     ds = -rc - A'*dy
     dx = -Sinv*rd - X*(Sinv*ds)
-    #dxy = H\[b1;b2] # need to substitute this with a solver
-    #dx = dxy[1:n2] 
-    #dy = dxy[n2+1:n1+n2]
-    #ds = -d.*dx - (x.^-1).*rd
 
 return(dx,dy,ds)
 
