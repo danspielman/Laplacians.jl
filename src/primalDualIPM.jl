@@ -5,44 +5,36 @@ Primal-dual interior point method for a generic linear program of the form min_x
 primalDualIPM takes as input a full row-rank matrix ‘A’, followed by vectors ‘c’ and 'b'. 
 =#
 
-function minCostFlow(Bt,b1,c1,u)
+function minCostFlow{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
+                            b1::Array{Tv,1},
+                            c1::Array{Tv,1},
+                            u::Array{Tv,1};
+                             tol::Real=1e-6)
 
-	#Bt = -dirEdgeVertexMat(a)
-	#Bt = a
 	m = size(Bt)[2]
 	n = size(Bt)[1] 
 	A = [Bt spzeros(n,m); speye(m) speye(m)]
 
 	b = [b1;u]
 	c = [c1;zeros(m,1)]
-
-    #lapSolver=(H -> augTreeSolver(H,tol=1e-3,maxits=1000))
+    
 	lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000))
+    hessSolve = ((x,s) -> shurSolve(Bt,A,x,s,m,n,lapSolver))
 
-    #function lapSolver(H)
-    #    return lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)
-    #end
-    #f = lapSolver(H)
-    #f(x1)
-    #f(x2)
-
-
-
-    shur = ((rhs,x,s) -> shurSolve(Bt,A,rhs,x,s,m,n,lapSolver))
-
-	(x,y,s) = primalDualIPM(A,b,c,shur)
+	(x,y,s) = primalDualIPM(A,b,c,hessSolve; tol=tol)
 
 	return (x,y,s)
-
-
 
 end
 
 
 
-function primalDualIPM(A,b,c,shur)
+function primalDualIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
+                              b::Array{Tv,1},
+                              c::Array{Tv,1},
+                              hessSolve; 
+                              tol::Real=1e-6)
 
-tol = 1e-6
 maxIter = 200
 n1 = size(A)[1]
 n2 = size(A)[2]
@@ -52,7 +44,7 @@ trunc = 0.995;
 #solve = ((rb,rc,rd,x,s) -> solver3(Bt,A,rb,rc,rd,x,s,shur))
 
 #computing the intial point
-(x,y,s) = initialPoint(A,b,c,shur)
+(x,y,s) = initialPoint(A,b,c,hessSolve)
 
 for i=1:maxIter
    
@@ -71,24 +63,9 @@ mu_cur = BLAS.dot(x,s)/n2  #current mu
         break 
     end
 
-	# d = (s.*(x.^-1))  #might need to add back the 1e+16 term
- #    D = diagm(d[:,1])
-
- #    H = [D -A';-A zeros(n1,n1)] 
-
- #    b1 = rc - (x.^-1).*rd
- #    b2 = rb
-
-
-
- #    dxy = H\[b1;b2] # need to substitute this with a solver
- #    dx = dxy[1:n2] 
- #    dy = dxy[n2+1:n1+n2]
- #    ds = -d.*dx - (x.^-1).*rd
-
-    invSol = shur(x,s)
+    Hinv = hessSolve(x,s)
     #(dx,dy,ds) = solve(rb,rc,rd,x,s)
-    (dx,dy,ds) = solver3(A,rb,rc,rd,x,s,invSol)
+    (dx,dy,ds) = solver3(A,rb,rc,rd,x,s,Hinv)
     
     id = find(dx.<0)
     if(isempty(id))
@@ -114,20 +91,8 @@ mu_cur = BLAS.dot(x,s)/n2  #current mu
 
 #corrector step
 	rd = rd + dx.*ds - (sig*mu_cur)[1,1]
-
-    #invSol = shur(x,s)
-	#(dx,dy,ds) = solve(rb,rc,rd,x,s)
-    (dx,dy,ds) = solver3(A,rb,rc,rd,x,s,invSol)
-    
-    # b1 = rc - (x.^-1).*rd
-    # b2 = rb
-
-
-
-    # dxy = H\[b1;b2] # need to substitute this with a solver
-    # dx = dxy[1:n2] 
-    # dy = dxy[n2+1:n1+n2]
-    # ds = -d.*dx - (x.^-1).*rd 
+    (dx,dy,ds) = solver3(A,rb,rc,rd,x,s,Hinv)
+   
 
 #compute the step size
 	id = find(dx.<0)
@@ -157,7 +122,7 @@ return(x,y,s)
 
 end
 
-function initialPoint(A,b,c,shur)
+function initialPoint(A,b,c,hessSolve)
 A2 = A*A'
 x0 = A'*(A2\b)
 y0 = A2\(A*c)
@@ -248,43 +213,18 @@ return(dx,dy,ds)
 end
 
 
-function solver3(A,rb,rc,rd,x,s,invSol)
+function solver3{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
+                        rb::Array{Tv,1},
+                        rc::Array{Tv,1},
+                        rd::Array{Tv,1},
+                        x::Array{Tv,1},
+                        s::Array{Tv,1},invSol)
     
-    #x1 = x[1:m,1]
-    #x2 = x[m+1:2*m,1]
-    #s1 = s[1:m,1]
-    #s2 = s[m+1:2*m,1]
 
-    #d1 = (s1.^-1.*(x1))  #might need to add back the 1e+16 term
-    #D1 = spdiagm(d1[:,1])
-
-    #d2 = (s2.^-1.*(x2))  #might need to add back the 1e+16 term
-    #D2 = spdiagm(d2[:,1])
-    
-    #wt = 1./(1./d1 + 1./d2)
-    #la = Bt*spdiagm(wt[:,1])*Bt'        # this is the Shur complement
-    
-    #dinv = 1./(d1 + d2)
-    #Dinv = spdiagm(dinv[:,1])
-
-##
     Sinv = spdiagm((s.^-1)[:,1])
     X = spdiagm(x[:,1])
     rhs = -rb - A*(X*(Sinv*rc)) + A*(Sinv*rd) 
 ##
-
-    rhs1 = rhs[1:n,1]
-    rhs2 = rhs[n+1:end,1]
-
-    #display(minimum(eigs(la)))
-    #df = la\(rhs1 - Bt*D1*Dinv*rhs2)
-    #laInv = lapSolver(la)
-    #laInv = lapWrapSolver(augTreeSolver,la,tol=1e-6,maxits=1000)
-    #df = laInv((rhs1 - Bt*D1*Dinv*rhs2))
-    #dw = Dinv*(rhs2 - D1*Bt'*df)
-##
-   # dy = [ df;dw]
-    #dy = shurSolve(Bt,A,rhs,x,s,m,n,lapSolver)
     dy = invSol(rhs)
     ds = -rc - A'*dy
     dx = -Sinv*rd - X*(Sinv*ds) 
@@ -293,7 +233,13 @@ function solver3(A,rb,rc,rd,x,s,invSol)
 return(dx,dy,ds)
 end
 
-function shurSolve(Bt,A,x,s,m,n,lapSolver)
+function shurSolve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
+                          A::SparseMatrixCSC{Tv,Ti},
+                          x::Array{Tv,1},
+                          s::Array{Tv,1},
+                          m::Integer,
+                          n::Integer,
+                          lapSolver)
 
     x1 = x[1:m,1]
     x2 = x[m+1:2*m,1]
@@ -316,18 +262,12 @@ function shurSolve(Bt,A,x,s,m,n,lapSolver)
     Sinv = spdiagm((s.^-1)[:,1])
     X = spdiagm(x[:,1])
 
-    rhs1 = rhs[1:n,1]
-    rhs2 = rhs[n+1:end,1]
-
-    #display(minimum(eigs(la)))
-    #df = la\(rhs1 - Bt*D1*Dinv*rhs2)
+ 
     laInv = lapSolver(la)
-#    df = laInv((rhs1 - Bt*D1*Dinv*rhs2))
-#    dw = Dinv*(rhs2 - D1*Bt'*df)
-
- #   dy = [ df;dw]
 ##
-    function fn(rhs)
+    function Hinv(rhs)
+        rhs1 = rhs[1:n,1]
+        rhs2 = rhs[n+1:end,1]
         df = laInv((rhs1 - Bt*D1*Dinv*rhs2))
         dw = Dinv*(rhs2 - D1*Bt'*df) 
         dy = [ df;dw]
@@ -336,7 +276,6 @@ function shurSolve(Bt,A,x,s,m,n,lapSolver)
 ##
 
 
-#return dy
-return fn 
+return Hinv 
 end
 
