@@ -6,13 +6,6 @@
     beta in [30,200]
 =#
 
-using Laplacians
-
-include("fastSampler.jl")
-include("revampedLinkedListFloatStorage.jl")
-include("fastCSC.jl")
-include("condNumber.jl")
-
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
                                 verbose::Bool=false, returnCN=false, CNTol::Tv=1e-3,

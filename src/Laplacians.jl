@@ -36,8 +36,12 @@ and exports the functions for which it seems appropriate.
   using DataStructures
   using PyAMG
 
-  include("graphUtils.jl")
+  include("fastCSC.jl")
+  export symPermuteCSC
+  export symTransposeCSC
+  export submatrixCSC
 
+  include("graphUtils.jl")
   export deg
   export nbri
   export weighti
@@ -52,7 +56,6 @@ and exports the functions for which it seems appropriate.
   export getObound
 
   include("graphGenerators.jl")
-
   export readIJ
   export ringGraph
   export generalizedRing
@@ -167,6 +170,8 @@ and exports the functions for which it seems appropriate.
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
   export amgSolver
+
+  include("complexSolvers.jl")
 
   include("toposort.jl")
   export toposort, dirEdgeVertexMat

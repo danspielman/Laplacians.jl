@@ -3,14 +3,12 @@
 An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
 =#
 
-include("fastCSC.jl")
-# include("samplingJLSolver.jl")
 include("samplingSolver.jl")
 
-global KMP_SAVEMATS=false
+global HYBRID_SAVEMATS=false
 
-global KMP_MATS=[]
-global KMP_FS=[]
+global HYBRID_MATS=[]
+global HYBRID_FS=[]
 
 type IJVS
     i::Array{Int64,1}
@@ -20,7 +18,7 @@ type IJVS
 end
 
 
-type KMPparams
+type hybridParams
     frac::Float64  # fraction to decrease at each level
     iters::Int64   # iters of PCG to apply between levels
     treeScale::Float64 # scale tree by treeScale*log_2 (n) * aveStretch
@@ -28,7 +26,7 @@ type KMPparams
     treeAlg # :akpw or :rand
 end
 
-defaultKMPparams = KMPparams(1/36, 6, 0.125, 600, :akpw)
+defaultHybridParams = hybridParams(1/200, 15, 0.0, 0, :akpw)
 
 # this is just for Laplacians, not general SDD
 immutable elimLeafNode
@@ -188,8 +186,8 @@ end
 
 
 """Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
-function KMPSDDSolver(mat; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
+function hybridSDDSolver(mat; verbose=false,
+                      tol::Real=1e-2, maxits::Integer=1000,  params::hybridParams=defaultHybridParams)
 
     n = size(mat,1)
     s = mat*ones(n)
@@ -207,7 +205,7 @@ function KMPSDDSolver(mat; verbose=false,
     
     a1 = [sparse([0 s']); [s a]]
     
-    f1 = KMPLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, params=params)
+    f1 = hybridLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, params=params)
 
     f = function(b::Array{Float64,1})
 
@@ -224,8 +222,8 @@ end
 
 
 """Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
-function KMPLapSolver(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
+function hybridLapSolver(a; verbose=false,
+                      tol::Real=1e-2, maxits::Integer=1000,  params::hybridParams=defaultHybridParams)
 
     if (minimum(a) < 0)
         error("The adjacency matrix cannot have negative entries.")
@@ -233,7 +231,7 @@ function KMPLapSolver(a; verbose=false,
 
     co = components(a)
     if maximum(co) == 1
-        return KMPLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits,  params=params)
+        return hybridLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits,  params=params)
     else
         comps = vecToComps(co)
 
@@ -251,7 +249,7 @@ function KMPLapSolver(a; verbose=false,
                 error("Node $ind has no edges.")
             end
             
-            subSolver = KMPLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits,  params=params)
+            subSolver = hybridLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits,  params=params)
 
             push!(solvers, subSolver)
         end
@@ -263,9 +261,9 @@ end
 
 
 
-# KMPLapSolver drops right in to this after doing some checks and splitting on components
-function KMPLapSolver1(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
+# hybridLapSolver drops right in to this after doing some checks and splitting on components
+function hybridLapSolver1(a; verbose=false,
+                      tol::Real=1e-2, maxits::Integer=1000,  params::hybridParams=defaultHybridParams)
 
     if (a.n <= params.n0)
         if verbose
@@ -303,12 +301,12 @@ function KMPLapSolver1(a; verbose=false,
     
     la = lap(aord)
 
-    if KMP_SAVEMATS
-        KMP_MATS = []
-        push!(KMP_MATS,la)
+    if HYBRID_SAVEMATS
+        HYBRID_MATS = []
+        push!(HYBRID_MATS,la)
     end
 
-    fsub = KMPLapPrecon(aord, tord, params, verbose=verbose)
+    fsub = hybridLapPrecon(aord, tord, params, verbose=verbose)
 
 #    f = function(b::Array{Float64,1}; tol::Real=tol, maxits::Integer=maxits)
     f = function(b::Array{Float64,1})
@@ -322,9 +320,9 @@ function KMPLapSolver1(a; verbose=false,
         return x
     end
 
-    if KMP_SAVEMATS
-        KMP_FS = []
-        push!(KMP_FS,f)
+    if HYBRID_SAVEMATS
+        HYBRID_FS = []
+        push!(HYBRID_FS,f)
     end
 
     return f
@@ -332,7 +330,7 @@ function KMPLapSolver1(a; verbose=false,
 end
 
 
-function KMPLapPrecon(a, t, params; verbose=false)
+function hybridLapPrecon(a, t, params; verbose=false)
     n = size(a,1);
 
     rest = a-t;
@@ -366,13 +364,13 @@ function KMPLapPrecon(a, t, params; verbose=false)
 
     ijvs = IJVS(ai,aj,av,sv)
 
-    f = KMPLapPreconSub(tree, ijvs, targetStretch, 0, params, verbose=verbose)
+    f = hybridLapPreconSub(tree, ijvs, targetStretch, 0, params, verbose=verbose)
     
     return f
 end
 
 
-function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::KMPparams; verbose=false)
+function hybridLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::hybridParams; verbose=false)
 
     # problem: are forming la before sampling.  should be other way around, at least for top level!
     # that is, we are constructing Heavy, and I don't want to!
@@ -432,7 +430,7 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n1,n1)
         la1 = lap(rest + rest' + subtree)
 
-        fsub = KMPLapPreconSub(subtree, ijvs1, targetStretch, level+1, params, verbose=verbose)
+        fsub = hybridLapPreconSub(subtree, ijvs1, targetStretch, level+1, params, verbose=verbose)
 
         f = function(b::Array{Float64,1})
             subMean!(b) # b = b - mean(b)
@@ -452,8 +450,8 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
         end
     end
 
-    if KMP_SAVEMATS
-        push!(KMP_FS,f)
+    if HYBRID_SAVEMATS
+        push!(HYBRID_FS,f)
     end
 
     return f
@@ -462,16 +460,14 @@ end
 
 
 #=
-goal is to downsample edges by frac.
-However, those whose stretches are larger than stretchTarget
-might just get their weight reduced instead
-
-This will mostly be the "uniform sampling" envisioned by KMP.
+    Sample k = m * frac edges in the following way:
+        1. take the highest stretch 1/8k edges
+        2. sample 7/8k edges proportional to stretch
 =#
 function stretchSample(ijvs::IJVS,stretchTarget::Float64,frac::Float64)
 
     m = size(ijvs.i,1)
-    k = ceil(Int64, m * frac / 2)
+    k = ceil(Int64, m * frac)
 
     take1 = ceil(Int64, 1/8 * k)
     take2 = ceil(Int64, 7/8 * k)
