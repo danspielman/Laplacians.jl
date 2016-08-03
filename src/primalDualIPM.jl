@@ -17,14 +17,12 @@ function minCostFlow{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
 	A = [Bt spzeros(n,m); speye(m) speye(m)]
 
 	b = [b1;u]
-	c = [c1;zeros(m,1)]
+	c = [c1;zeros(m)]
     
-	#lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000))
     hessSolve = ((x,s) -> shurSolve(Bt,A,x,s,m,n,lapSolver))
+    (x,y,s,numIter) = primalDualIPM(A,b,c,hessSolve, tol=tol)
 
-	(x,y,s) = primalDualIPM(A,b,c,hessSolve, tol=tol)
-
-	return (x,y,s)
+	return (x,y,s,numIter)
 
 end
 
@@ -37,9 +35,12 @@ function primalDualIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
                               tol::Real=1e-6)
 
 maxIter = 200
+numIter = maxIter
 n1 = size(A)[1]
 n2 = size(A)[2]
-trunc = 0.995;
+trunc = 0.995
+
+#println("Hello!")
 
 #solve = ((rb,rc,rd,x,s) -> solver1(A,rb,rc,rd,x,s,n1,n2))
 #solve = ((rb,rc,rd,x,s) -> solver3(Bt,A,rb,rc,rd,x,s,shur))
@@ -47,7 +48,7 @@ trunc = 0.995;
 #computing the intial point
 (x,y,s) = initialPoint1(A,b,c,hessSolve)
 
-for i=1:maxIter
+for i = 1:maxIter
    
 
 mu_cur = BLAS.dot(x,s)/n2  #current mu
@@ -60,7 +61,7 @@ mu_cur = BLAS.dot(x,s)/n2  #current mu
     rc = A'*y + s - c
 
     if(norm([rb;rc;rd])<tol)
-        display(i)
+        numIter = i
         break 
     end
 
@@ -87,7 +88,7 @@ mu_cur = BLAS.dot(x,s)/n2  #current mu
 	end
 
 #compute corrector step parameters
-	mu_aff = (x + alpha_p*dx)'*(s+alpha_d*ds)/n2
+	mu_aff = BLAS.dot((x + alpha_p*dx),(s+alpha_d*ds))/n2
 	sig = (mu_aff/mu_cur)^3
 
 #corrector step
@@ -119,7 +120,7 @@ mu_cur = BLAS.dot(x,s)/n2  #current mu
 
 end
 
-return(x,y,s)
+return (x,y,s,numIter)
 
 end
 
@@ -155,7 +156,7 @@ function initialPoint1{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
 #A2 = A*A'
 #x0 = A'*(A2\b)
 n2 = size(A)[2]
-Hinv = hessSolve(ones(n2,1),ones(n2,1))
+Hinv = hessSolve(ones(n2),ones(n2))
 #x0 = A'*shur(b,ones(n2,1),ones(n2,1))
 x0 = A'*Hinv(b)
 #y0 = A2\(A*c)
