@@ -225,7 +225,7 @@ function augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{T
         edgeinds[ord[i]] = true
     end
 
-    s = sum(av[(k+1):end])
+    s = sum(av[ord[(k+1):end]])
     probs = av * k / s
     probs[ord[1:k]] = 0
     edgeinds[rand(length(av)) .< probs] = true
@@ -294,7 +294,7 @@ function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, max
 
 end
 
-"""This is an augmented spanning tree preconditioner for Laplacians.  
+"""This is an augmented spanning tree preconditioner for Laplacians.
 It takes as optional input a tree growing algorithm.
 It adds back 2sqrt(n) edges via `augmentTree`: the sqrt(n) of highest stretch
 and another sqrt(n) sampled according to stretch.
@@ -314,7 +314,7 @@ function augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 
   augDD = Dx + spdiagm(augtree*ones(n)) - augtree
 
-    F = lapWrapSolver(cholfact,augDD)
+  F = lapWrapSolver(cholfact,augDD)
 
   return F
 
@@ -338,4 +338,24 @@ function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, 
   return f
 
 end
-    
+     
+"""
+A wrapper for the PyAMG solver.
+
+~~~julia
+ amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+~~~
+"""
+function AMGSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+
+  amg = PyAMG.RugeStubenSolver(ddmat);
+  M = PyAMG.aspreconditioner(amg);
+  function F(b)
+    return M \ b;
+  end
+
+  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+
+  return f
+  
+end

@@ -198,12 +198,13 @@ end
 # and each subtree is completed before a parallel subtree
 #
 # this matrix should be the adj matrix of a tree
-function dfsOrder(t::SparseMatrixCSC)
+function dfsOrder{Tv,Ti}(t::SparseMatrixCSC{Tv,Ti}; start::Ti = 1)
+
     n = size(t,1)
     seen = zeros(Bool,n)
     ord = Array{Int64}(0)
     stk = Array{Int64}(0)
-    push!(stk,1)
+    push!(stk,start)
     while ~isempty(stk)
         u = pop!(stk)
         push!(ord,u)
