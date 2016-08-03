@@ -137,7 +137,6 @@ and exports the functions for which it seems appropriate.
 
   export cg, cgSolver
   export pcg, pcgSolver, pcgLapSolver
-  export amgSolver
 
   include("flow.jl")
 
@@ -169,7 +168,7 @@ and exports the functions for which it seems appropriate.
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
-  export amgSolver
+  export AMGSolver
 
   include("complexSolvers.jl")
 

@@ -346,7 +346,7 @@ A wrapper for the PyAMG solver.
  amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 ~~~
 """
-function amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+function AMGSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 
   amg = PyAMG.RugeStubenSolver(ddmat);
   M = PyAMG.aspreconditioner(amg);

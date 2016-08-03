@@ -6,57 +6,54 @@
     beta in [30,200]
 =#
 
+type samplingParams{Tv,Ti}
+    eps::Tv
+    sampConst::Tv   # we create sampConst * log(n)^2 / eps^2 multiedges in the beginning
+    beta::Tv # we scale the tree up by beta
+    startingSize::Ti # the initial size of the linked list storage structure
+    blockSize::Ti # the size of each consecutive block of memory assigned to a certain element
+
+    # debug parameters, we can get rid of them later
+    verboseSS::Bool
+    verbosePCG::Bool
+    returnCN::Bool
+    CNTol::Tv
+end
+
+defaultSamplingParams = samplingParams(0.5, 0.02, 1e3, 1000, 20,
+                                false,false,false,1e-3)
+
+
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
-                                verbose::Bool=false, returnCN=false, CNTol::Tv=1e-3,
-                                eps::Tv=0.5, sampConst::Tv=0.02, beta::Tv=1e3,
-                                startingSize::Ti=1000, blockSize::Ti=20)
+                                params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
 	n = a.n;
 
 	return samplingSolver(a, zeros(Tv,n),
 		tol=tol,maxits=maxits,maxtime=maxtime,
-		verbose=verbose,returnCN=returnCN,CNTol=CNTol,
-		eps=eps,sampConst=sampConst,beta=beta,
-		startingSize=startingSize,blockSize=blockSize)
+		params=params)
 
 end
-
+    
 function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
-                                verbose::Bool=false, returnCN=false, CNTol::Tv=1e-3,
-                                eps::Tv=0.5, sampConst::Tv=0.02, beta::Tv=1e3,
-                                startingSize::Ti=1000, blockSize::Ti=20)
+                                params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     srand(1234)
-
-    if verbose
-        println("\n\n")
-    end
 
     a = extendMatrix(a, diag)
     n = a.n
 
-    F,gOp,_,_,ord,cn,cntime = buildSolver(a, eps=eps, sampConst=sampConst, beta=beta, 
-        startingSize=startingSize, blockSize=blockSize, returnCN=returnCN, CNTol=CNTol, verbose=verbose)
+    F,gOp,_,_,ord,cn,cntime = buildSolver(a, params=params)
 
-    if verbose
+    if params.verboseSS
         println()
         println("Eps error: ", checkError(gOp))
         println("Condition number: ", cn)
         println()
     end 
 
-    # invperm = collect(1:n)
-    # sort!(invperm, by=x->ord[x])
-    # invperm = zeros(Int64, n)
-    # for i in 1:n
-    # 	invperm[ord[i]] = i
-    # end
-
-    # aord = symperm(a, ord)
-    # la = lap(aord + aord')
-    # la = lap(a[ord,ord])
     la = lap(symPermuteCSC(a, ord))
     function f(b)
         #= 
@@ -66,7 +63,7 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
         auxb = copy(b)
         push!(auxb, -sum(auxb))
 
-        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=params.verbosePCG)
         ret = ret[invperm(ord)]
 
         # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
@@ -109,18 +106,16 @@ function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
 end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                            eps::Tv = 0.5, sampConst::Tv = 0.02, beta::Tv = 1000.0,
-                            startingSize::Ti = 1000, blockSize::Ti = 20,
-                            returnCN::Bool = false, CNTol=1e-3, verbose::Bool = false)
+                            params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     # compute rho
     n = a.n;
-    rho::Tv = sampConst * log(n) ^ 2 / eps ^ 2
-    if verbose
+    rho::Tv = params.sampConst * log(n) ^ 2 / params.eps ^ 2
+    if params.verboseSS
 	    println("rho = ", rho)
     end
 
-    if verbose
+    if params.verboseSS
 	    tic()
     end
     #=
@@ -129,28 +124,18 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     =#
 
     tree = akpw(a);
-
-    # isotonic debug
-    # println()
-    # println()
-    # println(full(a))
-    # println(full(tree))
-
     ord = reverse!(dfsOrder(tree, start = n));
-
-    # a = a[ord, ord];
-    # tree = tree[ord, ord];
     a = symPermuteCSC(a, ord)
     tree = symPermuteCSC(tree, ord)
 
     # Blow up the tree and compute the stretches
     a2 = copy(a)
-    a = a + (beta - 1) * tree
+    a = a + (params.beta - 1) * tree
 
-    stretch = rho * compStretches(beta * tree, a)
+    stretch = rho * compStretches(params.beta * tree, a)
     stretch.nzval = min(rho, stretch.nzval)
 
-    if verbose
+    if params.verboseSS
 	    println("Initial number of multiedges = ", ceil(Int64,sum(stretch.nzval)), " . Nonzeros in a = ", nnz(a))
 	    meanStretch = mean(stretch.nzval)
 	    println("Average number of multiedges = ", mean(stretch.nzval))
@@ -158,16 +143,16 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 	    println("Maximum number of multiedges = ", maximum(stretch.nzval))
     end
 
-  	if verbose
+  	if params.verboseSS
 	    print("Time to build the tree and compute the stretch: ")
 	    toc()
     end
 
     # Get u and d such that ut d u = -a (doesn't affect solver)
-    Ut,d = samplingLDL(a, stretch, rho, startingSize, blockSize, verbose)
+    Ut,d = samplingLDL(a, stretch, rho, params.startingSize, params.blockSize, params.verboseSS)
     U = Ut'
 
-    if verbose
+    if params.verboseSS
 	    println("nnz in U matrix: ", length(U.data.nzval))
     end
 
@@ -229,14 +214,14 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     end
     gOp = SqLinOp(true,1.0,n,g)
 
-    if returnCN
+    if params.returnCN
 	    tic()
-        cn = condNumber(lap(a2), U, d, tol=CNTol)
+        cn = condNumber(lap(a2), U, d, tol=params.CNTol)
         print("computing the condition number takes: ")
 	    cntime = toc()
     end
 
-    if returnCN
+    if params.returnCN
         return f,gOp,U,d,ord,cn,cntime
     else
         return f,gOp,U,d,ord,(0.0,0.0),0.0

@@ -3,6 +3,8 @@
 An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
 =#
 
+include("samplingSolver.jl")
+
 global HYBRID_SAVEMATS=false
 
 global HYBRID_MATS=[]
@@ -19,13 +21,12 @@ end
 type hybridParams
     frac::Float64  # fraction to decrease at each level
     iters::Int64   # iters of PCG to apply between levels
+    treeScale::Float64 # scale tree by treeScale*log_2 (n) * aveStretch
+    n0::Int64 # the number of edges at which to go direct
     treeAlg # :akpw or :rand
-
-    ssParams::samplingParams
 end
 
-defaultHybridParams = hybridParams(1/200, 15, :akpw, 
-                        samplingParams(0.5,0.2,1.0,1000,20,false,false,false,1e-3))
+defaultHybridParams = hybridParams(1/200, 15, 0.0, 0, :akpw)
 
 # this is just for Laplacians, not general SDD
 immutable elimLeafNode
@@ -186,7 +187,7 @@ end
 
 """Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
 function hybridSDDSolver(mat; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, params::hybridParams=defaultHybridParams)
+                      tol::Real=1e-2, maxits::Integer=1000,  params::hybridParams=defaultHybridParams)
 
     n = size(mat,1)
     s = mat*ones(n)
@@ -262,7 +263,15 @@ end
 
 # hybridLapSolver drops right in to this after doing some checks and splitting on components
 function hybridLapSolver1(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, params::hybridParams=defaultHybridParams)
+                      tol::Real=1e-2, maxits::Integer=1000,  params::hybridParams=defaultHybridParams)
+
+    if (a.n <= params.n0)
+        if verbose
+            println("The graph is small.  Solve directly")
+        end
+        
+        return lapWrapSolver(cholfact, lap(a))
+    end
 
     if (nnz(a) == 2*(a.n - 1))
         if verbose
@@ -299,6 +308,7 @@ function hybridLapSolver1(a; verbose=false,
 
     fsub = hybridLapPrecon(aord, tord, params, verbose=verbose)
 
+#    f = function(b::Array{Float64,1}; tol::Real=tol, maxits::Integer=maxits)
     f = function(b::Array{Float64,1})
         bord = b[ord]
         
@@ -320,24 +330,47 @@ function hybridLapSolver1(a; verbose=false,
 end
 
 
-function hybridLapPrecon(a, tree, params; verbose=false)
+function hybridLapPrecon(a, t, params; verbose=false)
     n = size(a,1);
 
-    rest = a-tree;
-    st = compStretches(tree,rest);
+    rest = a-t;
+
+    st = compStretches(t,rest);
+    aveStretch = sum(st)/nnz(rest)
+
+    if params.treeScale > 0
+    
+        targetStretch = 1/(params.treeScale*log(n)/log(2))
+
+        fac = aveStretch/targetStretch
+        tree = fac*t;
+
+    else
+
+        targetStretch = 1.0
+
+        fac = aveStretch/targetStretch
+        tree = t;
+
+    end
+
+    if verbose
+        println("aveStretch : ", aveStretch, " fac : ", fac)
+    end
     
     (ai,aj,av) = findnz(triu(rest))
     (si,sj,sv) = findnz(triu(st))
+    sv = sv ./ fac
 
     ijvs = IJVS(ai,aj,av,sv)
 
-    f = hybridLapPreconSub(tree, ijvs, 0, params, verbose=verbose)
+    f = hybridLapPreconSub(tree, ijvs, targetStretch, 0, params, verbose=verbose)
     
     return f
 end
 
 
-function hybridLapPreconSub(tree, ijvs::IJVS, level::Int64, params::hybridParams; verbose=false)
+function hybridLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::hybridParams; verbose=false)
 
     # problem: are forming la before sampling.  should be other way around, at least for top level!
     # that is, we are constructing Heavy, and I don't want to!
@@ -355,21 +388,29 @@ function hybridLapPreconSub(tree, ijvs::IJVS, level::Int64, params::hybridParams
         return lapWrapSolver(cholfact, la)
     end
 
-    ijvs1 = stretchSample(ijvs,params.frac)
+    ijvs1 = stretchSample(ijvs,targetStretch,params.frac)
     
-    if level > 0
+    if (length(ijvs1.i) <= params.n0 || level > 0)
 
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
         adj = rest + rest' + tree
         la = lap(rest + rest' + tree)
 
-        F = samplingSolver(adj, tol=1e-1, params=params.ssParams)
+        # F = samplingSolver(adj, tol=1e-1, eps=0.5, sampConst=2.0, verbose=true)
+        F = samplingSolver(adj, tol=1e-1, eps=0.5, sampConst=5.0, beta=1.0, verbose=false)
+        # F = amgSolver(la)
 
         f = function(b::Array{Float64,1})
+        	subMean!(b)
         	x = F(b)
+        	subMean!(x)
 
         	return x
         end
+
+        # println(adj.n, " ", length(f(rand(adj.n))))
+
+        # f = lapWrapSolver(cholfact, la)
     else
 
         marked = ones(Int64,n)
@@ -389,7 +430,7 @@ function hybridLapPreconSub(tree, ijvs::IJVS, level::Int64, params::hybridParams
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n1,n1)
         la1 = lap(rest + rest' + subtree)
 
-        fsub = hybridLapPreconSub(subtree, ijvs1, level+1, params, verbose=verbose)
+        fsub = hybridLapPreconSub(subtree, ijvs1, targetStretch, level+1, params, verbose=verbose)
 
         f = function(b::Array{Float64,1})
             subMean!(b) # b = b - mean(b)
@@ -423,13 +464,15 @@ end
         1. take the highest stretch 1/8k edges
         2. sample 7/8k edges proportional to stretch
 =#
-function stretchSample(ijvs::IJVS,frac::Float64)
+function stretchSample(ijvs::IJVS,stretchTarget::Float64,frac::Float64)
 
     m = size(ijvs.i,1)
     k = ceil(Int64, m * frac)
 
-    take1 = ceil(Int64, 3/8 * k)
-    take2 = ceil(Int64, 5/8 * k)
+    take1 = ceil(Int64, 1/8 * k)
+    take2 = ceil(Int64, 7/8 * k)
+    # take1 = 1
+    # take2 = k
 
     # make sure we sample less than m edges
     take2 = min(take2, m - take1)

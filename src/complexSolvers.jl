@@ -8,6 +8,7 @@ include("sqLinOpWrapper.jl")
 export SqLinOp
 
 include("samplingSolver.jl")
+export samplingParams
 export samplingSolver
 
 # KMP stuff
