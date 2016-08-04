@@ -323,17 +323,19 @@ end
 """
 An "augmented spanning tree" solver for Laplacian matrices.
 It works by adding edges to a low stretch spanning tree.  It calls `augTreeLapPrecon` to form
-the preconditioner.
+the preconditioner. In line with other solver, it takes as input the adjacency matrix of the system.
 
 ~~~julia
- augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+ augTreeLapSolver{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 ~~~
 """
-function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+function augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 
-  F = augTreeLapPrecon(ddmat, treeAlg=treeAlg)
+  la = lap(a)
 
-  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+  F = augTreeLapPrecon(la, treeAlg=treeAlg)
+
+  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
     
   return f
 
