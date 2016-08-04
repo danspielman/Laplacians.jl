@@ -9,7 +9,8 @@ export SqLinOp
 
 include("samplingSolver.jl")
 export samplingParams
-export samplingSolver
+export samplingSDDSolver
+export samplingLapSolver
 
 # KMP stuff
 include("KMPSolver.jl")

@@ -360,13 +360,16 @@ function hybridLapPreconSub(tree, ijvs::IJVS, level::Int64, params::hybridParams
     if level > 0
 
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
-        adj = rest + rest' + tree
+        adjMat = rest + rest' + tree
         la = lap(rest + rest' + tree)
 
-        F = samplingSolver(adj, tol=1e-1, params=params.ssParams)
+        F = samplingLapSolver(adjMat, tol=1e-1, params=params.ssParams)
 
         f = function(b::Array{Float64,1})
-        	x = F(b)
+            auxb = copy(b);
+            subMean!(auxb)
+
+        	x = F(auxb)
 
         	return x
         end
