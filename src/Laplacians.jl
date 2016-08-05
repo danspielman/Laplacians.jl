@@ -168,7 +168,7 @@ and exports the functions for which it seems appropriate.
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
-  export AMGSolver
+  export AMGSolver, AMGLapSolver
 
   include("complexSolvers.jl")
 

@@ -187,7 +187,7 @@ end
 
 """Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
 function KMPSDDSolver(mat; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPparams=defaultKMPparams)
 
     n = size(mat,1)
     s = mat*ones(n)
@@ -205,7 +205,7 @@ function KMPSDDSolver(mat; verbose=false,
     
     a1 = [sparse([0 s']); [s a]]
     
-    f1 = KMPLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, params=params)
+    f1 = KMPLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
 
     f = function(b::Array{Float64,1})
 
@@ -223,7 +223,7 @@ end
 
 """Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
 function KMPLapSolver(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPparams=defaultKMPparams)
 
 
 
@@ -235,7 +235,7 @@ function KMPLapSolver(a; verbose=false,
     co = components(a)
     if maximum(co) == 1
 
-        return KMPLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits,  params=params)
+        return KMPLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
 
     else
 
@@ -256,7 +256,7 @@ function KMPLapSolver(a; verbose=false,
                 error("Node $ind has no edges.")
             end
             
-            subSolver = KMPLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits,  params=params)
+            subSolver = KMPLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
 
             push!(solvers, subSolver)
         end
@@ -272,7 +272,7 @@ end
 
 # KMPLapSolver drops right in to this after doing some checks and splitting on components
 function KMPLapSolver1(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000,  params::KMPparams=defaultKMPparams)
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPparams=defaultKMPparams)
 
     if (a.n <= params.n0)
         if verbose
@@ -325,7 +325,7 @@ function KMPLapSolver1(a; verbose=false,
     f = function(b::Array{Float64,1})
         bord = b[ord]
         
-        xord = pcg(la, bord, fsub, tol=tol, maxits=maxits, verbose=verbose)
+        xord = pcg(la, bord, fsub, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 
         x = zeros(Float64,n)
         x[ord] = xord
