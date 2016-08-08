@@ -1,10 +1,13 @@
+defaultLapSolvers = [augTreeLapSolver, KMPLapSolver, samplingLapSolver, hybridLapSolver, AMGLapSolver]
+defaultSDDSolvers = [augTreeSolver, KMPSDDSolver, samplingSDDSolver, hybridSDDSolver, AMGSolver]
+
 # totTime should be in hours
-function compareSolversOut(n, solvers, tol, totTime)
+function compareSolversOut(n, totTime, solvers=defaultLapSolvers, tol=1e-3)
     
     # first, force a compile
-    tab = compareSolversRuns(1000, solvers, tol, 2)
+    tab = compareSolversRuns(1000, 2, solvers, tol)
 
-    tab = compareSolversTime(n, solvers, tol, totTime)
+    tab = compareSolversTime(n, totTime, solvers, tol)
     nruns = size(tab,1) - 1
 
     fn = string("compSolvers", n , "x", nruns, ".csv")
@@ -19,11 +22,11 @@ function compareSolversOut(n, solvers, tol, totTime)
 end
 
 
-compareSolversRuns(n, solvers, tol, nruns, maxtime=Inf) = compareSolvers(n, solvers, tol=tol, nruns=nruns, maxtime=maxtime)
-compareSolversTime(n, solvers, tol, totTime) = compareSolvers(n, solvers, tol=tol, totTime=totTime)
+compareSolversRuns(n, nruns, solvers, tol) = compareSolvers(n, nruns=nruns, solvers=solvers, tol=tol)
+compareSolversTime(n, totTime, solvers, tol) = compareSolvers(n, totTime=totTime, solvers=solvers, tol=tol)
 
 # totTime comes in hours, convert to seconds
-function compareSolvers(n, solvers; tol=1e-3, nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10)
+function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10, solvers=defaultLapSolvers, tol=1e-3)
 
     totTime = totTime*60*60
 
