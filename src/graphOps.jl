@@ -9,7 +9,9 @@ floatGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int64}(a.m, a.n, a.colp
 
 """Create a Laplacian matrix from an adjacency matrix.
 We might want to do this differently, say by enforcing symmetry"""
-lap(a) = spdiagm(a*ones(size(a)[1])) - a
+function lap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})  
+  return spdiagm(a * ones(Tv,size(a)[1])) - a
+end
 
 """Create an adjacency matrix and a diagonal vector from a Laplacian with added diagonal weights"""
 function adj{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
