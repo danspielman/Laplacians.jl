@@ -24,25 +24,16 @@ defaultSamplingParams = samplingParams(0.5, 0.02, 1e3, 1000, 20,
                                 false,false,false,1e-3)
 
 
-function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
-                                params::samplingParams{Tv,Ti}=defaultSamplingParams)
-
-	n = a.n;
-
-	return samplingSolver(a, zeros(Tv,n),
-		tol=tol,maxits=maxits,maxtime=maxtime,
-		params=params)
-
-end
-    
-function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
+""" Use the Sampling Solver to solve a SDD system. """
+function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
                                 params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     srand(1234)
 
-    a = extendMatrix(a, diag)
+    adjMat,diag = adj(SDDmat)
+
+    a = extendMatrix(adjMat,diag)
     n = a.n
 
     F,gOp,_,_,ord,cn,cntime = buildSolver(a, params=params)
@@ -61,7 +52,9 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
             vertex n, thus, we will add the new entry in b on position n as well.
         =#
         auxb = copy(b)
-        push!(auxb, -sum(auxb))
+        if norm(diag) != 0
+            push!(auxb, -sum(auxb))
+        end
 
         ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=params.verbosePCG)
         ret = ret[invperm(ord)]
@@ -69,7 +62,7 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
         # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
         ret = ret - ret[n]
 
-        if sum(diag) != 0
+        if norm(diag) != 0
             pop!(ret)
         end
 
@@ -80,10 +73,38 @@ function samplingSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1};
 
 end
 
+""" Use the Sampling Solver to solve a Laplacian system. Takes in the adjacency matrix. """
+function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
+                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
+                                params::samplingParams{Tv,Ti}=defaultSamplingParams)
+
+    srand(1234)
+
+	n = a.n;
+
+    F,gOp,_,_,ord,cn,cntime = buildSolver(a, params=params)
+
+    if params.verboseSS
+        println()
+        println("Eps error: ", checkError(gOp))
+        println("Condition number: ", cn)
+        println()
+    end 
+
+    la = lap(symPermuteCSC(a, ord))
+    function f(b)
+        ret = pcg(la, b[ord] - sum(b), F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=params.verbosePCG)
+        return ret[invperm(ord)]
+    end
+    
+    return f
+
+end
+
 # Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight
 function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
 
-    if sum(diag) == 0
+    if norm(diag) == 0
         return a
     end
     

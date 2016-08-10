@@ -69,6 +69,10 @@ and exports the functions for which it seems appropriate.
   export completeBinaryTree
   export completeGraph
   export pathGraph
+
+  export wGrid2
+  export wGrid3
+
   export grid2
   export grid2coords
 
@@ -168,7 +172,7 @@ and exports the functions for which it seems appropriate.
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
-  export AMGSolver
+  export AMGSolver, AMGLapSolver
 
   include("complexSolvers.jl")
 

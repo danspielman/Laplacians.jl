@@ -186,7 +186,7 @@ end
 
 """Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
 function hybridSDDSolver(mat; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, params::hybridParams=defaultHybridParams)
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
 
     n = size(mat,1)
     s = mat*ones(n)
@@ -204,7 +204,7 @@ function hybridSDDSolver(mat; verbose=false,
     
     a1 = [sparse([0 s']); [s a]]
     
-    f1 = hybridLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, params=params)
+    f1 = hybridLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
 
     f = function(b::Array{Float64,1})
 
@@ -222,7 +222,7 @@ end
 
 """Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
 function hybridLapSolver(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000,  params::hybridParams=defaultHybridParams)
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
 
     if (minimum(a) < 0)
         error("The adjacency matrix cannot have negative entries.")
@@ -230,7 +230,7 @@ function hybridLapSolver(a; verbose=false,
 
     co = components(a)
     if maximum(co) == 1
-        return hybridLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits,  params=params)
+        return hybridLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
     else
         comps = vecToComps(co)
 
@@ -248,7 +248,7 @@ function hybridLapSolver(a; verbose=false,
                 error("Node $ind has no edges.")
             end
             
-            subSolver = hybridLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits,  params=params)
+            subSolver = hybridLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
 
             push!(solvers, subSolver)
         end
@@ -262,7 +262,7 @@ end
 
 # hybridLapSolver drops right in to this after doing some checks and splitting on components
 function hybridLapSolver1(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, params::hybridParams=defaultHybridParams)
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
 
     if (nnz(a) == 2*(a.n - 1))
         if verbose
@@ -302,7 +302,7 @@ function hybridLapSolver1(a; verbose=false,
     f = function(b::Array{Float64,1})
         bord = b[ord]
         
-        xord = pcg(la, bord, fsub, tol=tol, maxits=maxits, verbose=verbose)
+        xord = pcg(la, bord, fsub, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 
         x = zeros(Float64,n)
         x[ord] = xord
@@ -360,13 +360,17 @@ function hybridLapPreconSub(tree, ijvs::IJVS, level::Int64, params::hybridParams
     if level > 0
 
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
-        adj = rest + rest' + tree
+        adjMat = rest + rest' + tree
         la = lap(rest + rest' + tree)
 
-        F = samplingSolver(adj, tol=1e-1, params=params.ssParams)
+        F = samplingLapSolver(adjMat, tol=1e-1, params=params.ssParams)
 
         f = function(b::Array{Float64,1})
-        	x = F(b)
+            auxb = copy(b);
+            subMean!(auxb)
+
+        	x = F(auxb)
+            subMean!(x)
 
         	return x
         end
