@@ -10,7 +10,8 @@ function minCostFlow{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
                             c1::Array{Tv,1},
                             u::Array{Tv,1};
                             lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)),
-                             tol::Real=1e-6)
+                            tol::Real=1e-6,
+                            maxtime=Inf)
 
 	m = size(Bt)[2]
 	n = size(Bt)[1] 
@@ -20,7 +21,7 @@ function minCostFlow{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
 	c = [c1;zeros(m)]
     
     hessSolve = ((x,s) -> shurSolve(Bt,A,x,s,m,n,lapSolver))
-    (x,y,s,numIter) = primalDualIPM(A,b,c,hessSolve, tol=tol)
+    (x,y,s,numIter) = primalDualIPM(A,b,c,hessSolve, tol=tol, maxtime=maxtime)
 
 	return (x,y,s,numIter)
 
@@ -32,7 +33,8 @@ function primalDualIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
                               b::Array{Tv,1},
                               c::Array{Tv,1},
                               hessSolve; 
-                              tol::Real=1e-6)
+                              tol::Real=1e-6,
+                              maxtime=Inf)
 
     maxIter = 200
     numIter = maxIter
@@ -48,7 +50,14 @@ function primalDualIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
     #computing the intial point
     (x,y,s) = initialPoint1(A,b,c,hessSolve)
 
+    tstart = time()
+
     for i = 1:maxIter
+        if time() - tstart > maxtime
+            println("Method exceeded time set by user. Stopped after $(i) iterations.")
+            break
+        end
+
         mu_cur = BLAS.dot(x,s)/n2  #current mu
         
         #predictor step

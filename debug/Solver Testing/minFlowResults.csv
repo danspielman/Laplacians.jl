@@ -1,0 +1,3 @@
+nlist,ilist,edges,targetTol,augTreeSolver_runtime,augTreeSolver_iterations,augTreeSolver_convergence,KMPSDDSolver_runtime,KMPSDDSolver_iterations,KMPSDDSolver_convergence,samplingSDDSolver_runtime,samplingSDDSolver_iterations,samplingSDDSolver_convergence,AMGSolver_runtime,AMGSolver_iterations,AMGSolver_convergence
+10000,1,11187,1e-5,28.288614889,192,4492409484681466e-21,24.121227419,176,4492280827257449e-21,41.758927382,184,4493541687979406e-21,33.783402356,194,449222069539553e-20
+10000,2,11630,1e-5,13.101008912,168,72612056142908816e-22,19.410475539,172,7261205526189062e-21,31.965511861,184,7261205720247494e-21,23.257051724,180,7261205633785129e-21
