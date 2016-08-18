@@ -81,7 +81,7 @@ end
 and returns a solver for solving Laplacian systems.
 The optional args tol and maxits are not necessarily taken by
 all solvers.  But, if they are, one can pass them here"""
-function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer=0)
+function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer=0, maxtime=Inf)
     N = size(la)[1]
 
     lasub = la[1:(N-1),1:(N-1)]
@@ -93,10 +93,19 @@ function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer
     if maximum(co) == 1
 
         if tol > 0
+            # this section is updated with maxtime, other may be not
             if maxits > 0
-                subSolver = solver(lasub, tol=tol, maxits=maxits);
+                if maxtime > 0
+                  subSolver = solver(lasub, tol=tol, maxits=maxits, maxtime=maxtime);
+                else
+                  subSolver = solver(lasub, tol=tol, maxits=maxits);
+                end
             else
-                subSolver = solver(lasub, tol=tol);
+                if maxtime > 0
+                  subSolver = solver(lasub, tol=tol, maxtime=maxtime);
+                else
+                  subSolver = solver(lasub, tol=tol);
+                end
             end
         else
             if maxits > 0
@@ -323,17 +332,19 @@ end
 """
 An "augmented spanning tree" solver for Laplacian matrices.
 It works by adding edges to a low stretch spanning tree.  It calls `augTreeLapPrecon` to form
-the preconditioner.
+the preconditioner. In line with other solver, it takes as input the adjacency matrix of the system.
 
 ~~~julia
- augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+ augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 ~~~
 """
-function augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+function augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 
-  F = augTreeLapPrecon(ddmat, treeAlg=treeAlg)
+  la = lap(a)
 
-  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+  F = augTreeLapPrecon(la, treeAlg=treeAlg)
+
+  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
     
   return f
 
@@ -346,7 +357,7 @@ A wrapper for the PyAMG solver.
  amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 ~~~
 """
-function amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+function AMGSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 
   amg = PyAMG.RugeStubenSolver(ddmat);
   M = PyAMG.aspreconditioner(amg);
@@ -355,6 +366,30 @@ function amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxi
   end
 
   f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+
+  return f
+  
+end
+
+
+"""
+A wrapper for the PyAMG solver. In line with our other solvers, takes in an adjacency matrix.
+
+~~~julia
+ amgSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+~~~
+"""
+function AMGLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+
+  la = lap(a)
+
+  amg = PyAMG.RugeStubenSolver(la);
+  M = PyAMG.aspreconditioner(amg);
+  function F(b)
+    return M \ b;
+  end
+
+  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 
   return f
   

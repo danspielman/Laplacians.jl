@@ -31,13 +31,20 @@ and exports the functions for which it seems appropriate.
     if !isdefined(Main, :LAPLACIANS_NOPLOT)
         eval(Expr(:using, :PyPlot))
     end
+
+    if !isdefined(Main, :LAPLACIANS_NOAMG)
+        eval(Expr(:using, :PyAMG))
+    end
   end
 
   using DataStructures
-  using PyAMG
+
+  include("fastCSC.jl")
+  export symPermuteCSC
+  export symTransposeCSC
+  export submatrixCSC
 
   include("graphUtils.jl")
-
   export deg
   export nbri
   export weighti
@@ -52,7 +59,6 @@ and exports the functions for which it seems appropriate.
   export getObound
 
   include("graphGenerators.jl")
-
   export readIJ
   export ringGraph
   export generalizedRing
@@ -66,6 +72,10 @@ and exports the functions for which it seems appropriate.
   export completeBinaryTree
   export completeGraph
   export pathGraph
+
+  export wGrid2
+  export wGrid3
+
   export grid2
   export grid2coords
 
@@ -134,7 +144,6 @@ and exports the functions for which it seems appropriate.
 
   export cg, cgSolver
   export pcg, pcgSolver, pcgLapSolver
-  export amgSolver
 
   include("flow.jl")
 
@@ -166,7 +175,14 @@ and exports the functions for which it seems appropriate.
   include("solvers.jl")
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
-  export amgSolver
+  export AMGSolver, AMGLapSolver
+
+  include("complexSolvers.jl")
+  export SDDSolvers
+  export LapSolvers
+
+  include("johnlind.jl")
+  export johnlind
 
   include("toposort.jl")
   export toposort, dirEdgeVertexMat
