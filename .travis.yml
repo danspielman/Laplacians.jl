@@ -9,6 +9,10 @@ os:
 before_install:
   - test "x$TRAVIS_OS_NAME" = xosx -o "x$PYTHON" = xConda-python || (sudo apt-get -qq update && sudo apt-get install -y $PYTHON)
 
+install:
+  - pip install pyamg
+  - pip install matplotlib
+
 script:  
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.clone("PyPlot"); Pkg.build("PyPlot")'
