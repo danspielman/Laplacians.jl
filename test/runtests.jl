@@ -11,31 +11,29 @@ end
 
 function testSolvers(a)
 
-    la = lap(a)
-    n = size(a,1)
+    n = 100;
+    a = chimera(n,1);
+    excess = zeros(n); excess[1] = excess[n] = 1e-10;
+    la = lap(a);
+    sdd = la + spdiagm(excess);
+    b = rand(n); b = b - mean(b);
 
-    err = 0
+    for solver in SDDSolvers
+        println(solver)
+        @time f = solver(sdd, tol=1e-6);
+        @time x = f(b);
+        println(norm(sdd * x - b) / norm(b))
+        println()
+    end
 
-    b = randn(n)
-    b = b - mean(b)
+    for solver in LapSolvers
+        println(solver)
+        @time f = solver(a, tol=1e-6);
+        @time x = f(b);
+        println(norm(la * x - b) / norm(b))
+        println()
+    end
 
-    t = akpw(a)
-    lt = lap(t)
-    f = pcgLapSolver(la,lt)
-    err = err + norm(la*f(b) - b)
-
-    f = augTreeLapSolver(la,tol=.0001,maxits=1000)
-    
-    err = err + norm(la*f(b)-b)
-
-    sdd = la
-    sdd[1,1] = sdd[1,1] + 1
-    
-    f = augTreeSolver(sdd,tol=.0001,maxits=1000)
-    
-    err = err + norm(sdd*f(b)-b)
-
-    return sdd
 end
 
 
