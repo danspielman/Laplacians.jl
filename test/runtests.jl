@@ -19,7 +19,7 @@ function testSolvers(a)
 
     for solver in SDDSolvers
         println(solver)
-        @time f = solver(sdd, tol=1e-6);
+        @time f = solver(sdd, tol=1e-6, maxtime=0.001);
         @time x = f(b);
         println(norm(sdd * x - b) / norm(b))
         println()
@@ -27,7 +27,7 @@ function testSolvers(a)
 
     for solver in LapSolvers
         println(solver)
-        @time f = solver(a, tol=1e-6);
+        @time f = solver(a, tol=1e-6, maxtime=0.001);
         @time x = f(b);
         println(norm(la * x - b) / norm(b))
         println()
