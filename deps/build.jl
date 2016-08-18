@@ -1,4 +1,4 @@
-# This build file is copied from the PyCall package with a few debug output changes.
+# The build.jl file from PyCall.jl
 
 # In this file, we figure out how to link to Python (surprisingly complicated)
 # and generate a deps/deps.jl file with the libpython name and other information
@@ -33,23 +33,25 @@ pysys(python::AbstractString, var::AbstractString) = chomp(readstring(`$python -
 
 #########################################################################
 
-const dlprefix = @windows? "" : "lib"
+const dlprefix = is_windows() ? "" : "lib"
 
 # return libpython name, libpython pointer
 function find_libpython(python::AbstractString)
     # it is ridiculous that it is this hard to find the name of libpython
     v = pyconfigvar(python,"VERSION","")
-    libs = [ dlprefix*"python"*v*"."*Libdl.dlext, dlprefix*"python."*Libdl.dlext ]
+    libs = [ dlprefix*"python"*v, dlprefix*"python" ]
     lib = pyconfigvar(python, "LIBRARY")
-    lib != "None" && unshift!(libs, splitext(lib)[1]*"."*Libdl.dlext)
+    lib != "None" && unshift!(libs, splitext(lib)[1])
     lib = pyconfigvar(python, "LDLIBRARY")
     lib != "None" && unshift!(unshift!(libs, basename(lib)), lib)
     libs = unique(libs)
 
     # it is ridiculous that it is this hard to find the path of libpython
     libpaths = [pyconfigvar(python, "LIBDIR"),
-                (@windows ? dirname(pysys(python, "executable")) : joinpath(dirname(dirname(pysys(python, "executable"))), "lib"))]
-    @osx_only push!(libpaths, pyconfigvar(python, "PYTHONFRAMEWORKPREFIX"))
+                (is_windows() ? dirname(pysys(python, "executable")) : joinpath(dirname(dirname(pysys(python, "executable"))), "lib"))]
+    if is_apple()
+        push!(libpaths, pyconfigvar(python, "PYTHONFRAMEWORKPREFIX"))
+    end
 
     # `prefix` and `exec_prefix` are the path prefixes where python should look for python only and compiled libraries, respectively.
     # These are also changed when run in a virtualenv.
@@ -57,6 +59,8 @@ function find_libpython(python::AbstractString)
 
     push!(libpaths, exec_prefix)
     push!(libpaths, joinpath(exec_prefix, "lib"))
+
+    error_strings = Compat.String[]
 
     if !haskey(ENV, "PYTHONHOME")
         # PYTHONHOME tells python where to look for both pure python
@@ -66,11 +70,12 @@ function find_libpython(python::AbstractString)
         # documentation recommends.  However, they are documented
         # to always be the same on Windows, where it causes
         # problems if we try to include both.
-        ENV["PYTHONHOME"] = @windows? exec_prefix : pysys(python, "prefix") * ":" * exec_prefix
+        ENV["PYTHONHOME"] = is_windows() ? exec_prefix : pysys(python, "prefix") * ":" * exec_prefix
         # Unfortunately, setting PYTHONHOME screws up Canopy's Python distro?
         try
             run(pipeline(`$python -c "import site"`, stdout=DevNull, stderr=DevNull))
-        catch
+        catch e
+            push!(error_strings, string("$python -c \"import site\" ==> ", e))
             pop!(ENV, "PYTHONHOME")
         end
     end
@@ -81,11 +86,13 @@ function find_libpython(python::AbstractString)
     for lib in libs
         for libpath in libpaths
             libpath_lib = joinpath(libpath, lib)
-            if isfile(libpath_lib)
+            if isfile(libpath_lib*"."*Libdl.dlext)
                 try
                     return (Libdl.dlopen(libpath_lib,
                                          Libdl.RTLD_LAZY|Libdl.RTLD_DEEPBIND|Libdl.RTLD_GLOBAL),
                             libpath_lib)
+                catch e
+                    push!(error_strings, string("dlopen($libpath_lib) ==> ", e))
                 end
             end
         end
@@ -99,30 +106,45 @@ function find_libpython(python::AbstractString)
         try
             return (Libdl.dlopen(lib, Libdl.RTLD_LAZY|Libdl.RTLD_DEEPBIND|Libdl.RTLD_GLOBAL),
                     lib)
+        catch e
+            push!(error_strings, string("dlopen($lib) ==> ", e))
         end
     end
-    error("Couldn't find libpython; check your PYTHON environment variable")
+
+    if "yes" == get(ENV, "PYCALL_DEBUG_BUILD", "no") # print out extra info to help with remote debugging
+        println(STDERR, "------------------------------------- exceptions -----------------------------------------")
+        for s in error_strings
+            print(s, "\n\n")
+        end
+        println(STDERR, "---------------------------------- get_config_vars ---------------------------------------")
+        print(STDERR, readstring(`python -c "import distutils.sysconfig; print(distutils.sysconfig.get_config_vars())"`))
+        println(STDERR, "--------------------------------- directory contents -------------------------------------")
+        for libpath in libpaths
+            if isdir(libpath)
+                print(libpath, ":\n")
+                for file in readdir(libpath)
+                    if contains(file, "pyth")
+                        println("    ", file)
+                    end
+                end
+            end
+        end
+        println(STDERR, "------------------------------------------------------------------------------------------")
+    end
+    
+    error("""
+        Couldn't find libpython; check your PYTHON environment variable.
+        
+        The python executable we tried was $python (= version $v);
+        the library names we tried were $libs
+        and the library paths we tried were $libpaths
+""")
 end
 
 #########################################################################
 
-hassym(lib, sym) = Libdl.dlsym_e(lib, sym) != C_NULL
-
-# call dlsym_e on a sequence of symbols and return the symbol that gives
-# the first non-null result
-function findsym(lib, syms...)
-    for sym in syms
-        if hassym(lib, sym)
-            return sym
-        end
-    end
-    error("no symbol found from: ", syms)
-end
-
+include("depsutils.jl")
 #########################################################################
-
-# need to be able to get the version before Python is initialized
-Py_GetVersion(libpy) = bytestring(ccall(Libdl.dlsym(libpy, :Py_GetVersion), Ptr{UInt8}, ()))
 
 const python = try
     let py = get(ENV, "PYTHON", isfile("PYTHON") ? readchomp("PYTHON") : "python"), vers = convert(VersionNumber, pyconfigvar(py,"VERSION","0.0"))
@@ -134,7 +156,7 @@ const python = try
 catch e1
     info( "No system-wide Python was found; got the following error:\n",
           "$e1\nusing the Python distribution in the Conda package")
-    abspath(Conda.PYTHONDIR, "python" * (@windows? ".exe" : ""))
+    abspath(Conda.PYTHONDIR, "python" * ( is_windows() ? ".exe" : ""))
 end
 
 use_conda = dirname(python) == abspath(Conda.PYTHONDIR)
@@ -148,78 +170,34 @@ const programname = pysys(python, "executable")
 # cache the Python version as a Julia VersionNumber
 const pyversion = convert(VersionNumber, split(Py_GetVersion(libpython))[1])
 
-info("Laplacians is using $python (Python $pyversion) at $programname, libpython = $libpy_name")
+info("PyCall is using $python (Python $pyversion) at $programname, libpython = $libpy_name")
 
 if pyversion < v"2.7"
-    error("Python 2.7 or later is required for Laplacians")
+    error("Python 2.7 or later is required for PyCall")
 end
 
-# PyUnicode_* may actually be a #define for another symbol, so
-# we cache the correct dlsym
-const PyUnicode_AsUTF8String =
-    findsym(libpython, :PyUnicode_AsUTF8String, :PyUnicodeUCS4_AsUTF8String, :PyUnicodeUCS2_AsUTF8String)
-const PyUnicode_DecodeUTF8 =
-    findsym(libpython, :PyUnicode_DecodeUTF8, :PyUnicodeUCS4_DecodeUTF8, :PyUnicodeUCS2_DecodeUTF8)
+# A couple of key strings need to be stored as constants so that
+# they persist throughout the life of the program.  In Python 3,
+# they need to be wchar_t* data.
+wstringconst(s) =
+    VERSION < v"0.5.0-dev+4859" ?
+    string("wstring(\"", escape_string(s), "\")") :
+    string("Base.cconvert(Cwstring, \"", escape_string(s), "\")")
 
-# Python 2/3 compatibility: cache symbols for renamed functions
-if hassym(libpython, :PyString_FromStringAndSize)
-    const PyString_FromStringAndSize = :PyString_FromStringAndSize
-    const PyString_AsStringAndSize = :PyString_AsStringAndSize
-    const PyString_Size = :PyString_Size
-    const PyString_Type = :PyString_Type
-else
-    const PyString_FromStringAndSize = :PyBytes_FromStringAndSize
-    const PyString_AsStringAndSize = :PyBytes_AsStringAndSize
-    const PyString_Size = :PyBytes_Size
-    const PyString_Type = :PyBytes_Type
-end
-if hassym(libpython, :PyInt_Type)
-    const PyInt_Type = :PyInt_Type
-    const PyInt_FromSize_t = :PyInt_FromSize_t
-    const PyInt_FromSsize_t = :PyInt_FromSsize_t
-    const PyInt_AsSsize_t = :PyInt_AsSsize_t
-else
-    const PyInt_Type = :PyLong_Type
-    const PyInt_FromSize_t = :PyLong_FromSize_t
-    const PyInt_FromSsize_t = :PyLong_FromSsize_t
-    const PyInt_AsSsize_t = :PyLong_AsSsize_t
-end
-
-# hashes changed from long to intptr_t in Python 3.2
-const Py_hash_t = pyversion < v"3.2" ? Clong:Int
-
-# whether to use unicode for strings by default, ala Python 3
-const pyunicode_literals = pyversion >= v"3.0"
-
-# some arguments changed from char* to wchar_t* in Python 3
-pystring = pyversion.major < 3 ? "bytestring" : "wstring"
+PYTHONHOMEENV = get(ENV, "PYTHONHOME", "")
 
 open("deps.jl", "w") do f
     print(f, """
           const python = "$(escape_string(python))"
           const libpython = "$(escape_string(libpy_name))"
-          const pyprogramname = $pystring("$(escape_string(programname))")
+          const pyprogramname = "$(escape_string(programname))"
+          const wpyprogramname = $(wstringconst(programname))
           const pyversion_build = $(repr(pyversion))
-          const PYTHONHOME = $pystring("$(escape_string(get(ENV, "PYTHONHOME", "")))")
+          const PYTHONHOME = "$(escape_string(PYTHONHOMEENV))"
+          const wPYTHONHOME = $(wstringconst(PYTHONHOMEENV))
 
           "True if we are using the Python distribution in the Conda package."
           const conda = $use_conda
-
-          const PyUnicode_AsUTF8String = :$PyUnicode_AsUTF8String
-          const PyUnicode_DecodeUTF8 = :$PyUnicode_DecodeUTF8
-
-          const PyString_FromStringAndSize = :$PyString_FromStringAndSize
-          const PyString_AsStringAndSize = :$PyString_AsStringAndSize
-          const PyString_Size = :$PyString_Size
-          const PyString_Type = :$PyString_Type
-          const PyInt_Type = :$PyInt_Type
-          const PyInt_FromSize_t = :$PyInt_FromSize_t
-          const PyInt_FromSsize_t = :$PyInt_FromSsize_t
-          const PyInt_AsSsize_t = :$PyInt_AsSsize_t
-
-          const Py_hash_t = $Py_hash_t
-
-          const pyunicode_literals = $pyunicode_literals
           """)
 end
 

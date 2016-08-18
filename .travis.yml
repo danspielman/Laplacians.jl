@@ -2,19 +2,12 @@ language: julia
 julia:
   - 0.4
   - release
+os:
+  - linux
+  - osx
 
-install:
-  - sudo apt-get update
-  # Installing anaconda 2.7 for PyAMG 
-  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
-
+before_install:
+  - test "x$TRAVIS_OS_NAME" = xosx -o "x$PYTHON" = xConda-python || (sudo apt-get -qq update && sudo apt-get install -y $PYTHON)
 
 script:  
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
