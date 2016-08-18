@@ -11,9 +11,8 @@ end
 
 function testSolvers(a)
 
-    n = 100;
-    a = chimera(n,1);
-    excess = zeros(n); excess[1] = excess[n] = 1e-10;
+    n = a.n
+    excess = zeros(n); excess[1] = excess[n] = 1e-5;
     la = lap(a);
     sdd = la + spdiagm(excess);
     b = rand(n); b = b - mean(b);
