@@ -1,17 +1,18 @@
-# Rasmus' linear system sovler. 
-
 #=
-    Some historically good parameters:
-    sampConst in [0.001, 0.03]
-    beta in [30,200]
+    An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
+    In addition to the setup in the paper, we also use a low stretch tree to approximate effective 
+    resistances on edges. To perform well cache wise, we implement a cache friendly list of
+    linked lists - found in revampedLinkedListFloatStorage.jl 
+    
+    The parameters used in the solver are described below.
 =#
 
 type samplingParams{Tv,Ti}
     eps::Tv
-    sampConst::Tv   # we create sampConst * log(n)^2 / eps^2 multiedges in the beginning
-    beta::Tv # we scale the tree up by beta
-    startingSize::Ti # the initial size of the linked list storage structure
-    blockSize::Ti # the size of each consecutive block of memory assigned to a certain element
+    sampConst::Tv       # we create sampConst * log(n)^2 / eps^2 multiedges in the beginning
+    beta::Tv            # we scale the tree up by beta
+    startingSize::Ti    # the initial size of the linked list storage structure
+    blockSize::Ti       # the size of each consecutive block of memory assigned to a certain element
 
     # debug parameters, we can get rid of them later
     verboseSS::Bool
@@ -24,12 +25,17 @@ defaultSamplingParams = samplingParams(0.5, 0.02, 1e3, 1000, 20,
                                 false,false,false,1e-3)
 
 
-""" Use the Sampling Solver to solve a SDD system. """
+""" 
+    A SDD system solver based on https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
+    ~~~julia
+    samplingLapSolver(a, tol, maxits, maxtime, params)
+    ~~~
+"""
 function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
                                 params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
-    srand(1234)
+    # srand(1234)
 
     adjMat,diag = adj(SDDmat)
 
@@ -73,12 +79,17 @@ function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
 
 end
 
-""" Use the Sampling Solver to solve a Laplacian system. Takes in the adjacency matrix. """
+""" 
+    A Laplacian system solver based on https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
+    ~~~julia
+    samplingLapSolver(a, tol, maxits, maxtime, params)
+    ~~~
+"""
 function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
                                 params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
-    srand(1234)
+    # srand(1234)
 
 	n = a.n;
 
@@ -326,8 +337,6 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
         
         # now propagate the clique to the neighbors of i
         for l in 1:multSum
-            # newSeed = rand(UInt32)
-            # srand(newSeed)
             
             j = jSamples[l]
             k = kSamples[l]

@@ -31,10 +31,13 @@ and exports the functions for which it seems appropriate.
     if !isdefined(Main, :LAPLACIANS_NOPLOT)
         eval(Expr(:using, :PyPlot))
     end
+
+    if !isdefined(Main, :LAPLACIANS_NOAMG)
+        eval(Expr(:using, :PyAMG))
+    end
   end
 
   using DataStructures
-  using PyAMG
 
   include("fastCSC.jl")
   export symPermuteCSC
@@ -175,6 +178,11 @@ and exports the functions for which it seems appropriate.
   export AMGSolver, AMGLapSolver
 
   include("complexSolvers.jl")
+  export SDDSolvers
+  export LapSolvers
+
+  include("johnlind.jl")
+  export johnlind
 
   include("toposort.jl")
   export toposort, dirEdgeVertexMat

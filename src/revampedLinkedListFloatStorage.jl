@@ -1,21 +1,32 @@
+#=
+    A data structure used for dealing with the oprations performed by samplingSolver in a cache friendly way.
 
-#= 
-next will point to the next element
-If totalSize % blockSize == 0 for the current position, then next will be pointing to a new block
+    Inspired by an implementation for linked lists used for Incomplete Cholesky in the TAUCS package, this
+    code works based on the following guidelines:
+        - initial size of the data structure is given by `size` blocks
+        - each block contains `blockSize` entries, all corresponding to a certain vertex (to offer locality)
+        - when all the blocks are filled up, we increase the number of blocks by `sizeIncrease`. this quantity
+        increases by 25% after each expansion
+        - we hold a queue of free blocks to reuse memory
 =#
+
 immutable element{Tv,Ti}
+    # values stored in the linked list relating to the samplingSolver algorithm
 	edgeWeight::Tv
 	edgeCount::Tv
-	neighbor::Ti
-	next::Ti
+	neighbor::Ti  
 
-	# this is for debug purposes
+    # next will point to the position of the next element in the linked list
+    # If totalSize % blockSize == 0 for the current position, then next will be pointing to a new block        
+	next::Ti           
+
+	# usedBy is for debugging purposes
 	usedBy::Ti
 end
 
 #=
-The linked list starts out with a small size, say close to 1000. At each step we increase its size
-by sizeIncrease. We hold blockSize consecutive elements in memory for every 
+    The linked list starts out with a small size, say close to 1000. At each step we increase its size
+    by sizeIncrease. We hold blockSize consecutive elements in memory for every 
 =#
 type LinkedListStorage{Tv,Ti}
 	val::Array{element{Tv,Ti},1}		# a big block of memory storing the values from the linked lists
@@ -28,7 +39,7 @@ type LinkedListStorage{Tv,Ti}
 	last::Array{Ti,1}					# the position of the last element in i's linked list
 
 	size::Ti 							# total size of the data structure (just counts the number of blocks)
-	sizeIncrease::Ti                    # the size before each expansion. it should be divisible by blockSize
+	sizeIncrease::Ti                    # the size of each expansion
 	blockSize::Ti 						# size of individual blocks of memory
 end
 
@@ -182,8 +193,8 @@ end
 function incSize{Tv,Ti}(lls::LinkedListStorage{Tv,Ti})
 
 	#=
-	we know that if we are increasing the size of the structure, we are out of free blocks
-	so, we can add aditional memory at the end of the structure
+    	we know that if we are increasing the size of the structure, we are out of free blocks
+    	thus we can add aditional memory at the end of the structure
 	=#
 	lls.left = lls.size + 1
 	lls.right = 1
@@ -194,7 +205,9 @@ function incSize{Tv,Ti}(lls::LinkedListStorage{Tv,Ti})
 	# update the number of free blocks and the number of blocks by which we increase the size every time
 	lls.size += lls.sizeIncrease
 	lls.sizeIncrease += ceil(Ti, 0.25 * lls.sizeIncrease)
-	lls.sizeIncrease = max(lls.blockSize, lls.sizeIncrease - lls.sizeIncrease % lls.blockSize)
+
+    # this was to make sizeIncrease divisible by blockSize. probably an artifact
+	# lls.sizeIncrease = max(lls.blockSize, lls.sizeIncrease - lls.sizeIncrease % lls.blockSize)
 
 end
 

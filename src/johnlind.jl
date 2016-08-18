@@ -1,4 +1,12 @@
-# Implements the Johnson-Lindenstauss resistance upperbounding
+""" 
+Johnson Lindenstrauss effective resistance upperbounding. If retXhat is set to true,
+returns the vectors necessary for computing the effective resistance bounds instead
+of the actual bounds. 
+
+~~~julia
+	johnlind(a::SparseMatrixCSC{Tv,Ti}; eps::Tv = 0.5, solver=(la -> augTreeSolver(la,tol=1e-1,maxits=1000,maxtime=10)), retXhat::Bool = false)
+~~~
+"""
 
 function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; 
 						eps::Tv = 0.5, 
@@ -6,7 +14,6 @@ function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 						retXhat::Bool = false)
 
 	n = a.n
-	# m = ceil(Int64, length(a.nzval) / 2)
 	m = length(a.nzval)
 	dhat = ceil(Int64, 4 * log(m) / eps^2)
 
