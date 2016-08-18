@@ -7,6 +7,7 @@ os:
   - osx
 
 install:
+  # install anaconda 2.7 (to be compatible with PyAMG)
   - sudo apt-get update
   - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
@@ -18,6 +19,7 @@ install:
   # now, install pyamg and matplotlib
   - pip install pyamg
   - pip install matplotlib
+  - pip install scipy
 
 script:  
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
