@@ -2,18 +2,11 @@ language: julia
 julia:
   - 0.4
   - release
-python:
-  - "2.7"
 
 install:
   - sudo apt-get update
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  # Installing anaconda 2.7 for PyAMG 
+  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
@@ -25,7 +18,7 @@ install:
 
 script:  
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'ENV["PYTHON"]=""; Pkg.clone("PyPlot"); Pkg.build("PyPlot")'
+  - julia -e 'Pkg.clone("PyPlot"); Pkg.build("PyPlot")'
   - julia -e 'Pkg.clone("PyAMG"); Pkg.build("PyAMG")'
   - julia -e 'Pkg.clone(pwd()); Pkg.build("Laplacians"); Pkg.test("Laplacians"; coverage=true)'
   
