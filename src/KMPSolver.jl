@@ -17,8 +17,8 @@ type IJVS
     s::Array{Float64,1}  # stretch of edge
 end
 
-
-type KMPparams
+"""Parameters for the KMP solver"""
+type KMPParams
     frac::Float64  # fraction to decrease at each level
     iters::Int64   # iters of PCG to apply between levels
     treeScale::Float64 # scale tree by treeScale*log_2 (n) * aveStretch
@@ -26,7 +26,7 @@ type KMPparams
     treeAlg # :akpw or :rand
 end
 
-defaultKMPparams = KMPparams(1/36, 6, 0.125, 600, :akpw)
+defaultKMPParams = KMPParams(1/36, 6, 0.125, 600, :akpw)
 
 # this is just for Laplacians, not general SDD
 immutable elimLeafNode
@@ -187,7 +187,7 @@ end
 
 """Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
 function KMPSDDSolver(mat; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPparams=defaultKMPparams)
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPParams=defaultKMPParams)
 
     n = size(mat,1)
     s = mat*ones(n)
@@ -223,7 +223,7 @@ end
 
 """Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
 function KMPLapSolver(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPparams=defaultKMPparams)
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPParams=defaultKMPParams)
 
 
 
@@ -272,7 +272,7 @@ end
 
 # KMPLapSolver drops right in to this after doing some checks and splitting on components
 function KMPLapSolver1(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPparams=defaultKMPparams)
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPParams=defaultKMPParams)
 
     if (a.n <= params.n0)
         if verbose
@@ -385,7 +385,7 @@ function KMPLapPrecon(a, t, params; verbose=false)
 end
 
 
-function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::KMPparams; verbose=false)
+function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::KMPParams; verbose=false)
 
     # problem: are forming la before sampling.  should be other way around, at least for top level!
     # that is, we are constructing Heavy, and I don't want to!

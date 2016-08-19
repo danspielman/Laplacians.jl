@@ -8,14 +8,15 @@ include("sqLinOpWrapper.jl")
 export SqLinOp
 
 include("samplingSolver.jl")
-export samplingParams
 export samplingSDDSolver
 export samplingLapSolver
+export samplingParams
 
 ### KMP
 include("KMPSolver.jl")
 export KMPSDDSolver
 export KMPLapSolver
+export KMPParams
 
 ### hybridSolver
 include("hybridSolver.jl")
@@ -30,6 +31,8 @@ export condNumber
 include("powerIteration.jl")
 export powerIteration
 
-# SDDSolvers take in a SDD matrix - LapSolvers take in an adjacency matrix
+"""A list containing SDD linear system solvers. They take in a SDD matrix plus tol, maxits and maxtime parameters."""
 SDDSolvers = [augTreeSolver, KMPSDDSolver, hybridSDDSolver, samplingSDDSolver, AMGSolver]
+
+"""A list containing Laplacian linear system solvers. They take in an adjacency matrix plus tol, maxits and maxtime parameters."""
 LapSolvers = [augTreeLapSolver, KMPLapSolver, hybridLapSolver, samplingLapSolver, AMGLapSolver]

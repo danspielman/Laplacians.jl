@@ -17,7 +17,7 @@ type IJVS
     s::Array{Float64,1}  # stretch of edge
 end
 
-
+"""Parameters for the hybrid solver"""
 type hybridParams
     frac::Float64   # fraction to decrease at each level
     iters::Int64    # iters of PCG to apply between levels

@@ -41,8 +41,6 @@ nms = names(Laplacians)
 
 n = length(nms)
 
-x = eval(nms[1])  # just a hack to prevent an error of some sort
-
 docstrs = Array(AbstractString,n)
 linenums = zeros(Int64,n)
 fileins = Array(AbstractString,n)
@@ -64,8 +62,7 @@ for i in 1:length(nms)
             linenums[i] = line
         end
 
-        
-        docmd = @doc(x)
+        docmd = @doc string(x)
         
         docstr = stringmime("text/plain", docmd )
         if (length(docstr) < 23) || (docstr[1:23] != noDocString)
@@ -75,44 +72,43 @@ for i in 1:length(nms)
         extras[i] = extraInfo(x)
 
     catch
+        println("didn't generate docs for ", string(sym))
     end
         
 end
 
 
-### Serban: not sure what this is for, but it doesn't seem to be working :(
+ind = zeros(Bool,length(fileins))
+for i in 1:length(fileins)
+    ind[i] = isdefined(fileins,i)
+end
 
-# ind = zeros(Bool,length(fileins))
-# for i in 1:length(fileins)
-#     ind[i] = isdefined(fileins,i)
-# end
+u = unique(fileins[ind]);
 
-# u = unique(fileins[ind]);
+fileins[!ind] = ""
 
-# fileins[!ind] = ""
+for j in 1:length(u)
+    infile = find(fileins .== u[j])
+    infile = infile[sortperm(linenums[infile])]
 
-# for j in 1:length(u)
-#     infile = find(fileins .== u[j])
-#     infile = infile[sortperm(linenums[infile])]
-
-#     fn = split(u[j],'.')[1]
+    fn = split(u[j],'.')[1]
     
-#     fileName = "docs/API/" * fn * "API.md"
-#     fh = open(fileName, "w")
+    fileName = "docs/API/" * fn * "API.md"
+    fh = open(fileName, "w")
 
-#     println(fh, "# ", fn)
+    println(fh, "# ", fn)
     
-#     for i in infile
-#         if isdefined(docstrs,i)
-#             println(fh, "### ", strings[i])
-#             println(fh, docstrs[i])
-#             println(fh, extras[i])
-#             println(fh,"\n")
-#         end
-#     end
+    for i in infile
+        if isdefined(docstrs,i)
+            println(fh, "### ", strings[i])
+            println(fh, docstrs[i])
+            println(fh, extras[i])
+            println(fh,"\n")
+        end
+    end
 
-#     close(fh)
+    close(fh)
 
-# end
+end
 
 
