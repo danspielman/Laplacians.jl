@@ -148,6 +148,34 @@ function completeBinaryTree(n::Int64)
   return a
 end # completeBinaryTree
 
+""" An n by n grid with random weights. User can specify the weighting scheme. """
+function wGrid2(n::Int64; weightGen::Function=rand)
+    gr2 = sparse(grid2(n));
+
+    gr2.nzval = Float64[weightGen() for i in 1:nnz(gr2)]
+
+    # symmetrize
+    gr2 = tril(gr2) + tril(gr2)'
+
+    return gr2
+end
+
+""" An n^3 grid with random weights. User can specify the weighting scheme. """
+function wGrid3(n::Int64; weightGen::Function=rand)
+    gr2 = grid2(n);
+    
+    a = kron(speye(n), gr2);
+    b = kron(gr2, speye(n));
+
+    gr3 = sparse(a + b);
+    gr3.nzval = Float64[weightGen() for i in 1:nnz(gr3)]
+
+    # symmetrize
+    gr3 = tril(gr3) + tril(gr3)'
+
+    return gr3
+end
+
 """An n-by-m grid graph.  iostropy is the weighting on edges in one direction."""
 function grid2(n::Int64, m::Int64; isotropy=1)
   a = kron(speye(n),spdiagm(ones(m-1),1,m,m))

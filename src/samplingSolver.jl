@@ -16,23 +16,25 @@ type samplingParams{Tv,Ti}
 
     # debug parameters, we can get rid of them later
     verboseSS::Bool
-    verbosePCG::Bool
     returnCN::Bool
     CNTol::Tv
 end
 
 defaultSamplingParams = samplingParams(0.5, 0.02, 1e3, 1000, 20,
-                                false,false,false,1e-3)
-
+                                false,false,1e-3)
 
 """ 
-    A SDD system solver based on https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
+    An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
+    In addition to the setup in the paper, we also use a low stretch tree to approximate effective 
+    resistances on edges. To perform well cache wise, we implement a cache friendly list of
+    linked lists - found in revampedLinkedListFloatStorage.jl 
+
     ~~~julia
     samplingLapSolver(a, tol, maxits, maxtime, params)
     ~~~
 """
 function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
-                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
+                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, 
                                 params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     # srand(1234)
@@ -62,7 +64,7 @@ function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
             push!(auxb, -sum(auxb))
         end
 
-        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=params.verbosePCG)
+        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
         ret = ret[invperm(ord)]
 
         # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
@@ -80,13 +82,17 @@ function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
 end
 
 """ 
-    A Laplacian system solver based on https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
+    An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
+    In addition to the setup in the paper, we also use a low stretch tree to approximate effective 
+    resistances on edges. To perform well cache wise, we implement a cache friendly list of
+    linked lists - found in revampedLinkedListFloatStorage.jl 
+
     ~~~julia
     samplingLapSolver(a, tol, maxits, maxtime, params)
     ~~~
 """
 function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, 
+                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, 
                                 params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     # srand(1234)
@@ -104,7 +110,7 @@ function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     la = lap(symPermuteCSC(a, ord))
     function f(b)
-        ret = pcg(la, b[ord] - sum(b), F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=params.verbosePCG)
+        ret = pcg(la, b[ord] - sum(b), F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
         return ret[invperm(ord)]
     end
     

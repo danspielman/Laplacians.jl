@@ -28,7 +28,7 @@ type hybridParams
 end
 
 defaultHybridParams = hybridParams(1/200, 15, :akpw, 600, 
-                        samplingParams(0.5,0.2,1.0,1000,20,false,false,false,1e-3))
+                        samplingParams(0.5,0.2,1.0,1000,20,false,false,1e-3))
 
 # this is just for Laplacians, not general SDD
 immutable elimLeafNode
@@ -46,6 +46,104 @@ immutable elimDeg2Node
     wt2::Float64
 end
 
+
+
+"""
+A mix between KMP, augTree and samplingSolver.
+At the top level, we perform a sampling scheme similar to what we see in augTreeSolver. After 
+sampling and eliminating degree 1 and degree 2 vertices, we perform a low accuracy solve using
+the samplingSolver, without blowing up the low stretch tree inside. 
+
+Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals.
+
+~~~julia
+hybridSDDSolver(mat; verbose=false, tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
+~~~
+"""
+function hybridSDDSolver(mat; verbose=false,
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
+
+    n = size(mat,1)
+    s = mat*ones(n)
+
+    dmat = diag(mat)
+    s = sparse(max(s,0) .* (s .> (dmat*1e-12)))
+
+    if (s == 0)
+        error("Matrix was not diagonally dominant.")
+    end
+    
+    # Force symmetric and diagonal zero
+    a = triu(abs(mat),1)
+    a = a + a'
+    
+    a1 = [sparse([0 s']); [s a]]
+    
+    f1 = hybridLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
+
+    f = function(b::Array{Float64,1})
+
+        b1 = [-sum(b);b]
+        x1 = f1(b1)
+        x = x1[2:end] - x1[1]
+        
+        return x
+        
+    end
+    
+    return f
+end
+
+
+"""
+A mix between KMP, augTree and samplingSolver.
+At the top level, we perform a sampling scheme similar to what we see in augTreeSolver. After 
+sampling and eliminating degree 1 and degree 2 vertices, we perform a low accuracy solve using
+the samplingSolver, without blowing up the low stretch tree inside. 
+
+Solves linear equations in the Laplacian of graph with adjacency matrix `a`.
+
+
+~~~julia
+hybridLapSolver(a; verbose=false, tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
+~~~
+"""
+function hybridLapSolver(a; verbose=false,
+                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
+
+    if (minimum(a) < 0)
+        error("The adjacency matrix cannot have negative entries.")
+    end
+
+    co = components(a)
+    if maximum(co) == 1
+        return hybridLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
+    else
+        comps = vecToComps(co)
+
+        if verbose
+            println("The graph has $(length(comps)) components.")
+        end
+
+        solvers = []
+        for i in 1:length(comps)
+            ind = comps[i]
+            
+            asub = a[ind,ind]
+
+            if (length(ind) == 1)
+                error("Node $ind has no edges.")
+            end
+            
+            subSolver = hybridLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
+
+            push!(solvers, subSolver)
+        end
+
+        return Laplacians.blockSolver(comps,solvers)
+    end
+    
+end
 
 # The tree must be in DFS order
 # marked is 1 if flagged for possible elimination,
@@ -184,84 +282,6 @@ function subMean!(x::Array{Float64,1})
         x[i] = x[i] - mn
     end
 end
-
-
-
-"""Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
-function hybridSDDSolver(mat; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
-
-    n = size(mat,1)
-    s = mat*ones(n)
-
-    dmat = diag(mat)
-    s = sparse(max(s,0) .* (s .> (dmat*1e-12)))
-
-    if (s == 0)
-        error("Matrix was not diagonally dominant.")
-    end
-    
-    # Force symmetric and diagonal zero
-    a = triu(abs(mat),1)
-    a = a + a'
-    
-    a1 = [sparse([0 s']); [s a]]
-    
-    f1 = hybridLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
-
-    f = function(b::Array{Float64,1})
-
-        b1 = [-sum(b);b]
-        x1 = f1(b1)
-        x = x1[2:end] - x1[1]
-        
-        return x
-        
-    end
-    
-    return f
-end
-
-
-"""Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
-function hybridLapSolver(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
-
-    if (minimum(a) < 0)
-        error("The adjacency matrix cannot have negative entries.")
-    end
-
-    co = components(a)
-    if maximum(co) == 1
-        return hybridLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
-    else
-        comps = vecToComps(co)
-
-        if verbose
-            println("The graph has $(length(comps)) components.")
-        end
-
-        solvers = []
-        for i in 1:length(comps)
-            ind = comps[i]
-            
-            asub = a[ind,ind]
-
-            if (length(ind) == 1)
-                error("Node $ind has no edges.")
-            end
-            
-            subSolver = hybridLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
-
-            push!(solvers, subSolver)
-        end
-
-        return Laplacians.blockSolver(comps,solvers)
-    end
-    
-end
-
-
 
 # hybridLapSolver drops right in to this after doing some checks and splitting on components
 function hybridLapSolver1(a; verbose=false,

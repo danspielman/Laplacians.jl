@@ -80,38 +80,39 @@ for i in 1:length(nms)
 end
 
 
-ind = zeros(Bool,length(fileins))
-for i in 1:length(fileins)
-    ind[i] = isdefined(fileins,i)
-end
+### Serban: not sure what this is for, but it doesn't seem to be working :(
 
-u = unique(fileins[ind]);
+# ind = zeros(Bool,length(fileins))
+# for i in 1:length(fileins)
+#     ind[i] = isdefined(fileins,i)
+# end
 
-fileins[!ind] = ""
+# u = unique(fileins[ind]);
 
-for j in 1:length(u)
-    infile = find(fileins .== u[j])
-    infile = infile[sortperm(linenums[infile])]
+# fileins[!ind] = ""
 
-    fn = split(u[j],'.')[1]
+# for j in 1:length(u)
+#     infile = find(fileins .== u[j])
+#     infile = infile[sortperm(linenums[infile])]
+
+#     fn = split(u[j],'.')[1]
     
-    fileName = "docs/API/" * fn * "API.md"
-    println(fileName)
-    fh = open(fileName,"w")
+#     fileName = "docs/API/" * fn * "API.md"
+#     fh = open(fileName, "w")
 
-    println(fh, "# ", fn)
+#     println(fh, "# ", fn)
     
-    for i in infile
-        if isdefined(docstrs,i)
-            println(fh, "### ", strings[i])
-            println(fh, docstrs[i])
-            println(fh, extras[i])
-            println(fh,"\n")
-        end
-    end
+#     for i in infile
+#         if isdefined(docstrs,i)
+#             println(fh, "### ", strings[i])
+#             println(fh, docstrs[i])
+#             println(fh, extras[i])
+#             println(fh,"\n")
+#         end
+#     end
 
-    close(fh)
+#     close(fh)
 
-end
+# end
 
 
