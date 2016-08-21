@@ -13,7 +13,7 @@ routine in Julia.  It basically does a radix sort on rows than columns. It does 
 to be symmetrix.  But, the same ideas could probably speed up many sparse matrix routines.
 `sympermute(a, perm)` is the same as `a[perm,perm]`.
 """
-function sympermute{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Array{Ti,1})
+function symPermuteCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Array{Ti,1})
 
     numnz = nnz(a)
 
@@ -71,6 +71,88 @@ function sympermute{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Array{Ti,1})
 
     return aperm
 end
+
+
+
+"""Compute the transpose of a matrix with symmetric nonzero structure"""
+function symTransposeCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti})
+
+    numnz = nnz(a)
+
+    cumdeg = a.colptr[2:end]-1
+    
+    I = a.rowval;
+
+    V1 = Array(Tv, numnz)
+
+    for i in numnz:-1:1
+        ptr = cumdeg[I[i]]
+        cumdeg[I[i]] -= 1
+        V1[ptr] = a.nzval[i]
+    end
+
+    return SparseMatrixCSC(a.n, a.n, copy(a.colptr),I, V1)
+
+end
+
+"""Given a set of integers, `set` between 1 and n, return a sorted version of them"""
+function sortSet{Ti}(set::Array{Ti,1},n::Ti)
+    v = zeros(Bool,n)
+    for i in set
+        v[i] = true
+    end
+    out = Array{Ti}(length(set))
+    ptr = 1
+    for i in 1:n
+        if v[i]
+            out[ptr] = i
+            ptr += 1
+        end
+    end
+    out
+end
+
+"""For a the submatrix of a with the entries of ijv indexed by list.  The list must be sorted.
+This is equivalent to
+
+~~~
+(ai,aj,av) = findnz(a)
+sparse(ai[list],aj[list],av[list],a.m,a.n)
+~~~
+"""
+function submatrixCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, list::Array{Ti,1})
+
+    list = sortSet(list,nnz(a))
+
+    colptr = Array{Ti}(1+a.n)
+    colptr[1] = 1
+
+    numnz = length(list)
+
+    rowval = Array{Ti}(numnz)
+    nzval = Array{Tv}(numnz)
+
+    ptr = 1
+    col = 1
+
+    for ind in list
+ 
+        while a.colptr[col+1] <= ind
+            col += 1
+            colptr[col] = ptr
+        end
+            
+        rowval[ptr] = a.rowval[ind]
+        nzval[ptr] = a.nzval[ind]
+        ptr += 1
+        
+    end
+
+    colptr[(col+1):end] = ptr
+    
+    return SparseMatrixCSC(a.m, a.n, colptr, rowval, nzval)
+end
+
 
 #=
   This is a version of sympermute that is not quite as fast.

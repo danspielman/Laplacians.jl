@@ -9,9 +9,8 @@ Contributors: Serban Stan
 =#
 
 """
-`pcgMatNorm(mat, b, pre, lhs; tol, maxits, maxtime, verbose)` solves a symmetric linear system using preconditioner `pre`.
+`pcg(mat, b, pre; tol, maxits, maxtime, verbose)` solves a symmetric linear system using preconditioner `pre`.
 `pre` can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact.
-`lhs` is the true left hand side of the system. In other words, b = mat * lhs
 `tol` is set to 1e-6 by default,
 `maxits` defaults to Inf
 `maxtime` defaults to Inf.  It measures seconds.
@@ -56,6 +55,7 @@ function pcgBLASMatNorm{Tval}(mat, b::Array{Tval,1}, pre, lhs::Array{Tval,1}; to
         BLAS.axpy!(al,p,x)  # x = x + al * p
         BLAS.axpy!(-al,q,r)  # r -= al*q
 
+        # This will take some time. Can we do something faster?
         if sqrt((lhs - x)' * mat * (lhs - x))[1] < tol 
             break
         end

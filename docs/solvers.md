@@ -183,62 +183,110 @@ That's a lot like using the diagonal preconditioner.  However, we see that the t
 ~~~
 
 
-## Augmented spanning tree preconditioners
+## Various Linear System Solvers
 
-Here is code that will invoke one.
-It is designed for positive definite systems.  So, let's give it one.
-Right now, it is using a randomized version of a MST.  There is no real reason to think that this should work.
-
+We have a blend of solvers geared towards solving symmetric linear systems. Some of these solvers, that have
+historically showcased good performance, have been grouped into two sections: SDDSolvers and LapSolvers.
 
 ~~~julia
-a = mapweight(grid2(1000),x->1/(rand(1)[1]));
-la = lap(a)
-n = size(la)[1]
-la[1,1] = la[1,1] + 1
-@time F = augTreeSolver(la,tol=1e-1,maxits=1000)
-	6.529052 seconds (4.00 M allocations: 1.858 GB, 15.34% gc time)
+SDDSolvers
+5-element Array{Function,1}:
+  Laplacians.augTreeSolver    
+  Laplacians.KMPSDDSolver     
+  Laplacians.hybridSDDSolver  
+  Laplacians.samplingSDDSolver
+  Laplacians.AMGSolver
 
-b = randn(n)
-@time x = F(b)
-	29.058915 seconds (9.74 k allocations: 23.209 GB, 6.84% gc time)
-
-norm(la*x - b)
-	99.74452367765869
-
-# Now, let's contrast with using CG
-
-@time y = cg(la,b,tol=1e-1,maxits=1000)
-	28.719631 seconds (4.01 k allocations: 7.473 GB, 3.74% gc time)
-
-norm(la*y-b)
-	3243.6014713600766
-
+LapSolvers
+5-element Array{Function,1}:
+  Laplacians.augTreeLapSolver 
+  Laplacians.KMPLapSolver     
+  Laplacians.hybridLapSolver  
+  Laplacians.samplingLapSolver
+  Laplacians.AMGLapSolver 
 ~~~
-That was not too impressive.  We will have to investigate.  By default, it presently uses randishKruskal.  Let's try randishPrim.  You can pass the treeAlg as a parameter.
+
+The SDD solvers take in a SDD matrix. They can also take in the usual tol, maxits and maxtime parameters. The
+Laplacian solvers, in contrast, are fed in an adjacency matrix. They are also subject to tol, maxits and maxtime.
+Following are examples of how to run these solvers on a given linear system.
 
 ~~~julia
-@time F = augTreeSolver(la,tol=1e-1,maxits=1000,treeAlg=randishPrim);
-	6.319489 seconds (4.00 M allocations: 2.030 GB, 18.81% gc time)
-
-b = randn(n)
-@time x = F(b)
-	29.503484 seconds (9.76 k allocations: 23.268 GB, 7.31% gc time)
-
-norm(la*x - b)
-	99.29610874176991
+a = mapweight(grid2(100),x->1/(rand(1)[1]));
+n = a.n
+la = lap(a); 
+dval = zeros(n); dval[1] = dval[n] = 1e-3;
+sdd = la + spdiagm(dval);
+b = randn(n); b = b - mean(b);
 ~~~
 
-
-To solve systems in a Laplacian, we could wrap it.
+Now, to run the SDD solvers.
 
 ~~~julia
-n = 40000
-la = lap(randRegular(n,3))
-f = lapWrapSolver(augTreeSolver,la,tol=1e-6,maxits=1000)
-b = randn(n); b = b - mean(b)
-x = f(b)
-norm(la*x-b)
-	0.00019304778073388
+for solver in SDDSolvers
+    println("Solver ", solver)
+    @time f = solver(sdd, maxits=1000, maxtime=10, tol=1e-4, verbose=false)
+    @time x = f(b);
+    println("Relative norm: ", norm(sdd * x - b) / norm(b), "\n")
+end
+
+Solver Laplacians.augTreeSolver
+  0.067958 seconds (235.22 k allocations: 35.807 MB, 8.41% gc time)
+  0.060869 seconds (2.72 k allocations: 70.339 MB, 17.35% gc time)
+Relative norm: 9.250884271915595e-5
+
+Solver Laplacians.KMPSDDSolver
+  0.063388 seconds (254.46 k allocations: 44.168 MB, 14.65% gc time)
+  0.102330 seconds (8.82 k allocations: 133.219 MB, 18.42% gc time)
+Relative norm: 9.355785387633888e-5
+
+Solver Laplacians.hybridSDDSolver
+  0.064385 seconds (264.54 k allocations: 41.390 MB, 12.33% gc time)
+  0.379060 seconds (2.07 M allocations: 266.961 MB, 9.90% gc time)
+Relative norm: 9.832304243953024e-5
+
+Solver Laplacians.samplingSDDSolver
+  0.135522 seconds (706.74 k allocations: 101.318 MB, 13.69% gc time)
+  0.179568 seconds (3.14 M allocations: 144.395 MB, 13.88% gc time)
+Relative norm: 9.95716064856691e-5
+
+Solver Laplacians.AMGSolver
+  0.030372 seconds (166 allocations: 860.125 KB)
+  0.116332 seconds (1.55 k allocations: 4.400 MB)
+Relative norm: 9.519986283623698e-5
 ~~~
 
-As you can see, lapWrapSolver can pass tol and maxits arguments to its solver, if they are given to it.
+Next, the Laplacian solvers.
+
+~~~julia
+for solver in LapSolvers
+    println("Solver ", solver)
+    @time f = solver(a, maxits=1000, maxtime=10, tol=1e-4, verbose=false)
+    @time x = f(b);
+    println("Relative norm: ", norm(sdd * x - b) / norm(b), "\n")
+end
+
+Solver Laplacians.augTreeLapSolver
+  0.072029 seconds (235.32 k allocations: 38.405 MB, 12.87% gc time)
+  0.088307 seconds (6.51 k allocations: 98.563 MB, 18.56% gc time)
+Relative norm: 0.00015469840172506333
+
+Solver Laplacians.KMPLapSolver
+  0.054602 seconds (254.18 k allocations: 39.445 MB, 15.07% gc time)
+  0.107957 seconds (8.38 k allocations: 126.549 MB, 21.16% gc time)
+Relative norm: 0.0001558714652838137
+
+Solver Laplacians.hybridLapSolver
+  0.053575 seconds (267.23 k allocations: 36.942 MB, 6.97% gc time)
+  0.407590 seconds (3.02 M allocations: 286.329 MB, 10.58% gc time)
+Relative norm: 0.00015420023270231535
+
+Solver Laplacians.samplingLapSolver
+  0.119625 seconds (706.35 k allocations: 90.641 MB, 21.37% gc time)
+  0.218231 seconds (3.52 M allocations: 161.625 MB, 14.20% gc time)
+Relative norm: 0.00015470313398451233
+
+Solver Laplacians.AMGLapSolver
+  0.043749 seconds (235 allocations: 2.744 MB)
+  0.179676 seconds (1.57 k allocations: 4.402 MB)
+Relative norm: 0.00014173955766018617
+~~~
