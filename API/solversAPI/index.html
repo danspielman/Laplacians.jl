@@ -246,6 +246,8 @@
         
             <li><a href="#lapwrapsolver">lapWrapSolver</a></li>
         
+            <li><a href="#lapchol">lapChol</a></li>
+        
             <li><a href="#augmenttree">augmentTree</a></li>
         
             <li><a href="#augtreeprecon">augTreePrecon</a></li>
@@ -256,6 +258,10 @@
         
             <li><a href="#augtreelapsolver">augTreeLapSolver</a></li>
         
+            <li><a href="#amgsolver">AMGSolver</a></li>
+        
+            <li><a href="#amglapsolver">AMGLapSolver</a></li>
+        
     
     </ul>
 </div></div>
@@ -263,43 +269,88 @@
 
 <h1 id="solvers">solvers</h1>
 <h3 id="lapwrapsolver">lapWrapSolver</h3>
-<p>Takes a solver for solving nonsingular sdd systems, and returns a solver for solving Laplacian systems. The optional args tol and maxits are not necessarily taken by all solvers.  But, if they are, one can pass them here</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">lapWrapSolver(solver)
 lapWrapSolver(solver, la::AbstractArray{T,N})
 lapWrapSolver(solver, la::AbstractArray{T,N}, b)
 </code></pre>
 
-<p>solvers.jl:178</p>
+<p>solvers.jl:187</p>
+<h3 id="lapchol">lapChol</h3>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
+<pre><code class="julia">lapChol()
+</code></pre>
+
+<p>solvers.jl:196</p>
 <h3 id="augmenttree">augmentTree</h3>
-<p>Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)
 </code></pre>
 
-<p>solvers.jl:208</p>
+<p>solvers.jl:219</p>
 <h3 id="augtreeprecon">augTreePrecon</h3>
-<p>This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. The default is a randomized variant of Kruskal. It adds back 2sqrt(n) edges via augmentTree. With the right tree, it should never be too bad.</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>solvers.jl:258</p>
+<p>solvers.jl:269</p>
 <h3 id="augtreesolver">augTreeSolver</h3>
-<p>This is the solver that calls augTreePrecon</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>solvers.jl:280</p>
+<p>solvers.jl:299</p>
 <h3 id="augtreelapprecon">augTreeLapPrecon</h3>
-<p>A version of augTreePrecon specialized for Laplacians</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
 </code></pre>
 
-<p>solvers.jl:291</p>
+<p>solvers.jl:315</p>
 <h3 id="augtreelapsolver">augTreeLapSolver</h3>
-<p>This is the solver that calls augTreeLapPrecon.  A solver specialized for Laplacians.</p>
-<pre><code class="julia">augTreeLapSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+<pre><code>string(xs...)
 </code></pre>
 
-<p>solvers.jl:313</p></div>
+<p>Create a string from any values using the <code>print</code> function.</p>
+<pre><code class="julia">augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>solvers.jl:345</p>
+<h3 id="amgsolver">AMGSolver</h3>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
+<pre><code class="julia">AMGSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>solvers.jl:364</p>
+<h3 id="amglapsolver">AMGLapSolver</h3>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
+<pre><code class="julia">AMGLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
+</code></pre>
+
+<p>solvers.jl:386</p></div>
             
         </div>
 

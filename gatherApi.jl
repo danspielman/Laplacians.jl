@@ -41,8 +41,6 @@ nms = names(Laplacians)
 
 n = length(nms)
 
-x = eval(nms[1])  # just a hack to prevent an error of some sort
-
 docstrs = Array(AbstractString,n)
 linenums = zeros(Int64,n)
 fileins = Array(AbstractString,n)
@@ -64,8 +62,7 @@ for i in 1:length(nms)
             linenums[i] = line
         end
 
-        
-        docmd = @doc(x)
+        docmd = @doc string(x)
         
         docstr = stringmime("text/plain", docmd )
         if (length(docstr) < 23) || (docstr[1:23] != noDocString)
@@ -75,6 +72,7 @@ for i in 1:length(nms)
         extras[i] = extraInfo(x)
 
     catch
+        println("didn't generate docs for ", string(sym))
     end
         
 end
@@ -96,8 +94,7 @@ for j in 1:length(u)
     fn = split(u[j],'.')[1]
     
     fileName = "docs/API/" * fn * "API.md"
-    println(fileName)
-    fh = open(fileName,"w")
+    fh = open(fileName, "w")
 
     println(fh, "# ", fn)
     

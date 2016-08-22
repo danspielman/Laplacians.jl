@@ -258,6 +258,10 @@
         
             <li><a href="#completebinarytree">completeBinaryTree</a></li>
         
+            <li><a href="#wgrid2">wGrid2</a></li>
+        
+            <li><a href="#wgrid3">wGrid3</a></li>
+        
             <li><a href="#grid2">grid2</a></li>
         
             <li><a href="#grid2coords">grid2coords</a></li>
@@ -295,147 +299,226 @@
 
 <h1 id="graphgenerators">graphGenerators</h1>
 <h3 id="pathgraph">pathGraph</h3>
-<p>The path graph on n vertices</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">pathGraph(n::Int64)
 </code></pre>
 
 <p>graphGenerators.jl:8</p>
 <h3 id="completegraph">completeGraph</h3>
-<p>The complete graph</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">completeGraph(n::Int64)
 </code></pre>
 
 <p>graphGenerators.jl:17</p>
 <h3 id="ringgraph">ringGraph</h3>
-<p>The simple ring on n vertices</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">ringGraph(n::Int64)
 </code></pre>
 
 <p>graphGenerators.jl:23</p>
 <h3 id="generalizedring">generalizedRing</h3>
-<p>A generalization of a ring graph. The vertices are integers modulo n. Two are connected if their difference is in gens. For example, </p>
-<pre><code>generalizedRing(17, [1 5])
+<pre><code>string(xs...)
 </code></pre>
 
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">generalizedRing(n::Int64, gens)
 </code></pre>
 
 <p>graphGenerators.jl:38</p>
 <h3 id="randgenring">randGenRing</h3>
-<p>A random generalized ring graph of degree k. Gens always contains 1, and the other k-1 edge types are chosen from an exponential distribution</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">randGenRing(n::Int64, k::Integer)
 </code></pre>
 
 <p>graphGenerators.jl:62</p>
 <h3 id="hypercube">hyperCube</h3>
-<p>The d dimensional hypercube.  Has 2^d vertices</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">hyperCube(d::Int64)
 </code></pre>
 
 <p>graphGenerators.jl:125</p>
 <h3 id="completebinarytree">completeBinaryTree</h3>
-<p>The complete binary tree on n vertices</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">completeBinaryTree(n::Int64)
 </code></pre>
 
 <p>graphGenerators.jl:139</p>
+<h3 id="wgrid2">wGrid2</h3>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
+<pre><code class="julia">wGrid2(n::Int64)
+</code></pre>
+
+<p>graphGenerators.jl:153</p>
+<h3 id="wgrid3">wGrid3</h3>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
+<pre><code class="julia">wGrid3(n::Int64)
+</code></pre>
+
+<p>graphGenerators.jl:165</p>
 <h3 id="grid2">grid2</h3>
-<p>An n-by-m grid graph.  iostropy is the weighting on edges in one direction.</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">grid2(n::Int64)
 grid2(n::Int64, m::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:159</p>
+<p>graphGenerators.jl:187</p>
 <h3 id="grid2coords">grid2coords</h3>
-<p>Coordinates for plotting the vertices of the n-by-m grid graph</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">grid2coords(n::Int64, m::Int64)
 grid2coords(n)
 </code></pre>
 
-<p>graphGenerators.jl:163</p>
+<p>graphGenerators.jl:191</p>
 <h3 id="randmatching">randMatching</h3>
-<p>A random matching on n vertices</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">randMatching(n::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:174</p>
+<p>graphGenerators.jl:202</p>
 <h3 id="randregular">randRegular</h3>
-<p>A sum of k random matchings on n vertices</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">randRegular(n::Int64, k::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:187</p>
+<p>graphGenerators.jl:215</p>
 <h3 id="growngraph">grownGraph</h3>
-<p>Create a graph on n vertices. For each vertex, give it k edges to randomly chosen prior vertices. This is a variety of a preferential attachment graph.    </p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">grownGraph(n::Int64, k::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:202</p>
+<p>graphGenerators.jl:230</p>
 <h3 id="growngraphd">grownGraphD</h3>
-<p>Like a grownGraph, but it forces the edges to all be distinct. It starts out with a k+1 clique on the first k vertices</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">grownGraphD(n::Int64, k::Int64)
 </code></pre>
 
-<p>graphGenerators.jl:234</p>
+<p>graphGenerators.jl:262</p>
 <h3 id="prefattach">prefAttach</h3>
-<p>A preferential attachment graph in which each vertex has k edges to those that come before.  These are chosen with probability p to be from a random vertex, and with probability 1-p to come from the endpoint of a random edge. It begins with a k-clique on the first k+1 vertices.</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">prefAttach(n::Int64, k::Int64, p::Float64)
 </code></pre>
 
-<p>graphGenerators.jl:258</p>
+<p>graphGenerators.jl:286</p>
 <h3 id="erdosrenyi">ErdosRenyi</h3>
-<p>Generate a random graph on n vertices with m edges. The actual number of edges will probably be smaller, as we sample with replacement</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">ErdosRenyi(n::Integer, m::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:337</p>
+<p>graphGenerators.jl:365</p>
 <h3 id="erdosrenyicluster">ErdosRenyiCluster</h3>
-<p>Generate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">ErdosRenyiCluster(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:351</p>
+<p>graphGenerators.jl:379</p>
 <h3 id="erdosrenyiclusterfix">ErdosRenyiClusterFix</h3>
-<p>Like an Erdos-Renyi cluster, but add back a tree so it has n vertices</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">ErdosRenyiClusterFix(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:364</p>
+<p>graphGenerators.jl:392</p>
 <h3 id="purerandomgraph">pureRandomGraph</h3>
-<p>Generate a random graph with n vertices from one of our natural distributions</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">pureRandomGraph(n::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:379</p>
+<p>graphGenerators.jl:407</p>
 <h3 id="semiwtedchimera">semiWtedChimera</h3>
-<p>A Chimera graph with some weights.  The weights just appear when graphs are combined. For more interesting weights, use <code>wtedChimera</code></p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">semiWtedChimera(n::Integer)
 semiWtedChimera(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:442</p>
+<p>graphGenerators.jl:470</p>
 <h3 id="chimera">chimera</h3>
-<p>Builds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
-<p>Builds a chimeric graph on n vertices. The components come from pureRandomGraph, connected by joinGraphs, productGraph and generalizedNecklace</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">chimera(n::Integer)
 chimera(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:515</p>
+<p>graphGenerators.jl:543</p>
 <h3 id="randweight">randWeight</h3>
-<p>Applies one of a number of random weighting schemes to the edges of the graph</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">randWeight(a)
 </code></pre>
 
-<p>graphGenerators.jl:535</p>
+<p>graphGenerators.jl:563</p>
 <h3 id="wtedchimera">wtedChimera</h3>
-<p>Builds the kth wted chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
-<p>Generate a chimera, and then apply a random weighting scheme</p>
+<pre><code>string(xs...)
+</code></pre>
+
+<p>Create a string from any values using the <code>print</code> function.</p>
 <pre><code class="julia">wtedChimera(n::Integer)
 wtedChimera(n::Integer, k::Integer)
 </code></pre>
 
-<p>graphGenerators.jl:607</p></div>
+<p>graphGenerators.jl:635</p></div>
             
         </div>
 
