@@ -239,7 +239,7 @@ end
 
 
 # uses BLAS.  As fast as Matlab's pcg.
-# set to use similar paramaters
+# set to use similar parameters "
 function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 
@@ -261,6 +261,10 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
         itcnt = itcnt+1
         
         q = mat*p
+
+        if dot(p,q) == 0
+            break
+        end
 
         al = rho/dot(p, q)
 
