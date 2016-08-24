@@ -81,7 +81,7 @@ end
 and returns a solver for solving Laplacian systems.
 The optional args tol and maxits are not necessarily taken by
 all solvers.  But, if they are, one can pass them here"""
-function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer=0)
+function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer=0, maxtime=Inf)
     N = size(la)[1]
 
     lasub = la[1:(N-1),1:(N-1)]
@@ -93,10 +93,19 @@ function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer
     if maximum(co) == 1
 
         if tol > 0
+            # this section is updated with maxtime, other may be not
             if maxits > 0
-                subSolver = solver(lasub, tol=tol, maxits=maxits);
+                if maxtime > 0
+                  subSolver = solver(lasub, tol=tol, maxits=maxits, maxtime=maxtime);
+                else
+                  subSolver = solver(lasub, tol=tol, maxits=maxits);
+                end
             else
-                subSolver = solver(lasub, tol=tol);
+                if maxtime > 0
+                  subSolver = solver(lasub, tol=tol, maxtime=maxtime);
+                else
+                  subSolver = solver(lasub, tol=tol);
+                end
             end
         else
             if maxits > 0
@@ -182,8 +191,10 @@ function lapWrapSolver(solver; tol::Real=0.0, maxits::Integer=0)
 end
 
 
-"""lapChol uses cholesky factorization to solver systems in Laplacians"""    
-lapChol = lapWrapSolver(cholfact)
+"""lapChol uses a Cholesky Factorization to solver systems in Laplacians"""    
+function lapChol() 
+    return lapWrapSolver(cholfact)
+end
 
 #lapWrapSolver(solver, la::AbstractMatrix, b) = lapWrapSolver(solver,la)(b)    
 
@@ -289,7 +300,6 @@ function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, max
 
   f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
   
-    
   return f
 
 end

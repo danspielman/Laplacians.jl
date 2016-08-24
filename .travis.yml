@@ -3,8 +3,26 @@ julia:
   - 0.4
   - release
 
+# install anaconda 2.7 (to be compatible with PyAMG)
+before_install:
+  - sudo apt-get update
+  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+
+# now, install required python packages
+install:
+  - pip install matplotlib
+  - pip install scipy
+  - pip install pyamg
+
 script:  
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'ENV["PYTHON"] = ""; Pkg.clone("PyPlot"); Pkg.build("PyPlot")'
+  - julia -e 'Pkg.clone("PyPlot"); Pkg.build("PyPlot")'
+  - julia -e 'Pkg.clone("PyAMG"); Pkg.build("PyAMG")'
   - julia -e 'Pkg.clone(pwd()); Pkg.build("Laplacians"); Pkg.test("Laplacians"; coverage=true)'
   

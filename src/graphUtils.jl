@@ -55,8 +55,6 @@ function flipIndex{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 end
 
 
-
-
 " Computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph "
 function backIndices{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti})
   n = max(G.n, G.m)
@@ -206,4 +204,3 @@ function getObound{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
   return obound
 
 end #getObound
-

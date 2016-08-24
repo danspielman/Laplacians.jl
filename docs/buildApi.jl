@@ -45,27 +45,18 @@ for i in 1:length(v)
     x = eval(sym)
 
     println(fh, "### ", string(sym))
-
-    try
+    docmd = @doc(x)
     
-        docmd = @doc(x)
-        
-        docstr = stringmime("text/plain", docmd )
-        if (length(docstr) < 23) || (docstr[1:23] != noDocString)
-            println(fh, docstr)
-        else
-            println("no docs for : ", sym)
-        end
-
-        extraInfo(fh, x)
-
-    catch
+    docstr = stringmime("text/plain", docmd )
+    if (length(docstr) < 23) || (docstr[1:23] != noDocString)
+        println(fh, docstr)
+    else
+        println("no docs for : ", sym)
     end
-        
+
+    extraInfo(fh, x)
     println(fh, "\n")
-
-
-        
+    
 end
 close(fh)
 
