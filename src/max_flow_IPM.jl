@@ -5,35 +5,7 @@ Primal-dual interior point method for a generic linear program of the form min_x
 primalDualIPM takes as input a full row-rank matrix ‘A’, followed by vectors ‘c’ and 'b'. 
 =#
 
-function minCostFlow{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
-                            b1::Array{Tv,1},
-                            c1::Array{Tv,1},
-                            u::Array{Tv,1};
-                            lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)),
-                             tol::Real=1e-6)
 
-	m = size(Bt)[2]
-	n = size(Bt)[1] 
-	A = [Bt spzeros(n,m); speye(m) speye(m)]
-
-	
-	c = [c1;zeros(m)]
-    
-    hessSolve = ((x,s) -> shurSolve(Bt,A,x,s,m,n,lapSolver))
-    (x,y,s,numIter) = max_flow_IPM(A,b,c,hessSolve, tol=tol)
-
-	return (x,y,s,numIter)
-
-end
-
-
-
-#=function max_flow_IPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
-                              b::Array{Tv,1},
-                              c::Array{Tv,1},
-                              hessSolve; 
-                              tol::Real=1e-6)
-=#
 function max_flow_IPM{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
                             b1::Array{Tv,1},
                             u::Array{Tv,1};
@@ -47,7 +19,7 @@ m = size(Bt)[2]
 n = size(Bt)[1] 
 A = [Bt spzeros(n,m) -sparsevec(b1); speye(m) speye(m) spzeros(m,1)]
 b = [zeros(n);u]
-c = [zeros(2*m); 1]
+c = [zeros(2*m); -1]
 
 n1 = size(A)[1]
 n2 = size(A)[2]
@@ -76,13 +48,14 @@ mu_cur = BLAS.dot(x,s)/n2  #current mu
     rb = (A*x - b)
     rc = A'*y + s - c
 
+    display(i)
     if(norm([rb;rc;rd])<tol)
         numIter = i
         break 
     end
 
     Hinv = hessSolve(x,s)
-    #(dx,dy,ds) = solve(rb,rc,rd,x,s)
+    # (dx,dy,ds) = solve(rb,rc,rd,x,s)
     (dx,dy,ds) = solver3(A,rb,rc,rd,x,s,Hinv)
     
     id = find(dx.<0)
@@ -181,7 +154,6 @@ x0 = A'*Hinv(b)
 y0 = Hinv(A*c)
 s0 = c - A'*y0
 
-display(x0)
 
 del_x = max(-1.5*minimum(x0),0)
     del_s = max(-1.5*minimum(s0),0)
@@ -250,11 +222,12 @@ function max_flow_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
     d3 = (s3.^(-1/2))*(x3.^(1/2))
 
     wt = 1./(1./d1 + 1./d2)
+    wt = minimum([wt 10^13*ones(length(wt))],2)
     la = Bt*spdiagm(wt[:,1])*Bt' 
-    display(la)
+    display(maximum(wt)/minimum(wt))
 
     laInv = lapSolver(la)
-    display("hi")
+    
 
     dinv = 1./(d1 + d2)
     Dinv = spdiagm(dinv[:,1])
@@ -275,7 +248,7 @@ function max_flow_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
         v2 = laInv(rr)
         #v1 = la\v
         #v2 = la\rr
-        display(v2)
+        
 
         df = v2 - BLAS.dot(v,v2)*v1/(1+BLAS.dot(v,v1))
 
