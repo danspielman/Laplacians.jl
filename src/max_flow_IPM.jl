@@ -48,7 +48,7 @@ mu_cur = BLAS.dot(x,s)/n2  #current mu
     rb = (A*x - b)
     rc = A'*y + s - c
 
-    display(i)
+    println("Iteration ", i)
     if(norm([rb;rc;rd])<tol)
         numIter = i
         break 
@@ -222,9 +222,12 @@ function max_flow_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
     d3 = (s3.^(-1/2))*(x3.^(1/2))
 
     wt = 1./(1./d1 + 1./d2)
-    wt = minimum([wt 10^13*ones(length(wt))],2)
+    ratioWt = maximum(wt)/minimum(wt)
+    println("Ratio of edge weights: ", ratioWt)
+    
     la = Bt*spdiagm(wt[:,1])*Bt' 
-    display(maximum(wt)/minimum(wt))
+    
+    #display(maximum(wt)/minimum(wt))
 
     laInv = lapSolver(la)
     

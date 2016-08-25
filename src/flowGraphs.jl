@@ -26,8 +26,7 @@ function eyeFlowGraph(k)
     n1 = size(a1)[1]
 
     a = [spzeros(2,n1+2); spzeros(n1,2) a1]
-    display(size(a1))
-
+    
     sb1 = 2+n0
     sb2 = 2+n0+nb
 
@@ -64,7 +63,7 @@ function eyeFlowGraph1(k)
   
 
     a0 = eyeFlowGraph1(k-1)
-    display(size(a0))
+    
     n0 = size(a0)[1]
 
     
