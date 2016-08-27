@@ -1,8 +1,5 @@
-defaultLapSolvers = [augTreeLapSolver, KMPLapSolver, samplingLapSolver, hybridLapSolver, AMGLapSolver]
-defaultSDDSolvers = [augTreeSolver, KMPSDDSolver, samplingSDDSolver, hybridSDDSolver, AMGSolver]
-
 # totTime should be in hours
-function compareSolversOut(n, totTime, solvers=defaultLapSolvers, tol=1e-3)
+function compareSolversOut(n, totTime, solvers=LapSolvers, tol=1e-3)
     
     # first, force a compile
     tab = compareSolversRuns(1000, 2, solvers, tol)
@@ -10,14 +7,11 @@ function compareSolversOut(n, totTime, solvers=defaultLapSolvers, tol=1e-3)
     tab = compareSolversTime(n, totTime, solvers, tol)
     nruns = size(tab,1) - 1
 
-    fn = string("compSolvers", n , "x", nruns, ".csv")
-    h = open(fn,"w")
-    write(h, chomp(readall(`hostname`)))
-    write(h, "  ")
-    write(h, string(now()))
-    write(h,"\n")
+    fn = string("compSolvers", n , "x", nruns, "_", chomp(readall(`hostname`)), "_",  string(now()), ".csv")
 
-    appendcsv(fn,tab)
+    appendcsv(fn, tab)
+
+    return tab
 
 end
 
@@ -26,7 +20,7 @@ compareSolversRuns(n, nruns, solvers, tol) = compareSolvers(n, nruns=nruns, solv
 compareSolversTime(n, totTime, solvers, tol) = compareSolvers(n, totTime=totTime, solvers=solvers, tol=tol)
 
 # totTime comes in hours, convert to seconds
-function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10, solvers=defaultLapSolvers, tol=1e-3)
+function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10, solvers=LapSolvers, tol=1e-3)
 
     totTime = totTime*60*60
 
@@ -85,9 +79,9 @@ function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10, so
     tab = [tab ["nedges"; nedges]]
 
     for i in 1:numSolvers
-        tab = [tab [name[i] * "Build"; bt[i]]]
-        tab = [tab [name[i] * "SolveTime"; st[i]]]
-        tab = [tab [name[i] * "RelativeError"; acc[i]]]
+        tab = [tab [name[i] * "_BuildTime"; bt[i]]]
+        tab = [tab [name[i] * "_SolveTime"; st[i]]]
+        tab = [tab [name[i] * "_RelativeError"; acc[i]]]
     end
 
     return tab
