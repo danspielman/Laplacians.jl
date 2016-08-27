@@ -224,6 +224,7 @@ function max_flow_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
     wt = 1./(1./d1 + 1./d2)
     ratioWt = maximum(wt)/minimum(wt)
     println("Ratio of edge weights: ", ratioWt)
+
     
     la = Bt*spdiagm(wt[:,1])*Bt' 
     
