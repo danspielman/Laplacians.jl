@@ -275,8 +275,6 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 
     n = a.n
 
-    # later will have to do a permutation here, for now consider the matrix is already permuted
-
     # some extra memory to be used later in the algorithm. this can be later pulled out of this function
     # into an external recipient, to be used on subsequent runs of the solver
     auxVal = zeros(Tv, n)                       # used to sum weights from multiedges
@@ -286,7 +284,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     multNeigh = zeros(Tv, n)
     indNeigh = zeros(Ti, n)
     
-    u = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
+    ut = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
     d = zeros(Tv, n)                            # the d matrix part of u d u'
 
     # neigh[i] = the list of neighbors for vertex i with their corresponding weights
@@ -297,8 +295,6 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
-        # push!(neigh, Tuple{Tv,Ti,Ti}[])
-
         for j in a.colptr[i]:a.colptr[i + 1] - 1
             if a.rowval[j] > i
                 llsAdd(neigh, i, (a.nzval[j], stretch.nzval[j], a.rowval[j]))
@@ -306,21 +302,8 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
         end
     end
 
-    tics = ceil(Int64, n * [1/n,1/2,3/4])
-    tocs = ceil(Int64, n * [1/2,3/4,(n-1)/n])
-    tot = 0
-
     # Now, for every i, we will compute the i'th column in U
     for i in 1:(n-1)
-        if (i in tocs) && verbose
-            print("From last checkpoint until ", i, " we have ")
-            toc()
-        end
-
-        if (i in tics) && verbose
-            tic()
-        end
-
         # We will get rid of duplicate edges
         # wSum - sum of weights of edges
         # multSum - sum of number of edges (including multiedges)
@@ -332,9 +315,10 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 
         # need to divide weights by the diagonal entry
         for j in 1:numPurged
-            push!(u[i], (-wNeigh[j] / wSum, indNeigh[j]))
+            push!(ut[i], (-wNeigh[j] / wSum, indNeigh[j]))
         end
-        push!(u[i], (1, i)) #diag term
+        push!(ut[i], (1, i)) #diag term
+
         d[i] = wSum
 
         multSum = ceil(Int64, multSum)
@@ -371,7 +355,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     end
 
     # add the last diagonal term
-    push!(u[n], (1, n))
+    push!(ut[n], (1, n))
     d[n] = 0
 
     if verbose
@@ -381,7 +365,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 	    println()
     end
 
-    return constructLowerTriangularMat(u), d
+    return constructLowerTriangularMat(ut), d
 end
 
 # u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
