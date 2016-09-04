@@ -19,7 +19,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 	n = size(B)[2];
 
   # Parameters for the algorithm.
-  max_iter = 100;
+  max_iter = 200;
 
   tol_p    = tol;
   tol_d    = tol;
@@ -179,8 +179,8 @@ function ipm_min_cost_flow_initial_point{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   z = z + dz*ones(m);
 
   # Keep x <= u
-  idx_large = find(x .>= u);
-  if isempty(idx_large)
+  idx_large = x .>= u;
+  if ~isempty(idx_large)
       x[idx_large] = (2/3)*u[idx_large];
   end
 
@@ -194,7 +194,7 @@ function ipm_min_cost_flow_initial_point{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   z = z + dz.*ones(m);
 
   # Keep x <= u
-  idx_large = find(x .>= u);
+  idx_large = x .>= u;
   if ~isempty(idx_large)
       x[idx_large] = (2/3)*u[idx_large];
   end

@@ -17,7 +17,7 @@ function min_isotonic_l2{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 	n = size(B)[2];
 
   # Parameters for the algorithm.
-  max_iter = 100;
+  max_iter = 200;
 
   tol_p    = tol;
   tol_d    = tol;
