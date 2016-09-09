@@ -28,7 +28,7 @@ function max_flow_IPM{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
     ipm_max_flow_hess_solve = ((x,s) -> ipm_max_flow_shur_solve(Bt,b1,x,s,m,n,lapSolver))
 
     #computing the intial point
-    (x,y,s) = ipm_min_cost_initial_point(A,b,c,ipm_max_flow_hess_solve)
+    (x,y,s) = ipm_max_flow_initial_point(A,b,c,u,m,n,ipm_max_flow_hess_solve)
     #display(minimum(s))
 
     for i = 1:maxIter
@@ -61,7 +61,8 @@ function max_flow_IPM{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
 
     #compute corrector step parameters
     	mu_aff = BLAS.dot((x + alpha_p*dx),(s+alpha_d*ds))/n2
-    	sig = (mu_aff/mu_cur)^3
+    	sig = (min(1,mu_aff/mu_cur))^3
+        println("sigma parameter is ",sig)
 
     #corrector step
     	rd = rd + dx.*ds - (sig*mu_cur)[1,1]
@@ -103,16 +104,21 @@ function ipm_max_flow_step_length{Tv}(x::Array{Tv,1},dx::Array{Tv,1},maxstepsize
 end
 
 
-function ipm_min_cost_initial_point{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
+function ipm_max_flow_initial_point{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
                               b::Array{Tv,1},
                               c::Array{Tv,1},
+                              u::Array{Tv,1},
+                              m,
+                              n,
                               ipm_max_flow_hess_solve)
 
 
 n2 = size(A)[2]
 Hinv = ipm_max_flow_hess_solve(ones(n2),ones(n2))
-x0 = A'*Hinv(b)
-y0 = Hinv(A*c)
+#x0 = A'*Hinv(b)
+x0 = -c + A'*Hinv(b + A*c)
+#y0 = Hinv(A*c)
+y0 = Hinv(A*c - b)
 s0 = c - A'*y0
 
 
@@ -128,6 +134,12 @@ del_s = 0.5*BLAS.dot(x0,s0)/sum(x0)
 x0 = x0 + del_x
 s0 = s0 + del_s
 
+#make sure the flow satisfies the capacity constraint
+idx_large = find(x0[m+1:m+m] .>= u)
+if ~isempty(idx_large)
+      x0[n+idx_large] = (2/3)*u[idx_large]
+  end
+
 return (x0,y0,s0)
 
 end
@@ -140,14 +152,14 @@ function ipm_max_flow_solver{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
                         rc::Array{Tv,1},
                         rd::Array{Tv,1},
                         x::Array{Tv,1},
-                        s::Array{Tv,1},invSol)
+                        s::Array{Tv,1},Hinv)
     
 
     Sinv = spdiagm((s.^-1)[:,1])
     X = spdiagm(x[:,1])
     rhs = -rb - A*(X*(Sinv*rc)) + A*(Sinv*rd) 
 ##
-    dy = invSol(rhs)
+    dy = Hinv(rhs)
     ds = -rc - A'*dy
     dx = -Sinv*rd - X*(Sinv*ds) 
 ##
@@ -207,10 +219,10 @@ function ipm_max_flow_shur_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
      
         #v1 = laInv(v)
         #v2 = laInv(rr)
-        v1 = la\v
-        v2 = la\rr
+        u1 = la\v
+        u2 = la\rr
         
-        df = v2 - BLAS.dot(v,v2)*v1/(1+BLAS.dot(v,v1))
+        df = u2 - BLAS.dot(v,u2)*u1/(1+BLAS.dot(v,u1))
         dw = Dinv*(rhs2 - D1*Bt'*df) 
         dy = [ df;dw]
         return dy 
