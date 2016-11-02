@@ -13,7 +13,15 @@ immutable ValWtPair
     wt::Float64
 end
 
+immutable StartPt
+    val::Int64
+    offset::Float64 # Flat amount added
+    wt::Float64 # Expected amount scaled
+    dists::Array{Float64,1}
+end
+
 import Base.isless
+include("graphAlgs.jl")
 
 isless(e1::ValWtPair, e2::ValWtPair) = e1.wt < e2.wt
 
@@ -80,7 +88,7 @@ function randishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})
     s = Vector{ValWtPair}()
 
     treeEdges = zeros(Tind,n-1)
-    numEdges = 0    
+    numEdges = 0
 
     # should randomize the initial choice
     v = one(Tind)

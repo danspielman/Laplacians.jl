@@ -3,3 +3,4 @@
 .ipynb_*
 .DS_Store
 site/
+.*.swp
