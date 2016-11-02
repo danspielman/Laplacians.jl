@@ -43,7 +43,9 @@ function getNewStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind},
 
     # Need to record each new point and the distance to that point
     f_c = Vector{StartPt}(length(start_pts))
-
+    for i in 1:length(start_pts)
+        f_c[i] = StartPt(0, 0)
+    end
     while comps.ngroups != 1
 
       valwt = Base.Collections.heappop!(s) #hog 
@@ -68,9 +70,6 @@ function getNewStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind},
           end
       end
     end
-    #for pt in f_c
-    #    @printf("pt, dist = %d, %f\n", pt.val, pt.offset)
-    #end
     return f_c
 end # getNewStartPoints
 
@@ -88,14 +87,27 @@ function makeStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind},
     for i in 1:num_rounds
         # Furtherest closest
         f_c = getNewStartPoints(mat, start)
+        # Displacement
+        disp = 0
         for j in 1:length(f_c)
-            pt = f_c[j]
+            pt = f_c[j].val
+            dist = f_c[j].offset
+            # If the new starting point was not set, then that means that the
+            # previous starting point had no points closer to it than any
+            # other starting point. Thus it is a bad starting point so we
+            # remove it from our list
+            if pt == 0
+                splice!(start, j-disp)
+                disp += 1
+                continue
+            end
             # What choice of offset should we have?
             # Currently is distance from other start + their offset
-            offset = pt.offset + start[j].offset
-            # Currently setting weight to be round number, not sure if should keep constant for starting points?
+            offset = dist + start[j-disp].offset
+            # Currently setting weight to be round number, not sure if should
+            # keep constant for starting points?
             wt = i
-            push!(start, StartPt(pt.val, offset)) 
+            push!(start, StartPt(pt, offset)) 
         end
     end
     #for st in start
@@ -107,8 +119,9 @@ end # makeStartPoints
 
 # Assumes the graph is already connected
 # Returns the tree, and the number of edges from each start point
-function fractalPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, start::Array{StartPt,1})
+function fractalPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, start::Array{StartPt,1}, seed::Int64 = 1)
 
+    srand(seed)
     n = mat.n
     m = nnz(mat)
 
@@ -165,8 +178,6 @@ function fractalPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, start::Array{St
           end
       end
     end
-
-    treeEdges = treeEdges[1:numEdges]
 
     tr = submatrixCSC(mat,treeEdges)
     tr = tr + tr';
