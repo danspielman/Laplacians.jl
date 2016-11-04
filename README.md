@@ -17,3 +17,11 @@ For some examples of some of the things you can do with Laplacians, look at
 *  [Low Stretch Spanning Trees](http://danspielman.github.io/Laplacians.jl/LSST/index.html
 *  [Information about solving Laplacian equations](http://danspielman.github.io/Laplacians.jl/solvers/index.html)
 *  And, try the chimera and wtedChimera graph generators.  They are designed to generate a wide variety of graphs so as to exercise code.
+
+# Version 0.0.3, November 4, 2016
+
+This version does not yet work with Julia 0.5.0.
+The last version of Julia with which it works is 0.4.7.
+We hope to fix that soon.
+
+If you want to solve Laplacian equations, we recommend the KMPLapSolver.  For SDD equations, we recommend the KMPSDDSolver.
