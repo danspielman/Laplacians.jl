@@ -18,7 +18,7 @@ For some examples of some of the things you can do with Laplacians, look at
 *  [Information about solving Laplacian equations](http://danspielman.github.io/Laplacians.jl/solvers/index.html)
 *  And, try the chimera and wtedChimera graph generators.  They are designed to generate a wide variety of graphs so as to exercise code.
 
-# Version 0.0.3, November 4, 2016
+# Version 0.0.2, November 4, 2016
 
 This version does not yet work with Julia 0.5.0.
 The last version of Julia with which it works is 0.4.7.
