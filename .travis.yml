@@ -1,7 +1,7 @@
 language: julia
 julia:
   - 0.4
-  - release
+#  - release
 
 # install anaconda 2.7 (to be compatible with PyAMG)
 before_install:
