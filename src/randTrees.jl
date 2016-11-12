@@ -7,6 +7,7 @@
 =#
 
 using DataStructures
+using Laplacians
 
 immutable ValWtPair
     val::Int64
