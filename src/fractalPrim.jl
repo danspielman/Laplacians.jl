@@ -88,22 +88,31 @@ function makeStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind},
         # Furtherest closest
         f_c = getNewStartPoints(mat, start)
         # Displacement
-        disp = 0
+        # OLD DISPLACEMENT CODE
+        # disp = 0
         for j in 1:length(f_c)
             pt = f_c[j].val
             dist = f_c[j].offset
+            adjusted_dist = sqrt(dist)
             # If the new starting point was not set, then that means that the
             # previous starting point had no points closer to it than any
             # other starting point. Thus it is a bad starting point so we
             # remove it from our list
+            # OLD DISPLACEMENT CODE
+            # UPDATE: removing this point from the list seems like it might not be advisable
+            # REASON: in the next 'round' the some point will almost certainly be found again
+            # leading to it being readded over and over
+            # Code for 'displacement' commented out
             if pt == 0
-                splice!(start, j-disp)
-                disp += 1
+                # splice!(start, j-disp)
+                # disp += 1
                 continue
             end
             # What choice of offset should we have?
             # Currently is distance from other start + their offset
-            offset = dist + start[j-disp].offset
+            # OLD DISPLACEMENT CODE
+            # offset = dist + start[j-disp].offset
+            offset = adjusted_dist + start[j].offset
             # Currently setting weight to be round number, not sure if should
             # keep constant for starting points?
             wt = i
@@ -116,6 +125,17 @@ function makeStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind},
 
     return start
 end # makeStartPoints
+
+function makeUniformExpRVStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, scale::Tval, seed::Int64 = 1)
+    srand(seed)
+    n = mat.n
+    start = Vector{StartPt}()
+    for i in 1:n
+        offset = -log(rand())*scale
+        push!(start, StartPt(i, offset)) 
+    end
+    return start
+end # makeUniformExpRVStartPoints
 
 # Assumes the graph is already connected
 # Returns the tree, and the number of edges from each start point
