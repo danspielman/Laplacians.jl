@@ -344,7 +344,9 @@ function tarjanStretch{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti},
     tarjanStretchSub(t.root, t, mat, ancestor, answer, seen, su, depth)
 
     stretches = copy(mat)
-    stretches.nzval = answer
+    for i in 1:length(stretches.nzval)
+        stretches.nzval[i] = answer[i]
+    end
     stretches = stretches + stretches'
     
     return stretches
@@ -486,7 +488,9 @@ function compStretchesDFS{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrix
     end # for v
 
     stretches = copy(mat)
-    stretches.nzval = answer
+    for i in 1:length(stretches.nzval)
+        stretches.nzval[i] = answer[i]
+    end
     stretches = stretches + stretches'
 
     return stretches
@@ -520,7 +524,10 @@ function tarjanOLCA{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
     tarjanSub(t.root, t, mat, ancestor, answer, seen, su)
 
     ansmat = copy(mat)
-    ansmat.nzval = answer
+    for i in 1:length(ansmat.nzval)
+        ansmat.nzval[i] = answer[i]
+    end
+
     ansmat = ansmat + ansmat'
     
     return ansmat
