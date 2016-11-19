@@ -378,7 +378,8 @@ function ErdosRenyi(n::Integer, m::Integer)
     aj = rand(1:n, m)
     ind = (ai .!= aj)
     mat = sparse(ai[ind],aj[ind],1,n,n)
-    uniformWeight!(mat)
+    mat = mat + mat'
+    unweight!(mat)
     return mat
 end
 
