@@ -174,7 +174,10 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     a = a + (params.beta - 1) * tree
 
     stretch = rho * compStretches(params.beta * tree, a)
-    stretch.nzval = min(rho, stretch.nzval)
+    for i in 1:length(stretch.nzval)
+        stretch.nzval[i] = min(rho, stretch.nzval[i])
+    end
+    
 
     if params.verboseSS
 	    println("Initial number of multiedges = ", ceil(Int64,sum(stretch.nzval)), " . Nonzeros in a = ", nnz(a))
