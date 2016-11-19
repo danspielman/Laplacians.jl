@@ -1,4 +1,8 @@
 #=
+  TEST FAILING: wtedChimera(1000, 5)
+   from runtests.
+  So, this is removed from the list of solvers for now.
+
     A mix between KMP, augTree and samplingSolver.
     At the top level, we perform a sampling scheme similar to what we see in augTreeSolver. After 
     sampling and eliminating degree 1 and degree 2 vertices, we perform a low accuracy solve using
