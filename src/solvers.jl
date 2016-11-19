@@ -296,11 +296,15 @@ the preconditioner.
 """
 function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 
-  F = augTreePrecon(ddmat, treeAlg=treeAlg)
-
-  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    F = augTreePrecon(ddmat, treeAlg=treeAlg)
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    
+    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
   
-  return f
+    return f
 
 end
 
@@ -345,7 +349,12 @@ function augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxi
 
   F = augTreeLapPrecon(la, treeAlg=treeAlg)
 
-  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+  tol_ =tol
+  maxits_ =maxits
+  maxtime_ =maxtime
+  verbose_ =verbose
+
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
     
   return f
 
@@ -366,7 +375,13 @@ function AMGSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxi
     return M \ b;
   end
 
-  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+
+    
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 
   return f
   
@@ -390,7 +405,13 @@ function AMGLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxit
     return M \ b;
   end
 
-  f(b;maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+
+    
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 
   return f
   
