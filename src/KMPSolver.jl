@@ -1,9 +1,7 @@
 #=
-
 An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
 =#
 
-include("fastCSC.jl")
 
 global KMP_SAVEMATS=false
 

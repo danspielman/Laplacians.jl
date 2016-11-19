@@ -13,10 +13,7 @@ export samplingLapSolver
 export samplingParams
 
 ### KMP
-include("KMPSolver.jl")
-export KMPSDDSolver
-export KMPLapSolver
-export KMPParams
+# included in Laplacians.jl
 
 ### hybridSolver
 include("hybridSolver.jl")

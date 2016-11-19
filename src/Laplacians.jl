@@ -62,7 +62,6 @@ and exports the functions for which it seems appropriate.
   export readIJ
   export ringGraph
   export generalizedRing
-  export generalizedNecklace
   export randMatching
   export randRegular
   export grownGraph
@@ -103,6 +102,7 @@ and exports the functions for which it seems appropriate.
   export edgeVertexMat
 
   export productGraph
+  export generalizedNecklace
   export subsampleEdges
 
   export twoLift
@@ -178,6 +178,11 @@ and exports the functions for which it seems appropriate.
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
   export AMGSolver, AMGLapSolver
+
+  include("KMPSolver.jl")
+  export KMPSDDSolver
+  export KMPLapSolver
+  export KMPParams
 
   include("complexSolvers.jl")
   export SDDSolvers

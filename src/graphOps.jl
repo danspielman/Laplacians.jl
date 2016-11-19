@@ -74,6 +74,60 @@ function productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
 end # productGraph
 
 
+"""
+~~~
+generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64)
+~~~
+
+ Constructs a generalized necklace graph starting with two graphs A and H. The
+resulting new graph will be constructed by expanding each vertex in H to an
+instance of A. k random edges will be generated between components. Thus, the
+resulting graph may have weighted edges.
+"""
+
+function generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64)
+  a = findnz(A)
+  h = findnz(H)
+
+  # these are square matrices
+  n = A.n
+  m = H.n
+
+  newI = Ti[]
+  newJ = Ti[]
+  newW = Tv[]
+
+  # duplicate the vertices in A so that each vertex in H corresponds to a copy of A
+  for i in 1:m
+    newI = append!(newI, a[1] + n * (i - 1))
+    newJ = append!(newJ, a[2] + n * (i - 1))
+    newW = append!(newW, a[3])
+  end
+
+  # for each edge in H, add k random edges between two corresponding components
+  # multiedges will be concatenated to a single edge with higher cost
+  for i in 1:length(h[1])
+    u = h[1][i]
+    v = h[2][i]
+
+    if (u < v)
+      #component x is from 1 + (x - 1) * n to n + (x - 1) * n
+      for edgeToAdd in 1:k
+        newU = rand(1:n) + n * (u - 1)
+        newV = rand(1:n) + n * (v - 1)
+        append!(newI, [newU, newV])
+        append!(newJ, [newV, newU])
+        append!(newW, [1, 1])
+      end
+    end
+  end
+
+  return sparse(newI, newJ, newW)
+end # generalizedNecklace
+
+
+
+
 """The signed edge-vertex adjacency matrix"""
 function edgeVertexMat(mat::SparseMatrixCSC)
     (ai,aj) = findnz(triu(mat,1))
@@ -234,48 +288,3 @@ function diagmat{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti})
 end # diagmat
 
 
-"""
- Constructs a generalized necklace graph starting with two graphs A and H. The
-resulting new graph will be constructed by expanding each vertex in H to an
-instance of A. k random edges will be generated between components. Thus, the
-resulting graph may have weighted edges.
-"""
-function generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64)
-  a = findnz(A)
-  h = findnz(H)
-
-  # these are square matrices
-  n = A.n
-  m = H.n
-
-  newI = Ti[]
-  newJ = Ti[]
-  newW = Tv[]
-
-  # duplicate the vertices in A so that each vertex in H corresponds to a copy of A
-  for i in 1:m
-    newI = append!(newI, a[1] + n * (i - 1))
-    newJ = append!(newJ, a[2] + n * (i - 1))
-    newW = append!(newW, a[3])
-  end
-
-  # for each edge in H, add k random edges between two corresponding components
-  # multiedges will be concatenated to a single edge with higher cost
-  for i in 1:length(h[1])
-    u = h[1][i]
-    v = h[2][i]
-
-    if (u < v)
-      #component x is from 1 + (x - 1) * n to n + (x - 1) * n
-      for edgeToAdd in 1:k
-        newU = rand(1:n) + n * (u - 1)
-        newV = rand(1:n) + n * (v - 1)
-        append!(newI, [newU, newV])
-        append!(newJ, [newV, newU])
-        append!(newW, [1, 1])
-      end
-    end
-  end
-
-  return sparse(newI, newJ, newW)
-end # generalizedNecklace
