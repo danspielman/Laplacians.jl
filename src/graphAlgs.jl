@@ -441,7 +441,9 @@ function prim(mat::SparseMatrixCSC; kind=:max)
     origmat = mat
     if kind==:max
         mat = copy(origmat)
-        mat.nzval = -mat.nzval
+        for i in 1:length(mat.nzval)
+            mat.nzval[i] = -mat.nzval[i]
+        end
     end
     
   nVertices = mat.n
