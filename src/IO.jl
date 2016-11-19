@@ -62,7 +62,7 @@ end #write IJV
 
 
 " Writes a sparse matrix to a given text file "
-function writeToFile{Tv,Ti}(filename::ASCIIString, a::SparseMatrixCSC{Tv,Ti})
+function writeToFile{Tv,Ti}(filename::String, a::SparseMatrixCSC{Tv,Ti})
     f = open(filename, "w")
     
     println(f, a.n, " ", a.m, " ", length(a.nzval))
@@ -82,7 +82,7 @@ function writeToFile{Tv,Ti}(filename::ASCIIString, a::SparseMatrixCSC{Tv,Ti})
 end
 
 " Reads a spare matrix from a given text file "
-function readFromFile(filename::ASCIIString)
+function readFromFile(filename::String)
     r = readdlm(filename, ' ')
     
     m::Int64 = r[1,1]
