@@ -152,7 +152,9 @@ end # completeBinaryTree
 function wGrid2(n::Int64; weightGen::Function=rand)
     gr2 = sparse(grid2(n));
 
-    gr2.nzval = Float64[weightGen() for i in 1:nnz(gr2)]
+    for i in 1:nnz(gr2)
+        gr2.nzval[i] = weightGen()
+    end
 
     # symmetrize
     gr2 = tril(gr2) + tril(gr2)'
@@ -162,13 +164,15 @@ end
 
 """ An n^3 grid with random weights. User can specify the weighting scheme. """
 function wGrid3(n::Int64; weightGen::Function=rand)
-    gr2 = grid2(n);
+    gr3 = grid3(n);
     
-    a = kron(speye(n), gr2);
-    b = kron(gr2, speye(n));
+    a = kron(speye(n), gr3);
+    b = kron(gr3, speye(n));
 
     gr3 = sparse(a + b);
-    gr3.nzval = Float64[weightGen() for i in 1:nnz(gr3)]
+    for i in 1:nnz(gr3)
+        gr3.nzval[i] = weightGen()
+    end
 
     # symmetrize
     gr3 = tril(gr3) + tril(gr3)'
@@ -185,6 +189,14 @@ function grid2(n::Int64, m::Int64; isotropy=1)
 end # grid2
 
 grid2(n::Int64) = grid2(n,n)
+
+"""An n1-by-n2-by-n3 grid graph."""
+function grid3{Ti}(n1::Ti, n2::Ti, n3::Ti)
+    a = productGraph(pathGraph(n1), productGraph(pathGraph(n2), pathGraph(n3)))
+    return a
+end
+
+grid3(n) = grid3(n,n,n)
 
 """Coordinates for plotting the vertices of the n-by-m grid graph"""
 function grid2coords(n::Int64, m::Int64)

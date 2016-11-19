@@ -78,6 +78,7 @@ and exports the functions for which it seems appropriate.
 
   export grid2
   export grid2coords
+  export grid3
 
   export randGenRing
   export randperm

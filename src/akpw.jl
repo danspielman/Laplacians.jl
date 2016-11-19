@@ -210,8 +210,10 @@ function akpwUsub(graph)
         cGraph = compGraphU(graph, comp)
 
         edgeMap = cGraph.nzval
-        cGraph.nzval = ones(length(edgeMap))
-
+        for i in 1:length(edgeMap)
+            cGraph.nzval[i] = 1
+        end
+        
         if (nnz(cGraph) > 0)
             ctre = akpwUsub(cGraph)
 
