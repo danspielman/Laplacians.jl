@@ -481,9 +481,7 @@ For more interesting weights, use `wtedChimera`"""
 function semiWtedChimera(n::Integer)
 
     if (n < 2)
-        gr = sparse([0.0])
-
-        return randperm(gr)
+        return spzeros(1,1)
     end
 
     r = rand()^2
