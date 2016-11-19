@@ -54,7 +54,12 @@ function cg(mat, b; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=true)
 end
 
 function cgSolver(mat; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-    f(b; tol::Real=1e-6, maxits=maxits, maxtime=maxtime, verbose=verbose) = cg(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+
+    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = cg(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
     
 
@@ -86,13 +91,24 @@ end
 
 
 function pcgSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-    f(b; tol::Real=1e-6, maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+
+    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
 
 """Create a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given"""
 function pcgLapSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
     fact = lapChol(pre)
-    f(b; tol::Real=1e-6, maxits=maxits, maxtime=maxtime, verbose=verbose) = pcg(mat, b, fact, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+
+    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(mat, b, fact, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 
 end
 
