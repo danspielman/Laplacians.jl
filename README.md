@@ -22,10 +22,35 @@ For some examples of some of the things you can do with Laplacians, look at
 *  [Information about solving Laplacian equations](http://danspielman.github.io/Laplacians.jl/solvers/index.html)
 *  And, try the chimera and wtedChimera graph generators.  They are designed to generate a wide variety of graphs so as to exercise code.
 
-# Version 0.0.3, November 4, 2016
+If you want to solve Laplacian equations, we recommend the KMPLapSolver.  For SDD equations, we recommend the KMPSDDSolver.
 
-This version does not yet work with Julia 0.5.0.
+The algorithms provide by Laplacians.jl include:
+
+* `akpw`, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic
+game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.
+* `KMPLapSolver` and `KMPSDDSolver`: linear equation solvers based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
+* `samplingSDDSolver` and `samplingLapSolver`, based on the paper "Approximate Gaussian Elimination for Laplacians:
+Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
+* `chimera` and `wtedChimera` graph generators for testing graph algorithms, by Daniel Spielman.
+* Local Graph Clustering Heuristics, implemented by Serban Stan, including `prn` a version of PageRank Nibble based on "Using PageRank to Locally Partition a Graph", <i>Internet Mathematics</i> and `LocalImprove` based on "Flow-Based Algorithms for Local Graph Clustering" by Zeyuan Allen-Zhu and Lorenzo Orecchia, SODA 2014.
+
+
+# Current Development Version
+
+To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
+
+# Version 0.0.3, November 20, 2016
+
+This version works with Julia 0.5.
+This is what you retrieve when you run `Pkg.add("Laplacians")`
+
+Warning: the behavior of chimera and wtedChimera differs between Julia 0.4 and Julia 0.5 because randperm acts differently in these.
+
+# Version 0.0.2, November 19, 2016
+
+This is the version that works with Julia 0.4.
+It was captured right before the upgrade to Julia 0.5
+
 The last version of Julia with which it works is 0.4.7.
 We hope to fix that soon.
 
-If you want to solve Laplacian equations, we recommend the KMPLapSolver.  For SDD equations, we recommend the KMPSDDSolver.
