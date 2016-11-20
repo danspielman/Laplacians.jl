@@ -229,6 +229,10 @@ Laplacians.bfsOrder(t,1)
 
   # export maxflow
 
+for i in 1:10
+    maxflow(wtedChimera(102,i),1,2)
+end
+
   # export akpw, akpwU
 
 akpw(wtedChimera(10000,1),ver=2)
@@ -236,9 +240,17 @@ akpw(wtedChimera(10000,1),ver=2)
   # export prn
   # export apr
   # export localImprove
-
   # export refineCut
   # export dumb
+
+a = chimera(100, 3);
+s = prn(a, [1,2,3], 0.2, 5);
+conds = compConductance(a, s)
+#println(conds, " ", length(s))
+minEpsSigma = getVolume(a, s) / getVolume(a, setdiff(collect(1:max(a.n, a.m)), s));
+cut, flow = localImprove(a, s, epsSigma = minEpsSigma);
+condcut = compConductance(a, cut)
+#println(condcut, " ", length(cut))
 
   # export randishKruskal, randishPrim
 
