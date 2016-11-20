@@ -61,7 +61,6 @@ b = randn(n)
 b = b - mean(b)
 println("wtedChimera($n, $i)")
 gr = wtedChimera(n,i)
-testSolvers(gr,maxtime=10)
 f = KMPLapSolver(gr,tol=1e-1,verbose=true)
 x = f(b)
 
