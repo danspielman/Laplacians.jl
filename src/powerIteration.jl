@@ -32,6 +32,6 @@ function powerIteration{Tv,Ti}(op::SqLinOp{Tv,Ti}; tol=1e-3, maxit = Inf, verbos
 		println("Failed to converge after ", iter, " iterations with error ", err)
 	end
 
-	return b
+	return lam  # WAS b, changed to lam.  not sure correct -- DAS
 
 end
