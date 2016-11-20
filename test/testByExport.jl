@@ -133,15 +133,15 @@ a3 = grid3(3)
 
 # export ErdosRenyi
 
-a = ErdosRenyi(100,300)
+a2 = ErdosRenyi(100,300)
 
 # export ErdosRenyiCluster
 
-a = ErdosRenyiCluster(100,4)
+a2 = ErdosRenyiCluster(100,4)
 
 # export ErdosRenyiClusterFix
 
-a = ErdosRenyiClusterFix(100,4)
+a2 = ErdosRenyiClusterFix(100,4)
 
 # export pureRandomGraph
 
@@ -204,13 +204,25 @@ b = edgeVertexMat(a2)
   # export shortestPaths, shortestPathTree, pathFromParents
   # export kruskal, prim
 
-  # export RootedTree
-  # export matToTree
-  # export matToTreeDepth
+
+# export RootedTree
+# export matToTree
+
+tr = matToTree(t)
+
+# export matToTreeDepth
+
+a = wtedChimera(101,1)
+t = akpw(a)
+tr, d1 = matToTreeDepth(t);
+d2 = Laplacians.treeDepthDFS(t)
+
   # export tarjanStretch
   # export compDepth
   # export compStretches
   # export dfsOrder
+
+Laplacians.bfsOrder(t,1)
 
   # export cg, cgSolver
   # export pcg, pcgSolver, pcgLapSolver
