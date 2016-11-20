@@ -158,6 +158,7 @@ end
   This is a version of sympermute that is not quite as fast.
   But, it could be the basis of a faster algorithm.
   =#
+#=  
 function sympermuteB{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Array{Ti,1})
 
     numnz = nnz(a)
@@ -214,3 +215,4 @@ function sympermuteB{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Array{Ti,1})
 end
 
 
+=#

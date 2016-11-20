@@ -51,6 +51,4 @@ Warning: the behavior of chimera and wtedChimera differs between Julia 0.4 and J
 This is the version that works with Julia 0.4.
 It was captured right before the upgrade to Julia 0.5
 
-The last version of Julia with which it works is 0.4.7.
-We hope to fix that soon.
 

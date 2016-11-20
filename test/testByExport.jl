@@ -285,5 +285,7 @@ dumbRefineCut(a,collect(1:10))
 
   # export johnlind
 
+johnlind(a)
+
   # export toposort, dirEdgeVertexMat
 
