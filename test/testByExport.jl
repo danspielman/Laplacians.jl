@@ -231,6 +231,8 @@ Laplacians.bfsOrder(t,1)
 
   # export akpw, akpwU
 
+akpw(wtedChimera(10000,1),ver=2)
+
   # export prn
   # export apr
   # export localImprove

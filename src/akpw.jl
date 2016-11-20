@@ -446,7 +446,6 @@ end
 
 
 
-
 # based on counting sort: is stable.  exploits symmetry, can produce multiedges
 function IJVindGraph(inList::Array{IJVind,1})
 
