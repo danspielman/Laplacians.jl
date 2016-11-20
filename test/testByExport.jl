@@ -106,6 +106,10 @@ getObound(a,collect(1:10))
 
   # export readIJ, readIJV, writeIJV
 
+writeIJV("tmp.txt",a)
+a2 = readIJV("tmp.txt")
+@test sum(abs(a-a2)) == 0
+
   # export unweight, unweight!
   # export mapweight
   # export uniformWeight, uniformWeight!
