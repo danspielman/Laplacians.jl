@@ -94,8 +94,21 @@ sdd = la + diagm(rand(n)/1000)
 f = hybridSDDSolver(sdd,tol=1e-6)
 x = f(b)
 
-# Need to make the following work.
-#=
+hp = Laplacians.defaultHybridParams
+hp.n0=10
+f = hybridSDDSolver(sdd,tol=1e-6,verbose=true)
+x = f(b)
+
+# Testing code inside Sampling Solver
+
+a = wtedChimera(100,1)
+t = akpw(a)
+la = lap(a)
+lt = lap(t)
+la[1,1] += 1
+lt[1,1] += 1
+condNumber(la,lt)
+
 sp = Laplacians.defaultSamplingParams
 
 sp.verboseSS = true
@@ -108,4 +121,4 @@ b = b - mean(b)
 la = lap(a)
 f = samplingLapSolver(a,tol=1e-6)
 x = f(b)
-=#
+

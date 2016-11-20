@@ -225,7 +225,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     # Create the error check function
     la = lap(a)   
-    g = function(b::Array{Float64,1})
+    g = function(b)
         res = copy(b)   
         res[n] = 0
             
