@@ -1,6 +1,6 @@
 language: julia
 julia:
-  - 0.4
+  - 0.5
 #  - release
 
 # install anaconda 2.7 (to be compatible with PyAMG)
@@ -26,3 +26,5 @@ script:
   - julia -e 'Pkg.clone("PyAMG"); Pkg.build("PyAMG")'
   - julia -e 'Pkg.clone(pwd()); Pkg.build("Laplacians"); Pkg.test("Laplacians"; coverage=true)'
   
+after_success:
+- julia -e 'cd(Pkg.dir("Laplacians")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'

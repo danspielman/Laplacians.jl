@@ -198,4 +198,4 @@ and exports the functions for which it seems appropriate.
   # export isotonicIPM, isotonicIPMrelEps
 
 
-end # module yinsGraph
+end # module Laplacians.jl
