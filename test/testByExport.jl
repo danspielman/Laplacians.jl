@@ -156,6 +156,8 @@ end
 
 # export readIJ, readIJV, writeIJV
 
+n = 101
+a = wtedChimera(n,1)
 writeIJV("tmp.txt",a)
 a2 = readIJV("tmp.txt")
 @test sum(abs(a-a2)) == 0
@@ -208,12 +210,11 @@ b = edgeVertexMat(a2)
 # export RootedTree
 # export matToTree
 
-tr = matToTree(t)
-
 # export matToTreeDepth
 
 a = wtedChimera(101,1)
 t = akpw(a)
+tr = matToTree(t)
 tr, d1 = matToTreeDepth(t);
 d2 = Laplacians.treeDepthDFS(t)
 
