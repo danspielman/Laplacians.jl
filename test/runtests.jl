@@ -48,7 +48,32 @@ for i in 1:100
     @test sum(kruskal(gr,kind=:min)) <= sum(kruskal(gr,kind=:max))
 
     testSolvers(gr)
+
+    gru = unweight(gr)
+    t = akpwU(gru)
 end
+
+n = 20000
+i = 1
+println("wtedChimera($n, $i)")
+gr = wtedChimera(n,i)
+testSolvers(gr)
+
+# Need to add tests for disconnected graphs.
+# Not all solvers work with them yet
+
+n = 2000
+gr1 = wtedChimera(n,1)
+gr2 = wtedChimera(n,2)
+gr = disjoin(gr1,gr2)
+
+b1 = rand(n); b1 = b1 - mean(b1)
+b2 = rand(n); b2 = b2 - mean(b2)
+b = [b1;b2]
+f = KMPLapSolver(gr,tol=1e-6)
+x = f(b)
+la = lap(gr)
+@test norm(la*x-b)/norm(b) < 1e-3
 
 
 include("testPCG.jl")

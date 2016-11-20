@@ -78,43 +78,103 @@ getObound(a,collect(1:10))
   # export generalizedRing
   # export randMatching
   # export randRegular
-  # export grownGraph
-  # export grownGraphD
-  # export prefAttach
-  # export hyperCube
-  # export completeBinaryTree
-  # export completeGraph
-  # export pathGraph
 
-  # export wGrid2
-  # export wGrid3
 
-  # export grid2
-  # export grid2coords
-  # export grid3
+# export grownGraph
+
+a2 = grownGraph(100,3)
+
+# export grownGraphD
+
+a2 = grownGraphD(100,3)
+
+# export prefAttach
+
+a2 = prefAttach(100,3,0.5)
+
+# export hyperCube
+
+a2 = hyperCube(3)
+
+# export completeBinaryTree
+
+a2 = completeBinaryTree(7)
+
+# export completeGraph
+
+a2 = completeGraph(7)
+
+# export pathGraph
+
+a2 = pathGraph(7)
+
+# export wGrid2
+
+a2 = wGrid2(3)
+
+# export wGrid3
+
+a3 = wGrid2(3)
+
+# export grid2
+
+a2 = grid2(3)
+
+# export grid2coords
+
+a2 = grid2coords(3)
+
+# export grid3
+
+a3 = grid3(3)
 
   # export randGenRing
   # export randperm
-  # export ErdosRenyi
-  # export ErdosRenyiCluster
-  # export ErdosRenyiClusterFix
-  # export pureRandomGraph
 
-  # export chimera
-  # export randWeight
-  # export wtedChimera, semiWtedChimera
+# export ErdosRenyi
 
-  # export readIJ, readIJV, writeIJV
+a = ErdosRenyi(100,300)
+
+# export ErdosRenyiCluster
+
+a = ErdosRenyiCluster(100,4)
+
+# export ErdosRenyiClusterFix
+
+a = ErdosRenyiClusterFix(100,4)
+
+# export pureRandomGraph
+
+# export chimera
+# export randWeight
+# export wtedChimera, semiWtedChimera
+
+for i in 1:5
+    a2 = semiWtedChimera(10000,i)
+end
+
+
+# export readIJ, readIJV, writeIJV
 
 writeIJV("tmp.txt",a)
 a2 = readIJV("tmp.txt")
 @test sum(abs(a-a2)) == 0
 
-  # export unweight, unweight!
+# export unweight, unweight!
+
+a2 = unweight(a2)
+unweight!(a2)
+
   # export mapweight
   # export uniformWeight, uniformWeight!
 
+a2 = uniformWeight(a2)
+uniformWeight!(a2)
+
   # export edgeVertexMat
+
+b = edgeVertexMat(a2)
+@test sum(abs(b'*b - lap(unweight(a2)))) == 0
 
   # export productGraph
   # export generalizedNecklace
