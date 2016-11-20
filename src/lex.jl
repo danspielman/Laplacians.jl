@@ -29,7 +29,7 @@ initVal: array[n] of initial voltage assignments;
 
 =#
 
-#=
+
 function simIterLexUnwtd{Tv, Ti}(numIter::Int64,
                                  A::SparseMatrixCSC{Tv, Ti},
                                  isTerm::Array{Bool, 1},
@@ -68,7 +68,7 @@ function simIterLexUnwtd{Tv, Ti}(numIter::Int64,
   end
   return val
 end
-=#
+
 
 function simIterLex{Tv<:Float64, Ti}(numIter::Int64,
                                      A::SparseMatrixCSC{Tv, Ti},
