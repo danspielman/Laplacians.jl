@@ -250,6 +250,7 @@ function spectralCoords(a)
 
 end # spectralCoords
 
+#=
 """Creates a unit vector of length n from a given set of integers, with weights based on the number of occurences"""
 function toUnitVector(a::Array{Int64,1}, n)
 
@@ -271,8 +272,9 @@ function toUnitVector(a::Array{Int64,1}, n)
   return v
 
 end # toUnitVector
+=#
 
-"Returns the diagonal matrix(as a sparse matrix) of a graph"
+"""Returns the diagonal matrix(as a sparse matrix) of a graph"""
 function diagmat{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti})
 
   dw = zeros(Tv, G.n)

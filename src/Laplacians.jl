@@ -117,8 +117,6 @@ and exports the functions for which it seems appropriate.
   export spectralCoords
   export spectralDrawing
 
-  export toUnitVector
-
   export diagmat
 
   include("graphAlgs.jl")
@@ -165,7 +163,7 @@ and exports the functions for which it seems appropriate.
   include("cutHeuristics.jl")
 
   export refineCut
-  export dumb
+  export dumbRefineCut
 
   include("randTrees.jl")
   export randishKruskal, randishPrim

@@ -511,6 +511,7 @@ end #prim
 #             OLD AND UNUSED CODE
 #################################################################
 
+#=
 
 function componentsSlow{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
   n = mat.n
@@ -662,3 +663,5 @@ function sparsecut_isop(a, v, k=1)
   (val, ind) = findmin(isop)
   return val, perm[1:(ind+k-1)]
 end
+
+=#

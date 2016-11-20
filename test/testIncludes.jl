@@ -1,5 +1,7 @@
 # for testing code that is not exported or included in Laplacians.jl
 
+
+#============================================================#
 # Test Lex by running code from its notebook
 
 include("$(Pkg.dir("Laplacians"))/src/lex.jl")
@@ -47,4 +49,22 @@ lexMinVolt = simIterLex(500, G, isTerm, initVal)
 println(lexMinVolt)
 println(MaxEdgeGrad(G, lexMinVolt))
 println(checkLex(G, isTerm, initVal, lexMinVolt))
+
+simIterLexTest()
+
+#============================================================#
+# test isotonicIPM
+
+include("$(Pkg.dir("Laplacians"))/src/isotonicIPM.jl")
+
+n = 100;
+A = grid2(10,10)
+A = triu(A);
+v = randn(n)+collect(1:n)/2;
+isoTestValues = collect(1:n);
+newOrder = randperm(n)
+permMat = (speye(n))[1:n,newOrder];
+A = permMat*A*permMat';
+v = permMat*v;
+@time (x,acc,itercount) = isotonicIPM(A,v);
 

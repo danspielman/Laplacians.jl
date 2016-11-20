@@ -182,7 +182,13 @@ b = edgeVertexMat(a2)
   # export generalizedNecklace
   # export subsampleEdges
 
-  # export twoLift
+subsampleEdges(a,0.5)
+
+# export twoLift
+
+twoLift(a)
+twoLift(a,3)
+
   # export joinGraphs, disjoin
 
   # export plotGraph
@@ -194,16 +200,33 @@ b = edgeVertexMat(a2)
   # export spectralCoords
   # export spectralDrawing
 
+spectralDrawing(a)
+
   # export toUnitVector
 
-  # export diagmat
+# export diagmat
+
+diagmat(a)
 
   # export components
   # export biggestComp
   # export vecToComps
   # export isConnected
 
-  # export shortestPaths, shortestPathTree, pathFromParents
+# export shortestPaths, shortestPathTree, pathFromParents
+
+a = wtedChimera(102,1)
+shortestPaths(a,1)
+shortestPathTree(a,1)
+
+Laplacians.intHeapSort(randn(10))
+
+nh = Laplacians.intHeap(10)
+for i in 1:10
+    Laplacians.intHeapAdd!(nh, i, rand())
+end
+Laplacians.intHeapSort(nh)
+
   # export kruskal, prim
 
 
@@ -251,6 +274,9 @@ conds = compConductance(a, s)
 minEpsSigma = getVolume(a, s) / getVolume(a, setdiff(collect(1:max(a.n, a.m)), s));
 cut, flow = localImprove(a, s, epsSigma = minEpsSigma);
 condcut = compConductance(a, cut)
+heur = refineCut(a, cut)
+dumbRefineCut(a,collect(1:10))
+
 #println(condcut, " ", length(cut))
 
   # export randishKruskal, randishPrim

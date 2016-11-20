@@ -28,6 +28,8 @@ isTerm: boolean array[n] of whether each vertex is a terminal;
 initVal: array[n] of initial voltage assignments;
 
 =#
+
+#=
 function simIterLexUnwtd{Tv, Ti}(numIter::Int64,
                                  A::SparseMatrixCSC{Tv, Ti},
                                  isTerm::Array{Bool, 1},
@@ -66,6 +68,7 @@ function simIterLexUnwtd{Tv, Ti}(numIter::Int64,
   end
   return val
 end
+=#
 
 function simIterLex{Tv<:Float64, Ti}(numIter::Int64,
                                      A::SparseMatrixCSC{Tv, Ti},
@@ -134,6 +137,7 @@ eps: absolute error tolerance;
 fatal: if true, throws error and halt; if false, return false;
 
 =#
+#=
 function checkLexUnwtd{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti},
                                isTerm::Array{Bool, 1},
                                initVal::Array{Float64, 1},
@@ -160,6 +164,7 @@ function checkLexUnwtd{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti},
   end
   return true
 end
+=#
 
 #=
 check the correctness of lex assignment for uniformly weighted graphs
@@ -441,6 +446,8 @@ end
 #
 # Naive version: enumerate pairs of vertices t1, t2 in T
 # that maximizes (v(t1)-v(t2))/(d(t1)-d(t2)). O(|T|^2)
+
+#=
 function NaiveStarSteepestPath(T, v, d)
   max = -Inf
   res1 = 0
@@ -465,6 +472,7 @@ function NaiveStarSteepestPath(T, v, d)
   end
   return T[res1], T[res2]
 end
+=#
 
 # grad error tolerance
 gradTol = 1e-14

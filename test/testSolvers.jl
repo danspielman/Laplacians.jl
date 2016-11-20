@@ -55,6 +55,18 @@ println("wtedChimera($n, $i)")
 gr = wtedChimera(n,i)
 testSolvers(gr,maxtime=10)
 
+n = 100000
+i = 1
+b = randn(n)
+b = b - mean(b)
+println("wtedChimera($n, $i)")
+gr = wtedChimera(n,i)
+testSolvers(gr,maxtime=10)
+f = KMPLapSolver(gr,tol=1e-1,verbose=true)
+x = f(b)
+
+
+
 # Need to add tests for disconnected graphs.
 # Not all solvers work with them yet
 
@@ -71,3 +83,30 @@ x = f(b)
 la = lap(gr)
 @test norm(la*x-b)/norm(b) < 1e-3
 
+# One test for Hybrid Solver, just to get coverage
+n = 100
+a = wtedChimera(n,1)
+b = randn(n)
+b = b - mean(b)
+la = lap(a)
+f = hybridLapSolver(a,tol=1e-6)
+x = f(b)
+sdd = la + diagm(rand(n)/1000)
+f = hybridSDDSolver(sdd,tol=1e-6)
+x = f(b)
+
+# Need to make the following work.
+#=
+sp = Laplacians.defaultSamplingParams
+
+sp.verboseSS = true
+
+
+n = 100
+a = wtedChimera(n,1)
+b = randn(n)
+b = b - mean(b)
+la = lap(a)
+f = samplingLapSolver(a,tol=1e-6)
+x = f(b)
+=#
