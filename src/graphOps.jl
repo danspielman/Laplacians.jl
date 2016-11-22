@@ -7,19 +7,24 @@ floatGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int64}(a.m, a.n, a.colp
 
 
 
-"""Create a Laplacian matrix from an adjacency matrix.
-We might want to do this differently, say by enforcing symmetry"""
+"""
+Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry
+"""
 lap(a) = spdiagm(a*ones(size(a)[1])) - a
 
-"""Create an adjacency matrix and a diagonal vector from a Laplacian with added diagonal weights"""
+"""
+Create an adjacency matrix and a diagonal vector from a Laplacian with added diagonal weights
+"""
 function adj{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
-  a = -(2 * la - triu(la) - tril(la))
-  d = diag(la) - diag(lap(a))
-  return a,d
+    a = diagm(diag(la)) - la
+    d = la*ones(size(la,1))
+    return a,d
 end
 
 
-"""Create a new graph in that is the same as the original, but with all edge weights 1"""
+"""
+Create a new graph in that is the same as the original, but with all edge weights 1
+"""
 function unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
     a = copy(ain)
     m = length(a.nzval)
@@ -29,7 +34,9 @@ function unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
     return a
 end # unweight
 
-"""Change the weight of every edge in a to 1"""
+"""
+Change the weight of every edge in a to 1
+"""
 function unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
     m = length(a.nzval)
     for i in 1:m
@@ -38,7 +45,8 @@ function unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
 end # unweight
 
 
-"""Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write
+"""
+Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write
 
 ~~~julia
 b = mapweight(a, x->rand(1)[1])
