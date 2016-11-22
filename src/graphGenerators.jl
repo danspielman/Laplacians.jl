@@ -68,57 +68,6 @@ function randGenRing(n::Int64, k::Integer)
 end
 
 
-"""
-~~~
-generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64)
-~~~
-
- Constructs a generalized necklace graph starting with two graphs A and H. The
-resulting new graph will be constructed by expanding each vertex in H to an
-instance of A. k random edges will be generated between components. Thus, the
-resulting graph may have weighted edges.
-"""
-
-function generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64)
-  a = findnz(A)
-  h = findnz(H)
-
-  # these are square matrices
-  n = A.n
-  m = H.n
-
-  newI = Ti[]
-  newJ = Ti[]
-  newW = Tv[]
-
-  # duplicate the vertices in A so that each vertex in H corresponds to a copy of A
-  for i in 1:m
-    newI = append!(newI, a[1] + n * (i - 1))
-    newJ = append!(newJ, a[2] + n * (i - 1))
-    newW = append!(newW, a[3])
-  end
-
-  # for each edge in H, add k random edges between two corresponding components
-  # multiedges will be concatenated to a single edge with higher cost
-  for i in 1:length(h[1])
-    u = h[1][i]
-    v = h[2][i]
-
-    if (u < v)
-      #component x is from 1 + (x - 1) * n to n + (x - 1) * n
-      for edgeToAdd in 1:k
-        newU = rand(1:n) + n * (u - 1)
-        newV = rand(1:n) + n * (v - 1)
-        append!(newI, [newU, newV])
-        append!(newJ, [newV, newU])
-        append!(newW, [1, 1])
-      end
-    end
-  end
-
-  return sparse(newI, newJ, newW)
-end # generalizedNecklace
-
 
 """The d dimensional hypercube.  Has 2^d vertices"""
 function hyperCube(d::Int64)
@@ -152,7 +101,9 @@ end # completeBinaryTree
 function wGrid2(n::Int64; weightGen::Function=rand)
     gr2 = sparse(grid2(n));
 
-    gr2.nzval = Float64[weightGen() for i in 1:nnz(gr2)]
+    for i in 1:nnz(gr2)
+        gr2.nzval[i] = weightGen()
+    end
 
     # symmetrize
     gr2 = tril(gr2) + tril(gr2)'
@@ -162,13 +113,15 @@ end
 
 """ An n^3 grid with random weights. User can specify the weighting scheme. """
 function wGrid3(n::Int64; weightGen::Function=rand)
-    gr2 = grid2(n);
+    gr3 = grid3(n);
     
-    a = kron(speye(n), gr2);
-    b = kron(gr2, speye(n));
+    a = kron(speye(n), gr3);
+    b = kron(gr3, speye(n));
 
     gr3 = sparse(a + b);
-    gr3.nzval = Float64[weightGen() for i in 1:nnz(gr3)]
+    for i in 1:nnz(gr3)
+        gr3.nzval[i] = weightGen()
+    end
 
     # symmetrize
     gr3 = tril(gr3) + tril(gr3)'
@@ -185,6 +138,14 @@ function grid2(n::Int64, m::Int64; isotropy=1)
 end # grid2
 
 grid2(n::Int64) = grid2(n,n)
+
+"""An n1-by-n2-by-n3 grid graph."""
+function grid3{Ti}(n1::Ti, n2::Ti, n3::Ti)
+    a = productGraph(pathGraph(n1), productGraph(pathGraph(n2), pathGraph(n3)))
+    return a
+end
+
+grid3(n) = grid3(n,n,n)
 
 """Coordinates for plotting the vertices of the n-by-m grid graph"""
 function grid2coords(n::Int64, m::Int64)
@@ -366,7 +327,8 @@ function ErdosRenyi(n::Integer, m::Integer)
     aj = rand(1:n, m)
     ind = (ai .!= aj)
     mat = sparse(ai[ind],aj[ind],1,n,n)
-    uniformWeight!(mat)
+    mat = mat + mat'
+    unweight!(mat)
     return mat
 end
 
@@ -468,9 +430,7 @@ For more interesting weights, use `wtedChimera`"""
 function semiWtedChimera(n::Integer)
 
     if (n < 2)
-        gr = sparse([0.0])
-
-        return randperm(gr)
+        return spzeros(1,1)
     end
 
     r = rand()^2

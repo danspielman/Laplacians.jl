@@ -4,3 +4,4 @@
 .DS_Store
 site/
 docs/API
+*.cov

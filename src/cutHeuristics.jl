@@ -101,7 +101,7 @@ end
 	Modify a cluster by passing through all the vertices exactly once and 
 	adding/removing them based on the value of (Deg_external - Deg_Internal).
 """
-function dumb{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+function dumbRefineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
 	n = max(G.n, G.m)
 

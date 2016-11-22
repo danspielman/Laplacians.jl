@@ -13,10 +13,7 @@ export samplingLapSolver
 export samplingParams
 
 ### KMP
-include("KMPSolver.jl")
-export KMPSDDSolver
-export KMPLapSolver
-export KMPParams
+# included in Laplacians.jl
 
 ### hybridSolver
 include("hybridSolver.jl")
@@ -32,7 +29,7 @@ include("powerIteration.jl")
 export powerIteration
 
 """A list containing SDD linear system solvers. They take in a SDD matrix plus tol, maxits and maxtime parameters."""
-SDDSolvers = [augTreeSolver, KMPSDDSolver, hybridSDDSolver, samplingSDDSolver, AMGSolver]
+SDDSolvers = [augTreeSolver, KMPSDDSolver, samplingSDDSolver, AMGSolver]
 
 """A list containing Laplacian linear system solvers. They take in an adjacency matrix plus tol, maxits and maxtime parameters."""
-LapSolvers = [augTreeLapSolver, KMPLapSolver, hybridLapSolver, samplingLapSolver, AMGLapSolver]
+LapSolvers = [augTreeLapSolver, KMPLapSolver, samplingLapSolver, AMGLapSolver]

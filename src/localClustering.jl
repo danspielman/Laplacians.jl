@@ -106,7 +106,7 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
     for j in 1:deg(G,u)
       v = nbri(G,u,j)
 
-      if v in considered == false
+      if (v in considered) == false
         push!(considered, v)
 
         # add this new vertex to GPrime
@@ -135,7 +135,7 @@ function localFlow{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}, alpha::F
       for i in 1:deg(G, u)
         v = nbri(G, u, i)
         
-        if v in considered == false
+        if (v in considered) == false
           push!(newbatch, v)
           push!(considered, v)
         end
@@ -240,7 +240,7 @@ function localBlockFlow(G::Array{Array{Tuple{Int64,Float64},1},1}, s::Int64, t::
     for i in 1:length(G[u])
       v,w = G[u][i]
 
-      if inQ[v] == false && w > 0
+      if (inQ[v] == false) && (w > 0)
         right = right + 1
         Q[right] = v
         inQ[v] = true
@@ -444,8 +444,8 @@ function apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64
   relems = Set(s)
 
   for u in s
-    p[u] = 0
-    r[u] = 1 / length(s)^2 - eps * deg(G,u)
+      p[u] = 0
+      r[u] = 1 / length(s)^2 - eps * deg(G,u)
   end
 
   # we are moving mass from a node u only if it has more mass than eps * deg(G,u)
@@ -456,7 +456,7 @@ function apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64
     ru = ru + eps * deg(G,u)
 
     # check if u is in the priority queue for p
-    if u in pelems == false
+    if (u in pelems) == false
       p[u] = 0
       push!(pelems, u)
     end
@@ -465,17 +465,19 @@ function apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64
     p[u] = p[u] + alpha * ru / deg(G,u)
     r[u] = -eps * deg(G,u) # this means it's set to 0
 
+
     for i in 1:deg(G,u)
       v = nbri(G,u,i)
 
-      # check if v is in the priority queue for r
-      if v in relems == false
+        # check if v is in the priority queue for r
+      if (v in relems) == false
         r[v] = -eps * deg(G,v) # this means it's set to 0
         push!(relems, v)
       end
 
       # update u's neighbors in r
-      r[v] = r[v] + (1 - alpha) * ru / deg(G, u)
+        r[v] = r[v] + (1 - alpha) * ru / deg(G, u)
+
     end
 
   end
