@@ -1,5 +1,5 @@
-function IccAndCmg(n, maxtime)
-% function IccAndCmg(n, maxtime)
+function IccAndCmg(n, maxtime, tol)
+% function IccAndCmg(n, maxtime, tol)
 %
 % run the icc and cmg solvers on graphs of size n for a time up to
 % maxtime, measured in seconds
@@ -8,7 +8,12 @@ function IccAndCmg(n, maxtime)
 %addpath ~/Laplacians/matlab/
 %init
 
-opts.tol = 1e-6;
+if nargin < 3
+    tol = 1e-6
+end
+
+
+opts.tol = tol;
 opts.maxit = 100000;
 
 t0 = now;

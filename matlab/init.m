@@ -19,7 +19,12 @@ if (status ~= 0)
            str = strs(i).name;
            ind = (str >= '0') .* (str <= '9');
            vern(i) = str2num(['1', str(find(ind))]);
+           if sum(ind) < 3
+               vern(i) = vern(i)*10
+           end
+           
          end
+         
          [~,i] = max(vern);
          
          p = ['/Applications/', strs(i).name, '/Contents/', ...
