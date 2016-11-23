@@ -45,15 +45,30 @@ while (now - t0 < maxtime/60/60/24)
     
     b = randn(n,1);
     b = b - mean(b);
-
-    tic; f = iccSolver(la,[],opts); tb = toc;
-    tic; x = f(b); ts = toc;
+    
+    try
+    
+        tic; f = iccSolver(la,[],opts); tb = toc;
+        tic; x = f(b); ts = toc;
+    
+    catch
+        
+        tb = inf;
+        ts = inf;
+    end
     
     iccBuild = [iccBuild ; tb];
     iccSolve = [iccSolve ; ts];
     
-    tic; f = cmgSolver(la,[],opts); tb = toc;
-    tic; x = f(b); ts = toc;
+    
+    try
+        tic; f = cmgSolver(la,[],opts); tb = toc;
+        tic; x = f(b); ts = toc;
+    catch
+        tb = inf;
+        ts = inf;
+    end
+    
     
     cmgBuild = [cmgBuild ; tb];
     cmgSolve = [cmgSolve ; ts];

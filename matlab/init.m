@@ -1,6 +1,11 @@
 % add current directory to the path
 addpath(pwd())
 
+pwds = pwd;
+ind = find(pwds == '/');
+dir2 = [pwds(1:ind(end)), 'speedTests'];
+addpath(dir2)
+
 % if Julia is not on the search path, try to find it.
 
 status = system('julia --version');
