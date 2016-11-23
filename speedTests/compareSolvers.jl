@@ -7,7 +7,7 @@ function compareSolversOut(n, totTime, solvers=LapSolvers, tol=1e-3)
     tab = compareSolversTime(n, totTime, solvers, tol)
     nruns = size(tab,1) - 1
 
-    fn = string("compSolvers", n , "x", nruns, "_", chomp(readall(`hostname`)), "_",  string(now()), ".csv")
+    fn = string("compSolvers", n , "x", nruns, "_", chomp(readstring(`hostname`)), "_",  string(now()), ".csv")
 
     appendcsv(fn, tab)
 
@@ -28,7 +28,7 @@ function compareSolvers(n; nruns=10^8, totTime=Inf, maxtime=totTime*60*60/10, so
     bt = []
     st = []
     acc = []
-    name = Array{ASCIIString,1}(0)
+    name = Array{String,1}(0)
     for i in 1:numSolvers
         push!(bt, Array{Float64,1}(0))
         push!(st, Array{Float64,1}(0))
