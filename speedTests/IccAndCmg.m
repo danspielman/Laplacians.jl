@@ -27,8 +27,11 @@ is = [];
 nnzs = [];
 iccBuild = [];
 iccSolve = [];
+iccErr = [];
 cmgBuild = [];
 cmgSolve = [];
+cmgErr = [];
+
 
 while (now - t0 < maxtime/60/60/24)
     
@@ -41,7 +44,7 @@ while (now - t0 < maxtime/60/60/24)
     is = [is;i];
     nnzs = [nnzs;nnz(a)];
     
-    la = lap(a);
+    la = diag(sum(a)) - a;
     
     b = randn(n,1);
     b = b - mean(b);
@@ -50,31 +53,38 @@ while (now - t0 < maxtime/60/60/24)
     
         tic; f = iccSolver(la,[],opts); tb = toc;
         tic; x = f(b); ts = toc;
+        er = norm(la*x-b)/norm(b);
     
     catch
         
         tb = inf;
         ts = inf;
+        er = inf;
     end
     
     iccBuild = [iccBuild ; tb];
     iccSolve = [iccSolve ; ts];
+    iccErr = [iccErr; er];
     
     
     try
         tic; f = cmgSolver(la,[],opts); tb = toc;
         tic; x = f(b); ts = toc;
+        er = norm(la*x-b)/norm(b);
+    
     catch
         tb = inf;
         ts = inf;
+        er = inf;
     end
     
     
     cmgBuild = [cmgBuild ; tb];
     cmgSolve = [cmgSolve ; ts];
+    cmgErr = [cmgErr ; er];
     
 end
 
-T = table(ns,is,nnzs,iccBuild,iccSolve,cmgBuild,cmgSolve)
+T = table(ns,is,nnzs,iccBuild,iccSolve,iccErr,cmgBuild,cmgSolve,cmgErr)
 writetable(T,fn)
 

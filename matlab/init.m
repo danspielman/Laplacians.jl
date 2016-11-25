@@ -1,10 +1,11 @@
+% This is meant to be called in Matlab to use solvers
 % add current directory to the path
 addpath(pwd())
 
-pwds = pwd;
-ind = find(pwds == '/');
-dir2 = [pwds(1:ind(end)), 'speedTests'];
-addpath(dir2)
+%pwds = pwd;
+%ind = find(pwds == '/');
+%dir2 = [pwds(1:ind(end)), 'speedTests'];
+%addpath(dir2)
 
 % if Julia is not on the search path, try to find it.
 
