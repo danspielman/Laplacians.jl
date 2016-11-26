@@ -3,9 +3,6 @@ function IccAndCmg(n, maxtime, tol)
 %
 % run the icc and cmg solvers on graphs of size n for a time up to
 % maxtime, measured in seconds
-%
-%
-% SUBSUMED BY solverTests.jl
 
 %addpath ~/Laplacians/speedTests/
 %addpath ~/Laplacians/matlab/
@@ -74,11 +71,11 @@ while (now - t0 < maxtime/60/60/24)
         tic; f = cmgSolver(la,[],opts); tb = toc;
         tic; x = f(b); ts = toc;
         er = norm(la*x-b)/norm(b);
+        er = inf;
     
     catch
         tb = inf;
         ts = inf;
-        er = inf;
     end
     
     

@@ -1,3 +1,6 @@
+# SUBSUMED by solverTests.jl
+
+
 # totTime should be in hours
 function compareSolversOut(n, totTime, solvers=LapSolvers, tol=1e-3)
     
