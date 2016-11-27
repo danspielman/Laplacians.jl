@@ -170,7 +170,11 @@ function speedTestSDDSolver{Tv,Ti}(sdd::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, 
     return f
 end
 
+"""
+    plotTests(DF::DataFrame)
 
+Positive means first is better
+"""
 function plotTests(DF::DataFrame)
     
     solver_names = ["kmp","aug","amg", "icc", "cmg"]
