@@ -3,6 +3,7 @@ using DataFrames
 
 include("$(Pkg.dir("Laplacians"))/matlab/setUpMatlab.jl")
 include("$(Pkg.dir("Laplacians"))/matlab/matlabSolvers.jl")
+include("$(Pkg.dir("Laplacians"))/src/isotonicIPM.jl")
 
 global speedDF = DataFrame()
 
@@ -17,6 +18,8 @@ Runs many Laplacians solvers.  Puts the build and solve time results into solver
 function speedTestLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 
 
+    b = b - mean(b)
+    
     la = lap(a)
     
     # augTree
@@ -139,9 +142,9 @@ function speedTestSDDSolver{Tv,Ti}(sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; 
     _, cmg_err, cmg_build, cmg_solve = matlabCMGSDDSolver(sdd, b; tol=tol)
     _, icc_err, icc_build, icc_solve = matlabIccSDDSolver(sdd, b; tol=tol)
 
-    nv = size(a,1)
-    ne = nnz(a)
-    hash_a = hash(a)
+    nv = size(sdd,1)
+    ne = nnz(sdd)-nv
+    hash_a = hash(sdd)
     hash_b = hash(b)
     
     row = DataFrame(nv = nv, ne = ne, hash_a = hash_a, hash_b = hash_b,
@@ -200,4 +203,30 @@ function plotTests(DF::DataFrame)
         end
     end
     
+end
+
+
+function testInApps(a)
+
+    n = size(a,1)
+    v = randn(n)
+    v = v / norm(v)
+    v = v - mean(v)
+    prev = zeros(n)
+    it = 0
+    while (norm(v-prev) > 0.05)
+        prev = copy(v)
+        v = speedTestLapSolver(a,v,tol=1e-6)
+        v = v - mean(v)
+        v = v / norm(v)
+        it += 1
+        println(it, " : ", norm(v - prev))
+    end
+
+    
+    p = sortperm(v);
+    ap = triu(a[p,p])
+    vp = v[p];
+    iso = isotonicIPM(ap,vp,eps=.01,solver=(H -> speedTestSDDSolver(H,tol=1e-1,maxits=100000)))
+
 end
