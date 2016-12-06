@@ -137,6 +137,22 @@ function makeUniformExpRVStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind},
     return start
 end # makeUniformExpRVStartPoints
 
+function makeDegreeStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, seed::Int64 = 1)
+    srand(seed)
+    n = mat.n
+    start = Vector{StartPt}()
+    for i in 1:n
+        wtDeg = 0
+        for ind in mat.colptr[i]:(mat.colptr[i+1]-1)
+            wt = mat.nzval[ind]
+            wtDeg += 1/wt
+        end
+        offset = -log(rand())*wtDeg
+        push!(start, StartPt(i, offset)) 
+    end
+    return start
+end # makeDegreeStartPoints
+
 # Assumes the graph is already connected
 # Returns the tree, and the number of edges from each start point
 function fractalPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, start::Array{StartPt,1}, seed::Int64 = 1)
