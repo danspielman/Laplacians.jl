@@ -30,7 +30,7 @@ pages:
     - KMP: 'kmp.md'
     - localClustering: 'localClustering.md'
     - Private Functions: 'privateFuncs.md'
-    
+    - All of the above: 'indexOfAll.md'
 
 docs_dir: 'build'
 

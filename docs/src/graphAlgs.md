@@ -6,7 +6,7 @@ These are basic graph algorithms.
 
 ```@index
 Order = [:type, :function]
-Pages   = ["graphGenerators.md"]
+Pages   = ["graphAlgs.md"]
 ```
 
 

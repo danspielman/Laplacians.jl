@@ -1,9 +1,9 @@
-# All Functions and Types
+# Unexported (Private) functions.
 
 This is a list of all unexported functions and types from Laplacians.
 
 ```@index
-Pages   = ["allFuncs.md"]
+Pages   = ["privateFuncs.md"]
 ```
 
 ```@autodocs

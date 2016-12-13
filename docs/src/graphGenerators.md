@@ -1,13 +1,18 @@
 # Generators
 
 `Laplacians.jl` implements generators for many standard graphs.
-The `chimera` and `wtedChimera` generators combine these standard
-graphs by
+The [`chimera`](@ref) and [`wtedChimera`](@ref) generators are
+designed to stress code by combining these standard graphs in tricky
+ways.  While no one of these graphs need be a hard case for any
+application, the goal is for these generators to explore the space of
+graphs in such a way that running on many of them should exercise your
+code.
 
-*  joining disjoint copies with edges,
-* forming Kronecker products, and
-* taking `generalizedNecklace` products.
-
+`chimera(n)` generates a random chimera graph.
+`chimera(n,k)` first sets the seed of the psrg to k.
+In this way, it generates the kth chimera graph, and messes with your
+psrg.
+`wtedChimera` is similar, but it generates weighted graphs.
 
 ## Function list
 
