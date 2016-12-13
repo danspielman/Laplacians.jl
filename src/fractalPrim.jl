@@ -126,8 +126,10 @@ function makeStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind},
     return start
 end # makeStartPoints
 
-function makeUniformExpRVStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, scale::Tval, seed::Int64 = 1)
-    srand(seed)
+function makeUniformExpRVStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, scale::Tval, seed::Int64 = -1)
+    if (seed != -1)
+        srand(seed)
+    end
     n = mat.n
     start = Vector{StartPt}()
     for i in 1:n
@@ -137,8 +139,10 @@ function makeUniformExpRVStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind},
     return start
 end # makeUniformExpRVStartPoints
 
-function makeDegreeStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, seed::Int64 = 1)
-    srand(seed)
+function makeDegreeStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, seed::Int64 = -1)
+    if (seed != -1)
+        srand(seed)
+    end
     n = mat.n
     start = Vector{StartPt}()
     for i in 1:n
@@ -153,11 +157,38 @@ function makeDegreeStartPoints{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, seed:
     return start
 end # makeDegreeStartPoints
 
+function estimateDiameter{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, seed::Int64 = -1)
+    if (seed != -1)
+        srand(seed)
+    end
+    n = mat.n
+    point = rand(1:n)
+    dists, parents = shortestPaths(mat, point)
+    return 2*maximum(dists)
+end # estimateDiameter
+
+function estimateAverageDistance{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, sample = 1, seed::Int64 = -1)
+    if (seed != -1)
+        srand(seed)
+    end
+    n = mat.n
+    tot = 0
+    for i in 1:sample
+        point = rand(1:n)
+        dists, parents = shortestPaths(mat, point)
+        tot += mean(dists)
+    end
+    return tot/sample
+end # estimateAverageDistance
+
+
 # Assumes the graph is already connected
 # Returns the tree, and the number of edges from each start point
-function fractalPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, start::Array{StartPt,1}, seed::Int64 = 1)
+function fractalPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind}, start::Array{StartPt,1}, seed::Int64 = -1)
 
-    srand(seed)
+    if (seed != -1)
+        srand(seed)
+    end
     n = mat.n
     m = nnz(mat)
 
