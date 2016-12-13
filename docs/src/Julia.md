@@ -1,12 +1,10 @@
-[TOC]
-
 # Using Julia
 
-These are some things you might want to know about using Julia if it is new to you.
+These are some things you might want to know about using Julia if it is new to you.  There are now many other resources that can explain Julia to you.  But, we keep this section here for reference.
 
 ## Docstrings
 
-Julia 0.4 lets you take advantage of docstrings.
+Julia 0.5 lets you take advantage of docstrings.
 For example, `?ringGraph` produces
 
 ~~~
@@ -18,28 +16,23 @@ This will mess up the indentation when calling '?func_name'.
 
 ## Julia Notebooks
 To get the Julia notebooks working, I presently type `jupyter notebook`.
-I then select the kernel to be Julia-0.4.2.
+I then select the kernel to be Julia-0.5.0.
 It seems important to run this command from a directory that contains all the directories
 that have notebooks that you will use.  In particular, I advise against "uploading" notebooks
 from other directories.  That has only given me trouble.
 
-The calico extensions that seem to be hosted at Brynmawr seem interesting.
-I haven't yet figured out how to get them to work.
-Here are the relevent links:
 
-* http://jupyter.cs.brynmawr.edu/hub/dblank/public/Jupyter%20Help.ipynb
-* http://jupyter.cs.brynmawr.edu/hub/dblank/public/Jupyter%20Notebook%20Users%20Manual.ipynb
 
 To turn a notebook into html, you type something like
 
 ~~~
-ipython nbconvert Laplacians.ipynb
+jupyter nbconvert Laplacians.ipynb
 ~~~
 
 or
 
 ~~~
-ipython nbconvert --to markdown --stdout Sampler.ipynb > SamplerNotebook.md
+jupyter nbconvert --to markdown --stdout Sampler.ipynb > SamplerNotebook.md
 ~~~
 
 ## Workflows
@@ -103,7 +96,7 @@ a
 
 * To get a vector with entries 1 through n, type `collect(1:n)`.  The object `1:n` is a range, rather than a vector.
 
-* Julia sparse matrix entries dissapear if they are set to 0. In order to overcome this, use the `setValue` function. `setValue(G, u, i, 0)` will set `weighti(G, u, i)` to 0 while also leaving `(u, nbri(G, u, i))` in the matrix.
+* Julia sparse matrix entries dissapear if they are set to 0. In order to overcome this, use the `setValue` function. `setValue(G, u, i, 0)` will set `weighti(G, u, i)` to 0 while also leaving `(u, nbri(G, u, i))` in the matrix.  _Note This problem may have been fixed with Julia version 0.5._
 
 ## Useful Julia functions
 
@@ -128,42 +121,12 @@ julia> fieldnames(a)
 
 ## Optimizing code in Julia
 
-The best way that I've found of figuring out what's slowing down my code has been to use `@code_warntype`.  It only exists in version 4 of Julia.  For this reason, I keep one of those around.
+The best way that I've found of figuring out what's slowing down my code has been to use `@code_warntype`.  
 
 Note that the first time you run a piece of code in Julia, it gets compiled.  So, you should run it on a small example before trying to time it.  Then, use `@time` to time your code.
 
 I recommend reading the Performance Tips in the Julia documentation, not that I've understood all of it yet.
 
-### Vectorization is Bad.
-Julia is the anti-matlab in that vectorization is slow.
-Still it is a good way to write your code the first time.
-Here are some examples of code that adds one vector into another.
-The first is vectorized, the second turns that into a loop, and the fastest uses BLAS.  Note that this was done in Julia 0.3.11.  The vectorized code is much faster, but still not fast, in 0.4.
-_Also note that you have to run each routine once before it will be fast.  This is because it compiles it the first time your run it_
-
-~~~julia
-n = 10^7
-a = rand(n)
-b = rand(n)
-@time a += b;
-
-elapsed time: 0.155296017 seconds (80000312 bytes allocated)
-
-a = rand(n)
-b = rand(n)
-@time add2(a,b);
-
-elapsed time: 0.021190554 seconds (80 bytes allocated)
-
-a = rand(n)
-b = rand(n)
-@time BLAS.axpy!(1.0,b,a);
-
-elapsed time: 0.015894922 seconds (80 bytes allocated)
-
-~~~
-
-One reason that `a += b` was slow was that it seems to allocate a lot of memory.
 
 
 

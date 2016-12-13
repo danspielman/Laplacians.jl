@@ -1,11 +1,9 @@
-[TOC]
-
 # Installation
 
 Before you can use Laplacians, you need Julia.
 So, we'll begin with instructions for installing Julia.  I (Dan S.) found that it worked best if I installed Python first.  So, I'll suggest that you do the same.
 
-All of these instruction assume you are using a Mac.  
+All of these instruction assume you are using a Mac. 
 
 ## Python
 
@@ -22,7 +20,13 @@ conda install jupyter
 ## Julia
 
 You can get Julia from 
-[http://julialang.org/](http://julialang.org/).  I haven't had much luck with Juno, so I recommend the plain Julia installation.
+[http://julialang.org/](http://julialang.org/).  
+If you are using a Mac, you may wish to create a symnolic link to the Julia executable so that you can call it from a terminal.  For example, you can do this like:
+
+~~~sh
+cd /usr/local/bin/
+ln -s julia /Applications/Julia-0.5.app/Contents/Resources/julia/bin/julia
+~~~
 
 Once you have this, you will want Julia notebooks.  To install this, run `julia` and type
 
@@ -42,25 +46,38 @@ jupyter notebook
 In theory, all you need to do now is type either
 
 ~~~julia
-julia> Pkg.clone("git://github.com/danspielman/Laplacians.jl.git")
-~~~
-
-Or, in a few days,
-
-~~~julia
 julia> Pkg.add("Laplacians")
 ~~~
 
-This should add all the packages upon which Laplacians explicitly depends.  
-
-
-## Using Laplacians
-
-To actually use the Laplacians package in a Julia session, you must type
+To use the package, you then type
 
 ~~~julia
-julia> using Laplacians 
+julia> using Laplacians
 ~~~
+
+
+This should add all the packages upon which Laplacians explicitly depends. 
+
+Laplacians might add some packages that you do not want, or which
+might not be available on your system.  If you do not want to load
+PyPlot, then set 
+
+~~~julia
+julia> LAPLACIANS_NOPLOT = true
+~~~
+
+before typing `using Laplacians`.
+Similarly, you can avoid loading PyAmg by setting
+
+~~~julia
+julia> LAPLACIANS_NOAMG = true
+~~~
+
+Actually, defining these variables to anything will have the same
+effect.  So, setting them to false has the same effect as setting them
+to true.
+
+
 
 To see if Laplacians is working, try typing
 

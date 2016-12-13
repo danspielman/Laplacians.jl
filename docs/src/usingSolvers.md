@@ -1,4 +1,3 @@
-[TOC]
 
 # Solving linear equations in Laplacians
 

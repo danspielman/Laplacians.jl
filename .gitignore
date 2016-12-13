@@ -5,3 +5,6 @@
 site/
 docs/API
 *.cov
+docs/build
+docs/site
+
