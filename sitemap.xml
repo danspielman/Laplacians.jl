@@ -3,8 +3,8 @@
 
     
     <url>
-     <loc>None/about/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/about/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -12,48 +12,38 @@
     
         
     <url>
-     <loc>None/Installation/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/Installation/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/Julia/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/Julia/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/Examples/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/Examples/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/LSST/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/CSCgraph/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/CSCgraph/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/LSST/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/solvers/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    
-
-    
-        
-    <url>
-     <loc>None/Developing/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/usingSolvers/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
@@ -62,74 +52,90 @@
     
         
     <url>
-     <loc>None/API/wholeAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/Developing/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    
+
+    
+        
+    <url>
+     <loc>/graphGenerators/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/graphGeneratorsAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/operators/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/IOAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/graphUtils/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/graphOpsAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/graphAlgs/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/graphAlgsAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/IO/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/graphUtilsAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/pcg/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/pcgAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/treeAlgs/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/solversAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/akpw/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/cutHeuristicsAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/solvers/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/localClusteringAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/kmp/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/pcgAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/localClustering/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>None/API/akpwAPI/index.html</loc>
-     <lastmod>2016-08-22</lastmod>
+     <loc>/privateFuncs/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>/indexOfAll/index.html</loc>
+     <lastmod>2016-12-13</lastmod>
      <changefreq>daily</changefreq>
     </url>
         

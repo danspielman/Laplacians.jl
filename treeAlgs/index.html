@@ -9,7 +9,7 @@
   
   <link rel="shortcut icon" href="../lambda2.ico">
   
-  <title>Examples - Laplacians.jl</title>
+  <title>treeAlgs - Laplacians.jl</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -19,9 +19,9 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Examples";
-    var mkdocs_page_input_path = "Examples.md";
-    var mkdocs_page_url = "/Examples/index.html";
+    var mkdocs_page_name = "treeAlgs";
+    var mkdocs_page_input_path = "treeAlgs.md";
+    var mkdocs_page_url = "/treeAlgs/index.html";
   </script>
   
   <script src="../js/jquery-2.1.1.min.js"></script>
@@ -75,15 +75,8 @@
 
         
             
-    <li class="toctree-l1 current">
-        <a class="current" href="index.html">Examples</a>
-        
-            <ul>
-            
-                <li class="toctree-l3"><a href="#examples">Examples</a></li>
-                
-            
-            </ul>
+    <li class="toctree-l1 ">
+        <a class="" href="../Examples/index.html">Examples</a>
         
     </li>
 
@@ -175,8 +168,15 @@
 
         
             
-    <li class="toctree-l1 ">
-        <a class="" href="../treeAlgs/index.html">treeAlgs</a>
+    <li class="toctree-l1 current">
+        <a class="current" href="index.html">treeAlgs</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#tree-algorithms">Tree Algorithms</a></li>
+                
+            
+            </ul>
         
     </li>
 
@@ -248,14 +248,14 @@
     
       
         
-          <li>User Guide &raquo;</li>
+          <li>API &raquo;</li>
         
       
     
-    <li>Examples</li>
+    <li>treeAlgs</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/danspielman/Laplacians.jl/edit/master/docs/Examples.md"
+        <a href="https://github.com/danspielman/Laplacians.jl/edit/master/docs/treeAlgs.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -265,16 +265,15 @@
           <div role="main">
             <div class="section">
               
-                <p><a id='Examples-1'></a></p>
-<h1 id="examples">Examples</h1>
-<p>The following are links to html files of Julia notebooks. These notebooks are also in the notebook directory, and can be open there so that you can run the code live. You should be able to find them under ~/.julia/v0.4/Laplacians/notebooks.</p>
+                <p><a id='Tree-Algorithms-1'></a></p>
+<h1 id="tree-algorithms">Tree Algorithms</h1>
 <ul>
-<li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/FirstNotebook.ipynb">FirstNotebook</a></li>
-<li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Solvers.ipynb">Solvers</a></li>
-<li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Sampler.ipynb">Sampler</a></li>
-<li><a href="https://github.com/danspielman/Laplacians.jl/blob/master/notebooks/LocalClustering.ipynb">LocalClustering</a></li>
-<li><a href="https://github.com/danspielman/Laplacians.jl/blob/master/notebooks/LocalClustering%20Statistics.ipynb">LocalClustering Statistics</a></li>
+<li><a href="index.html#Laplacians.compStretches-Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.compStretches</code></a></li>
 </ul>
+<p><a id='Laplacians.compStretches-Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.compStretches-Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti}}'>#</a>
+<strong><code>Laplacians.compStretches</code></strong> &mdash; <em>Method</em>.</p>
+<p>Compute the stretched of every edge in <code>mat</code> with respect to the tree <code>tree</code>. Returns the answer as a sparse matrix with the same nonzero structure as <code>mat</code>. Assumes that <code>mat</code> is symmetric. <code>tree</code> should be the adjacency matrix of a spanning tree.</p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/7b7075786a37a721b080a03650926a4feb9c4098/src/treeAlgs.jl#L387-L391' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
@@ -282,10 +281,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../CSCgraph/index.html" class="btn btn-neutral float-right" title="Sparse matrices as graphs">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../akpw/index.html" class="btn btn-neutral float-right" title="akpw">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../Julia/index.html" class="btn btn-neutral" title="Using Julia"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../pcg/index.html" class="btn btn-neutral" title="pcg"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -313,10 +312,10 @@
           <a href="https://github.com/danspielman/Laplacians.jl" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-        <span><a href="../Julia/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../pcg/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../CSCgraph/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../akpw/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>
