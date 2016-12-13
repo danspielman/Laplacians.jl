@@ -16,7 +16,7 @@ lap(a) = spdiagm(a*ones(size(a)[1])) - a
 Create an adjacency matrix and a diagonal vector from a Laplacian with added diagonal weights
 """
 function adj{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
-    a = diagm(diag(la)) - la
+    a = spdiagm(diag(la)) - la
     d = la*ones(size(la,1))
     return a,d
 end
