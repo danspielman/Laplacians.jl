@@ -18,7 +18,7 @@ floatGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int64}(a.m, a.n, a.colp
 
 
 """
-  l = lap(a)
+    l = lap(a)
 
 Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry
 """
@@ -111,7 +111,7 @@ end # productGraph
 
 
 """
-   graph = generalizedNecklace(A, H, k::Int64)
+    graph = generalizedNecklace(A, H, k::Int64)
 
 Constructs a generalized necklace graph starting with two graphs A and H. The
 resulting new graph will be constructed by expanding each vertex in H to an
