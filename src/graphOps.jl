@@ -1,28 +1,45 @@
 
-"Convert the indices in a graph to 32-bit ints.  This takes less storage, but does not speed up much"
+"""
+    graph = shortIntGraph(a::SparseMatrixCSC)
+
+Convert the indices in a graph to 32-bit ints. 
+This takes less storage, but does not speed up much.
+"""
 shortIntGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int32}(convert(Int32,a.m), convert(Int32,a.n), convert(Array{Int32,1},a.colptr), convert(Array{Int32,1},a.rowval), a.nzval)
 
-"Convert the nonzero entries in a graph to Float64"
+
+"""
+  graph = floatGraph(a::SparseMatrixCSC)
+
+Convert the nonzero entries in a graph to Float64.
+"""
 floatGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int64}(a.m, a.n, a.colptr, a.rowval, convert(Array{Float64,1},a.nzval))
 
 
 
 """
+  l = lap(a)
+
 Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry
 """
 lap(a) = spdiagm(a*ones(size(a)[1])) - a
 
 """
-Create an adjacency matrix and a diagonal vector from a Laplacian with added diagonal weights
+    a,d = adj(sdd)    
+
+Create an adjacency matrix and a diagonal vector from an SDD M-matrix.
+That is, from a Laplacian with added diagonal weights
 """
-function adj{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
-    a = spdiagm(diag(la)) - la
-    d = la*ones(size(la,1))
+function adj{Tv,Ti}(sdd::SparseMatrixCSC{Tv,Ti})
+    a = spdiagm(diag(sdd)) - sdd
+    d = sdd*ones(size(sdd,1))
     return a,d
 end
 
 
 """
+    wt1 = unweight(a)
+
 Create a new graph in that is the same as the original, but with all edge weights 1
 """
 function unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
@@ -35,6 +52,8 @@ function unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
 end # unweight
 
 """
+    unweight!(a)
+
 Change the weight of every edge in a to 1
 """
 function unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
@@ -46,11 +65,9 @@ end # unweight
 
 
 """
-Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write
+    b = mapweight(a, x->rand(1)[1])
 
-~~~julia
-b = mapweight(a, x->rand(1)[1])
-~~~
+Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write.
 """
 function mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind},f)
     b = triu(a,1)
@@ -63,17 +80,28 @@ function mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind},f)
 
 end # mapweight
 
-"""Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight."""
+"""
+    wted = uniformWeight(unwted)
+
+Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight."""
 uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}) = mapweight(a,x->rand(1)[1])
 
-"""Set the weight of every edge to random uniform [0,1]"""
+"""
+    uniformWeight!(a)
+
+Set the weight of every edge to random uniform [0,1]
+"""
 function uniformWeight!(mat::SparseMatrixCSC)
     for i in 1:length(mat.nzval)
         mat.nzval[i] = rand(1)[1]
     end
 end
 
-"""The Cartesian product of two graphs.  When applied to two paths, it gives a grid."""
+"""
+    aprod = productGraph(a0, a1)
+
+The Cartesian product of two graphs.  When applied to two paths, it gives a grid.
+"""
 function productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
   n0 = size(a0)[1]
   n1 = size(a1)[1]
@@ -83,16 +111,13 @@ end # productGraph
 
 
 """
-~~~
-generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64)
-~~~
+   graph = generalizedNecklace(A, H, k::Int64)
 
- Constructs a generalized necklace graph starting with two graphs A and H. The
+Constructs a generalized necklace graph starting with two graphs A and H. The
 resulting new graph will be constructed by expanding each vertex in H to an
 instance of A. k random edges will be generated between components. Thus, the
 resulting graph may have weighted edges.
 """
-
 function generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64)
   a = findnz(A)
   h = findnz(H)
@@ -136,7 +161,11 @@ end # generalizedNecklace
 
 
 
-"""The signed edge-vertex adjacency matrix"""
+"""
+    U = edgeVertexMat(a)
+
+The signed edge-vertex adjacency matrix
+"""
 function edgeVertexMat(mat::SparseMatrixCSC)
     (ai,aj) = findnz(triu(mat,1))
     m = length(ai)
@@ -145,19 +174,30 @@ function edgeVertexMat(mat::SparseMatrixCSC)
 end
 
 
-"""Create a new graph from the old, but keeping edge edge with probability `p`"""
-function subsampleEdges(a::SparseMatrixCSC{Float64,Int64}, p::Float64)
+"""
+    graph = subsampleEdges(a::SparseMatrixCSC, p::Float64)
+
+Create a new graph from the old, but keeping edge edge with probability `p`
+"""
+function subsampleEdges(a::SparseMatrixCSC, p::Float64)
   (ai, aj, av) = findnz(triu(a))
   n = size(a)[1]
-  mask = map(x -> convert(Float64,x < p), rand(length(ai)))
-  as = sparse(ai,aj,mask.*av,n,n)
+  mask = rand(length(ai)) .< p
+  as = sparse(ai[mask],aj[mask],av[mask],n,n)
   as = as + as'
   return as
 
 end # subsampleEdges
 
 
-"""Creats a 2-lift of a.  `flip` is a boolean indicating which edges cross"""
+"""
+    graph = twoLift(a, flip::AbstractArray{Bool,1})
+    graph = twoLift(a)
+    graph = twoLift(a, k::Integer) 
+
+Creats a 2-lift of a.  `flip` is a boolean indicating which edges cross.
+In the third version, k is the number of edges that cross.
+"""
 function twoLift(a, flip::AbstractArray{Bool,1})
     (ai,aj,av) = findnz(triu(a))
     m = length(ai)
@@ -178,6 +218,8 @@ twoLift(a, k::Integer) = twoLift(a,randperm(div(nnz(a),2)) .> k)
 
 
 """
+    graph = joinGraphs(a, b, k::Integer)
+
  Create a disjoint union of graphs a and b,
  and then put k random edges between them
 """
@@ -198,6 +240,8 @@ end
 
 
 """
+    graph = disjoin(a,b)
+    
  Create a disjoint union of graphs a and b,
   with no edges between them.
 """
@@ -205,7 +249,11 @@ disjoin(a,b) = joinGraphs(a,b,0)
 
 
 
-"""Plots graph gr with coordinates (x,y)"""
+"""
+    plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)
+
+Plots graph gr with coordinates (x,y)
+"""
 function plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)
   (ai,aj,av) = findnz(triu(gr))
   arx = [x[ai]';x[aj]';NaN*ones(length(ai))']
@@ -241,7 +289,11 @@ function plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)
   return p
 end # plotGraph
 
-"""Computes spectral coordinates, and then uses plotGraph to draw"""
+"""
+    spectralDrawing(a)
+
+Computes spectral coordinates, and then uses plotGraph to draw
+"""
 function spectralDrawing(a)
 
     x, y = spectralCoords(a)
@@ -249,7 +301,11 @@ function spectralDrawing(a)
 
 end # spectralDrawing
 
-"""Computes the spectral coordinates of a graph"""
+"""
+    spectralCoords(a)
+
+Computes the spectral coordinates of a graph
+"""
 function spectralCoords(a)
 
     E = eigs(lap(a), nev = 3, which=:SR)
@@ -282,18 +338,14 @@ function toUnitVector(a::Array{Int64,1}, n)
 end # toUnitVector
 =#
 
-"""Returns the diagonal matrix(as a sparse matrix) of a graph"""
-function diagmat{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti})
+"""
+    d = diagmat(a)
 
-  dw = zeros(Tv, G.n)
+Returns the diagonal weighted degree matrix(as a sparse matrix) of a graph
+"""
+function diagmat{Tv, Ti}(a::SparseMatrixCSC{Tv, Ti})
 
-  u,v,w = findnz(G)
-
-  for i in 1:length(u)
-    dw[v[i]] = dw[v[i]] + w[i]
-  end
-
-  return sparse(collect(1:G.n), collect(1:G.n), dw)
+  return spdiagm(vec(sum(a,1))) 
 
 end # diagmat
 
