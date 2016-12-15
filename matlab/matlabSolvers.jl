@@ -133,3 +133,63 @@ function matlabCMGSDDSolver(sdd, b; tol::Real=1e-6, maxits=10000)
     
     return x, err, cmg_build_time, cmg_solve_time
 end
+
+function matlab_ichol(sdd)
+
+    n = sdd.n
+    
+    @mput sdd
+    
+    mat"""
+    p = symrcm(sdd);
+    laperm = sdd(p,p);
+    L = ichol(laperm)
+    """
+
+    @mget p
+    @mget L
+
+    @show n
+    @show length(p)
+    
+    p = convert(Array{Int,1},vec(p))
+    pi = zeros(Int,n)
+    pi[p] = collect(1:n)
+    
+    Ltri = LowerTriangular(L)
+    Utri = Ltri'
+    
+    # Create the solver function
+    f = function(b::Array{Float64,1})
+
+        y = Utri \ (Ltri \ b[p])
+        return y[pi]
+
+    end
+
+    return f
+end
+
+function matlab_ichol_sdd(sdd::SparseMatrixCSC; tol::Real=1e-6, maxits=Inf, maxtime=Inf)
+
+    F = matlab_ichol(sdd)
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    
+    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_) = pcg(sdd, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=true)
+  
+    return f
+
+end
+
+
+function matlab_ichol_lap(la::SparseMatrixCSC; tol::Real=1e-6, maxits=Inf)
+
+    tol_=tol
+    maxits_=maxits
+    
+    return lapWrapSolver(matlab_ichol_sdd, la, tol=tol_, maxits=maxits_)
+  
+end
+    

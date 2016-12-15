@@ -78,7 +78,7 @@ end
 and returns a solver for solving Laplacian systems.
 The optional args tol and maxits are not necessarily taken by
 all solvers.  But, if they are, one can pass them here"""
-function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer=0, maxtime=Inf)
+function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits=Inf, maxtime=Inf)
     N = size(la)[1]
 
     lasub = la[1:(N-1),1:(N-1)]
@@ -180,7 +180,7 @@ function lapWrapSolver(solver)
 end
 =#
 
-function lapWrapSolver(solver; tol::Real=0.0, maxits::Integer=0)
+function lapWrapSolver(solver; tol::Real=0.0, maxits=Inf)
     f = function(la::AbstractArray)
         return lapWrapSolver(solver, la, tol=tol, maxits=maxits)
     end
