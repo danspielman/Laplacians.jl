@@ -171,15 +171,6 @@ function lapWrapSolver(solver, la::AbstractArray; tol::Real=0.0, maxits::Integer
 end
 
 
-#=
-function lapWrapSolver(solver)
-    f = function(la::AbstractMatrix)
-        return lapWrapSolver(solver, la)
-    end
-    return f
-end
-=#
-
 function lapWrapSolver(solver; tol::Real=0.0, maxits::Integer=0)
     f = function(la::AbstractArray)
         return lapWrapSolver(solver, la, tol=tol, maxits=maxits)
@@ -189,8 +180,8 @@ end
 
 
 """lapChol uses a Cholesky Factorization to solver systems in Laplacians"""    
-function lapChol() 
-    return lapWrapSolver(cholfact)
+function lapChol(la) 
+    return lapWrapSolver(cholfact, la)
 end
 
 #lapWrapSolver(solver, la::AbstractMatrix, b) = lapWrapSolver(solver,la)(b)    
