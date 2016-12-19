@@ -4,7 +4,6 @@ Code for solving Laplacian and Diagnally Dominant Systems
 This is not all of it, just the short and sweet routines.
 
 Started by Dan Spielman
-Contributors: ???
 
   lapWrapSolver: takes a solver for DD systems, and uses it to solve a lap system in la
   lapWrapSolver(solver, la::AbstractArray)
@@ -29,14 +28,20 @@ Contributors: ???
   Wrapping solver for Laplacians
 ==================================#
 
-#=
-function lapWrapSolver(solver, la::AbstractMatrix)
+"""
+    f = lapWrapConnected(sddSolver, a::AbstractMatrix; kwargs)
+
+Applies a `sddSolver` to the Laplacian of the adjacency matrix `a` of a connected graph.
+Passes on kwargs to the solver.
+"""
+function lapWrapConnected(solver, a::AbstractMatrix; kwargs...)
+    la = lap(a)
     N = size(la)[1]
     lasub = la[1:(N-1),1:(N-1)]
     subSolver = solver(lasub);
     
     f = function(b)
-        b = b - mean(b)
+        b = b - mean(b)  # is this necessary?
         bs = b[1:(N-1)]
         if isa(subSolver,Factorization)
             xs = subSolver \ bs
@@ -50,7 +55,7 @@ function lapWrapSolver(solver, la::AbstractMatrix)
     
     return f
 end
-=#
+
 
 
 """Apply the ith solver on the ith component"""
@@ -73,6 +78,66 @@ function blockSolver(comps, solvers)
 end
 
 
+
+"""
+    f = lapWrapComponents(solver, a::AbstractArray; kwargs)
+
+Applies a Laplacian `solver` to each connected component of the graph with adjacency matrix `a`.
+Passes kwargs on the solver.
+"""
+function lapWrapComponents(solver, a::AbstractArray; kwargs)
+    @assert minimum(a)>=0 "Input must be a nonnegative (adjacency) matrix"
+
+    co = components(a)
+
+    if maximum(co) == 1
+        f = solver(a; kwargs)
+
+    else
+        
+        comps = vecToComps(co)
+
+        solvers = []
+        for i in 1:length(comps)
+            ind = comps[i]
+            
+            asub = a[ind,ind]
+
+            if (length(ind) == 1)
+                ssubSolver = x->0
+            
+            elseif (length(ind) < 50)
+                ssubSolver = cholfact(lasubsub)
+
+            else
+
+                if tol > 0
+                    if maxits > 0
+                        ssubSolver = solver(lasubsub, tol=tol, maxits=maxits);
+                    else
+                        ssubSolver = solver(lasubsub, tol=tol);
+                    end
+                else
+                    if maxits > 0
+                        ssubSolver = solver(lasubsub, maxits=maxits);
+                    else
+                        ssubSolver = solver(lasubsub);
+                    end
+                end
+
+            end
+            push!(solvers, ssubSolver)
+        end
+
+
+        subSolver = blockSolver(comps,solvers)
+
+    end
+    
+    
+end
+
+    
 
 """Takes a solver for solving nonsingular sdd systems,
 and returns a solver for solving Laplacian systems.
