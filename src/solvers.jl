@@ -23,31 +23,104 @@ Started by Dan Spielman
 =#
 
 
+"""
+    solveA = wrapInterface(solver::Function, A::AbstractMatrix; tol, maxits, maxtime, verbose, pcgIts=Int[],params...)
+    solverConstructor = wrapInterface(A::AbstractMatrix; tol, maxits, maxtime, verbose, pcgIts=Int[],params...)
 
-#==================================
-  Wrapping solver for Laplacians
-==================================#
+Returns a function that discards `tol`, `maxits`, `maxtime` and `verbose`, 
+sets `pcgIts` to 0 (because it might not be using pcg), 
+and passes whatever `params` are left to the solver.
+
+# Examples
+
+```julia
+julia> a = randn(5,5);
+julia> a = a * a';
+julia> solvea = wrapInterface(cholfact, a, maxits=100, verbose=true);
+julia> b = randn(5,1);
+julia> norm(a*solvea(b, verbose=false)-b)
+1.575705319704736e-14
+
+julia> f = wrapInterface(cholfact)
+julia> solvea = f(a, maxits=1000, maxtime = 1)
+julia> norm(a*solvea(b, verbose=false, maxtime = 10)-b)
+1.575705319704736e-14
+```
+"""
+function wrapInterface(solver::Function, a::AbstractMatrix; tol=0, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],params...)
+    sol = solver(a)
+    f = function(b; jnk=false, jnkargs...)
+        if length(pcgIts) > 0
+            pcgIts[1] = 1
+        end
+        if isa(sol,Factorization)
+            x = sol \ b
+        else
+            x = sol(b; params...)
+        end
+        return x
+    end
+    return f
+end
+
+function wrapInterface(solver::Function)
+    f = function(a::AbstractArray; tol=0, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+        return wrapInterface(solver, a; pcgIts=Int[], params...)
+    end
+    return f
+end
+
+
+
 
 """
-    f = lapWrapConnected(sddSolver, a::AbstractMatrix; kwargs)
+    la = forceLap(a)
+
+Create a Laplacian matrix from an adjacency matrix. 
+If the input looks like a Laplacian, throw a warning and convert it.
+"""
+function forceLap(a::AbstractArray)
+
+    if minimum(a) < 0
+        warn("The input should be an adjacency matrix, whereas this one has negative entries.")
+        af = abs(a)
+        af = af - spdiagm(diag(af))
+    elseif sum(abs(diag(a))) > 0
+        warn("The input should be an adjacency matrix, whereas this one has diagonal entries.")
+        af = a - spdiagm(diag(a))
+    else
+        af = a
+    end
+
+    return spdiagm(vec(sum(af,1))) - af
+end
+
+
+"""
+    f = lapWrapConnected(sddSolver, a::AbstractMatrix; kwargs...)
 
 Applies a `sddSolver` to the Laplacian of the adjacency matrix `a` of a connected graph.
 Passes on kwargs to the solver.
+`sddSolver` should be a solver that obeys the interface.
 """
-function lapWrapConnected(solver, a::AbstractMatrix; kwargs...)
-    la = lap(a)
+function lapWrapConnected(solver, a::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+    la = forceLap(a)
     N = size(la)[1]
     lasub = la[1:(N-1),1:(N-1)]
-    subSolver = solver(lasub);
-    
-    f = function(b)
-        b = b - mean(b)  # is this necessary?
+    subSolver = solver(lasub; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts);
+
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
+    f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
+
         bs = b[1:(N-1)]
-        if isa(subSolver,Factorization)
-            xs = subSolver \ bs
-        else
-            xs = subSolver(bs)
-        end
+        
+        xs = subSolver(bs, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+
         x = [xs;0]
         x = x - mean(x)
         return x
@@ -85,13 +158,13 @@ end
 Applies a Laplacian `solver` to each connected component of the graph with adjacency matrix `a`.
 Passes kwargs on the solver.
 """
-function lapWrapComponents(solver, a::AbstractArray; kwargs)
+function lapWrapComponents(solver, a::AbstractArray; kwargs...)
     @assert minimum(a)>=0 "Input must be a nonnegative (adjacency) matrix"
 
     co = components(a)
 
     if maximum(co) == 1
-        f = solver(a; kwargs)
+        f = solver(a; kwargs...)
 
     else
         
