@@ -16,13 +16,18 @@ Started by Dan Spielman
 
 
 
-"""Takes as input a tree and an adjacency matrix of a graph.
+"""
+    B = augmentTree{Tv,Ti}(tree, A, k)
+
+
+Takes as input a tree and an adjacency matrix of a graph.
 It then computes the stretch of every edge of the graph wrt
 the tree.  It then adds back the k edges of highest stretch,
-and k edges sampled according to stretch"""
-function augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, k::Ti)
+and k edges sampled according to stretch
+"""
+function augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}, k::Ti)
 
-    st = compStretches(tree, mat)
+    st = compStretches(tree, A)
 
     # just to be safe, remove the tree from this
     #=
@@ -52,10 +57,10 @@ function augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{T
     augm = length(augi)
     augv = zeros(Tv, augm)
     for i in 1:augm,
-        augv = mat[augi[i],augj[i]]
+        augv = A[augi[i],augj[i]]
     end
 
-    n = size(mat)[1]
+    n = size(A)[1]
     aug = sparse(augi, augj, augv, n, n)
     aug = aug + aug'
 
@@ -65,11 +70,15 @@ end
 
 
     
-"""This is an augmented spanning tree preconditioner for diagonally dominant
+"""
+    pre = augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
+
+This is an augmented spanning tree preconditioner for diagonally dominant
 linear systems.  It takes as optional input a tree growing algorithm.
 It adds back 2sqrt(n) edges via augmentTree: the sqrt(n) of highest stretch
 and another sqrt(n) sampled according to stretch.
-For most purposes, one should directly call `augTreeSolver`."""
+For most purposes, one should directly call `augTreeSolver`.
+"""
 function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 
   adjmat = -triu(ddmat,1)
@@ -100,15 +109,16 @@ the preconditioner.
  augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
 ~~~
 """
-function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
 
     F = augTreePrecon(ddmat, treeAlg=treeAlg)
     tol_=tol
     maxits_=maxits
     maxtime_=maxtime
     verbose_=verbose
+    pcgIts_=pcgIts
     
-    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_,pcgIts_=pcgIts) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
   
     return f
 
@@ -146,10 +156,10 @@ It works by adding edges to a low stretch spanning tree.  It calls `augTreeLapPr
 the preconditioner. In line with other solver, it takes as input the adjacency matrix of the system.
 
 ~~~julia
- augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+ augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
 ~~~
 """
-function augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
+function augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
 
   la = lap(a)
 
@@ -159,66 +169,12 @@ function augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxi
   maxits_ =maxits
   maxtime_ =maxtime
   verbose_ =verbose
+    pcgIts_=pcgIts
 
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
     
   return f
 
 end
      
-"""
-A wrapper for the PyAMG solver.
-
-~~~julia
- amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-~~~
-"""
-function AMGSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-
-  amg = PyAMG.RugeStubenSolver(ddmat);
-  M = PyAMG.aspreconditioner(amg);
-  function F(b)
-    return M \ b;
-  end
-
-    tol_=tol
-    maxits_=maxits
-    maxtime_=maxtime
-    verbose_=verbose
-
-    
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
-
-  return f
-  
-end
-
-
-"""
-A wrapper for the PyAMG solver. In line with our other solvers, takes in an adjacency matrix.
-
-~~~julia
- amgSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-~~~
-"""
-function AMGLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-
-  la = lap(a)
-
-  amg = PyAMG.RugeStubenSolver(la);
-  M = PyAMG.aspreconditioner(amg);
-  function F(b)
-    return M \ b;
-  end
-
-    tol_=tol
-    maxits_=maxits
-    maxtime_=maxtime
-    verbose_=verbose
-
-    
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
-
-  return f
-  
-end

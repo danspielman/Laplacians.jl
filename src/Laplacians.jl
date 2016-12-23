@@ -181,6 +181,7 @@ and exports the functions for which it seems appropriate.
   export augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
 
+  include("externalSolvers.jl")
   export AMGSolver, AMGLapSolver
 
   include("KMPSolver.jl")
