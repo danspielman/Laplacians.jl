@@ -1,24 +1,8 @@
 #=
 
-Code for solving Laplacian and Diagnally Dominant Systems
-This is not all of it, just the short and sweet routines.
+Code for transforming between Laplacian and SDDM solvers.
 
-Started by Dan Spielman
-
-  lapWrapSolver: takes a solver for DD systems, and uses it to solve a lap system in la
-  lapWrapSolver(solver, la::AbstractArray)
-  lapWrapSolver(solver)
-  lapWrapSolver(solver, la::AbstractArray, b) = lapWrapSolver(solver,la)(b)    
-
-  For example, to make a Cholesky-based solver for Laplacians, we created
-  lapChol = lapWrapSolver(cholfact)
-
-
-  augmentTree : takes a spanning tree, a graph, and adds in 2k edges of high stretch
-    takes both as sparse matrices
-
-
-  augTreeSolver : a solver that shouldn't suck
+By Dan Spielman
 
 =#
 
@@ -77,7 +61,7 @@ end
 This functions wraps cholfact so that it satsfies our interface.
 It ignores all the keyword arguments.
 """    
-cholSDD = Laplacians.wrapInterface(cholfact)
+cholSDD = wrapInterface(cholfact)
 
 
 """
@@ -167,7 +151,7 @@ end
 
 
 """
-    f = lapWrapComponents(solver, a::AbstractArray; kwargs)
+    f = lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
 
 Applies a Laplacian `solver` that satisfies our interface to each connected component of the graph with adjacency matrix `a`.
 Passes kwargs on the solver.

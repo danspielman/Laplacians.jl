@@ -137,14 +137,14 @@ end
 
 
 """
-    x = pcgLapSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+    x = pcgLapSolver(A, B; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
-Create a solver that uses pcg to solve Laplacian systems in la. 
-Specialized for the case when pre is a Laplacian matrix.  
+Create a solver that uses pcg to solve Laplacian systems in `A`
+Specialized for the case when the preconditioner the Laplacian matrix of `B`.
 It solves the preconditioner by Cholesky Factorization.
 """
-function pcgLapSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
-    fact = lapChol(pre)
+function pcgLapSolver(A::AbstractMatrix, B::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+    fact = cholLap(B)
     
     tol_=tol
     maxits_=maxits
@@ -152,8 +152,10 @@ function pcgLapSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose
     verbose_=verbose
     pcgIts_=pcgIts
 
+    la = forceLap(A)
+
     f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =
-        pcg(mat, b, fact, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+        pcg(la, b, fact, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
 end
 
@@ -211,14 +213,14 @@ function cgBLAS{Tval}(mat, b::Array{Tval,1};
        
         if (time() - t1) > maxtime
             if verbose
-                println("CG stopped at maxtime.")
+                println("CG BLAS stopped at maxtime.")
             end
             break
         end
       end
 
     if verbose
-        println("CG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("CG BLAS stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0
@@ -285,14 +287,14 @@ function cgSlow{Tval}(mat, b::Array{Tval,1};
 
         if (time() - t1) > maxtime
             if verbose
-                println("CG stopped at maxtime.")
+                println("CG Slow stopped at maxtime.")
             end
             break
         end
       end
 
     if verbose
-        println("CG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("CG Slow stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0
@@ -365,7 +367,7 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
 
         if (time() - t1) > maxtime
             if verbose
-                println("PCG stopped at maxtime.")
+                println("PCG BLAS stopped at maxtime.")
             end
             break
         end
@@ -374,7 +376,7 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
       end
 
     if verbose
-        println("PCG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("PCG BLAS stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0
@@ -443,7 +445,7 @@ function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
 
         if (time() - t1) > maxtime
             if verbose
-                println("PCG stopped at maxtime.")
+                println("PCG Slow stopped at maxtime.")
             end
             break
         end
@@ -451,7 +453,7 @@ function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
     end
 
     if verbose
-        println("PCG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("PCG Slow stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0

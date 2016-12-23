@@ -59,7 +59,7 @@ x = f(b,verbose=true, maxits=1000, maxtime = 2)
 t = akpw(a)
 lt = lap(t)
 
-f = pcgLapSolver(la, lt)
+f = pcgLapSolver(a, t)
 pcgIts = [1]
 x = f(b,verbose=true, pcgIts=pcgIts)
 bbig = convert(Array{BigFloat,1},b);

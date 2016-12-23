@@ -184,7 +184,7 @@ end
 
 
 """Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
-function KMPSDDSolver(mat; verbose=false,
+function KMPSDDSolver(mat; verbose=false, 
                       tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPParams=defaultKMPParams)
 
     n = size(mat,1)
@@ -202,13 +202,21 @@ function KMPSDDSolver(mat; verbose=false,
     a = a + a'
     
     a1 = [sparse([0 s']); [s a]]
-    
+
+
     f1 = KMPLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
 
-    f = function(b::Array{Float64,1})
+
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
+    f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
 
         b1 = [-sum(b);b]
-        x1 = f1(b1)
+        x1 = f1(b1; verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
         x = x1[2:end] - x1[1]
         
         return x
@@ -224,45 +232,8 @@ function KMPLapSolver(a; verbose=false,
                       tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPParams=defaultKMPParams)
 
 
+        return lapWrapComponents(KMPLapSolver1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
 
-    if (minimum(a) < 0)
-        error("The adjacency matrix cannot have negative entries.")
-    end
-    
-
-    co = components(a)
-    if maximum(co) == 1
-
-        return KMPLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
-
-    else
-
-        comps = vecToComps(co)
-
-        if verbose
-            println("The graph has $(length(comps)) components.")
-        end
-
-
-        solvers = []
-        for i in 1:length(comps)
-            ind = comps[i]
-            
-            asub = a[ind,ind]
-
-            if (length(ind) == 1)
-                error("Node $ind has no edges.")
-            end
-            
-            subSolver = KMPLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
-
-            push!(solvers, subSolver)
-        end
-
-
-        return Laplacians.blockSolver(comps,solvers)
-
-    end
     
 end
 
@@ -277,7 +248,7 @@ function KMPLapSolver1(a; verbose=false,
             println("The graph is small.  Solve directly")
         end
         
-        return lapWrapSolver(cholfact, lap(a))
+        return cholLap(a)
     end
 
 
@@ -286,7 +257,7 @@ function KMPLapSolver1(a; verbose=false,
             println("The graph is a tree.  Solve directly")
         end
         
-        return lapWrapSolver(cholfact, lap(a))
+        return cholLap(a)
     end
 
 
@@ -398,7 +369,7 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
     # if is nothing in ijvs
     if m == 0
         la = lap(tree)
-        return lapWrapSolver(cholfact, la)
+        return cholLap(a)
     end
 
 
@@ -410,9 +381,8 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
         # solve directly
 
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
-        la = lap(rest + rest' + tree)
 
-        f = lapWrapSolver(cholfact, la)
+        return cholLap(rest + rest' + tree)
         
     else
 

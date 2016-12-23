@@ -1,24 +1,9 @@
 #=
 
 Code for solving Laplacian and Diagnally Dominant Systems
-This is not all of it, just the short and sweet routines.
+by augmented spanning tree preconditioners.
 
 Started by Dan Spielman
-
-  lapWrapSolver: takes a solver for DD systems, and uses it to solve a lap system in la
-  lapWrapSolver(solver, la::AbstractArray)
-  lapWrapSolver(solver)
-  lapWrapSolver(solver, la::AbstractArray, b) = lapWrapSolver(solver,la)(b)    
-
-  For example, to make a Cholesky-based solver for Laplacians, we created
-  lapChol = lapWrapSolver(cholfact)
-
-
-  augmentTree : takes a spanning tree, a graph, and adds in 2k edges of high stretch
-    takes both as sparse matrices
-
-
-  augTreeSolver : a solver that shouldn't suck
 
 =#
 
@@ -145,11 +130,11 @@ function augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 
   augtree = augmentTree(tree,adjmat,convert(Int,round(sqrt(n))))
 
-  Dx = spdiagm(ddmat*ones(n))
+  #Dx = spdiagm(ddmat*ones(n))
 
-  augDD = Dx + spdiagm(augtree*ones(n)) - augtree
+  #augDD = Dx + spdiagm(augtree*ones(n)) - augtree
 
-  F = lapWrapSolver(cholfact,augDD)
+  F = cholLap(augtree)
 
   return F
 

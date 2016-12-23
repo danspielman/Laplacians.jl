@@ -61,13 +61,13 @@ solver = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(Laplacians.cho
 f = solver(a,verbose = true)
 norm(la*f(b,tol=1e-3)-b)/norm(b)
 
-
+its2 = [0]
 f = Laplacians.lapWrapSDD(Laplacians.cgSolver,a,tol=1e-2,pcgIts=its)
 @assert norm(la*f(b,verbose=true,pcgIts = its2, tol=1e-3)-b) / norm(b) < 1e-2
 f = Laplacians.lapWrapSDD(Laplacians.cholSDD,a)
-@assert norm(la*f(b) / norm(b) < 1e-2
+@assert norm(la*f(b)-b) / norm(b) < 1e-2
 f = Laplacians.cholLap(a)
-@assert norm(la*f(b) / norm(b) < 1e-2
+@assert norm(la*f(b)-b) / norm(b) < 1e-2
 fs = Laplacians.lapWrapSDD(cgSolver)
 f = fs(a, tol=1e-2, verbose=true)
 x = f(b, tol=1e-6);
