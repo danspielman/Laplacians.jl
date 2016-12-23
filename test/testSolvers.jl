@@ -1,4 +1,81 @@
 
+
+# testing the interface routines
+
+n = 100;
+a = wtedChimera(100,1);
+b = randn(n);
+b = b - mean(b);
+la = Laplacians.forceLap(a);
+sdd = copy(la)
+sdd[1,1] += 1;
+its = [0]
+
+f = Laplacians.lapWrapConnected(cgSolver,a, tol=1e-2, verbose=true)
+@assert norm(la*f(b)-b)/norm(b) < 1e-1
+@assert norm(la*f(b,pcgIts=its,tol=1e-3,verbose=false)-b)/norm(b) < 1e-3
+
+norm(la*f(b,pcgIts=its)-b)/norm(b)
+norm(la*f(b,pcgIts=its,verbose=true,tol=1e-6)-b)/norm(b)
+
+conSolve = Laplacians.lapWrapConnected(cgSolver)
+
+fa = conSolve(a)
+
+@assert norm(la*fa(b,verbose=true) - b) < 1e-2
+
+a2 = disjoin(chimera(100,2),wtedChimera(200,3))
+la2 = lap(a2)
+n = size(a2,1)
+b2 = randn(n); 
+b2[1:100] = b2[1:100] - mean(b2[1:100]);
+b2[101:300] = b2[101:300] - mean(b2[101:300]);
+
+f = Laplacians.lapWrapComponents(conSolve, a2)
+
+x = f(b2,verbose=true)
+norm(la2*x-b2)/norm(b2) 
+
+f = Laplacians.lapWrapComponents(Laplacians.cgLapSolver, a2)
+
+x1 = f(b2,verbose=true)
+norm(la2*x1-b2)/norm(b2) 
+
+sum(x1[101:300])
+
+f = Laplacians.cgLapSolver(a)
+x = f(b,verbose=true)
+norm(la*x-b)/norm(b)
+
+f0 = Laplacians.lapWrapComponents(conSolve, a)
+@assert norm(la*f0(b,tol=1e-4,maxits=200,verbose=true)-b)/norm(b) < 1e-2
+
+f0 = Laplacians.lapWrapComponents(Laplacians.cgLapSolver, a)
+@assert norm(la*f0(b,tol=1e-4,maxits=200,verbose=true)-b)/norm(b) < 1e-2
+
+
+f = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(cholSDD),a)
+@assert norm(la*f(b)-b)/norm(b) < 1e-8
+
+solver = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(Laplacians.cholSDD))
+f = solver(a,verbose = true)
+norm(la*f(b,tol=1e-3)-b)/norm(b)
+
+
+f = Laplacians.lapWrapSDD(Laplacians.cgSolver,a,tol=1e-2,pcgIts=its)
+@assert norm(la*f(b,verbose=true,pcgIts = its2, tol=1e-3)-b) / norm(b) < 1e-2
+f = Laplacians.lapWrapSDD(Laplacians.cholSDD,a)
+@assert norm(la*f(b) / norm(b) < 1e-2
+f = Laplacians.cholLap(a)
+@assert norm(la*f(b) / norm(b) < 1e-2
+fs = Laplacians.lapWrapSDD(cgSolver)
+f = fs(a, tol=1e-2, verbose=true)
+x = f(b, tol=1e-6);
+             
+
+
+# testing by repitition
+
 function isTree(gr::SparseMatrixCSC)
     isConnected(gr) && (nnz(gr) == 2*(gr.n-1))
 end

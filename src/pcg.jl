@@ -79,6 +79,29 @@ function cgSolver(mat; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, p
 end
     
 
+"""
+    x = cgLapSolver(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+
+Create a solver that uses cg to solve Laplacian systems in the laplacian of A. 
+This just exists to satisfy our interface.
+It does nothing more than create the Laplacian and call cg.
+"""
+function cgLapSolver(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+
+    la = forceLap(A)
+    
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
+    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =
+        cg(la, b-mean(b), tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+
+end
+
+
 
 function pcg(mat, b, pre::Union{AbstractArray,Matrix}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
     fact = cholfact(pre)

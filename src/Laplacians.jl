@@ -172,9 +172,12 @@ and exports the functions for which it seems appropriate.
   include("fastSampler.jl")
   export FastSampler, sample, sampleMany
 
-  include("solvers.jl")
+  include("solverInterface.jl")
+  include("augTreeSolver.jl")
+
   export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
+
   export AMGSolver, AMGLapSolver
 
   include("KMPSolver.jl")
