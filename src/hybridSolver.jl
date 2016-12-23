@@ -138,15 +138,15 @@ function hybridLapSolver1(a; verbose=false,
             println("The graph is small.  Solve directly")
         end
         
-        return lapWrapSolver(cholfact, lap(a))
+        return cholLap(a)
     end
 
     if (nnz(a) == 2*(a.n - 1))
         if verbose
             println("The graph is a tree.  Solve directly")
         end
-        
-        return lapWrapSolver(cholfact, lap(a))
+
+        return cholLap(a)
     end
 
     if params.treeAlg == :rand
@@ -228,8 +228,7 @@ function hybridLapPreconSub(tree, ijvs::IJVS, level::Int64, params::hybridParams
 
     # if is nothing in ijvs
     if m == 0
-        la = lap(tree)
-        return lapWrapSolver(cholfact, la)
+        return cholLap(tree)
     end
 
     ijvs1 = stretchSample(ijvs,params.frac)
