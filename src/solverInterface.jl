@@ -108,7 +108,7 @@ function lapWrapConnected(solver, a::AbstractMatrix; tol::Real=1e-6, maxits=Inf,
 
     f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
 
-        bs = b[1:(N-1)]
+        bs = b[1:(N-1)] - mean(b)
         
         xs = subSolver(bs, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
