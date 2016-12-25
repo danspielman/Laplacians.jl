@@ -25,14 +25,14 @@ Create a Laplacian matrix from an adjacency matrix. We might want to do this dif
 lap(a) = spdiagm(a*ones(size(a)[1])) - a
 
 """
-    a,d = adj(sdd)    
+    a,d = adj(sddm)    
 
 Create an adjacency matrix and a diagonal vector from an SDD M-matrix.
 That is, from a Laplacian with added diagonal weights
 """
-function adj{Tv,Ti}(sdd::SparseMatrixCSC{Tv,Ti})
-    a = spdiagm(diag(sdd)) - sdd
-    d = sdd*ones(size(sdd,1))
+function adj{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti})
+    a = spdiagm(diag(sddm)) - sddm
+    d = sddm*ones(size(sddm,1))
     return a,d
 end
 

@@ -40,10 +40,10 @@ the samplingSolver, without blowing up the low stretch tree inside.
 Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals.
 
 ~~~julia
-hybridSDDSolver(mat; verbose=false, tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
+hybridSDDMSolver(mat; verbose=false, tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
 ~~~
 """
-function hybridSDDSolver(mat; verbose=false,
+function hybridSDDMSolver(mat; verbose=false,
                       tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::hybridParams=defaultHybridParams)
 
     n = size(mat,1)

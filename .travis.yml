@@ -1,7 +1,6 @@
 # blocklist
 branches:
   except:
-  - interface
   - speed
 
 # safelist

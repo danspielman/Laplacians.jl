@@ -27,22 +27,17 @@ defaultSamplingParams = samplingParams(0.5, 0.02, 1e3, 1000, 20,
                                 false,false,1e-3)
 
 """ 
-    An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
-    In addition to the setup in the paper, we also use a low stretch tree to approximate effective 
-    resistances on edges. To perform well cache wise, we implement a cache friendly list of
-    linked lists - found in revampedLinkedListFloatStorage.jl 
+    solver = samplingSDDMSolver(sddm)
 
-    ~~~julia
-    samplingLapSolver(a, tol, maxits, maxtime, params)
-    ~~~
+An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl 
 """
-function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
+function samplingSDDMSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, 
                                 params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     # srand(1234)
 
-    adjMat,diag = adj(SDDmat)
+    adjMat,diag = adj(sddm)
 
     a = extendMatrix(adjMat,diag)
     n = a.n
@@ -85,14 +80,9 @@ function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
 end
 
 """ 
-    An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
-    In addition to the setup in the paper, we also use a low stretch tree to approximate effective 
-    resistances on edges. To perform well cache wise, we implement a cache friendly list of
-    linked lists - found in revampedLinkedListFloatStorage.jl 
+    solver = samplingLapSolver(A)
 
-    ~~~julia
-    samplingLapSolver(a, tol, maxits, maxtime, params)
-    ~~~
+An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl 
 """
 function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
                                 tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, 

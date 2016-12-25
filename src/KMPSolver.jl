@@ -1,5 +1,5 @@
 #=
-An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
+An implementation of the Laplacians and SDDM solvers of Koutis, Miller and Peng
 =#
 
 
@@ -184,8 +184,12 @@ end
 
 
 
-"""Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
-function KMPSDDSolver(mat; verbose=false, 
+"""
+    sddmSolver = KMPSDDMSolver(mat; verbose, tol, maxits, maxtime, pcgIts, params::KMPParams)
+
+Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals.
+"""
+function KMPSDDMSolver(mat; verbose=false, 
                       tol::Real=1e-6, maxits::Integer=1000, maxtime=Inf, pcgIts=Int[], params::KMPParams=defaultKMPParams)
 
     n = size(mat,1)

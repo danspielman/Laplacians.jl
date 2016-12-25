@@ -56,12 +56,12 @@ end
 
 
 """
-    solveSDD = cholSDD(SDD::AbstractMatrix; tol, maxits, maxtime, verbose, pcgIts=Int[])
+    solveSDDM = cholSDDM(sddm::AbstractMatrix; tol, maxits, maxtime, verbose, pcgIts=Int[])
 
 This functions wraps cholfact so that it satsfies our interface.
 It ignores all the keyword arguments.
 """    
-cholSDD = wrapInterface(cholfact)
+cholSDDM = wrapInterface(cholfact)
 
 
 """
@@ -88,11 +88,11 @@ end
 
 
 """
-    f = lapWrapConnected(sddSolver, a::AbstractMatrix; kwargs...)
+    f = lapWrapConnected(sddmSolver, a::AbstractMatrix; kwargs...)
 
-Applies a `sddSolver` to the Laplacian of the adjacency matrix `a` of a connected graph.
+Applies a `sddmSolver` to the Laplacian of the adjacency matrix `a` of a connected graph.
 Passes on kwargs to the solver.
-`sddSolver` should be a solver that obeys the interface.
+`sddmSolver` should be a solver that obeys the interface.
 """
 function lapWrapConnected(solver, a::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
     la = forceLap(a)
@@ -202,12 +202,12 @@ end
     
 
 """
-    f = lapWrapSDD(sddmSolver, A::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
-    f = lapWrapSDD(sddmSolver)
+    f = lapWrapSDDM(sddmSolver, A::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+    f = lapWrapSDDM(sddmSolver)
 
 Uses a `sddmSolver` to solve systems of linear equations in Laplacian matrices.
 """
-function lapWrapSDD(sddmSolver, a::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+function lapWrapSDDM(sddmSolver, a::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
 
     @assert(minimum(a) >= 0, "A must be nonnegative")
     @assert(sum(abs(diag(a))) == 0, "A must have zero diagonal")
@@ -218,7 +218,7 @@ function lapWrapSDD(sddmSolver, a::AbstractArray; tol::Real=1e-6, maxits=Inf, ma
                                      
 end
 
-function lapWrapSDD(sddmSolver)
+function lapWrapSDDM(sddmSolver)
 
     return Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(sddmSolver))
 
@@ -231,7 +231,7 @@ end
 
 Uses Cholesky Factorization to solve systems in Laplacians.
 """    
-cholLap = lapWrapSDD(cholSDD)
+cholLap = lapWrapSDDM(cholSDDM)
     
 
 

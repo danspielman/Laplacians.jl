@@ -1,10 +1,9 @@
 site_name: Laplacians.jl
-
-site_description: Graph analysis inspired by graph Laplacians and the needs of researchers at YINS
+repo_url: https://github.com/danspielman/Laplacians.jl
+site_description: Spectral and Algebraic graph algorithms, emphasizing the graph Laplacian.
 
 theme: readthedocs
 
-repo_url: https://github.com/danspielman/Laplacians.jl
 
 pages:
 - About: 'about.md'
@@ -13,21 +12,20 @@ pages:
     - Using Julia: 'Julia.md'
     - Examples: 'Examples.md'
     - Sparse matrices as graphs: 'CSCgraph.md'
+    - Solving Linear Equations: 'usingSolvers.md'
     - Low Stretch Spanning Trees: 'LSST.md'
-    - Solvers: 'usingSolvers.md'
 - Developing:
-    - Devleoping Laplacians: 'Developing.md'
+    - Developing Laplacians: 'Developing.md'
 - API:
     - generators: 'graphGenerators.md'
     - operators: 'operators.md'
     - graphUtils: 'graphUtils.md'
     - graphAlgs : 'graphAlgs.md'
     - IO: 'IO.md'
-    - pcg: 'pcg.md'
     - treeAlgs: 'treeAlgs.md'
     - akpw: 'akpw.md'
+    - randTrees: 'randTrees.md'
     - solvers: 'solvers.md'
-    - KMP: 'kmp.md'
     - localClustering: 'localClustering.md'
     - Private Functions: 'privateFuncs.md'
     - All of the above: 'indexOfAll.md'
@@ -36,15 +34,20 @@ docs_dir: 'build'
 
 site_favicon: lambda2.ico
 
+extra_css:
+  - assets/Laplacians.css
 
+extra_javascript:
+  - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+  - assets/mathjaxhelper.js
+  
 markdown_extensions:
   - extra
   - tables
   - fenced_code
 
-extra_css:
-  - Laplacians.css
-
-
-
 use_directory_urls: false
+
+
+
+

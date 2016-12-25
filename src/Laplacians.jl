@@ -141,7 +141,7 @@ and exports the functions for which it seems appropriate.
 
   include("pcg.jl")
 
-  export cg, cgSolver
+  export cg, cgSolver, cgLapSolver
   export pcg, pcgSolver, pcgLapSolver
 
   include("flow.jl")
@@ -173,7 +173,7 @@ and exports the functions for which it seems appropriate.
   export FastSampler, sample, sampleMany
 
   include("solverInterface.jl")
-  export cholSDD, cholLap, lapWrapSDD
+  export cholSDDM, cholLap, lapWrapSDDM
 
 
   include("augTreeSolver.jl")
@@ -185,12 +185,12 @@ and exports the functions for which it seems appropriate.
   export AMGSolver, AMGLapSolver
 
   include("KMPSolver.jl")
-  export KMPSDDSolver
+  export KMPSDDMSolver
   export KMPLapSolver
   export KMPParams
 
   include("complexSolvers.jl")
-  export SDDSolvers
+  export SDDMSolvers
   export LapSolvers
 
   include("johnlind.jl")

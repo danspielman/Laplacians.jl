@@ -6,7 +6,11 @@ using DataStructures
 
 # sample edges with probability proportional to their weight
 
-"""A heuristic for computing low-stretch spanning trees.  Where Kruskal's MST algorithm adds edges in order of weight, this algorithm adds them at random with probability proportional to their weight."""
+"""
+    tree = randishKruskal(A)
+
+A heuristic for computing low-stretch spanning trees.  Where Kruskal's MST algorithm adds edges in order of weight, this algorithm adds them at random with probability proportional to their weight.
+"""
 function randishKruskal(mat::SparseMatrixCSC)
     n = size(mat)[1]
     (ai,aj,av) = findnz(triu(mat))
@@ -34,7 +38,11 @@ function randishKruskal(mat::SparseMatrixCSC)
 
 end
 
-"""A heuristic for computing low-stretch spanning trees.  Where Prim's MST algorithm grows a cluster by always adding the edge on the boundary of maximum weight, this algorithm adds a boundary edge with probability proportional to its weight."""
+"""
+    tree = randishPrim(A)
+
+A heuristic for computing low-stretch spanning trees.  Where Prim's MST algorithm grows a cluster by always adding the edge on the boundary of maximum weight, this algorithm adds a boundary edge with probability proportional to its weight.
+"""
 function randishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})
 
   n = mat.n

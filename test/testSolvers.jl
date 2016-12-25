@@ -54,21 +54,21 @@ f0 = Laplacians.lapWrapComponents(Laplacians.cgLapSolver, a)
 @assert norm(la*f0(b,tol=1e-4,maxits=200,verbose=true)-b)/norm(b) < 1e-2
 
 
-f = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(cholSDD),a)
+f = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(cholSDDM),a)
 @assert norm(la*f(b)-b)/norm(b) < 1e-8
 
-solver = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(Laplacians.cholSDD))
+solver = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(Laplacians.cholSDDM))
 f = solver(a,verbose = true)
 norm(la*f(b,tol=1e-3)-b)/norm(b)
 
 its2 = [0]
-f = Laplacians.lapWrapSDD(Laplacians.cgSolver,a,tol=1e-2,pcgIts=its)
+f = Laplacians.lapWrapSDDM(Laplacians.cgSolver,a,tol=1e-2,pcgIts=its)
 @assert norm(la*f(b,verbose=true,pcgIts = its2, tol=1e-3)-b) / norm(b) < 1e-2
-f = Laplacians.lapWrapSDD(Laplacians.cholSDD,a)
+f = Laplacians.lapWrapSDDM(Laplacians.cholSDDM,a)
 @assert norm(la*f(b)-b) / norm(b) < 1e-2
 f = Laplacians.cholLap(a)
 @assert norm(la*f(b)-b) / norm(b) < 1e-2
-fs = Laplacians.lapWrapSDD(cgSolver)
+fs = Laplacians.lapWrapSDDM(cgSolver)
 f = fs(a, tol=1e-2, verbose=true)
 x = f(b, tol=1e-6);
              
@@ -87,13 +87,13 @@ function testSolvers(a;maxtime=1)
     n = a.n
     excess = zeros(n); excess[1] = excess[n] = 0.1;
     la = lap(a);
-    sdd = la + spdiagm(excess);
+    sddm = la + spdiagm(excess);
     b = rand(n); b = b - mean(b);
 
-    for solver in SDDSolvers
-        f = solver(sdd, tol=1e-6, maxtime=maxtime);
+    for solver in SDDMSolvers
+        f = solver(sddm, tol=1e-6, maxtime=maxtime);
         x = f(b);
-        @test norm(sdd*x - b)/norm(b) <= 1e-1
+        @test norm(sddm*x - b)/norm(b) <= 1e-1
     end
 
     for solver in LapSolvers
@@ -167,13 +167,13 @@ b = b - mean(b)
 la = lap(a)
 f = hybridLapSolver(a,tol=1e-6)
 x = f(b)
-sdd = la + diagm(rand(n)/1000)
-f = hybridSDDSolver(sdd,tol=1e-6)
+sddm = la + diagm(rand(n)/1000)
+f = hybridSDDMSolver(sddm,tol=1e-6)
 x = f(b)
 
 hp = Laplacians.defaultHybridParams
 hp.n0=10
-f = hybridSDDSolver(sdd,tol=1e-6,verbose=true)
+f = hybridSDDMSolver(sddm,tol=1e-6,verbose=true)
 x = f(b)
 
 # Testing code inside Sampling Solver
