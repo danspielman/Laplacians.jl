@@ -120,7 +120,7 @@ function augTreeSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxi
     verbose_=verbose
     pcgIts_=pcgIts
     
-    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_,pcgIts_=pcgIts) = pcg(sddm, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_,pcgIts=pcgIts_) = pcg(sddm, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
   
     return f
 
