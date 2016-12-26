@@ -90,15 +90,17 @@ function testSolvers(a;maxtime=1)
     sddm = la + spdiagm(excess);
     b = rand(n); b = b - mean(b);
 
+    its = Int[0]
+
     for solver in SDDMSolvers
-        f = solver(sddm, tol=1e-6, maxtime=maxtime);
-        x = f(b);
+        f = solver(sddm, tol=1e-6, maxtime=maxtime,verbose=true);
+        x = f(b,tol=1e-6,maxits=10000,verbose=false,pcgIts=its);
         @test norm(sddm*x - b)/norm(b) <= 1e-1
     end
 
     for solver in LapSolvers
-        f = solver(a, tol=1e-6, maxtime=maxtime);
-        x = f(b);
+        f = solver(a, tol=1e-6, maxtime=maxtime,verbose=true);
+        x = f(b,tol=1e-6,maxits=10000,verbose=false,pcgIts=its);
         @test norm(la*x - b)/norm(b) <= 1e-1
     end
 
@@ -125,6 +127,22 @@ for i in 1:100
     gru = unweight(gr)
     t = akpwU(gru)
 end
+
+a = wtedChimera(1234,1);
+for i in 2:5
+    a = disjoin(a,wtedChimera(1234,i))
+end
+n = size(a,1)
+b = randn(n)
+b = b - mean(b)
+for solver in [augTreeLapSolver, KMPLapSolver, samplingLapSolver, cgLapSolver]
+    f = solver(a, tol=1e-6, maxtime=5);
+    x = f(b);
+    @test norm(la*x - b)/norm(b) <= 1e-1
+end
+
+
+
 
 n = 20000
 i = 1

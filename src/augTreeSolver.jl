@@ -160,6 +160,13 @@ It works by adding edges to a low stretch spanning tree.  It calls `augTreeLapPr
 """
 function augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
 
+    return lapWrapComponents(augTreeLapSolver1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, treeAlg=treeAlg)
+
+
+end
+     
+function augTreeLapSolver1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
+
   la = lap(a)
 
   F = augTreeLapPrecon(la, treeAlg=treeAlg)
@@ -168,10 +175,10 @@ function augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxi
   maxits_ =maxits
   maxtime_ =maxtime
   verbose_ =verbose
-    pcgIts_=pcgIts
+  pcgIts_ =pcgIts
 
 
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
     
   return f
 

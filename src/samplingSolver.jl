@@ -31,9 +31,7 @@ defaultSamplingParams = samplingParams(0.5, 0.02, 1e3, 1000, 20,
 
 An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl 
 """
-function samplingSDDMSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti};
-                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, 
-                                params::samplingParams{Tv,Ti}=defaultSamplingParams)
+function samplingSDDMSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     # srand(1234)
 
@@ -51,8 +49,14 @@ function samplingSDDMSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti};
         println()
     end 
 
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
     la = lap(symPermuteCSC(a, ord))
-    function f(b)
+    f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
         #= 
             We need to add an extra entry to b to make it match the size of a. The extra vertex in a is
             vertex n, thus, we will add the new entry in b on position n as well.
@@ -62,7 +66,7 @@ function samplingSDDMSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti};
             push!(auxb, -sum(auxb))
         end
 
-        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts_)
         ret = ret[invperm(ord)]
 
         # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
@@ -84,9 +88,15 @@ end
 
 An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl 
 """
-function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, 
-                                params::samplingParams{Tv,Ti}=defaultSamplingParams)
+function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams)
+
+    return lapWrapComponents(samplingLapSolver1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, params=params)
+
+
+end
+
+
+function samplingLapSolver1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     # srand(1234)
 
@@ -102,8 +112,17 @@ function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     end 
 
     la = lap(symPermuteCSC(a, ord))
-    function f(b)
-        ret = pcg(la, b[ord] - sum(b), F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
+
+    f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
+
+        ret = pcg(la, b[ord] - mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts_)
         return ret[invperm(ord)]
     end
     

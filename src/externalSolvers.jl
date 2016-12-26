@@ -51,7 +51,7 @@ function AMGLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxit
     pcgIts_=pcgIts
 
     
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, pcgIts=pcgIts_, verbose=verbose_) = pcg(la, b, F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, pcgIts=pcgIts_, verbose=verbose_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
 
   return f
   

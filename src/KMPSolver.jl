@@ -309,7 +309,7 @@ function KMPLapSolver1(a; verbose=false,
 
     f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
 
-        bord = b[ord]
+        bord = b[ord] - mean(b)
         
         xord = pcg(la, bord, fsub, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 

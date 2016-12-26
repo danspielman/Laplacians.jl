@@ -84,9 +84,17 @@ end
 
 Create a solver that uses cg to solve Laplacian systems in the laplacian of A. 
 This just exists to satisfy our interface.
-It does nothing more than create the Laplacian and call cg.
+It does nothing more than create the Laplacian and call cg on each connected component.
 """
-function cgLapSolver(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+function cgLapSolver(a::SparseMatrixCSC; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+
+    return lapWrapComponents(cgLapSolver1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts)
+
+
+end
+
+
+function cgLapSolver1(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     la = forceLap(A)
     

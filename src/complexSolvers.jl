@@ -32,4 +32,4 @@ export powerIteration
 SDDMSolvers = [augTreeSolver, KMPSDDMSolver, samplingSDDMSolver, AMGSolver]
 
 """A list containing Laplacian linear system solvers. They take in an adjacency matrix plus tol, maxits and maxtime parameters."""
-LapSolvers = [augTreeLapSolver, KMPLapSolver, samplingLapSolver, AMGLapSolver]
+LapSolvers = [augTreeLapSolver, KMPLapSolver, samplingLapSolver, AMGLapSolver, cgLapSolver]
