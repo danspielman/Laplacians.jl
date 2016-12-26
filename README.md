@@ -41,7 +41,13 @@ To get the current version of the master branch, run `Pkg.checkout("Laplacians")
 
 ## Version 0.1.1, December 26, 2016
 
-This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`.  In this version, all of the linear equation solvers have the same interface.  Some support for calling solvers from Matlab has been added.
+This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`.  
+
+Changelist:
+
+* All of the linear equation solvers now have the same interface, and the Laplacian solvers work for disconnected graphs. 
+* Some support for calling solvers from Matlab has been added.
+* Documentation is now through Documenter.jl.
 
 ## Version 0.0.3 / 0.1.0, November 20, 2016
 
