@@ -135,6 +135,7 @@ end
 n = size(a,1)
 b = randn(n)
 b = b - mean(b)
+la = lap(a)
 for solver in [augTreeLapSolver, KMPLapSolver, samplingLapSolver, cgLapSolver]
     f = solver(a, tol=1e-6, maxtime=5);
     x = f(b);
