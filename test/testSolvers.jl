@@ -82,7 +82,7 @@ end
 
 # generate chimeric graphs, and test run many routines on them
 
-function testSolvers(a;maxtime=1)
+function testSolvers(a;maxtime=5)
 
     n = a.n
     excess = zeros(n); excess[1] = excess[n] = 0.1;

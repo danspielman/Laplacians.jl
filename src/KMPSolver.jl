@@ -276,6 +276,9 @@ function KMPLapSolver1(a; verbose=false,
         tree = randishPrim(a)
     else
         tree = akpw(a)
+        if verbose
+            println("akpw stretch : ", sum(compStretches(tree,a))/nnz(a))
+        end
     end
 
     n = size(a,1);
