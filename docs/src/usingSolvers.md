@@ -274,5 +274,37 @@ This is an interface to the algebraic multigrid solvers from the PyAMG package.
 * [`AMGLapSolver`](@ref)
 * [`AMGSolver`](@ref), for SDDM systems.
 
+## Solvers from Matlab
 
+The [MATLAB.jl](https://github.com/JuliaInterop/MATLAB.jl) package allows Julia to call routines from Matlab, provided you have Matlab installed.  It does this in a very efficient fashion: it starts up the Matlab process when you type `using MATLAB`, and then communicates with it.  So, we have wrapped some solvers from Matlab so that they obey the same interface.
+
+These are not part of the Laplacians module, but are included in the package under `src/matlabSolvers.jl`.  To include them, type
+
+~~~julia
+include(string(Pkg.dir("Laplacians") , "/src/matlabSolvers.jl"))
+~~~
+
+We provide the docstrings for these here.
+
+### Incomplete Cholesky Factorizations
+
+These use the no-fill incomplete Cholesky factorizations implemented in Matlab.  They first order the vertices by the `symrcm` ordering.
+
+
+The solvers are:
+
+* `f = matlab_ichol_sddm(sddm; tol, maxtime, maxits, pctIts, verbose)`
+* `f = matlab_ichol_lap(A; tol, maxtime, maxits, pctIts, verbose)`
+
+A routine that just wraps the function that solves equations in the preconditioner is provided as well:
+
+* `f = matlab_ichol(sddm)`
+
+### Koutis's Combinatorial Multigrid (CMG)
+
+You must have installed Yiannis Koutis's [Combinatorial Multigrid Code](http://www.cs.cmu.edu/~jkoutis/cmg.html), and it must be on Matlab's default path.  As this code returns a function rather than a preconditioner, it would be inefficient to make it use our PCG code and satisfy our interface.  So, it does not.
+
+* `x = matlabCmgSolver(mat, b; tol::Real=1e-6, maxits=10000)`
+
+The matrix `mat` can either be SDDM or a Laplacian.  This solves the system in `b`.
  

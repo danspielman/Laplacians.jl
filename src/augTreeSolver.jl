@@ -101,24 +101,26 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 end
 
 """
+    solver = augTreeSolver(sddm; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
+
 An "augmented spanning tree" solver for positive definite diagonally dominant matrices.
 It works by adding edges to a low stretch spanning tree.  It calls `augTreePrecon` to form
 the preconditioner.
 
-~~~julia
- augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, treeAlg=akpw)
-~~~
-"""
-function augTreeSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
 
-    F = augTreePrecon(ddmat, treeAlg=treeAlg)
+
+
+"""
+function augTreeSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
+
+    F = augTreePrecon(sddm, treeAlg=treeAlg)
     tol_=tol
     maxits_=maxits
     maxtime_=maxtime
     verbose_=verbose
     pcgIts_=pcgIts
     
-    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_,pcgIts_=pcgIts) = pcg(ddmat, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_,pcgIts_=pcgIts) = pcg(sddm, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
   
     return f
 
@@ -151,13 +153,10 @@ function augTreeLapPrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; treeAlg=akpw)
 end
 
 """
-An "augmented spanning tree" solver for Laplacian matrices.
-It works by adding edges to a low stretch spanning tree.  It calls `augTreeLapPrecon` to form
-the preconditioner. In line with other solver, it takes as input the adjacency matrix of the system.
+    solver = augTreeLapSolver(A; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
 
-~~~julia
- augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
-~~~
+An "augmented spanning tree" solver for Laplacian matrices.
+It works by adding edges to a low stretch spanning tree.  It calls `augTreeLapPrecon` to form the preconditioner. In line with other solver, it takes as input the adjacency matrix of the system.
 """
 function augTreeLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], treeAlg=akpw)
 
