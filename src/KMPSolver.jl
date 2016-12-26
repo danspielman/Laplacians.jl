@@ -187,7 +187,7 @@ end
 """
     sddmSolver = KMPSDDMSolver(mat; verbose, tol, maxits, maxtime, pcgIts, params::KMPParams)
 
-Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals.
+Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals.  Based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
 """
 function KMPSDDMSolver(mat; verbose=false, 
                       tol::Real=1e-6, maxits::Integer=1000, maxtime=Inf, pcgIts=Int[], params::KMPParams=defaultKMPParams)
@@ -232,7 +232,13 @@ function KMPSDDMSolver(mat; verbose=false,
 end
 
 
-"""Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
+"""
+    lapSolver = KMPLapSolver(A; verbose, tol, maxits, maxtime, pcgIts, params::KMPParams)
+
+Solves linear equations in the Laplacian of graph with adjacency matrix `A`.
+
+Based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
+"""
 function KMPLapSolver(a; verbose=false,
                       tol::Real=1e-6, maxits::Integer=1000, maxtime=Inf, pcgIts=Int[], params::KMPParams=defaultKMPParams)
 

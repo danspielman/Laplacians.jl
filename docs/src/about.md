@@ -38,10 +38,14 @@ Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
-## Version 0.0.3, November 20, 2016
+## Version 0.1.1, December 26, 2016
 
-This version works with Julia 0.5.
-This is what you retrieve when you run `Pkg.add("Laplacians")`
+This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`.  In this version, all of the linear equation solvers have the same interface.  Some support for calling solvers from Matlab has been added.
+
+## Version 0.0.3 / 0.1.0, November 20, 2016
+
+Versions 0.0.3 and 0.1.0 are the same.
+These versions works with Julia 0.5.
 
 Warning: the behavior of chimera and wtedChimera differs between Julia 0.4 and Julia 0.5 because randperm acts differently in these.
 
