@@ -113,7 +113,7 @@ end
 n = 1000
 tol = 1e-11
 
-for i in 1:100
+for i in 1:10
     println("wtedChimera($n, $i)")
     gr = wtedChimera(n,i)
     @test gr.n == n
