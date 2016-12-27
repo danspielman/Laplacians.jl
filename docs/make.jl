@@ -5,10 +5,9 @@ using Laplacians
 
 makedocs(modules=[Laplacians], doctest = false)
 
-#=
 deploydocs(
-    deps = Deps.pip("pygments", "mkdocs", "mkdocs-material", "python-markdown-math"),
-    repo   = "github.com/danspielman/Laplacians.jl.git"
-#    julia  = "release"
+           repo = "github.com/danspielman/Laplacians.jl.git"
+           deps   = Deps.pip("mkdocs", "python-markdown-math"),
+           julia  = "0.5",
+           osname = "osx"
 )
-=#
