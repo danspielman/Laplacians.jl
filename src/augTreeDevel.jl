@@ -114,4 +114,119 @@ function augmentTree2{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv
     return tree + aug
     
 end
+
+function augmentTree3{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}; nnzL_fac=2.0, flops_fac=100.0)
+
+    Aminus = A - tree
+    
+    ai,aj,av = findnz(triu(Aminus))
+
+    n = A.n
+    m = length(ai)
+
+    st = compStretches(tree, Aminus)
+    _,_,sv = findnz(triu(st))
+
+    
+    r = -log(rand(m)) ./ sv
+    ord = sortperm(r)
+
+    #=
+    @show n*nnzL_fac
+    @show n*nnzL_fac/2
+    @show (n+m)*flops_fac/4
+    @show (n+m)*flops_fac
+    =#
+    
+    nnzLTooBig(nnzL) = (nnzL-2*(n-1)) > n*nnzL_fac
+    nnzLTooSmall(nnzL) = (nnzL-2*(n-1)) < n*nnzL_fac/2
+    flopsTooBig(flops) = flops > (n+m)*flops_fac
+    flopsTooSmall(flops) = flops < (n+m)*flops_fac/4
+    
+    k = Int(round(2*sqrt(n)))
+
+    first = true
+    direction = 0
+    done = false
+
+    while ~done
+    
+        edgeinds = ord[1:min(k,m)]
+        augi = ai[edgeinds]
+        augj = aj[edgeinds]
+        augv = av[edgeinds]
+        
+
+        n = size(A,1)
+        aug = sparse(augi, augj, augv, n, n)
+        aug = aug + aug'
+
+        augTree = tree+aug
+
+        nnzL, flops = ask_cholmod(lap(augTree))
+
+        @show k, nnzL, flops
+
+        #=
+        @show [n*nnzL_fac/2, nnzL-2*(n-1), n*nnzL_fac]
+        @show [(n+m)*flops_fac/4, flops, (n+m)*flops_fac]
+        =#
+        
+        if first
+            first = false
+            if ~(nnzLTooBig(nnzL) || nnzLTooSmall(nnzL) ||
+                 flopsTooBig(flops) || flopsTooSmall(flops))
+                done = true
+            elseif nnzLTooBig(nnzL) || flopsTooBig(flops)
+                k = div(k,2)
+                direction = -1
+            else
+                k = k * 2
+                direction = 1
+                if k >= m
+                    done = true
+                end
+                
+            end
+        else
+            if direction == -1
+                if nnzLTooBig(nnzL) || flopsTooBig(flops)
+                    k = div(k,2)
+                else
+                    done = true
+                end
+                
+            else # direction == 1
+
+                if nnzLTooSmall(nnzL) && flopsTooSmall(flops)
+                    k = k * 2
+                    if k >= m
+                        done = true
+                    end
+                else
+                    @show nnzLTooSmall(nnzL)
+                    @show flopsTooSmall(flops)
+                    done = true
+                end
+            end
+        end
+
+        if done
+            return augTree
+        end
+    end
+        
+    
+end
+
+
+function augTreeLapSolver3{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], nnzL_fac=2.0, flops_fac=100.0 )
+
+    t = akpw(a)
+    at = augmentTree3(t,a; nnzL_fac=nnzL_fac, flops_fac=flops_fac)
+
+    return pcgLapSolver(a, at, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts)
+
+end
+
     
