@@ -30,11 +30,11 @@ end
 
 import Base.SparseArrays
 
-macro cholmod_name(nm,typ) string("cholmod_", eval(typ) == ba.SuiteSparse_long ? "l_" : "", nm) end
+macro cholmod_name(nm,typ) string("cholmod_", eval(typ) == Base.SparseArrays.CHOLMOD.SuiteSparse_long ? "l_" : "", nm) end
 
-function print_common{Tv<:ba.VTypes}(F::ba.Factor{Tv}, name::String)
+#=    
+function print_common{Tv<:Base.SparseArrays.CHOLMOD.VTypes}(F::Base.SparseArrays.CHOLMOD.Factor{Tv}, name::String)
     ba = Base.SparseArrays.CHOLMOD
-    cm = ba.common()
         
     cm = ba.common()
     ba.set_print_level(cm, 3)
@@ -42,6 +42,8 @@ function print_common{Tv<:ba.VTypes}(F::ba.Factor{Tv}, name::String)
     Cint, (Ptr{UInt8}, Ptr{UInt8}), name,  cm)
     nothing
 end
+=#
+
 
 """
   nnzL, flops = ask_cholmod(mat)
@@ -75,6 +77,9 @@ end
     
     
 function print_cholmod(sdd)
+    ba = Base.SparseArrays.CHOLMOD
+    cm = ba.common()
+        
     anal = ba.analyze(ba.Sparse(lap(sdd)), cm);
 
     print_common(anal, "F")
@@ -298,6 +303,8 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
     push!(dic["nv"],nv)
     push!(dic["ne"],ne)
     push!(dic["hash_a"],hash_a)
+
+    x = []
     
     for solverTest in solvers
         tic()
