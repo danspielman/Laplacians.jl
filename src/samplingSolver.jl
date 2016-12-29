@@ -66,7 +66,7 @@ function samplingSDDMSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, m
             push!(auxb, -sum(auxb))
         end
 
-        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts_)
+        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
         ret = ret[invperm(ord)]
 
         # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
