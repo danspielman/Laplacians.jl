@@ -21,10 +21,20 @@ type samplingParams{Tv,Ti}
     verboseSS::Bool
     returnCN::Bool
     CNTol::Tv
+    cholmodPerm::Bool
 end
 
 defaultSamplingParams = samplingParams(0.5, 0.02, 1e3, 1000, 20,
-                                false,false,1e-3)
+                                       false,false,1e-3,false)
+
+samplingParams(eps, sampConst, beta, startingSize, blockSize, verboseSS, returnCN, CNTol) =
+    samplingParams(eps, sampConst, beta, startingSize, blockSize, verboseSS, returnCN, CNTol, false)
+
+plainSamplingParams(sampConst) = 
+  samplingParams(0.5, sampConst, 1.0, 1000, 20, false, false, 1e-3, true)
+
+plainSamplingParamsOld(sampConst) = 
+  samplingParams(0.5, sampConst, 1.0, 1000, 20, false, false, 1e-3, false)
 
 """ 
     solver = samplingSDDMSolver(sddm)
@@ -174,7 +184,13 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     =#
 
     tree = akpw(a);
-    ord = reverse!(dfsOrder(tree, start = n));
+
+    if params.cholmodPerm
+        ord = cholmod_perm(lap(a))
+    else
+        ord = reverse!(dfsOrder(tree, start = n));
+    end
+    
     a = symPermuteCSC(a, ord)
     tree = symPermuteCSC(tree, ord)
 
@@ -196,14 +212,25 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 	    println("Maximum number of multiedges = ", maximum(stretch.nzval))
     end
 
-  	if params.verboseSS
+    if params.verboseSS
 	    print("Time to build the tree and compute the stretch: ")
 	    toc()
+    end
+
+    if params.verboseSS
+	    tic()
     end
 
     # Get u and d such that ut d u = -a (doesn't affect solver)
     Ut,d = samplingLDL(a, stretch, rho, params.startingSize, params.blockSize, params.verboseSS)
     U = Ut'
+
+    if params.verboseSS
+	print("Time to factorize: ")
+	toc()
+    end
+
+
 
     if params.verboseSS
 	    println("nnz in U matrix: ", length(U.data.nzval))
