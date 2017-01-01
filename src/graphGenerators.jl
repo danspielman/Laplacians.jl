@@ -449,11 +449,11 @@ end
     
     
 """
-    graph = pureRandomGraph(n::Integer)
+    graph = pureRandomGraph(n::Integer; verbose=false)
 
 Generate a random graph with n vertices from one of our natural distributions
 """
-function pureRandomGraph(n::Integer)
+function pureRandomGraph(n::Integer; verbose=false)
    
     gr = []
     wt = []
@@ -489,9 +489,14 @@ function pureRandomGraph(n::Integer)
     # make sure get a connected graph
     its = 0
     mat = eval(gr[i])
+    if verbose
+        println(gr[i])
+    end
+        
 
     while (~isConnected(mat)) && (its < 100)
         i = sampleByWeight(wt)
+
         mat = eval(gr[i])
         its += 1
     end
@@ -519,12 +524,12 @@ function sampleByWeight(wt)
 end
 
 """
-    graph = semiWtedChimera(n::Integer)
+    graph = semiWtedChimera(n::Integer; verbose=false)
 
 A Chimera graph with some weights.  The weights just appear when graphs are combined.
 For more interesting weights, use `wtedChimera`
 """
-function semiWtedChimera(n::Integer)
+function semiWtedChimera(n::Integer; verbose=false)
 
     if (n < 2)
         return spzeros(1,1)
@@ -534,7 +539,7 @@ function semiWtedChimera(n::Integer)
     
     if (n < 30) || (rand() < .2)
 
-        gr = pureRandomGraph(n)
+        gr = pureRandomGraph(n, verbose=verbose)
 
         return randperm(gr)
     end
@@ -546,7 +551,11 @@ function semiWtedChimera(n::Integer)
         n2 = n - n1
         k = ceil(Integer,exp(rand()*log(min(n1,n2)/2)))
 
-        gr = joinGraphs(r*chimera(n1),chimera(n2),k)
+        if verbose
+            println("joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+        end
+
+        gr = joinGraphs(r*chimera(n1;verbose=verbose),chimera(n2;verbose=verbose),k)
 
         return randperm(gr)
     end
@@ -559,7 +568,11 @@ function semiWtedChimera(n::Integer)
         n2 = n - n1
         k = floor(Integer,1+exp(rand()*log(min(n1,n2)/2)))
 
-        gr = joinGraphs(r*chimera(n1),chimera(n2),k)
+        if verbose
+            println("joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+        end
+
+        gr = joinGraphs(r*chimera(n1;verbose=verbose),chimera(n2;verbose=verbose),k)
 
         return randperm(gr)
 
@@ -570,18 +583,31 @@ function semiWtedChimera(n::Integer)
 
         if (rand() < .5)
 
-            gr = productGraph(r*chimera(n1),chimera(n2))
+            if verbose
+                println("productGraph($(r)*chimera($(n1)),chimera($(n2)))")
+            end
+            gr = productGraph(r*chimera(n1;verbose=verbose),chimera(n2;verbose=verbose))
 
         else
 
             k = floor(Integer,1+exp(rand()*log(min(n1,n2)/10)))
-            gr = generalizedNecklace(r*chimera(n1),chimera(n2),k)
+
+            if verbose
+                println("generalizedNecklace($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+            end
+
+            gr = generalizedNecklace(r*chimera(n1;verbose=verbose),chimera(n2;verbose=verbose),k)
 
         end
 
         n3 = n - size(gr)[1]
         if (n3 > 0)
-            gr = joinGraphs(gr,chimera(n3),2)
+
+            if verbose
+                println("joinGraphs(gr,chimera($(n3)),2)")
+            end
+
+            gr = joinGraphs(gr,chimera(n3;verbose=verbose),2)
 
         end
 
@@ -592,16 +618,16 @@ end
 
 
 """
-    graph = chimera(n::Integer)
+    graph = chimera(n::Integer; verbose=false)
 
 Builds a chimeric graph on n vertices.
 The components come from pureRandomGraph,
 connected by joinGraphs, productGraph and generalizedNecklace
 """
-function chimera(n::Integer)
+function chimera(n::Integer; verbose=false)
 
 
-    gr = semiWtedChimera(n)
+    gr = semiWtedChimera(n; verbose=verbose)
     unweight!(gr)
 
     return gr
@@ -609,16 +635,16 @@ function chimera(n::Integer)
 end
 
 """
-    graph = chimera(n::Integer, k::Integer)
+    graph = chimera(n::Integer, k::Integer; verbose=false)
 
 Builds the kth chimeric graph on n vertices.
 It does this by resetting the random number generator seed.
 It should captute the state of the generator before that and then
 return it, but it does not yet.
 """
-function chimera(n::Integer, k::Integer)
+function chimera(n::Integer, k::Integer; verbose=false)
     srand(100*n+k)
-    g = chimera(n)
+    g = chimera(n; verbose=verbose)
     return g
 end
 
@@ -683,22 +709,22 @@ function randWeight(a)
 end
 
 """
-    graph = wtedChimera(n::Integer, k::Integer)
+    graph = wtedChimera(n::Integer, k::Integer; verbose=false)
 
 Builds the kth wted chimeric graph on n vertices.
 It does this by resetting the random number generator seed.
 It should captute the state of the generator before that and then
 return it, but it does not yet.
 """
-function wtedChimera(n::Integer, k::Integer)
+function wtedChimera(n::Integer, k::Integer; verbose=false)
     srand(100*n+k)
-    g = wtedChimera(n)
+    g = wtedChimera(n; verbose=verbose)
     return g
 end
 
-function semiWtedChimera(n::Integer, k::Integer)
+function semiWtedChimera(n::Integer, k::Integer; verbose=false)
     srand(100*n+k)
-    g = semiWtedChimera(n)
+    g = semiWtedChimera(n; verbose=verbose)
     return g
 end
 
@@ -708,7 +734,7 @@ end
 
 Generate a chimera, and then apply a random weighting scheme
 """
-function wtedChimera(n::Integer)
-    return randWeight(semiWtedChimera(n))
+function wtedChimera(n::Integer; verbose=false)
+    return randWeight(semiWtedChimera(n; verbose=verbose))
 end
 
