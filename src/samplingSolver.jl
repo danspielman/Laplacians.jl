@@ -22,19 +22,23 @@ type samplingParams{Tv,Ti}
     returnCN::Bool
     CNTol::Tv
     cholmodPerm::Bool
+    fixTree::Bool
 end
 
 defaultSamplingParams = samplingParams(0.5, 0.02, 1e3, 1000, 20,
-                                       false,false,1e-3,false)
+                                       false,false,1e-3,false,false)
 
 samplingParams(eps, sampConst, beta, startingSize, blockSize, verboseSS, returnCN, CNTol) =
-    samplingParams(eps, sampConst, beta, startingSize, blockSize, verboseSS, returnCN, CNTol, false)
+    samplingParams(eps, sampConst, beta, startingSize, blockSize, verboseSS, returnCN, CNTol, false, false)
 
 plainSamplingParams(sampConst) = 
-  samplingParams(0.5, sampConst, 1.0, 1000, 20, false, false, 1e-3, true)
+  samplingParams(0.5, sampConst, 1.0, 1000, 20, false, false, 1e-3, true, false)
 
 plainSamplingParamsOld(sampConst) = 
-  samplingParams(0.5, sampConst, 1.0, 1000, 20, false, false, 1e-3, false)
+  samplingParams(0.5, sampConst, 1.0, 1000, 20, false, false, 1e-3, false, false)
+
+treeSamplingParams(rho,n) = 
+  samplingParams(1.0, rho/(log(n)^2), 1.0, 1000, 20, false, false, 1e-3, false, true)
 
 """ 
     solver = samplingSDDMSolver(sddm)
@@ -222,7 +226,15 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     end
 
     # Get u and d such that ut d u = -a (doesn't affect solver)
-    Ut,d = samplingLDL(a, stretch, rho, params.startingSize, params.blockSize, params.verboseSS)
+
+    if params.fixTree
+        Ut,d = samplingLDL2(a, tree, stretch, rho, params.startingSize, params.blockSize, params.verboseSS)
+
+    else
+        Ut,d = samplingLDL(a, stretch, rho, params.startingSize, params.blockSize, params.verboseSS)
+    end
+
+
     U = Ut'
 
     if params.verboseSS
@@ -407,7 +419,136 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     return constructLowerTriangularMat(ut), d
 end
 
+function samplingLDL2{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
+    startingSize::Ti, blockSize::Ti, verbose::Bool=false)
+
+    print("fixing tree")
+
+    n = a.n
+
+    # some extra memory to be used later in the algorithm. this can be later pulled out of this function
+    # into an external recipient, to be used on subsequent runs of the solver
+    auxVal = zeros(Tv, n)                       # used to sum weights from multiedges
+    auxMult = zeros(Tv, n)                      # used to count the number of multiedges
+
+    wNeigh = zeros(Tv, n)
+    multNeigh = zeros(Tv, n)
+    indNeigh = zeros(Ti, n)
+    
+    ut = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
+    d = zeros(Tv, n)                            # the d matrix part of u d u'
+
+    # neigh[i] = the list of neighbors for vertex i with their corresponding weights
+    # note neigh[i] only stores neighbors j such that j > i
+    # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
+
+    neigh = llsInit(a, startingSize = startingSize, blockSize = blockSize)
+
+    # gather the info in a and put it into neigh and w
+    for i in 1:length(a.colptr) - 1
+        for j in a.colptr[i]:a.colptr[i + 1] - 1
+            if a.rowval[j] > i
+                llsAdd(neigh, i, (a.nzval[j], stretch.nzval[j], a.rowval[j]))
+            end
+        end
+    end
+
+    # Now, for every i, we will compute the i'th column in U
+    for i in 1:(n-1)
+        # We will get rid of duplicate edges
+        # wSum - sum of weights of edges
+        # multSum - sum of number of edges (including multiedges)
+        # numPurged - the size in use of wNeigh, multNeigh and indNeigh
+        # wNeigh - list of weights correspongind to each neighbors
+        # multNeigh - list of number of multiedges to each neighbor
+        # indNeigh - the indices of the neighboring vertices
+        wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh, rho = rho) # also a lot of time
+
+        # need to divide weights by the diagonal entry
+        for j in 1:numPurged
+            push!(ut[i], (-wNeigh[j] / wSum, indNeigh[j]))
+        end
+        push!(ut[i], (1, i)) #diag term
+
+        d[i] = wSum
+
+
+        # handle all tree edges
+        for j in 1:(numPurged-1)
+            for k in (j+1):numPurged
+                posj = indNeigh[j]
+                posk = indNeigh[k]
+
+                if tree[posj,posk] > 0
+
+                    # swap so posj is smaller
+                    if posk < posj  
+                        j, k = k, j
+                        posj, posk = posk, posj
+                    end
+
+                    wj = wNeigh[j]                
+                    wk = wNeigh[k]
+
+                    sampScaling = wSum
+                    
+                    llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
+                end
+            end
+        end
+
+        multSum = ceil(Int64, multSum)
+        wSamp = FastSampler(wNeigh[1:numPurged])
+        multSamp = FastSampler(multNeigh[1:numPurged])
+        
+        jSamples = sampleMany(wSamp, multSum)
+        kSamples = sampleMany(multSamp, multSum)
+        
+        # now propagate the clique to the neighbors of i
+        for l in 1:multSum
+            
+            j = jSamples[l]
+            k = kSamples[l]
+
+            posj = indNeigh[j]
+            posk = indNeigh[k]
+
+            if (j != k) && (tree[posj,posk] == 0)
+
+                # swap so posj is smaller
+                if posk < posj  
+                    j, k = k, j
+                    posj, posk = posk, posj
+                end
+
+                wj = wNeigh[j]                
+                wk = wNeigh[k]
+
+                sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
+                
+                llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
+            end
+        end  
+
+    end
+
+    # add the last diagonal term
+    push!(ut[n], (1, n))
+    d[n] = 0
+
+    if verbose
+	    println()
+	    println("The total size of the linked list data structure should be at most ", ceil(Ti, sum(stretch) + rho * (n - 1)) + 20 * n)
+	    println("The actual size is ", neigh.size * neigh.blockSize)
+	    println()
+    end
+
+    return constructLowerTriangularMat(ut), d
+end
+
+
 # u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
+# looks like 10% of the construction time, and could be sped up a lot
 function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
     n = length(u)
 
