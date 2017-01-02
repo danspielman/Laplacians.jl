@@ -187,22 +187,6 @@ x = f(b)
 la = lap(gr)
 @test norm(la*x-b)/norm(b) < 1e-3
 
-# One test for Hybrid Solver, just to get coverage
-n = 100
-a = wtedChimera(n,1)
-b = randn(n)
-b = b - mean(b)
-la = lap(a)
-f = hybridLapSolver(a,tol=1e-6)
-x = f(b)
-sddm = la + diagm(rand(n)/1000)
-f = hybridSDDMSolver(sddm,tol=1e-6)
-x = f(b)
-
-hp = Laplacians.defaultHybridParams
-hp.n0=10
-f = hybridSDDMSolver(sddm,tol=1e-6,verbose=true)
-x = f(b)
 
 # Testing code inside Sampling Solver
 

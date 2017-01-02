@@ -15,11 +15,7 @@ export samplingParams
 ### KMP
 # included in Laplacians.jl
 
-### hybridSolver
-include("hybridSolver.jl")
-export hybridSDDMSolver
-export hybridLapSolver
-export hybridParams
+### hybridSolver -- has been removed from master, and now lives in own branch
 
 ### useful misc
 include("condNumber.jl")
