@@ -4,13 +4,13 @@ returns the vectors necessary for computing the effective resistance bounds inst
 of the actual bounds. 
 
 ~~~julia
-	johnlind(a::SparseMatrixCSC{Tv,Ti}; eps::Tv = 0.5, solver=(la -> augTreeSolver(la,tol=1e-1,maxits=1000,maxtime=10)), retXhat::Bool = false)
+	johnlind(a::SparseMatrixCSC{Tv,Ti}; eps::Tv = 0.5, solver=(la -> augTreeSddm(la,tol=1e-1,maxits=1000,maxtime=10)), retXhat::Bool = false)
 ~~~
 """
 
 function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; 
 						eps::Tv = 0.5, 
-						solver=(la -> augTreeSolver(la,tol=1e-1,maxits=1000,maxtime=10)), 
+						solver=(la -> augTreeSddm(la,tol=1e-1,maxits=1000,maxtime=10)), 
 						retXhat::Bool = false)
 
 	n = a.n

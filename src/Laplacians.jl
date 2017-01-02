@@ -178,8 +178,8 @@ and exports the functions for which it seems appropriate.
 
   include("augTreeSolver.jl")
 
-  export augmentTree, augTreePrecon, augTreeSolver
-  export augTreeLapPrecon, augTreeLapSolver
+  export augmentTree, augTreePrecon, augTreeSddm
+  export augTreeLapPrecon, augTreeLap, AugTreeParams, AugTreeParamsOld
 
   include("externalSolvers.jl")
   export AMGSolver, AMGLapSolver
