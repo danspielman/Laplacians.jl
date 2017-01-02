@@ -202,7 +202,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     # Get u and d such that ut d u = -a (doesn't affect solver)
 
-    Ut,d = simpleSampleTree(a, tree, params.startingSize, params.blockSize, params.verboseSS)
+    Ut,d = simpleSampleTree(a, tree, params)
 
 
 
@@ -291,7 +291,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     end
 end
 
-function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCSC{Tv,Ti}, startingSize::Ti, blockSize::Ti, verbose::Bool=false)
+function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCSC{Tv,Ti},  params::SimpleSamplerParams)
 
     n = a.n
 
@@ -311,7 +311,7 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
     # note neigh[i] only stores neighbors j such that j > i
     # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
 
-    neigh = llsInit(a, startingSize = startingSize, blockSize = blockSize)
+    neigh = llsInit(a, startingSize = params.startingSize, blockSize = params.blockSize)
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
@@ -429,7 +429,7 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
     push!(ut[n], (1, n))
     d[n] = 0
 
-    if verbose
+    if params.verboseSS
 	    println()
 	    println("The actual size is ", neigh.size * neigh.blockSize)
 	    println()
