@@ -1,4 +1,4 @@
- #=
+#=
 
 Implementations of cg and pcg that use BLAS when they can.
 
@@ -9,106 +9,161 @@ Contributors:
 
 
 """
-`cg(mat, b; tol, maxits, maxtime, verbose)` solves a symmetric linear system.
-`tol` is set to 1e-6 by default,
-`maxits` defaults to Inf
-`maxtime` defaults to Inf.  It measures seconds.
-`verbose` defaults to false
+    x = cg(mat, b; tol, maxits, maxtime, verbose, pcgIts)
+
+solves a symmetric linear system `mat x = b`.
+# Arguments
+* `tol` is set to 1e-6 by default,
+* `maxits` defaults to Inf
+* `maxtime` defaults to Inf.  It measures seconds.
+* `verbose` defaults to false
+* `pcgIts` is an array for returning the number of pcgIterations.  Default is length 0, in which case nothing is returned.
 """
 function cg end
 
 """
-`pcg(mat, b, pre; tol, maxits, maxtime, verbose)` solves a symmetric linear system using preconditioner `pre`.
-`pre` can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact.
-`tol` is set to 1e-6 by default,
-`maxits` defaults to Inf
-`maxtime` defaults to Inf.  It measures seconds.
-`verbose` defaults to false
+    x = pcg(mat, b, pre; tol, maxits, maxtime, verbose, pcgIts)` 
+
+solves a symmetric linear system using preconditioner `pre`.
+# Arguments
+* `pre` can be a function or a matrix.  If a matrix, a function to solve it is created with cholFact.
+* `tol` is set to 1e-6 by default,
+* `maxits` defaults to Inf
+* `maxtime` defaults to Inf.  It measures seconds.
+* `verbose` defaults to false
+* `pcgIts` is an array for returning the number of pcgIterations.  Default is length 0, in which case nothing is returned.
 """
 function pcg end
 
 
 """
-`cgSolver(mat; tol, maxits, maxtime, verbose)` creates a solver for a PSD system `mat`.
+    x = cgSolver(mat; tol, maxits, maxtime, verbose, pcgIts)
+
+creates a solver for a PSD system `mat`.
 The parameters are as described in cg.
 """
 function cgSolver end
 
 
 """
-`pcgSolver(mat, pre; tol, maxits, maxtime, verbose)` creates a solver for a PSD system using preconditioner `pre`.
+    x = pcgSolver(mat, pre; tol, maxits, maxtime, verbose, pcgIts)
+
+creates a solver for a PSD system using preconditioner `pre`.
 The parameters are as described in pcg.
 """
 function pcgSolver end
 
-function cg(mat, b::Array{Float64,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-    cgBLAS(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+function cg(mat, b::Array{Float64,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+    cgBLAS(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
 
-function cg(mat, b::Array{Float32,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-    cgBLAS(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+function cg(mat, b::Array{Float32,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+    cgBLAS(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
 
-function cg(mat, b; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=true)
-    cgSlow(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+function cg(mat, b; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=true, pcgIts=Int[])
+    cgSlow(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
 
-function cgSolver(mat; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+function cgSolver(mat; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+
     tol_=tol
     maxits_=maxits
     maxtime_=maxtime
     verbose_=verbose
+    pcgIts_=pcgIts
 
-    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = cg(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+
+    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =
+       cg(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
     
 
+"""
+    x = cgLapSolver(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
-function pcg(mat, b, pre::Union{AbstractArray,Matrix}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+Create a solver that uses cg to solve Laplacian systems in the laplacian of A. 
+This just exists to satisfy our interface.
+It does nothing more than create the Laplacian and call cg on each connected component.
+"""
+function cgLapSolver(a::SparseMatrixCSC; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+
+    return lapWrapComponents(cgLapSolver1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts)
+
+
+end
+
+
+function cgLapSolver1(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+
+    la = forceLap(A)
+    
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
+    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =
+        cg(la, b-mean(b), tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+
+end
+
+
+
+function pcg(mat, b, pre::Union{AbstractArray,Matrix}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
     fact = cholfact(pre)
     F = x->(fact \ x)
-    pcg(mat, b, F; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    pcg(mat, b, F; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
 
 
-function pcg(mat, b::Array{BigFloat,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+function pcg(mat, b::Array{Float64,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
 
-function pcg(mat, b::Array{Float64,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
-end
-
-function pcg(mat, b::Array{Float32,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+function pcg(mat, b::Array{Float32,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
 
 
-
-function pcg(mat, b, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-    pcgSlow(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+function pcg(mat, b, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+    pcgSlow(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
 
 
-function pcgSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+function pcgSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
     tol_=tol
     maxits_=maxits
     maxtime_=maxtime
     verbose_=verbose
+    pcgIts_=pcgIts
 
-    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =
+        pcg(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
 
-"""Create a solver that uses cg to solve Laplacian systems in mat. Specialized for the case when pre is a Laplacian matrix.  Fix the default parameters of the solver as given"""
-function pcgLapSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
-    fact = lapChol(pre)
+
+"""
+    x = pcgLapSolver(A, B; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+
+Create a solver that uses pcg to solve Laplacian systems in `A`
+Specialized for the case when the preconditioner the Laplacian matrix of `B`.
+It solves the preconditioner by Cholesky Factorization.
+"""
+function pcgLapSolver(A::AbstractMatrix, B::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+    fact = cholLap(B)
     
     tol_=tol
     maxits_=maxits
     maxtime_=maxtime
     verbose_=verbose
+    pcgIts_=pcgIts
 
-    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_) = pcg(mat, b, fact, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+    la = forceLap(A)
+
+    f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =
+        pcg(la, b, fact, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
 end
 
@@ -119,7 +174,7 @@ end
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar paramaters
 function cgBLAS{Tval}(mat, b::Array{Tval,1};
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     n = size(mat,2)
     
@@ -166,23 +221,27 @@ function cgBLAS{Tval}(mat, b::Array{Tval,1};
        
         if (time() - t1) > maxtime
             if verbose
-                println("CG stopped at maxtime.")
+                println("CG BLAS stopped at maxtime.")
             end
             break
         end
       end
 
     if verbose
-        println("CG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("CG BLAS stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
+    if length(pcgIts) > 0
+        pcgIts[1] = itcnt
+    end
+    
     return x
 end
 
 # For when you can't use BLAS.
 # set to use similar paramaters similar to MATLAB
 function cgSlow{Tval}(mat, b::Array{Tval,1};
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     n = size(mat,2)
     
@@ -236,14 +295,18 @@ function cgSlow{Tval}(mat, b::Array{Tval,1};
 
         if (time() - t1) > maxtime
             if verbose
-                println("CG stopped at maxtime.")
+                println("CG Slow stopped at maxtime.")
             end
             break
         end
       end
 
     if verbose
-        println("CG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("CG Slow stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+    end
+
+    if length(pcgIts) > 0
+        pcgIts[1] = itcnt
     end
 
     return x
@@ -257,7 +320,7 @@ end
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar parameters "
 function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     n = size(mat,2)
     
@@ -312,7 +375,7 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
 
         if (time() - t1) > maxtime
             if verbose
-                println("PCG stopped at maxtime.")
+                println("PCG BLAS stopped at maxtime.")
             end
             break
         end
@@ -321,14 +384,19 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
       end
 
     if verbose
-        println("PCG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("PCG BLAS stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
+
+    if length(pcgIts) > 0
+        pcgIts[1] = itcnt
+    end
+
 
     return x
 end
 
 function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
 
     n = size(mat,2)
@@ -385,7 +453,7 @@ function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
 
         if (time() - t1) > maxtime
             if verbose
-                println("PCG stopped at maxtime.")
+                println("PCG Slow stopped at maxtime.")
             end
             break
         end
@@ -393,8 +461,13 @@ function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
     end
 
     if verbose
-        println("PCG stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("PCG Slow stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
+
+    if length(pcgIts) > 0
+        pcgIts[1] = itcnt
+    end
+
 
     return x
 end

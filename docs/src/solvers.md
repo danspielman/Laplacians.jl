@@ -1,6 +1,5 @@
-# Solvers
+# Linear Equation Solvers
 
-These are a collection of relatively elementary solvers.
 For more, see the page [on using solvers](usingSolvers.md).
 
 
@@ -11,6 +10,6 @@ Pages   = ["solvers.md"]
 
 ```@autodocs
 Modules = [Laplacians]
-Pages   = ["solvers.jl"]
+Pages   = ["solverInterface.jl", "pcg.jl", "augTreeSolver.jl", "samplingSolver.jl","KMPSolver.jl", "externalSolvers.jl"]
 Private = false
 ```

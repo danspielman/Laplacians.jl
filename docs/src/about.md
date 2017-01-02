@@ -1,8 +1,9 @@
 # Laplacians.jl 
 
 [![Build Status](https://travis-ci.org/danspielman/Laplacians.jl.svg?branch=master)](https://travis-ci.org/danspielman/Laplacians.jl)
-
 [![codecov](https://codecov.io/gh/danspielman/Laplacians.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/danspielman/Laplacians.jl)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://danspielman.github.io/Laplacians.jl/stable)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://danspielman.github.io/Laplacians.jl/latest)
 
 
 
@@ -26,8 +27,7 @@ If you want to solve Laplacian equations, we recommend the KMPLapSolver.  For SD
 
 The algorithms provide by Laplacians.jl include:
 
-* `akpw`, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic
-game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.
+* `akpw`, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.
 * `KMPLapSolver` and `KMPSDDSolver`: linear equation solvers based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
 * `samplingSDDSolver` and `samplingLapSolver`, based on the paper "Approximate Gaussian Elimination for Laplacians:
 Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
@@ -39,10 +39,20 @@ Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
-## Version 0.0.3, November 20, 2016
+## Version 0.1.1, December 26, 2016
 
-This version works with Julia 0.5.
-This is what you retrieve when you run `Pkg.add("Laplacians")`
+This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`.  
+
+Changelist:
+
+* All of the linear equation solvers now have the same interface, and the Laplacian solvers work for disconnected graphs. 
+* Some support for calling solvers from Matlab has been added.
+* Documentation is now through Documenter.jl.
+
+## Version 0.0.3 / 0.1.0, November 20, 2016
+
+Versions 0.0.3 and 0.1.0 are the same.
+These versions works with Julia 0.5.
 
 Warning: the behavior of chimera and wtedChimera differs between Julia 0.4 and Julia 0.5 because randperm acts differently in these.
 

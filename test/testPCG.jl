@@ -28,6 +28,9 @@ x = cg(la,b,verbose=true,tol=0.5);
 x = Laplacians.cgBLAS(la,b,verbose=true,tol=0.5);
 x = Laplacians.cgSlow(la,b,verbose=true,tol=0.5);
 
+bbig = convert(Array{BigFloat,1},b);
+f = cgSolver(la)
+x = f(bbig);
 
 
 
@@ -52,3 +55,23 @@ f = pcgSolver(la, diagm(diag(la)) ,maxits=10,verbose=true)
 x = f(b)
 f = pcgSolver(la,pre,maxits=10,verbose=false)
 x = f(b,verbose=true, maxits=1000, maxtime = 2)
+
+t = akpw(a)
+lt = lap(t)
+
+f = pcgLapSolver(a, t)
+pcgIts = [1]
+x = f(b,verbose=true, pcgIts=pcgIts)
+bbig = convert(Array{BigFloat,1},b);
+x = f(bbig,verbose=true, pcgIts=pcgIts)
+
+sdda = copy(la)
+sdda[1,1] += 1
+sddt = copy(lt)
+sddt[1,1] += 1
+
+f = pcgSolver(sdda, sddt)
+x = f(b,verbose=true, pcgIts=pcgIts)
+x = f(bbig,verbose=true, pcgIts=pcgIts)
+
+

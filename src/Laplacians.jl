@@ -141,7 +141,7 @@ and exports the functions for which it seems appropriate.
 
   include("pcg.jl")
 
-  export cg, cgSolver
+  export cg, cgSolver, cgLapSolver
   export pcg, pcgSolver, pcgLapSolver
 
   include("flow.jl")
@@ -172,18 +172,25 @@ and exports the functions for which it seems appropriate.
   include("fastSampler.jl")
   export FastSampler, sample, sampleMany
 
-  include("solvers.jl")
-  export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
+  include("solverInterface.jl")
+  export cholSDDM, cholLap, lapWrapSDDM
+
+
+  include("augTreeSolver.jl")
+
+  export augmentTree, augTreePrecon, augTreeSolver
   export augTreeLapPrecon, augTreeLapSolver
+
+  include("externalSolvers.jl")
   export AMGSolver, AMGLapSolver
 
   include("KMPSolver.jl")
-  export KMPSDDSolver
+  export KMPSDDMSolver
   export KMPLapSolver
   export KMPParams
 
   include("complexSolvers.jl")
-  export SDDSolvers
+  export SDDMSolvers
   export LapSolvers
 
   include("johnlind.jl")
@@ -195,5 +202,8 @@ and exports the functions for which it seems appropriate.
   # include("isotonicIPM.jl")
   # export isotonicIPM, isotonicIPMrelEps
 
+
+  include("from_cholmod.jl")
+  export cholmod_perm, ask_cholmod
 
 end # module Laplacians.jl
