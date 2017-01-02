@@ -15,7 +15,7 @@
 """
 Parameters for the sampling solver.
 """
-type simpleSamplerParams{Tv,Ti}
+type SimpleSamplerParams{Tv,Ti}
     startingSize::Ti    # the initial size of the linked list storage structure
     blockSize::Ti       # the size of each consecutive block of memory assigned to a certain element
 
@@ -23,11 +23,12 @@ type simpleSamplerParams{Tv,Ti}
     verboseSS::Bool
     returnCN::Bool
     CNTol::Tv
-    cholmodPerm::Bool
+    perm::Symbol
+    fixA::Bool
 end
 
-defaultSimpleSamplerParams = simpleSamplerParams(1000, 20,
-                                       false,false,1e-3,false)
+SimpleSamplerParams() = SimpleSamplerParams(1000, 20,
+                                       false,false,1e-3,:tree,false)
 #=
 """ 
     solver = samplingSDDMSolver(sddm)
@@ -94,7 +95,7 @@ end
 
 An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl 
 """
-function simpleSamplerLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params::simpleSamplerParams{Tv,Ti}=defaultSimpleSamplerParams)
+function simpleSamplerLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params::SimpleSamplerParams{Tv,Ti}=SimpleSamplerParams())
 
     return lapWrapComponents(simpleSamplerLap1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, params=params)
 
@@ -102,7 +103,7 @@ function simpleSamplerLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxi
 end
 
 
-function simpleSamplerLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::simpleSamplerParams{Tv,Ti}=defaultsimpleSamplerParams)
+function simpleSamplerLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::SimpleSamplerParams{Tv,Ti}=defaultsimpleSamplerParams)
 
     # srand(1234)
 
@@ -162,7 +163,7 @@ function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
 end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                            params::simpleSamplerParams{Tv,Ti}=defaultSimpleSamplerParams)
+                            params::SimpleSamplerParams{Tv,Ti}=SimpleSamplerParams())
 
     # compute rho
     n = a.n;
@@ -177,10 +178,10 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     tree = akpw(a);
 
-    if params.cholmodPerm
-        ord = cholmod_perm(lap(a))
-    else
+    if params.perm == :tree
         ord = reverse!(dfsOrder(tree, start = n));
+    else
+        ord = cholmod_perm(lap(a))
     end
     
     a = symPermuteCSC(a, ord)
@@ -321,8 +322,24 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
         end
     end
 
-    tr = matToTree(tree,n)
+#    tr = matToTree(tree,n)
 
+
+    if params.fixA
+        if params.verboseSS
+            println("fix A")
+        end
+        
+        check = a
+    else
+        if params.verboseSS
+            println("fix tree")
+        end
+
+        check = tree
+        
+    end
+    
 
     # Now, for every i, we will compute the i'th column in U
     for i in 1:(n-1)
@@ -353,7 +370,9 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
                 posj = indNeigh[j]
                 posk = indNeigh[k]
 
-                if tr.parent[posj] == posk || tr.parent[posk] == posj
+                if check[posj,posk] > 0
+
+#                if tr.parent[posj] == posk || tr.parent[posk] == posj
 
                     # swap so posj is smaller
                     if posk < posj  
@@ -385,7 +404,7 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
             posj = indNeigh[j]
             posk = indNeigh[k]
 
-            if (j != k) && (tree[posj,posk] == 0)
+            if (j != k) && (check[posj,posk] == 0)
 
                 # swap so posj is smaller
                 if posk < posj  
