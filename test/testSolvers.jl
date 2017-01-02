@@ -115,7 +115,11 @@ tol = 1e-11
 
 for i in 1:100
     println("wtedChimera($n, $i)")
-    gr = wtedChimera(n,i)
+    if isodd(i)
+        gr = wtedChimera(n,i,verbose=true)
+    else
+        gr = wtedChimera(n,i)
+    end
     @test gr.n == n
     @test isConnected(gr)
     @test isTree(kruskal(gr))
@@ -124,6 +128,9 @@ for i in 1:100
     @test abs(sum(kruskal(gr)) - sum(prim(gr))) < tol
     @test sum(kruskal(gr,kind=:min)) <= sum(kruskal(gr,kind=:max))
 
+    nnzL, flops = ask_cholmod(lap(gr))
+    pe = cholmod_perm(lap(gr))
+    
     testSolvers(gr)
 
     gru = unweight(gr)

@@ -203,4 +203,7 @@ and exports the functions for which it seems appropriate.
   # export isotonicIPM, isotonicIPMrelEps
 
 
+  include("from_cholmod.jl")
+  export cholmod_perm, ask_cholmod
+
 end # module Laplacians.jl
