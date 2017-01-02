@@ -23,7 +23,7 @@ type SimpleSamplerParams{Tv,Ti}
     verboseSS::Bool
     returnCN::Bool
     CNTol::Tv
-    perm::Symbol
+    perm::Symbol    # options :tree, :amd
     fixA::Bool
 end
 
@@ -390,10 +390,12 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
             end
         end
 
-        wSamp = FastSampler(wNeigh[1:deg])
+        if deg > 0
+            wSamp = FastSampler(wNeigh[1:deg])
         
-        jSamples = sampleMany(wSamp, deg)
-        kSamples = randperm(deg)
+            jSamples = sampleMany(wSamp, deg)
+            kSamples = randperm(deg)
+        end
 
         # now propagate the clique to the neighbors of i
         for l in 1:deg
