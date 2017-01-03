@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../lambda2.ico">
+  
+  <title>Using Julia - Laplacians.jl</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="../assets/Laplacians.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Using Julia";
+    var mkdocs_page_input_path = "Julia.md";
+    var mkdocs_page_url = "/Julia/index.html";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../index.html" class="icon icon-home"> Laplacians.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../index.html">About</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>User Guide</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../Installation/index.html">Installation</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 current">
+        <a class="current" href="index.html">Using Julia</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#using-julia">Using Julia</a></li>
+                
+                    <li><a class="toctree-l4" href="#docstrings">Docstrings</a></li>
+                
+                    <li><a class="toctree-l4" href="#julia-notebooks">Julia Notebooks</a></li>
+                
+                    <li><a class="toctree-l4" href="#workflows">Workflows</a></li>
+                
+                    <li><a class="toctree-l4" href="#things-to-be-careful-of-common-bugs">Things to be careful of (common bugs)</a></li>
+                
+                    <li><a class="toctree-l4" href="#useful-julia-functions">Useful Julia functions</a></li>
+                
+                    <li><a class="toctree-l4" href="#optimizing-code-in-julia">Optimizing code in Julia</a></li>
+                
+                    <li><a class="toctree-l4" href="#how-should-notebooks-play-with-git">How should notebooks play with Git?</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../Examples/index.html">Examples</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../CSCgraph/index.html">Sparse matrices as graphs</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../usingSolvers/index.html">Solving Linear Equations</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../LSST/index.html">Low Stretch Spanning Trees</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Developing</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../Developing/index.html">Developing Laplacians</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>API</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../graphGenerators/index.html">generators</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../operators/index.html">operators</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../graphUtils/index.html">graphUtils</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../graphAlgs/index.html">graphAlgs</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../IO/index.html">IO</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../treeAlgs/index.html">treeAlgs</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../akpw/index.html">akpw</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../randTrees/index.html">randTrees</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../solvers/index.html">solvers</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../localClustering/index.html">localClustering</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../privateFuncs/index.html">Private Functions</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../indexOfAll/index.html">All of the above</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Laplacians.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>User Guide &raquo;</li>
+        
+      
+    
+    <li>Using Julia</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/danspielman/Laplacians.jl/edit/master/docs/Julia.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='Using-Julia-1'></a></p>
+<h1 id="using-julia">Using Julia</h1>
+<p>These are some things you might want to know about using Julia if it is new to you.  There are now many other resources that can explain Julia to you.  But, we keep this section here for reference.</p>
+<p><a id='Docstrings-1'></a></p>
+<h2 id="docstrings">Docstrings</h2>
+<p>Julia 0.5 lets you take advantage of docstrings. For example, <code>?ringGraph</code> produces</p>
+<pre><code>The simple ring on n vertices
+</code></pre>
+
+<p>When having a multiline comment, make sure that lines don't have starting and trailing spaces. This will mess up the indentation when calling '?func_name'.</p>
+<p><a id='Julia-Notebooks-1'></a></p>
+<h2 id="julia-notebooks">Julia Notebooks</h2>
+<p>To get the Julia notebooks working, I presently type <code>jupyter notebook</code>. I then select the kernel to be Julia-0.5.0. It seems important to run this command from a directory that contains all the directories that have notebooks that you will use.  In particular, I advise against "uploading" notebooks from other directories.  That has only given me trouble.</p>
+<p>To turn a notebook into html, you type something like</p>
+<pre><code>jupyter nbconvert Laplacians.ipynb
+</code></pre>
+
+<p>or</p>
+<pre><code>jupyter nbconvert --to markdown --stdout Sampler.ipynb &gt; SamplerNotebook.md
+</code></pre>
+
+<p><a id='Workflows-1'></a></p>
+<h2 id="workflows">Workflows</h2>
+<p>Julia has an IDE called Juno.  Both Dan and Serban have encountered some trouble with it: we have both found that it sometimes refuses to reload .jl code that we have written.  Please document workflows that you have found useful here:</p>
+<p><a id='Dan's-current-workflow:-1'></a></p>
+<h4 id="dans-current-workflow">Dan's current workflow:</h4>
+<ul>
+<li>I use emacs (which has a mode for Julia) and the notebooks.</li>
+<li>I develop Julia code in a "temporary" file with a name like develX.jl.  While I am developing, this code is not included by the module to which it will eventually belong.</li>
+<li>After modifying code, I reload it with <code>include("develX.jl")</code>.  This works fine for reloading methods.  It is not a good way to reload modules or types.  So, I usually put the types either in a separate file, or in my julia notebook.</li>
+<li>I am writing this documention in MacDown.</li>
+</ul>
+<p><a id='Add-your-current-workflow-here:-1'></a></p>
+<h4 id="add-your-current-workflow-here">Add your current workflow here:</h4>
+<p><a id='Things-to-be-careful-of-(common-bugs)-1'></a></p>
+<h2 id="things-to-be-careful-of-common-bugs">Things to be careful of (common bugs)</h2>
+<ul>
+<li>Julia passes vectors and matrices to routines by reference, rather than by copying them.  If you type <code>x = y</code> when x and y are arrays, then this will make x a pointer to y.  If you want x to be a copy of y, type <code>x = copy(y)</code>.  This can really mess up matlab programmers.  I wrote many functions that were modifying their arguments without realizing it.</li>
+<li>On the other hand, if you type <code>x = x + y</code>, then x becomes a newly allocated vector and no longer refers to the original.  This is true even if you type <code>x += y</code>.  Here is an example that shows two of the possible behaviors, and the difference between what happens inside functions.</li>
+</ul>
+<pre><code class="julia">
+&quot;Adds b in to a&quot;
+function addA2B(a,b)
+    for i in 1:length(a)
+        a[i] += b[i]
+    end
+end
+
+&quot;Fails to add b in to a&quot;
+function addA2Bfail(a,b)
+    a += b
+end
+
+a = [1 0]
+b = [2 2]
+addA2B(a,b)
+a
+
+1x2 Array{Int64,2}:
+ 3  2
+
+a = [1 0]
+b = [2 2]
+addA2Bfail(a,b)
+a
+
+1x2 Array{Int64,2}:
+ 1  0
+
+a += b
+a
+
+1x2 Array{Int64,2}:
+ 3  2
+
+</code></pre>
+
+<ul>
+<li>If you are used to programming in Matlab, you might be tempted to type a line like <code>for i in 1:10,</code>.  <em>Do not put extra commas in Julia!</em>  It will cause bad things to happen.</li>
+<li>To get a vector with entries 1 through n, type <code>collect(1:n)</code>.  The object <code>1:n</code> is a range, rather than a vector.</li>
+<li>Julia sparse matrix entries dissapear if they are set to 0. In order to overcome this, use the <code>setValue</code> function. <code>setValue(G, u, i, 0)</code> will set <code>weighti(G, u, i)</code> to 0 while also leaving <code>(u, nbri(G, u, i))</code> in the matrix.  <em>Note This problem may have been fixed with Julia version 0.5.</em></li>
+</ul>
+<p><a id='Useful-Julia-functions-1'></a></p>
+<h2 id="useful-julia-functions">Useful Julia functions</h2>
+<p>I am going to make a short list of Julia functions/features that I find useful.  Please add those that you use often as well.</p>
+<ul>
+<li>docstrings: in the above example, I used a docstring to document each function.  You can get these by typing <code>?addA2B</code>.  You can also  <a href="http://julia.readthedocs.org/en/latest/manual/documentation/">write longer docstrings and use markdown</a>.  I suggest putting them in front of every function.</li>
+<li><code>methods(foo)</code> lists all methods with the name foo.</li>
+<li><code>fieldnames(footype)</code> tells you all the fields of footype.  Note that this is 0.4.  In 0.3.11, you type <code>names(footype)</code></li>
+</ul>
+<pre><code class="julia">julia&gt; a = sparse(rand(3,3));
+julia&gt; fieldnames(a)
+5-element Array{Symbol,1}:
+ :m
+ :n
+ :colptr
+ :rowval
+ :nzval
+</code></pre>
+
+<p><a id='Optimizing-code-in-Julia-1'></a></p>
+<h2 id="optimizing-code-in-julia">Optimizing code in Julia</h2>
+<p>The best way that I've found of figuring out what's slowing down my code has been to use <code>@code_warntype</code>.  </p>
+<p>Note that the first time you run a piece of code in Julia, it gets compiled.  So, you should run it on a small example before trying to time it.  Then, use <code>@time</code> to time your code.</p>
+<p>I recommend reading the Performance Tips in the Julia documentation, not that I've understood all of it yet.</p>
+<p><a id='How-should-notebooks-play-with-Git?-1'></a></p>
+<h2 id="how-should-notebooks-play-with-git">How should notebooks play with Git?</h2>
+<p>The great thing about the notebooks is that they contain live code, so that you can play with them.  But, sometimes you get a version that serves as great documentation, and you don't want to klobber it my mistake later (or evern worse, have someone else klobber it).  Presumably if someone accidently commits a messed up version we can unwind that.  But, is there a good way to keep track of this?</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Examples/index.html" class="btn btn-neutral float-right" title="Examples">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../Installation/index.html" class="btn btn-neutral" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+    
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/danspielman/Laplacians.jl" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../Installation/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../Examples/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script src="../js/theme.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="../assets/mathjaxhelper.js"></script>
+
+</body>
+</html>
