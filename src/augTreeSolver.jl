@@ -20,10 +20,11 @@ immutable AugTreeParams
     opt::Bool
     nnzL_fac::Float64
     flops::Float64
+    verbose::Bool
 end
 
-AugTreeParams() = AugTreeParams(akpw, true, 4.0, 200.0)
-AugTreeParamsOld() = AugTreeParams(akpw, false, 0, 0)
+AugTreeParams() = AugTreeParams(akpw, true, 4.0, 200.0, false)
+AugTreeParamsOld() = AugTreeParams(akpw, false, 0, 0, false)
 
 
 """
@@ -82,7 +83,7 @@ end
 
 
 """
-    B = augmentTreeOpt{Tv,Ti}(tree, A, nnzL_fac=4.0, flops_fac=200.0)
+    B = augmentTreeOpt{Tv,Ti}(tree, A, params)
 
 
 Takes as input a tree and an adjacency matrix of a graph.
@@ -92,7 +93,7 @@ shooting for nnzL_fac times n entries in the factored augmented tree,
 with a number of flops to factor equal to nnz(a)*flops_fac.
 The edges to add back are then choen at random.
 """
-function augmentTreeOpt{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}; nnzL_fac=4.0, flops_fac=200.0)
+function augmentTreeOpt{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}; params=AugTreeParams())
 
     Aminus = A - tree
     
@@ -108,10 +109,10 @@ function augmentTreeOpt{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{
     r = -log(rand(m)) ./ sv
     ord = sortperm(r)
 
-    nnzLTooBig(nnzL) = (nnzL-2*(n-1)) > n*nnzL_fac
-    nnzLTooSmall(nnzL) = (nnzL-2*(n-1)) < n*nnzL_fac/2
-    flopsTooBig(flops) = flops > (n+m)*flops_fac
-    flopsTooSmall(flops) = flops < (n+m)*flops_fac/4
+    nnzLTooBig(nnzL) = (nnzL-2*(n-1)) > n*params.nnzL_fac
+    nnzLTooSmall(nnzL) = (nnzL-2*(n-1)) < n*params.nnzL_fac/2
+    flopsTooBig(flops) = flops > (n+m)*params.flops
+    flopsTooSmall(flops) = flops < (n+m)*params.flops/4
     
     k = Int(round(2*sqrt(n)))
 
@@ -172,6 +173,10 @@ function augmentTreeOpt{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{
         end
 
         if done
+            if params.verbose
+                println("Increased k by $(k/round(2*sqrt(n))).")
+            end
+
             return augTree
         end
     end
@@ -199,7 +204,7 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti};  params=AugTreePara
 
 
   if params.opt  
-      augtree = augmentTreeOpt(tree,adjmat,nnzL_fac=params.nnzL_fac, flops_fac=params.flops)
+      augtree = augmentTreeOpt(tree,adjmat,params=params)
   else
       augtree = augmentTree(tree,adjmat,convert(Int,round(sqrt(n))))
   end
@@ -211,7 +216,7 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti};  params=AugTreePara
 
   F = cholfact(augDD)
 
-  return F
+  return x -> (F\x)
 
 end
 
@@ -251,7 +256,7 @@ function augTreeLapPrecon{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; params=AugTreeParams
   tree = params.treeAlg(a)
 
   if params.opt  
-      augtree = augmentTreeOpt(tree,a,nnzL_fac=params.nnzL_fac, flops_fac=params.flops)
+      augtree = augmentTreeOpt(tree,a, params=params)
   else
       augtree = augmentTree(tree,a,convert(Int,round(sqrt(a.n))))
   end
