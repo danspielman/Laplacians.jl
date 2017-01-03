@@ -262,8 +262,8 @@
 <h1 id="graph-utilities">Graph Utilities</h1>
 <p>These are utilities to facilitate the use of sparse matrices as graphs.</p>
 <ul>
-<li><a href="index.html#Laplacians.backIndices-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.backIndices</code></a></li>
 <li><a href="index.html#Laplacians.backIndices-Tuple{Array{Array{Tuple{Tv1,Tv2},1},1}}"><code>Laplacians.backIndices</code></a></li>
+<li><a href="index.html#Laplacians.backIndices-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.backIndices</code></a></li>
 <li><a href="index.html#Laplacians.compConductance-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}"><code>Laplacians.compConductance</code></a></li>
 <li><a href="index.html#Laplacians.findEntries-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.findEntries</code></a></li>
 <li><a href="index.html#Laplacians.flipIndex-Tuple{SparseMatrixCSC{Tval,Tind}}"><code>Laplacians.flipIndex</code></a></li>
@@ -275,19 +275,19 @@
 <p><a id='Laplacians.backIndices-Tuple{Array{Array{Tuple{Tv1,Tv2},1},1}}' href='#Laplacians.backIndices-Tuple{Array{Array{Tuple{Tv1,Tv2},1},1}}'>#</a>
 <strong><code>Laplacians.backIndices</code></strong> &mdash; <em>Method</em>.</p>
 <p>Same as the above, but now the graph is in adjacency list form </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/b7e261aeea25fb17e95c51e60d5ff2c1ccefc845/src/graphUtils.jl#L95' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/f377e7acdbfd54351e9bfffcf31197ae63acf3bd/src/graphUtils.jl#L95' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.backIndices-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.backIndices-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.backIndices</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/b7e261aeea25fb17e95c51e60d5ff2c1ccefc845/src/graphUtils.jl#L58' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/f377e7acdbfd54351e9bfffcf31197ae63acf3bd/src/graphUtils.jl#L58' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.compConductance-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}' href='#Laplacians.compConductance-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}'>#</a>
 <strong><code>Laplacians.compConductance</code></strong> &mdash; <em>Method</em>.</p>
 <p>Returns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/b7e261aeea25fb17e95c51e60d5ff2c1ccefc845/src/graphUtils.jl#L155-L159' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/f377e7acdbfd54351e9bfffcf31197ae63acf3bd/src/graphUtils.jl#L155-L159' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.findEntries-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.findEntries-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.findEntries</code></strong> &mdash; <em>Method</em>.</p>
 <p>Similar to findnz, but also returns 0 entries that have an edge in the sparse matrix </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/b7e261aeea25fb17e95c51e60d5ff2c1ccefc845/src/graphUtils.jl#L136' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/f377e7acdbfd54351e9bfffcf31197ae63acf3bd/src/graphUtils.jl#L136' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.flipIndex-Tuple{SparseMatrixCSC{Tval,Tind}}' href='#Laplacians.flipIndex-Tuple{SparseMatrixCSC{Tval,Tind}}'>#</a>
 <strong><code>Laplacians.flipIndex</code></strong> &mdash; <em>Method</em>.</p>
 <p>For a symmetric matrix, this gives the correspondance between pairs of entries in an ijv. So, ai[ind] = aj[flip[ind]].  For example, </p>
@@ -303,23 +303,23 @@ backind = fl[10] = 4
 [ai[backind],aj[backind],av[backind]] = [4.0,2.0,0.7]
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/b7e261aeea25fb17e95c51e60d5ff2c1ccefc845/src/graphUtils.jl#L33-L49' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/f377e7acdbfd54351e9bfffcf31197ae63acf3bd/src/graphUtils.jl#L33-L49' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.getObound-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}' href='#Laplacians.getObound-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}'>#</a>
 <strong><code>Laplacians.getObound</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes the number of edges leaving s </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/b7e261aeea25fb17e95c51e60d5ff2c1ccefc845/src/graphUtils.jl#L189' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/f377e7acdbfd54351e9bfffcf31197ae63acf3bd/src/graphUtils.jl#L189' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.getVolume-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}' href='#Laplacians.getVolume-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}'>#</a>
 <strong><code>Laplacians.getVolume</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes the volume of subset s in an unweighted graph G </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/b7e261aeea25fb17e95c51e60d5ff2c1ccefc845/src/graphUtils.jl#L171' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/f377e7acdbfd54351e9bfffcf31197ae63acf3bd/src/graphUtils.jl#L171' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.setValue-Tuple{SparseMatrixCSC{Tv,Ti},Ti,Ti,Tv}' href='#Laplacians.setValue-Tuple{SparseMatrixCSC{Tv,Ti},Ti,Ti,Tv}'>#</a>
 <strong><code>Laplacians.setValue</code></strong> &mdash; <em>Method</em>.</p>
 <p>Sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/b7e261aeea25fb17e95c51e60d5ff2c1ccefc845/src/graphUtils.jl#L27' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/f377e7acdbfd54351e9bfffcf31197ae63acf3bd/src/graphUtils.jl#L27' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.wdeg-Tuple{SparseMatrixCSC{Tv,Ti},Ti}' href='#Laplacians.wdeg-Tuple{SparseMatrixCSC{Tv,Ti},Ti}'>#</a>
 <strong><code>Laplacians.wdeg</code></strong> &mdash; <em>Method</em>.</p>
 <p>Finds the weighted degree of a vertex in the graph </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/b7e261aeea25fb17e95c51e60d5ff2c1ccefc845/src/graphUtils.jl#L17' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/f377e7acdbfd54351e9bfffcf31197ae63acf3bd/src/graphUtils.jl#L17' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
