@@ -16,15 +16,16 @@ Started by Dan Spielman
 
 
 type AugTreeParams
-    treeAlg::Function
-    opt::Bool
+    treeAlg::Function  # should be akpw
+    opt::Bool          # optimize number edges added, constrained by following
     nnzL_fac::Float64
     flops::Float64
-    verbose::Bool
+    scale::Bool        # if true, scale up the edges we add back.  Is bad.  keep false.
+    verbose::Bool      
 end
 
-AugTreeParams() = AugTreeParams(akpw, true, 4.0, 200.0, false)
-AugTreeParamsOld() = AugTreeParams(akpw, false, 0, 0, false)
+AugTreeParams() = AugTreeParams(akpw, true, 4.0, 200.0, false, false)
+AugTreeParamsOld() = AugTreeParams(akpw, false, 0, 0, false, false)
 
 
 """
@@ -82,6 +83,49 @@ function augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,
 end
 
 
+
+
+
+
+
+
+
+"""
+    p = computePforX(x,k::Int)
+
+For sampling k items with probabilities proportional to x.
+We choose r according to rand(), and then keep those for which r <= p.
+For example
+
+```julia
+x = collect(1:10).^2
+p = computePforX(x,5)
+s = find(rand(size(p)) .< p)
+```   
+""" 
+function computePforX{Tv}(x::Array{Tv},k::Int)
+
+    if (k == 0) || (length(x) == 0)
+        return Tv[]
+    end
+    
+    
+    xs = sort(x, rev=true)
+
+    csx = sum(xs)
+    i = 0
+    while xs[i+1]*(k-i) > csx
+        csx -= xs[i+1]
+        i = i + 1
+    end    
+    fac = (k-i)/csx 
+
+    p = map(z->min(1,fac*z),x)
+     
+    return p
+end
+
+
 """
     B = augmentTreeOpt{Tv,Ti}(tree, A, params)
 
@@ -105,10 +149,11 @@ function augmentTreeOpt{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{
     st = compStretches(tree, Aminus)
     _,_,sv = findnz(triu(st))
 
+    if ~params.scale
+        r = -log(rand(m)) ./ sv
+        ord = sortperm(r)
+    end
     
-    r = -log(rand(m)) ./ sv
-    ord = sortperm(r)
-
     nnzLTooBig(nnzL) = (nnzL-2*(n-1)) > n*params.nnzL_fac
     nnzLTooSmall(nnzL) = (nnzL-2*(n-1)) < n*params.nnzL_fac/2
     flopsTooBig(flops) = flops > (n+m)*params.flops
@@ -121,11 +166,29 @@ function augmentTreeOpt{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{
     done = false
 
     while ~done
-    
-        edgeinds = ord[1:min(k,m)]
-        augi = ai[edgeinds]
-        augj = aj[edgeinds]
-        augv = av[edgeinds]
+
+        if ~params.scale
+            edgeinds = ord[1:min(k,m)]
+            augi = ai[edgeinds]
+            augj = aj[edgeinds]
+            augv = av[edgeinds]
+            if params.verbose
+                println("Sampled $(length(augv)) edges.")
+            end
+
+        else # want to scale
+            sampleProbs = computePforX(sv,min(k,m))
+            edgeinds = find(rand(size(sampleProbs)) .< sampleProbs)
+            augi = ai[edgeinds]
+            augj = aj[edgeinds]
+            augv = av[edgeinds] ./ sampleProbs[edgeinds]
+
+            if params.verbose
+                println("Expected $(sum(sampleProbs)) edges.  Got $(length(edgeinds)) edges.")
+            end
+        end
+
+        
         
         n = size(A,1)
         aug = sparse(augi, augj, augv, n, n)
@@ -214,7 +277,12 @@ function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti};  params=AugTreePara
 
   augDD = Dx + spdiagm(augtree*ones(n)) - augtree
 
-  F = cholfact(augDD)
+    F = cholfact(augDD)
+
+    if params.verbose
+        println("Cholfact has $(nnz(sparse(F[:L]))) nonzeros.")
+    end
+    
 
   return x -> (F\x)
 
