@@ -193,6 +193,9 @@ and exports the functions for which it seems appropriate.
   export SDDMSolvers
   export LapSolvers
 
+  include("compare_solvers.jl")
+  export SolverTest, speedTestLapSolvers
+
   include("johnlind.jl")
   export johnlind
 

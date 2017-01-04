@@ -94,6 +94,8 @@ function testSolvers(a;maxtime=5)
 
     its = Int[0]
 
+
+    
     for solver in SDDMSolvers
         f = solver(sddm, tol=1e-6, maxtime=maxtime,verbose=true);
         x = f(b,tol=1e-6,maxits=maxits,verbose=true,pcgIts=its);
@@ -210,4 +212,27 @@ b = b - mean(b)
 la = lap(a)
 f = samplingLapSolver(a,tol=1e-6)
 x = f(b)
+
+
+# testing compare_solvers
+
+a = chimera(200,4);
+
+la = lap(a)
+sdd = copy(la)
+sdd[1,1] += 1
+b = randn(a.n)
+b = b - mean(b)
+@time fn = augTreeLap(a,params=AugTreeParams())
+@time fold = augTreeLap(a,params=AugTreeParamsOld())
+@time gn = augTreeSddm(sdd)
+@time gold = augTreeSddm(sdd,params=AugTreeParamsOld())
+
+lnew(a; kwargs...) = augTreeLap(a; params=AugTreeParams(), kwargs...)
+lold(a; kwargs...) = augTreeLap(a; params=AugTreeParamsOld(), kwargs...)
+solvers = [SolverTest(lnew,"new") SolverTest(lold,"old")]
+
+dic = Dict()
+x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2)
+
 
