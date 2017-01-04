@@ -15,7 +15,7 @@ Started by Dan Spielman
 =========================================#
 
 
-immutable AugTreeParams
+type AugTreeParams
     treeAlg::Function
     opt::Bool
     nnzL_fac::Float64
