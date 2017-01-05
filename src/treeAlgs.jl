@@ -374,16 +374,6 @@ end # TarjanStretchSub
 
 
 
-function compStretches{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
-    n = length(t.order)
-    
-    depth = compDepth(t)
-
-    stretches = tarjanStretch(t,mat,depth)
-    return stretches
-
-end # compStretches
-
 """Compute the stretched of every edge in `mat` with respect to the tree `tree`.
 Returns the answer as a sparse matrix with the same nonzero structure as `mat`.
 Assumes that `mat` is symmetric.
@@ -422,62 +412,6 @@ function treeDepthDFS{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti})
 end
 
 
-"""Compute the stretched of every edge in `mat` with respect to the tree `tree`.
-Returns the answer as a sparse matrix with the same nonzero structure as `mat`.
-Assumes that `mat` is symmetric.
-`tree` should be the adjacency matrix of a spanning tree, 
-*ordered by DFS so that every parent comes before its children in the order*"""
-function compStretchesDFS{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
-
-
-    n = size(tree,1)
-    su = IntDisjointSets(n)
-
-    ancestor = collect(1:n)
-    answer = zeros(Tv,nnz(mat))
-    seen = zeros(Bool, n)
-
-    depth = treeDepthDFS(tree)
-    
-    # traverse nodes from leaves back to root
-    for v in n:-1:1
-
-        if v > 1
-            par = tree.rowval[tree.colptr[v]]
-        else
-            par = 1
-        end
-
-        # just for debugging
-        if seen[par]
-            error("saw parent!")
-        end
-
-        seen[v] = true
-
-        for ind in mat.colptr[v]:(mat.colptr[v+1]-1)
-            w = mat.rowval[ind]
-            if seen[w]
-                answer[ind] = mat.nzval[ind]*(depth[v] + depth[w] - 2*depth[ancestor[DataStructures.find_root(su,w)]])
-            end # can fill u-v query
-        end # over queries
-
-        DataStructures.union!(su, par, v)
-        
-        ancestor[DataStructures.find_root(su, par)] = par
-        
-
-    end # for v
-
-    stretches = copy(mat)
-    for i in 1:length(stretches.nzval)
-        stretches.nzval[i] = answer[i]
-    end
-    stretches = stretches + stretches'
-
-    return stretches
-    
-end # compStretchesDFS
 
 
 

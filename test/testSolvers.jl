@@ -94,6 +94,8 @@ function testSolvers(a;maxtime=5)
 
     its = Int[0]
 
+
+    
     for solver in SDDMSolvers
         f = solver(sddm, tol=1e-6, maxtime=maxtime,verbose=true);
         x = f(b,tol=1e-6,maxits=maxits,verbose=true,pcgIts=its);
@@ -115,7 +117,11 @@ tol = 1e-11
 
 for i in 1:100
     println("wtedChimera($n, $i)")
-    gr = wtedChimera(n,i)
+    if isodd(i)
+        gr = wtedChimera(n,i,verbose=true)
+    else
+        gr = wtedChimera(n,i)
+    end
     @test gr.n == n
     @test isConnected(gr)
     @test isTree(kruskal(gr))
@@ -124,6 +130,9 @@ for i in 1:100
     @test abs(sum(kruskal(gr)) - sum(prim(gr))) < tol
     @test sum(kruskal(gr,kind=:min)) <= sum(kruskal(gr,kind=:max))
 
+    nnzL, flops = ask_cholmod(lap(gr))
+    pe = cholmod_perm(lap(gr))
+    
     testSolvers(gr)
 
     gru = unweight(gr)
@@ -138,7 +147,7 @@ n = size(a,1)
 b = randn(n)
 b = b - mean(b)
 la = lap(a)
-for solver in [augTreeLapSolver, KMPLapSolver, samplingLapSolver, cgLapSolver]
+for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver]
     f = solver(a, tol=1e-6, maxtime=5);
     x = f(b);
     @test norm(la*x - b)/norm(b) <= 1e-1
@@ -180,22 +189,6 @@ x = f(b)
 la = lap(gr)
 @test norm(la*x-b)/norm(b) < 1e-3
 
-# One test for Hybrid Solver, just to get coverage
-n = 100
-a = wtedChimera(n,1)
-b = randn(n)
-b = b - mean(b)
-la = lap(a)
-f = hybridLapSolver(a,tol=1e-6)
-x = f(b)
-sddm = la + diagm(rand(n)/1000)
-f = hybridSDDMSolver(sddm,tol=1e-6)
-x = f(b)
-
-hp = Laplacians.defaultHybridParams
-hp.n0=10
-f = hybridSDDMSolver(sddm,tol=1e-6,verbose=true)
-x = f(b)
 
 # Testing code inside Sampling Solver
 
@@ -219,4 +212,27 @@ b = b - mean(b)
 la = lap(a)
 f = samplingLapSolver(a,tol=1e-6)
 x = f(b)
+
+
+# testing compare_solvers
+
+a = chimera(200,4);
+
+la = lap(a)
+sdd = copy(la)
+sdd[1,1] += 1
+b = randn(a.n)
+b = b - mean(b)
+@time fn = augTreeLap(a,params=AugTreeParams())
+@time fold = augTreeLap(a,params=AugTreeParamsOld())
+@time gn = augTreeSddm(sdd)
+@time gold = augTreeSddm(sdd,params=AugTreeParamsOld())
+
+lnew(a; kwargs...) = augTreeLap(a; params=AugTreeParams(), kwargs...)
+lold(a; kwargs...) = augTreeLap(a; params=AugTreeParamsOld(), kwargs...)
+solvers = [SolverTest(lnew,"new") SolverTest(lold,"old")]
+
+dic = Dict()
+x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2)
+
 

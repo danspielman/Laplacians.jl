@@ -15,11 +15,7 @@ export samplingParams
 ### KMP
 # included in Laplacians.jl
 
-### hybridSolver
-include("hybridSolver.jl")
-export hybridSDDMSolver
-export hybridLapSolver
-export hybridParams
+### hybridSolver -- has been removed from master, and now lives in own branch
 
 ### useful misc
 include("condNumber.jl")
@@ -29,7 +25,7 @@ include("powerIteration.jl")
 export powerIteration
 
 """A list containing SDDM linear system solvers. They take in a SDDM matrix plus tol, maxits and maxtime parameters."""
-SDDMSolvers = [augTreeSolver, KMPSDDMSolver, samplingSDDMSolver, AMGSolver]
+SDDMSolvers = [augTreeSddm, KMPSDDMSolver, samplingSDDMSolver, AMGSolver]
 
 """A list containing Laplacian linear system solvers. They take in an adjacency matrix plus tol, maxits and maxtime parameters."""
-LapSolvers = [augTreeLapSolver, KMPLapSolver, samplingLapSolver, AMGLapSolver, cgLapSolver]
+LapSolvers = [augTreeLap, KMPLapSolver, samplingLapSolver, AMGLapSolver, cgLapSolver]

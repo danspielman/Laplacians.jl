@@ -80,7 +80,7 @@ function samplingSDDMSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, m
             push!(auxb, -sum(auxb))
         end
 
-        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts_)
+        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
         ret = ret[invperm(ord)]
 
         # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
@@ -145,28 +145,16 @@ function samplingLapSolver1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxi
 end
 
 # Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight
-function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
+function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, d::Array{Tv,1})
 
-    if norm(diag) == 0
+    if norm(d,1) == 0
         return a
     end
     
-    n = a.n
-    u,v,w = findnz(a)
-    for i in 1:n
-        if diag[i] > 0
-            push!(u, i)
-            push!(v, n + 1)
-            push!(w, diag[i])
-
-            push!(u, n + 1)
-            push!(v, i)
-            push!(w, diag[i])
-        end
-    end
+    dpos = d.*(d.>0)
     
-    return sparse(u,v,w)
-
+    return [a dpos; dpos' 0];
+    
 end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
