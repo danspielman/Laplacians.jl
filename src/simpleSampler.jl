@@ -12,6 +12,8 @@
 
 =#
 
+import Laplacians.lapWrapComponents
+
 """
 Parameters for the sampling solver.
 """
@@ -134,31 +136,6 @@ function simpleSamplerLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxit
     end
     
     return f
-
-end
-
-# Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight
-function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
-
-    if norm(diag) == 0
-        return a
-    end
-    
-    n = a.n
-    u,v,w = findnz(a)
-    for i in 1:n
-        if diag[i] > 0
-            push!(u, i)
-            push!(v, n + 1)
-            push!(w, diag[i])
-
-            push!(u, n + 1)
-            push!(v, i)
-            push!(w, diag[i])
-        end
-    end
-    
-    return sparse(u,v,w)
 
 end
 
@@ -363,16 +340,13 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
         deg = numPurged
 
         nbrs = indNeigh[1:deg]
-        
-        # handle all tree edges
-        for j in 1:(deg-1)
-            for k in (j+1):deg
-                posj = indNeigh[j]
-                posk = indNeigh[k]
 
-                if check[posj,posk] > 0
 
-#                if tr.parent[posj] == posk || tr.parent[posk] == posj
+        if deg <= 3
+            for j in 1:(deg-1)
+                for k in (j+1):deg
+                    posj = indNeigh[j]
+                    posk = indNeigh[k]
 
                     # swap so posj is smaller
                     if posk < posj  
@@ -388,41 +362,67 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
                     llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
                 end
             end
-        end
+        else
 
-        if deg > 0
+
+            # handle all tree edges
+            for j in 1:(deg-1)
+                for k in (j+1):deg
+                    posj = indNeigh[j]
+                    posk = indNeigh[k]
+
+                    if check[posj,posk] > 0
+
+                        #                if tr.parent[posj] == posk || tr.parent[posk] == posj
+
+                        # swap so posj is smaller
+                        if posk < posj  
+                            j, k = k, j
+                            posj, posk = posk, posj
+                        end
+
+                        wj = wNeigh[j]                
+                        wk = wNeigh[k]
+
+                        sampScaling = wSum
+                        
+                        llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
+                    end
+                end
+            end
+
+            
             wSamp = FastSampler(wNeigh[1:deg])
-        
+            
             jSamples = sampleMany(wSamp, deg)
             kSamples = randperm(deg)
-        end
 
-        # now propagate the clique to the neighbors of i
-        for l in 1:deg
-            
-            j = jSamples[l]
-            k = kSamples[l]
-
-            posj = indNeigh[j]
-            posk = indNeigh[k]
-
-            if (j != k) && (check[posj,posk] == 0)
-
-                # swap so posj is smaller
-                if posk < posj  
-                    j, k = k, j
-                    posj, posk = posk, posj
-                end
-
-                wj = wNeigh[j]                
-                wk = wNeigh[k]
-
-                sampScaling = wj + wk 
+            # now propagate the clique to the neighbors of i
+            for l in 1:deg
                 
-                llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
-            end
-        end  
+                j = jSamples[l]
+                k = kSamples[l]
 
+                posj = indNeigh[j]
+                posk = indNeigh[k]
+
+                if (j != k) && (check[posj,posk] == 0)
+
+                    # swap so posj is smaller
+                    if posk < posj  
+                        j, k = k, j
+                        posj, posk = posk, posj
+                    end
+
+                    wj = wNeigh[j]                
+                    wk = wNeigh[k]
+
+                    sampScaling = wj + wk 
+                    
+                    llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
+                end
+            end  
+        end
     end
 
     # add the last diagonal term

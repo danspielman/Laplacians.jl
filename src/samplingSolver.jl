@@ -144,7 +144,9 @@ function samplingLapSolver1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxi
 
 end
 
-# Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight
+"""
+Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight.
+"""
 function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, d::Array{Tv,1})
 
     if norm(d,1) == 0
