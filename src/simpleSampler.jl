@@ -105,7 +105,7 @@ function simpleSamplerLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxi
 end
 
 
-function simpleSamplerLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::SimpleSamplerParams{Tv,Ti}=defaultsimpleSamplerParams)
+function simpleSamplerLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::SimpleSamplerParams{Tv,Ti}=SimpleSamplerParams())
 
     # srand(1234)
 

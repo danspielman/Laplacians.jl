@@ -174,7 +174,7 @@ function augmentTreeOpt{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{
 
         if done
             if params.verbose
-                println("Increased k by $(k/round(2*sqrt(n))).")
+                println("Increased k by $(k/round(2*sqrt(n))) to $(k).")
             end
 
             return augTree
