@@ -13,7 +13,11 @@
 =#
 
 import Laplacians.lapWrapComponents
+using Laplacians: intHeap, intHeapAdd!, intHeapPop!, intHeapDown!
 
+
+
+#=
 """
 Parameters for the sampling solver.
 """
@@ -23,14 +27,15 @@ type SimpleSamplerParams{Tv,Ti}
 
     # debug parameters, we can get rid of them later
     verboseSS::Bool
+    verbose::Bool
     returnCN::Bool
     CNTol::Tv
-    perm::Symbol    # options :tree, :amd
-    fixA::Bool
+    order::Symbol    # options :min, :approx, :tree
 end
+=#
 
 SimpleSamplerParams() = SimpleSamplerParams(1000, 20,
-                                       false,false,1e-3,:tree,false)
+                                       false,false,false,1e-3,:min)
 #=
 """ 
     solver = samplingSDDMSolver(sddm)
@@ -145,9 +150,10 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     # compute rho
     n = a.n;
 
-    if params.verboseSS
+    if params.verbose
 	    tic()
     end
+
     #=
         Note: The n'th vertex will correspond to the vertex used to solve Laplacian systems
         with extra weight on the diagonal. Thus, we want to eliminate it last.
@@ -155,44 +161,53 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     tree = akpw(a);
 
-    if params.perm == :tree
-        ord = reverse!(dfsOrder(tree, start = n));
-    else
-        ord = cholmod_perm(lap(a))
-    end
-    
-    a = symPermuteCSC(a, ord)
-    tree = symPermuteCSC(tree, ord)
-
-    if params.verboseSS
-	    println("Nonzeros in a = ", nnz(a))
-    end
-
-    if params.verboseSS
+    if params.verbose
 	    print("Time to build the tree: ")
 	    toc()
     end
 
-    if params.verboseSS
+
+    if  params.order == :min
+        
+        ord = minDegOrder(tree, a)
+        println("minimum degree tree order")
+
+    elseif params.order == :approx
+        
+        ord = approxElimOrder(tree, a)
+        println("approximate Elimination Order")
+
+    else
+        ord = reverse!(dfsOrder(tree, start = n));
+        if params.verbose
+            println("natural DFS tree order")
+        end
+    end
+
+    a = symPermuteCSC(a, ord)
+    tree = symPermuteCSC(tree, ord)
+
+    if params.verbose
+	    println("Nonzeros in a = ", nnz(a), ". Avg degree = ", nnz(a)/size(a,1))
+    end
+
+
+    if params.verbose
 	    tic()
     end
 
     # Get u and d such that ut d u = -a (doesn't affect solver)
 
-    Ut,d = simpleSampleTree(a, tree, params)
+    U,d = simpleSampleTree(a, tree, params)
 
+    Ut = U'
 
-
-    U = Ut'
-
-    if params.verboseSS
+    if params.verbose
 	print("Time to factorize: ")
 	toc()
     end
 
-
-
-    if params.verboseSS
+    if params.verbose
 	    println("nnz in U matrix: ", length(U.data.nzval))
     end
 
@@ -299,24 +314,8 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
         end
     end
 
-#    tr = matToTree(tree,n)
+    tr = matToTree(tree,n)
 
-
-    if params.fixA
-        if params.verboseSS
-            println("fix A")
-        end
-        
-        check = a
-    else
-        if params.verboseSS
-            println("fix tree")
-        end
-
-        check = tree
-        
-    end
-    
 
     # Now, for every i, we will compute the i'th column in U
     for i in 1:(n-1)
@@ -371,9 +370,7 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
                     posj = indNeigh[j]
                     posk = indNeigh[k]
 
-                    if check[posj,posk] > 0
-
-                        #                if tr.parent[posj] == posk || tr.parent[posk] == posj
+                    if tr.parent[posj] == posk || tr.parent[posk] == posj
 
                         # swap so posj is smaller
                         if posk < posj  
@@ -392,9 +389,11 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
             end
 
             
-            wSamp = FastSampler(wNeigh[1:deg])
+            # wSamp = FastSampler(wNeigh[1:deg])
+            # jSamples = sampleMany(wSamp, deg)  # time hog
+
+            jSamples = blockSample(wNeigh[1:deg])
             
-            jSamples = sampleMany(wSamp, deg)
             kSamples = randperm(deg)
 
             # now propagate the clique to the neighbors of i
@@ -406,7 +405,7 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
                 posj = indNeigh[j]
                 posk = indNeigh[k]
 
-                if (j != k) && (check[posj,posk] == 0)
+                if (j != k) && (tr.parent[posj] != posk) && (tr.parent[posk] != posj)
 
                     # swap so posj is smaller
                     if posk < posj  
@@ -435,13 +434,33 @@ function simpleSampleTree{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCS
 	    println()
     end
 
-    return constructLowerTriangularMat(ut), d
+    #=
+    tic()
+    ltr = constructLowerTriangularMat(ut)
+    if params.verbose
+        print("Time to compute lower tri1: ")
+        toc()
+    end
+
+    tic()
+    ltr2 = constructLowerTriangularMat2(ut)
+    if params.verbose
+        print("Time to compute lower tri2: ")
+        toc()
+    end
+
+    =#
+    tic()
+    utr = constructUpperTriangularMat(ut)
+
+    return UpperTriangular(utr), d    
 end
+
 
 
 # u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
 # looks like 10% of the construction time, and could be sped up a lot
-function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
+function constructLowerTriangularMatOld{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
     n = length(u)
 
     nnz = 0
@@ -482,9 +501,275 @@ function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
         end
     end
 
+    return SparseMatrixCSC(n, n, colptr, rowval, nzval)
+end
+
+
+# u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
+# looks like 10% of the construction time, and could be sped up a lot
+function constructLowerTriangularMat2{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
+    n = length(u)
+
+
+    colptr = Array{Ti,1}(n + 1)
+
+    colptr[1] = 1
+    for i in 1:n
+        colptr[i + 1] = colptr[i] + length(u[i])
+    end
+    nnz = colptr[n+1]
+
+    rowval = Array{Ti,1}(nnz)
+    nzval = Array{Tv,1}(nnz)
+
+    ind = 1
+
+    for i in 1:n
+        sort!(u[i], by=(x->x[2]))
+        for j in 1:length(u[i])
+            rowval[ind] = u[i][j][2]
+            nzval[ind] = u[i][j][1]
+            ind += 1
+        end
+    end
+    
+    return SparseMatrixCSC(n, n, colptr, rowval, nzval)
+end
+
+
+function constructUpperTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
+    n = length(u)
+
+    rowDegs = zeros(Ti,n)
+    for i in 1:n
+        for j in 1:length(u[i])
+            rowDegs[u[i][j][2]] += 1
+        end
+    end
+
+    index = cumsum(rowDegs)
+    
+    colptr = [1; 1+index]
+
+    nnz = colptr[n+1]
+    rowval = Array{Ti,1}(nnz)
+    nzval = Array{Tv,1}(nnz)
+
+    ind = 1
+
+    for i in n:-1:1
+        for j in 1:length(u[i])
+            row = u[i][j][2]
+            spot = index[row]
+            
+            rowval[spot] = i
+            nzval[spot] = u[i][j][1]
+
+            index[row] -= 1
+
+        end
+    end
+    
+    return SparseMatrixCSC(n, n, colptr, rowval, nzval)
+end
+
+
+# u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
+# looks like 10% of the construction time, and could be sped up a lot
+function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
+    n = length(u)
+
+    nnz = 0
+    for i in 1:n
+        nnz = nnz + length(u[i])
+    end
+
+    col = Array{Ti,1}(nnz)
+    row = Array{Ti,1}(nnz)
+    val = Array{Tv,1}(nnz)
+
+    ind = 1
+    for i in 1:n
+        for j in 1:length(u[i]) 
+            col[ind] = i
+            row[ind] = u[i][j][2]
+            val[ind] = u[i][j][1]
+            ind += 1
+        end
+    end
+
+    return sparse(row, col, val, n, n)
+end
+
+
+
+#=
+ u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
+ u[i] has the entries in the ith column
+  with u[i][j] being a tuple of (val, row)
+
+function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
+    n = length(u)
+
+    colptr = Array{Ti,1}(n + 1)
+
+    rownz = zeros(Ti,n)
+
+    colptr[1] = 1
+    for i in 1:n
+        colptr[i + 1] = colptr[i] + length(u[i])
+        for j in 1:length(u[i])
+            rownz[u[i][j][2]] += 1
+        end
+    end
+    nnz = colptr[n+1]
+
+
+    
+    rowval = Array{Ti,1}(nnz)
+    nzval = Array{Tv,1}(nnz)
+
+    index = copy(colptr)
+
+    # We know that in u the values aren't necessarily ordered by row. So, we do a count sort-like algorith to keep linear time.
+    helper = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]
+    for i in 1:n
+        for j in 1:length(u[i])
+            row = u[i][j][2]
+            col = i
+            val = u[i][j][1]
+            push!(helper[row], (val, col))
+        end
+    end
+
+
+    helper = Array{Tuple{Tv,Ti},1}(nnz)
+    for i in n:-1:1
+        for j in 1:length(u[i])
+            row = u[i][j][2]
+            col = i
+            val = u[i][j][1]
+            helper[rownz[row]] = (val, col)
+            rownz[row] -= 1
+        end
+    end
+
+    # Just left this routine broken ... maybe fix it later ?
+    
+    ind = 1
+    for i in 1:n
+        for j in 1:length(u[i])
+            row = i
+            col = helper[ind]
+            val = helper[ind]
+            ind += 1
+            
+            rowval[index[col]] = row
+            nzval[index[col]] = val
+            index[col] = index[col] + 1
+        end
+    end
+
     return LowerTriangular(SparseMatrixCSC(n, n, colptr, rowval, nzval))
 end
+=#
+
 
 function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
     return eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
 end
+
+
+"""
+    ord = minDegOrder(tree, a)
+
+Given a tree on n vertices and a graph A,
+create an order in which the leaf for which degree in A is minimized comes first,
+and this proceeds inductively.
+"""
+function minDegOrder(t, a)
+
+    degs = a.colptr[2:(a.n+1)] - a.colptr[1:a.n]
+
+    tr = matToTree(t)
+
+    pq = Base.Collections.PriorityQueue(Int,Int)
+
+    n = length(tr.numKids)
+    for i in 1:n
+        if tr.numKids[i] == 0
+            Base.Collections.enqueue!(pq, i, degs[i])
+        end
+    end
+
+    ord = Int[]
+
+    while ~isempty(pq)
+
+        u = Base.Collections.dequeue!(pq)
+        push!(ord, u)
+
+        v = tr.parent[u]
+
+        tr.numKids[v] -= 1
+        if tr.numKids[v] == 0
+            Base.Collections.enqueue!(pq, v, degs[v])
+        end
+    end
+
+    return ord
+end
+        
+"""
+    ord = approxElimOrder(tree, a)
+
+Given a tree on n vertices and a graph A,
+create an order in which the leaf for which degree in A is minimized comes first,
+and this proceeds inductively.
+But, as opposed to minDegOrder, it estimates the degrees of nodes after elimination
+of those that came before.
+"""
+function approxElimOrder(t, a)
+
+    degs = a.colptr[2:(a.n+1)] - a.colptr[1:a.n]
+
+    tr = matToTree(t)
+
+    pq = intHeap(a.n)
+
+    n = length(tr.numKids)
+    for i in 1:n
+        if tr.numKids[i] == 0
+            intHeapAdd!(pq, i, degs[i])
+        end
+    end
+
+    ord = Int[]
+
+    while pq.nitems > 0
+
+        u = intHeapPop!(pq)
+        push!(ord, u)
+
+        # add two to all of the nbrs of u
+        for ind in a.colptr[u]:(a.colptr[u+1]-1)
+            nbr = a.rowval[ind]
+            degs[nbr] += 2
+            if pq.index[nbr] > 0
+                pq.keys[nbr] = degs[nbr]
+                intHeapDown!(pq,nbr)
+            end
+        end
+        
+        
+        v = tr.parent[u]
+
+        tr.numKids[v] -= 1
+        if tr.numKids[v] == 0
+            intHeapAdd!(pq, v, degs[v])
+        end
+    end
+
+    return ord
+end
+        

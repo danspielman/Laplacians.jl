@@ -38,7 +38,7 @@ end
 """
     s = FastSampler(p)
 """
-function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false, rng::AbstractRNG = MersenneTwister(rand(UInt32,2)))
+function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false, rng::AbstractRNG=Base.Random.GLOBAL_RNG)
 
     @assert(minimum(p) > 0, "The probability vector has a negative entry")
 
@@ -110,4 +110,32 @@ function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false, rng::AbstractRN
     else
         return FastSampler(F, A, V, n, rng)
     end
+end
+
+
+"""
+    s = blockSample(p; k = length(p))
+
+Compute numbers sampled with probability proportional to the vector p.
+They are returned in order.
+If need be, they can be permuted with randperm.
+"""
+function blockSample(p; k = length(p))
+    samp = zeros(Int,k)
+
+    r = sort(rand(k))
+
+    cs = cumsum(p)
+    cs = cs / cs[end]
+    
+    j = 1
+    for i in 1:k
+        while r[i] > cs[j]
+            j += 1
+        end
+
+        samp[i] = j
+    end
+
+    return samp
 end

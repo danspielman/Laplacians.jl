@@ -7,8 +7,9 @@
 =#
 
 #include("types.jl")
+import Laplacians.lapWrapComponents
 
-AugTreeHybridParams() = AugTreeHybridParams(100, 0.05, 10, 0.5, true)
+AugTreeHybridParams() = AugTreeHybridParams(100, 0.05, 10, 0.5, true, SimpleSamplerParams())
 
 import Laplacians.IJVS
 import Laplacians.elimDeg12
@@ -47,6 +48,7 @@ function augTreeHybridLap1(a; verbose=false,
 
     n = size(a,1);
 
+
     ord::Array{Int64,1} = Laplacians.dfsOrder(tree)
 
     # these lines could be MUCH faster
@@ -82,8 +84,7 @@ function augTreeHybridLap1(a; verbose=false,
     verbose_=verbose
     pcgIts_=pcgIts
 
-
-    fsub = simpleSamplerLap1(a1,tol=params.subTol,maxits=params.subIts)
+    fsub = simpleSamplerLap1(a1,tol=params.subTol,maxits=params.subIts,params=params.sampParams)
 
 
     f1 = function(b::Array{Float64,1})
@@ -135,16 +136,24 @@ function augmentingEdges(a, tree, params)
     st = compStretches(tree, Aminus)
     _,_,sv = findnz(triu(st))
 
-    k = min(m, round(Int,params.frac*a.n))
+    k = round(Int,params.frac*a.n)
 
-    sampleProbs = computePforX(sv,k)
-    edgeinds = find(rand(size(sampleProbs)) .< sampleProbs)
-    augi = ai[edgeinds]
-    augj = aj[edgeinds]
-    augv = av[edgeinds] 
+    if (m <= k)
+        augi = ai
+        augj = aj
+        augv = av
+    else
+        
+        sampleProbs = computePforX(sv,k)
+        edgeinds = find(rand(size(sampleProbs)) .< sampleProbs)
+        augi = ai[edgeinds]
+        augj = aj[edgeinds]
+        augv = av[edgeinds] 
 
-    if params.verbose
-        println("Expected $(sum(sampleProbs)) edges.  Got $(length(edgeinds)) edges.")
+        if params.verbose
+            println("Expected $(sum(sampleProbs)) edges.  Got $(length(edgeinds)) edges.")
+        end
+
     end
 
     ijvs = IJVS(augi, augj, augv, augv)
@@ -187,5 +196,4 @@ function computePforX{Tv}(x::Array{Tv},k::Int)
      
     return p
 end
-
 

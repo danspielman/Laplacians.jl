@@ -171,6 +171,7 @@ and exports the functions for which it seems appropriate.
   include("sampler.jl")
   include("fastSampler.jl")
   export FastSampler, sample, sampleMany
+  export blockSample
 
   include("solverInterface.jl")
   export cholSDDM, cholLap, lapWrapSDDM
