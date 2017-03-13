@@ -170,12 +170,16 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     if  params.order == :min
         
         ord = minDegOrder(tree, a)
-        println("minimum degree tree order")
+        if params.verbose
+            println("minimum degree tree order")
+        end
 
     elseif params.order == :approx
         
         ord = approxElimOrder(tree, a)
-        println("approximate Elimination Order")
+        if params.verbose
+            println("approximate Elimination Order")
+        end
 
     else
         ord = reverse!(dfsOrder(tree, start = n));
