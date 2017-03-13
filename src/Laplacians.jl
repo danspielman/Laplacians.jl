@@ -63,7 +63,6 @@ and exports the functions for which it seems appropriate.
   export readIJ
   export ringGraph
   export generalizedRing
-  export generalizedNecklace
   export randMatching
   export randRegular
   export grownGraph
@@ -79,6 +78,7 @@ and exports the functions for which it seems appropriate.
 
   export grid2
   export grid2coords
+  export grid3
 
   export randGenRing
   export randperm
@@ -103,6 +103,7 @@ and exports the functions for which it seems appropriate.
   export edgeVertexMat
 
   export productGraph
+  export generalizedNecklace
   export subsampleEdges
 
   export twoLift
@@ -116,8 +117,6 @@ and exports the functions for which it seems appropriate.
   export adj
   export spectralCoords
   export spectralDrawing
-
-  export toUnitVector
 
   export diagmat
 
@@ -143,7 +142,7 @@ and exports the functions for which it seems appropriate.
 
   include("pcg.jl")
 
-  export cg, cgSolver
+  export cg, cgSolver, cgLapSolver
   export pcg, pcgSolver, pcgLapSolver
 
   include("flow.jl")
@@ -165,22 +164,39 @@ and exports the functions for which it seems appropriate.
   include("cutHeuristics.jl")
 
   export refineCut
-  export dumb
+  export dumbRefineCut
 
   include("randTrees.jl")
   export randishKruskal, randishPrim
 
   include("sampler.jl")
   include("fastSampler.jl")
+  export FastSampler, sample, sampleMany
+  export blockSample
 
-  include("solvers.jl")
-  export lapWrapSolver, lapChol, augmentTree, augTreePrecon, augTreeSolver
-  export augTreeLapPrecon, augTreeLapSolver
+  include("solverInterface.jl")
+  export cholSDDM, cholLap, lapWrapSDDM
+
+
+  include("augTreeSolver.jl")
+
+  export augmentTree, augTreePrecon, augTreeSddm
+  export augTreeLapPrecon, augTreeLap, AugTreeParams, AugTreeParamsOld
+
+  include("externalSolvers.jl")
   export AMGSolver, AMGLapSolver
 
+  include("KMPSolver.jl")
+  export KMPSDDMSolver
+  export KMPLapSolver
+  export KMPParams
+
   include("complexSolvers.jl")
-  export SDDSolvers
+  export SDDMSolvers
   export LapSolvers
+
+  include("compare_solvers.jl")
+  export SolverTest, speedTestLapSolvers
 
   include("johnlind.jl")
   export johnlind
@@ -192,4 +208,7 @@ and exports the functions for which it seems appropriate.
   # export isotonicIPM, isotonicIPMrelEps
 
 
-end # module yinsGraph
+  include("from_cholmod.jl")
+  export cholmod_perm, ask_cholmod
+
+end # module Laplacians.jl

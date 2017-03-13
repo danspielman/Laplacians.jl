@@ -4,13 +4,14 @@ immutable FastSampler{Tv,Ti}
     A::Array{Ti,1}    # array of indices of elements < (1 / n)
     V::Array{Ti,1}    # arary of indices of elements > (1 / n)
     n::Ti
+    rng::AbstractRNG  # the pseudo random number generator
 end
 
 # sample a random number
 function sample{Tv,Ti}(s::FastSampler{Tv,Ti})
     #i = rand(1:s.n)
-    i = ceil(Ti,rand()*s.n)
-    f = rand()
+    i = ceil(Ti,rand(s.rng)*s.n)
+    f = rand(s.rng)
     if f < s.F[i]
         return s.A[i]
     else
@@ -23,8 +24,8 @@ function sampleMany{Tv,Ti}(s::FastSampler{Tv,Ti},sampCount::Ti)
     #i = rand(1:s.n)
     samples = Array{Ti,1}(sampCount)
     for j = 1:sampCount
-        i = ceil(Ti,rand()*s.n)
-        f = rand()
+        i = ceil(Ti,rand(s.rng)*s.n)
+        f = rand(s.rng)
         if f < s.F[i]
             samples[j] = s.A[i]
         else
@@ -34,8 +35,10 @@ function sampleMany{Tv,Ti}(s::FastSampler{Tv,Ti},sampCount::Ti)
     return samples
 end
 
-# initialize the sampler. To get the residual error after building the sampler, set residual to true
-function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
+"""
+    s = FastSampler(p)
+"""
+function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false, rng::AbstractRNG=Base.Random.GLOBAL_RNG)
 
     @assert(minimum(p) > 0, "The probability vector has a negative entry")
 
@@ -103,8 +106,36 @@ function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false)
     end
 
     if residual
-        return FastSampler(F, A, V, n), err
+        return FastSampler(F, A, V, n, rng), err
     else
-        return FastSampler(F, A, V, n)
+        return FastSampler(F, A, V, n, rng)
     end
+end
+
+
+"""
+    s = blockSample(p; k = length(p))
+
+Compute numbers sampled with probability proportional to the vector p.
+They are returned in order.
+If need be, they can be permuted with randperm.
+"""
+function blockSample(p; k = length(p))
+    samp = zeros(Int,k)
+
+    r = sort(rand(k))
+
+    cs = cumsum(p)
+    cs = cs / cs[end]
+    
+    j = 1
+    for i in 1:k
+        while r[i] > cs[j]
+            j += 1
+        end
+
+        samp[i] = j
+    end
+
+    return samp
 end

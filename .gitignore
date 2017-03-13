@@ -4,3 +4,7 @@
 .DS_Store
 site/
 docs/API
+*.cov
+docs/build
+docs/site
+

@@ -20,7 +20,7 @@ using a PD SDD linear system solver, given by argument *solver*."""
 function isotonicIPMrelEps{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
                                   v::Array{Tv,1},
                                   eps::Real=0.1,
-                                  solver=(H -> augTreeSolver(H,tol=1e-1,maxits=1000)))
+                                  solver=(H -> augTreeSddm(H,tol=1e-1,maxits=1000)))
     return isotonicIPM(A,v,eps,solver,true)
 end
 
@@ -31,7 +31,7 @@ Setting relGapTermination=true means the IPM continues until a multiplicative er
 function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
                             v::Array{Tv,1},
                             eps::Tv=0.1,
-                            solver=(H -> augTreeSolver(H,tol=1e-1,maxits=1000)),
+                            solver=(H -> augTreeSddm(H,tol=1e-1,maxits=1000)),
                             relGapTermination::Bool=false)
     n = size(A)[1]
     topoOrder = toposort(A)

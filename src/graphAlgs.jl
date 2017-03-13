@@ -441,7 +441,9 @@ function prim(mat::SparseMatrixCSC; kind=:max)
     origmat = mat
     if kind==:max
         mat = copy(origmat)
-        mat.nzval = -mat.nzval
+        for i in 1:length(mat.nzval)
+            mat.nzval[i] = -mat.nzval[i]
+        end
     end
     
   nVertices = mat.n
@@ -509,6 +511,7 @@ end #prim
 #             OLD AND UNUSED CODE
 #################################################################
 
+#=
 
 function componentsSlow{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
   n = mat.n
@@ -660,3 +663,5 @@ function sparsecut_isop(a, v, k=1)
   (val, ind) = findmin(isop)
   return val, perm[1:(ind+k-1)]
 end
+
+=#

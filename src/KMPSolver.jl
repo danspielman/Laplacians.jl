@@ -1,14 +1,13 @@
 #=
-
-An implementation of the Laplacians and SDD solvers of Koutis, Miller and Peng
+An implementation of the Laplacians and SDDM solvers of Koutis, Miller and Peng
 =#
 
-include("fastCSC.jl")
 
+#=
 global KMP_SAVEMATS=false
-
 global KMP_MATS=[]
 global KMP_FS=[]
+=#
 
 type IJVS
     i::Array{Int64,1}
@@ -18,7 +17,7 @@ type IJVS
 end
 
 """Parameters for the KMP solver"""
-type KMPParams
+immutable KMPParams
     frac::Float64  # fraction to decrease at each level
     iters::Int64   # iters of PCG to apply between levels
     treeScale::Float64 # scale tree by treeScale*log_2 (n) * aveStretch
@@ -185,9 +184,13 @@ end
 
 
 
-"""Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals."""
-function KMPSDDSolver(mat; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPParams=defaultKMPParams)
+"""
+    sddmSolver = KMPSDDMSolver(mat; verbose, tol, maxits, maxtime, pcgIts, params::KMPParams)
+
+Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals.  Based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
+"""
+function KMPSDDMSolver(mat; verbose=false, 
+                      tol::Real=1e-6, maxits::Integer=1000, maxtime=Inf, pcgIts=Int[], params::KMPParams=defaultKMPParams)
 
     n = size(mat,1)
     s = mat*ones(n)
@@ -204,13 +207,21 @@ function KMPSDDSolver(mat; verbose=false,
     a = a + a'
     
     a1 = [sparse([0 s']); [s a]]
-    
-    f1 = KMPLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
 
-    f = function(b::Array{Float64,1})
+
+    f1 = KMPLapSolver(a1, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, params=params)
+
+
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
+    f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
 
         b1 = [-sum(b);b]
-        x1 = f1(b1)
+        x1 = f1(b1; verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts)
         x = x1[2:end] - x1[1]
         
         return x
@@ -221,50 +232,19 @@ function KMPSDDSolver(mat; verbose=false,
 end
 
 
-"""Solves linear equations in the Laplacian of graph with adjacency matrix `a`."""
+"""
+    lapSolver = KMPLapSolver(A; verbose, tol, maxits, maxtime, pcgIts, params::KMPParams)
+
+Solves linear equations in the Laplacian of graph with adjacency matrix `A`.
+
+Based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
+"""
 function KMPLapSolver(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPParams=defaultKMPParams)
+                      tol::Real=1e-6, maxits::Integer=1000, maxtime=Inf, pcgIts=Int[], params::KMPParams=defaultKMPParams)
 
 
+        return lapWrapComponents(KMPLapSolver1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, params=params)
 
-    if (minimum(a) < 0)
-        error("The adjacency matrix cannot have negative entries.")
-    end
-    
-
-    co = components(a)
-    if maximum(co) == 1
-
-        return KMPLapSolver1(a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
-
-    else
-
-        comps = vecToComps(co)
-
-        if verbose
-            println("The graph has $(length(comps)) components.")
-        end
-
-
-        solvers = []
-        for i in 1:length(comps)
-            ind = comps[i]
-            
-            asub = a[ind,ind]
-
-            if (length(ind) == 1)
-                error("Node $ind has no edges.")
-            end
-            
-            subSolver = KMPLapSolver1(asub, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, params=params)
-
-            push!(solvers, subSolver)
-        end
-
-
-        return Laplacians.blockSolver(comps,solvers)
-
-    end
     
 end
 
@@ -272,14 +252,14 @@ end
 
 # KMPLapSolver drops right in to this after doing some checks and splitting on components
 function KMPLapSolver1(a; verbose=false,
-                      tol::Real=1e-2, maxits::Integer=1000, maxtime=Inf, params::KMPParams=defaultKMPParams)
+                      tol::Real=1e-6, maxits::Integer=1000, maxtime=Inf, pcgIts=pcgIts, params::KMPParams=defaultKMPParams)
 
     if (a.n <= params.n0)
         if verbose
             println("The graph is small.  Solve directly")
         end
         
-        return lapWrapSolver(cholfact, lap(a))
+        return cholLap(a)
     end
 
 
@@ -288,7 +268,7 @@ function KMPLapSolver1(a; verbose=false,
             println("The graph is a tree.  Solve directly")
         end
         
-        return lapWrapSolver(cholfact, lap(a))
+        return cholLap(a)
     end
 
 
@@ -296,6 +276,9 @@ function KMPLapSolver1(a; verbose=false,
         tree = randishPrim(a)
     else
         tree = akpw(a)
+        if verbose
+            println("akpw stretch : ", sum(compStretches(tree,a))/nnz(a))
+        end
     end
 
     n = size(a,1);
@@ -312,20 +295,26 @@ function KMPLapSolver1(a; verbose=false,
     
     la = lap(aord)
 
-
+    #=
     if KMP_SAVEMATS
         KMP_MATS = []
         push!(KMP_MATS,la)
     end
-
+    =#
 
     fsub = KMPLapPrecon(aord, tord, params, verbose=verbose)
+    
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
 
-#    f = function(b::Array{Float64,1}; tol::Real=tol, maxits::Integer=maxits)
-    f = function(b::Array{Float64,1})
-        bord = b[ord]
+    f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
+
+        bord = b[ord] - mean(b)
         
-        xord = pcg(la, bord, fsub, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+        xord = pcg(la, bord, fsub, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
         x = zeros(Float64,n)
         x[ord] = xord
@@ -333,11 +322,12 @@ function KMPLapSolver1(a; verbose=false,
         return x
     end
 
+    #=
     if KMP_SAVEMATS
         KMP_FS = []
         push!(KMP_FS,f)
     end
-
+    =#
         
     return f
 
@@ -385,7 +375,7 @@ function KMPLapPrecon(a, t, params; verbose=false)
 end
 
 
-function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64, params::KMPParams; verbose=false)
+function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Real, level::Int, params::KMPParams; verbose=false)
 
     # problem: are forming la before sampling.  should be other way around, at least for top level!
     # that is, we are constructing Heavy, and I don't want to!
@@ -400,7 +390,7 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
     # if is nothing in ijvs
     if m == 0
         la = lap(tree)
-        return lapWrapSolver(cholfact, la)
+        return cholLap(a)
     end
 
 
@@ -412,9 +402,8 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
         # solve directly
 
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
-        la = lap(rest + rest' + tree)
 
-        f = lapWrapSolver(cholfact, la)
+        return cholLap(rest + rest' + tree)
         
     else
 
@@ -457,9 +446,11 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Float64, level::Int64,
 
     end
 
+    #=
     if KMP_SAVEMATS
         push!(KMP_FS,f)
     end
+    =#
 
     return f
 

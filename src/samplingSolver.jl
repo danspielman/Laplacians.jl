@@ -21,28 +21,35 @@ type samplingParams{Tv,Ti}
     verboseSS::Bool
     returnCN::Bool
     CNTol::Tv
+    cholmodPerm::Bool
+    fixTree::Bool
 end
 
 defaultSamplingParams = samplingParams(0.5, 0.02, 1e3, 1000, 20,
-                                false,false,1e-3)
+                                       false,false,1e-3,false,false)
+
+samplingParams(eps, sampConst, beta, startingSize, blockSize, verboseSS, returnCN, CNTol) =
+    samplingParams(eps, sampConst, beta, startingSize, blockSize, verboseSS, returnCN, CNTol, false, false)
+
+plainSamplingParams(sampConst) = 
+  samplingParams(0.5, sampConst, 1.0, 1000, 20, false, false, 1e-3, true, false)
+
+plainSamplingParamsOld(sampConst) = 
+  samplingParams(0.5, sampConst, 1.0, 1000, 20, false, false, 1e-3, false, false)
+
+treeSamplingParams(rho,n) = 
+  samplingParams(1.0, rho/(log(n)^2), 1.0, 1000, 20, false, false, 1e-3, false, true)
 
 """ 
-    An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
-    In addition to the setup in the paper, we also use a low stretch tree to approximate effective 
-    resistances on edges. To perform well cache wise, we implement a cache friendly list of
-    linked lists - found in revampedLinkedListFloatStorage.jl 
+    solver = samplingSDDMSolver(sddm)
 
-    ~~~julia
-    samplingLapSolver(a, tol, maxits, maxtime, params)
-    ~~~
+An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl 
 """
-function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
-                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, 
-                                params::samplingParams{Tv,Ti}=defaultSamplingParams)
+function samplingSDDMSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     # srand(1234)
 
-    adjMat,diag = adj(SDDmat)
+    adjMat,diag = adj(sddm)
 
     a = extendMatrix(adjMat,diag)
     n = a.n
@@ -56,8 +63,14 @@ function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
         println()
     end 
 
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
     la = lap(symPermuteCSC(a, ord))
-    function f(b)
+    f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
         #= 
             We need to add an extra entry to b to make it match the size of a. The extra vertex in a is
             vertex n, thus, we will add the new entry in b on position n as well.
@@ -67,7 +80,7 @@ function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
             push!(auxb, -sum(auxb))
         end
 
-        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+        ret = pcg(la, auxb[ord], F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
         ret = ret[invperm(ord)]
 
         # We want to discard the nth element of ret (which corresponds to the first element in the permutation)
@@ -85,18 +98,19 @@ function samplingSDDSolver{Tv,Ti}(SDDmat::SparseMatrixCSC{Tv,Ti};
 end
 
 """ 
-    An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.
-    In addition to the setup in the paper, we also use a low stretch tree to approximate effective 
-    resistances on edges. To perform well cache wise, we implement a cache friendly list of
-    linked lists - found in revampedLinkedListFloatStorage.jl 
+    solver = samplingLapSolver(A)
 
-    ~~~julia
-    samplingLapSolver(a, tol, maxits, maxtime, params)
-    ~~~
+An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl 
 """
-function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                                tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, 
-                                params::samplingParams{Tv,Ti}=defaultSamplingParams)
+function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams)
+
+    return lapWrapComponents(samplingLapSolver1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, params=params)
+
+
+end
+
+
+function samplingLapSolver1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams)
 
     # srand(1234)
 
@@ -112,8 +126,17 @@ function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     end 
 
     la = lap(symPermuteCSC(a, ord))
-    function f(b)
-        ret = pcg(la, b[ord] - sum(b), F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
+
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
+
+    f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
+
+        ret = pcg(la, b[ord] - mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts_)
         return ret[invperm(ord)]
     end
     
@@ -121,29 +144,19 @@ function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
 end
 
-# Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight
-function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, diag::Array{Tv,1})
+"""
+Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight.
+"""
+function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, d::Array{Tv,1})
 
-    if norm(diag) == 0
+    if norm(d,1) == 0
         return a
     end
     
-    n = a.n
-    u,v,w = findnz(a)
-    for i in 1:n
-        if diag[i] > 0
-            push!(u, i)
-            push!(v, n + 1)
-            push!(w, diag[i])
-
-            push!(u, n + 1)
-            push!(v, i)
-            push!(w, diag[i])
-        end
-    end
+    dpos = d.*(d.>0)
     
-    return sparse(u,v,w)
-
+    return [a dpos; dpos' 0];
+    
 end
 
 function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
@@ -165,7 +178,13 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     =#
 
     tree = akpw(a);
-    ord = reverse!(dfsOrder(tree, start = n));
+
+    if params.cholmodPerm
+        ord = cholmod_perm(lap(a))
+    else
+        ord = reverse!(dfsOrder(tree, start = n));
+    end
+    
     a = symPermuteCSC(a, ord)
     tree = symPermuteCSC(tree, ord)
 
@@ -174,7 +193,10 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     a = a + (params.beta - 1) * tree
 
     stretch = rho * compStretches(params.beta * tree, a)
-    stretch.nzval = min(rho, stretch.nzval)
+    for i in 1:length(stretch.nzval)
+        stretch.nzval[i] = min(rho, stretch.nzval[i])
+    end
+    
 
     if params.verboseSS
 	    println("Initial number of multiedges = ", ceil(Int64,sum(stretch.nzval)), " . Nonzeros in a = ", nnz(a))
@@ -184,14 +206,33 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 	    println("Maximum number of multiedges = ", maximum(stretch.nzval))
     end
 
-  	if params.verboseSS
+    if params.verboseSS
 	    print("Time to build the tree and compute the stretch: ")
 	    toc()
     end
 
+    if params.verboseSS
+	    tic()
+    end
+
     # Get u and d such that ut d u = -a (doesn't affect solver)
-    Ut,d = samplingLDL(a, stretch, rho, params.startingSize, params.blockSize, params.verboseSS)
+
+    if params.fixTree
+        Ut,d = samplingLDL2(a, tree, stretch, rho, params.startingSize, params.blockSize, params.verboseSS)
+
+    else
+        Ut,d = samplingLDL(a, stretch, rho, params.startingSize, params.blockSize, params.verboseSS)
+    end
+
+
     U = Ut'
+
+    if params.verboseSS
+	print("Time to factorize: ")
+	toc()
+    end
+
+
 
     if params.verboseSS
 	    println("nnz in U matrix: ", length(U.data.nzval))
@@ -222,7 +263,7 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     # Create the error check function
     la = lap(a)   
-    g = function(b::Array{Float64,1})
+    g = function(b)
         res = copy(b)   
         res[n] = 0
             
@@ -275,8 +316,6 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 
     n = a.n
 
-    # later will have to do a permutation here, for now consider the matrix is already permuted
-
     # some extra memory to be used later in the algorithm. this can be later pulled out of this function
     # into an external recipient, to be used on subsequent runs of the solver
     auxVal = zeros(Tv, n)                       # used to sum weights from multiedges
@@ -286,7 +325,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     multNeigh = zeros(Tv, n)
     indNeigh = zeros(Ti, n)
     
-    u = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
+    ut = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
     d = zeros(Tv, n)                            # the d matrix part of u d u'
 
     # neigh[i] = the list of neighbors for vertex i with their corresponding weights
@@ -297,8 +336,6 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 
     # gather the info in a and put it into neigh and w
     for i in 1:length(a.colptr) - 1
-        # push!(neigh, Tuple{Tv,Ti,Ti}[])
-
         for j in a.colptr[i]:a.colptr[i + 1] - 1
             if a.rowval[j] > i
                 llsAdd(neigh, i, (a.nzval[j], stretch.nzval[j], a.rowval[j]))
@@ -306,21 +343,8 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
         end
     end
 
-    tics = ceil(Int64, n * [1/n,1/2,3/4])
-    tocs = ceil(Int64, n * [1/2,3/4,(n-1)/n])
-    tot = 0
-
     # Now, for every i, we will compute the i'th column in U
     for i in 1:(n-1)
-        if (i in tocs) && verbose
-            print("From last checkpoint until ", i, " we have ")
-            toc()
-        end
-
-        if (i in tics) && verbose
-            tic()
-        end
-
         # We will get rid of duplicate edges
         # wSum - sum of weights of edges
         # multSum - sum of number of edges (including multiedges)
@@ -332,9 +356,10 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 
         # need to divide weights by the diagonal entry
         for j in 1:numPurged
-            push!(u[i], (-wNeigh[j] / wSum, indNeigh[j]))
+            push!(ut[i], (-wNeigh[j] / wSum, indNeigh[j]))
         end
-        push!(u[i], (1, i)) #diag term
+        push!(ut[i], (1, i)) #diag term
+
         d[i] = wSum
 
         multSum = ceil(Int64, multSum)
@@ -371,7 +396,7 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     end
 
     # add the last diagonal term
-    push!(u[n], (1, n))
+    push!(ut[n], (1, n))
     d[n] = 0
 
     if verbose
@@ -381,10 +406,139 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
 	    println()
     end
 
-    return constructLowerTriangularMat(u), d
+    return constructLowerTriangularMat(ut), d
 end
 
+function samplingLDL2{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
+    startingSize::Ti, blockSize::Ti, verbose::Bool=false)
+
+    print("fixing tree")
+
+    n = a.n
+
+    # some extra memory to be used later in the algorithm. this can be later pulled out of this function
+    # into an external recipient, to be used on subsequent runs of the solver
+    auxVal = zeros(Tv, n)                       # used to sum weights from multiedges
+    auxMult = zeros(Tv, n)                      # used to count the number of multiedges
+
+    wNeigh = zeros(Tv, n)
+    multNeigh = zeros(Tv, n)
+    indNeigh = zeros(Ti, n)
+    
+    ut = Array{Tuple{Tv,Ti},1}[[] for i in 1:n]  # the lower triangular u matrix part of u d u'
+    d = zeros(Tv, n)                            # the d matrix part of u d u'
+
+    # neigh[i] = the list of neighbors for vertex i with their corresponding weights
+    # note neigh[i] only stores neighbors j such that j > i
+    # neigh[i][1] is weight, [2] is number of multi-edges, [3] is neighboring vertex
+
+    neigh = llsInit(a, startingSize = startingSize, blockSize = blockSize)
+
+    # gather the info in a and put it into neigh and w
+    for i in 1:length(a.colptr) - 1
+        for j in a.colptr[i]:a.colptr[i + 1] - 1
+            if a.rowval[j] > i
+                llsAdd(neigh, i, (a.nzval[j], stretch.nzval[j], a.rowval[j]))
+            end
+        end
+    end
+
+    # Now, for every i, we will compute the i'th column in U
+    for i in 1:(n-1)
+        # We will get rid of duplicate edges
+        # wSum - sum of weights of edges
+        # multSum - sum of number of edges (including multiedges)
+        # numPurged - the size in use of wNeigh, multNeigh and indNeigh
+        # wNeigh - list of weights correspongind to each neighbors
+        # multNeigh - list of number of multiedges to each neighbor
+        # indNeigh - the indices of the neighboring vertices
+        wSum, multSum, numPurged = llsPurge(neigh, i, auxVal, auxMult, wNeigh, multNeigh, indNeigh, rho = rho) # also a lot of time
+
+        # need to divide weights by the diagonal entry
+        for j in 1:numPurged
+            push!(ut[i], (-wNeigh[j] / wSum, indNeigh[j]))
+        end
+        push!(ut[i], (1, i)) #diag term
+
+        d[i] = wSum
+
+
+        # handle all tree edges
+        for j in 1:(numPurged-1)
+            for k in (j+1):numPurged
+                posj = indNeigh[j]
+                posk = indNeigh[k]
+
+                if tree[posj,posk] > 0
+
+                    # swap so posj is smaller
+                    if posk < posj  
+                        j, k = k, j
+                        posj, posk = posk, posj
+                    end
+
+                    wj = wNeigh[j]                
+                    wk = wNeigh[k]
+
+                    sampScaling = wSum
+                    
+                    llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
+                end
+            end
+        end
+
+        multSum = ceil(Int64, multSum)
+        wSamp = FastSampler(wNeigh[1:numPurged])
+        multSamp = FastSampler(multNeigh[1:numPurged])
+        
+        jSamples = sampleMany(wSamp, multSum)
+        kSamples = sampleMany(multSamp, multSum)
+        
+        # now propagate the clique to the neighbors of i
+        for l in 1:multSum
+            
+            j = jSamples[l]
+            k = kSamples[l]
+
+            posj = indNeigh[j]
+            posk = indNeigh[k]
+
+            if (j != k) && (tree[posj,posk] == 0)
+
+                # swap so posj is smaller
+                if posk < posj  
+                    j, k = k, j
+                    posj, posk = posk, posj
+                end
+
+                wj = wNeigh[j]                
+                wk = wNeigh[k]
+
+                sampScaling = wj * multNeigh[k] + wk * multNeigh[j]
+                
+                llsAdd(neigh, posj, (wj * wk / sampScaling, 1.0, posk))
+            end
+        end  
+
+    end
+
+    # add the last diagonal term
+    push!(ut[n], (1, n))
+    d[n] = 0
+
+    if verbose
+	    println()
+	    println("The total size of the linked list data structure should be at most ", ceil(Ti, sum(stretch) + rho * (n - 1)) + 20 * n)
+	    println("The actual size is ", neigh.size * neigh.blockSize)
+	    println()
+    end
+
+    return constructLowerTriangularMat(ut), d
+end
+
+
 # u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
+# looks like 10% of the construction time, and could be sped up a lot
 function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
     n = length(u)
 

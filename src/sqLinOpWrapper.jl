@@ -2,6 +2,9 @@ import Base.*
 import Base.size
 import Base.eltype
 import Base.issym
+import Base.issymmetric
+
+import Base.LinAlg.A_mul_B!
 
 immutable SqLinOp{Tv,Ti}
     issym::Bool
@@ -21,11 +24,21 @@ size{Tv,Ti}(A::SqLinOp{Tv,Ti}, d::Ti) = A.n
 size{Tv,Ti}(A::SqLinOp{Tv,Ti}) = (A.n,A.n)
 
 issym{Tv,Ti}(A::SqLinOp{Tv,Ti}) = A.issym
+issymmetric{Tv,Ti}(A::SqLinOp{Tv,Ti}) = A.issym
 
-function *{Tv,Ti}(A::SqLinOp{Tv,Ti}, b::Array{Tv,1})
+function *{Tv,Ti}(A::SqLinOp{Tv,Ti}, b)
     return A.multFn(b)
 end
+
+function A_mul_B!{Tv,Ti}(Y, A::SqLinOp{Tv,Ti}, B) 
+    Y1 = A*B
+    for i in 1:A.n
+        Y[i] = Y1[i]
+    end
+end
+
 
 function testId{Ti}(n::Ti)
     return M = SqLinOp{Float64,Int64}(true,1.0,n,x -> x)
 end
+

@@ -26,7 +26,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U, d::Array{Tv,1}; tol=1e-
 	n = la.n
 
 	# get the max eigenvalue of d^-1/2 * L^-1 * a * U^-1 * d^-1/2
-	f = function(b::Array{Float64,1})
+	f = function(b)
 		res = copy(b)
 
 		# diag sqrt inverse 
@@ -57,7 +57,7 @@ function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U, d::Array{Tv,1}; tol=1e-
 	end
 
 	# get the max eigenvalue of 1 - (M^-1/2 L M^-1/2) / lambdaMax
-	g = function(b::Array{Float64,1})
+	g = function(b)
 		res2 = copy(b)
 		res = copy(b) / lmax
 

@@ -306,24 +306,6 @@ end # bfsOrder
 
 
 
-# compute the depth of every node in a rooted tree,
-# taking the weight as the reciprocal of distance
-function compDepth{Tv,Ti}(t::RootedTree{Tv,Ti})
-    n = length(t.parent)
-    depth = zeros(Tv,n)
-
-    depth[t.root] = 0
-
-    for v in t.children
-        for i in t.kidsPtr[v]:(t.numKids[v] + t.kidsPtr[v] - 1)
-            depth[t.children[i]] = depth[v] + 1/t.weights[i]
-        end
-    end
-
-    return depth
-end # compDepth
-
-
 # tarjan stretch uses tarjans offline lca algorithm to compute stretches
 
 # it seems that this cannot be made much faster:
@@ -344,7 +326,9 @@ function tarjanStretch{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti},
     tarjanStretchSub(t.root, t, mat, ancestor, answer, seen, su, depth)
 
     stretches = copy(mat)
-    stretches.nzval = answer
+    for i in 1:length(stretches.nzval)
+        stretches.nzval[i] = answer[i]
+    end
     stretches = stretches + stretches'
     
     return stretches
@@ -390,16 +374,6 @@ end # TarjanStretchSub
 
 
 
-function compStretches{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
-    n = length(t.order)
-    
-    depth = compDepth(t)
-
-    stretches = tarjanStretch(t,mat,depth)
-    return stretches
-
-end # compStretches
-
 """Compute the stretched of every edge in `mat` with respect to the tree `tree`.
 Returns the answer as a sparse matrix with the same nonzero structure as `mat`.
 Assumes that `mat` is symmetric.
@@ -438,154 +412,7 @@ function treeDepthDFS{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti})
 end
 
 
-"""Compute the stretched of every edge in `mat` with respect to the tree `tree`.
-Returns the answer as a sparse matrix with the same nonzero structure as `mat`.
-Assumes that `mat` is symmetric.
-`tree` should be the adjacency matrix of a spanning tree, 
-*ordered by DFS so that every parent comes before its children in the order*"""
-function compStretchesDFS{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
-
-
-    n = size(tree,1)
-    su = IntDisjointSets(n)
-
-    ancestor = collect(1:n)
-    answer = zeros(Tv,nnz(mat))
-    seen = zeros(Bool, n)
-
-    depth = treeDepthDFS(tree)
-    
-    # traverse nodes from leaves back to root
-    for v in n:-1:1
-
-        if v > 1
-            par = tree.rowval[tree.colptr[v]]
-        else
-            par = 1
-        end
-
-        # just for debugging
-        if seen[par]
-            error("saw parent!")
-        end
-
-        seen[v] = true
-
-        for ind in mat.colptr[v]:(mat.colptr[v+1]-1)
-            w = mat.rowval[ind]
-            if seen[w]
-                answer[ind] = mat.nzval[ind]*(depth[v] + depth[w] - 2*depth[ancestor[DataStructures.find_root(su,w)]])
-            end # can fill u-v query
-        end # over queries
-
-        DataStructures.union!(su, par, v)
-        
-        ancestor[DataStructures.find_root(su, par)] = par
-        
-
-    end # for v
-
-    stretches = copy(mat)
-    stretches.nzval = answer
-    stretches = stretches + stretches'
-
-    return stretches
-    
-end # compStretchesDFS
 
 
 
 
-#-----------------------------------
-#
-# extra stuff we don't need
-
-# this is tarjans offline lca algorithm
-# we don't use it.
-#
-# it seems that this cannot be made much faster:
-# almost all of the time is in the disjoint sets code.
-# and, when I just run that without the rest, it is most of the time.
-function tarjanOLCA{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
-    n = length(t.order)
-#    su = SetUnion(n)
-    su = IntDisjointSets(n)
-
-    ancestor = zeros(Ti,n)
-
-    answer = zeros(Ti,nnz(mat))
-
-    seen = zeros(Bool, n)
-
-    tarjanSub(t.root, t, mat, ancestor, answer, seen, su)
-
-    ansmat = copy(mat)
-    ansmat.nzval = answer
-    ansmat = ansmat + ansmat'
-    
-    return ansmat
-
-end # tarjanOLCA
-
-function tarjanSub{Tv,Ti}(u::Ti, t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, ancestor::Array{Ti,1}, answer::Array{Ti,1}, seen::Array{Bool,1}, su::IntDisjointSets)    
-
-        ancestor[u] = u
-
-        for v in t.children[u]
-            tarjanSub(v, t, mat, ancestor, answer, seen, su)
-            DataStructures.union!(su, u, v)
-            ancestor[DataStructures.find_root(su, u)] = u
-#            ancestor[DataStructures.find!(su, u)] = u
-        end
-
-        seen[u] = true
-
-        for ind in mat.colptr[u]:(mat.colptr[u+1]-1)
-            v = mat.rowval[ind]
-            if seen[v]
-#                answer[ind] = ancestor[find!(su,v)]
-                answer[ind] = ancestor[DataStructures.find_root(su,v)]
-                # println(u, " ", v, " : ", answer[ind])
-            end # can fill u-v query
-        end # over queries
-
-end # TarjanOLCA
-
-
-
-# union-find code, modified from https://en.wikipedia.org/wiki/Tarjan%27s_off-line_lowest_common_ancestors_algorithm
-
-#=
-type SetUnion{Ti}
-  parent::Array{Ti,1}
-  rank::Array{Ti,1}
-end # setUnion
-
-SetUnion(n::Int32) = SetUnion([1:n], zeros(Int32,n))
-SetUnion(n::Int64) = SetUnion([1:n], zeros(Int64,n))
-
-# recursive path compression
-function find!{Ti}(su::SetUnion{Ti}, x::Ti)
-     if su.parent[x] == x
-        return x
-     else
-        su.parent[x] = find!(su,su.parent[x])
-        return su.parent[x]
-     end
-end
-
-
-function union!{Ti}(su::SetUnion{Ti}, x::Ti, y::Ti)
-     xroot = find!(su, x)
-     yroot = find!(su, y)
-     if su.rank[xroot] > su.rank[yroot]
-         su.parent[yroot] = xroot
-     elseif su.rank[xroot] < su.rank[yroot]
-         su.parent[xroot] = yroot
-     elseif xroot != yroot
-         su.parent[yroot] = xroot
-         su.rank[xroot] = su.rank[xroot] + 1
-     end
-end
-  
-=#
