@@ -91,7 +91,9 @@ matlab_ichol_lap = lapWrapSDDM(matlab_ichol_sddm)
 
 This runs Koutis's CMG solver.  You must have installed the solver, and it must be on Matlab's default path.  This routine does not implement all of our preferred interface.  Use the same solver for sddm and Laplacian matrices.
 """
-function matlabCmgSolver(mat, b; tol::Real=1e-6, maxits=10000)
+function matlabCmgSolver(mat::SparseMatrixCSC, b; tol::Real=1e-6, maxits=10000)
+
+    maxits = min(10000,maxits)
     
     @mput mat
     @mput b
@@ -116,14 +118,24 @@ This runs Koutis's CMG solver.  You must have installed the solver, and it must 
 
 Note that this does not build the solver.  Rather, it just makes sure that the call to `solver` will.
 """
-function matlabCmgSolver(mat; tol::Real=1e-6, maxits=10000)
+function matlabCmgSolver(mat::SparseMatrixCSC; tol::Real=1e-6, maxits=1000, params...)
 
     tol_=tol
     maxits_=maxits
     
-    f(b; tol=tol_, maxits=maxits_) = matlabCmgSolver(mat, b; tol=tol, maxits=maxits)
+    f(b; tol=tol_, maxits=maxits_, params...) = matlabCmgSolver(mat, b; tol=tol, maxits=maxits)
 
     return f
 end
 
 
+"""
+    solver = matlabCmgLap(a; tol::Real=1e-6, maxits=10000)
+
+This runs Koutis's CMG solver.  You must have installed the solver, and it must be on Matlab's default path.  This routine does not implement all of our preferred interface.  
+
+The input `a` should be the adjacency matrix.  This will find connected components, and then call the sddm version of the solver.
+
+Note that this does not build the solver.  Rather, it just makes sure that the call to `solver` will.
+"""
+matlabCmgLap = lapWrapSDDM(matlabCmgSolver)
