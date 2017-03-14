@@ -185,11 +185,19 @@ Passes kwargs on the solver.
 """
 function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
 
+    t1 = time()
+
     co = components(a)
 
     if maximum(co) == 1
+
+        s = solver(a; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params... )
+        if verbose
+            println("Solver build time: ", round((time() - t1),3), " seconds.")
+        end
+
         # f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =         
-        return solver(a; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params... )
+        return s
 
     else
         
@@ -213,6 +221,10 @@ function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf,
 
             end
             push!(solvers, subSolver)
+        end
+
+        if verbose
+            println("Solver build time: ", round((time() - t1),3), " seconds.")
         end
 
         return blockSolver(comps,solvers; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
