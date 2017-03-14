@@ -10,7 +10,8 @@ Input: vertex-edge incidence matrix B,demand d, capacities u
 function max_flow_IPM{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
                             b1::Array{Tv,1},
                             u::Array{Tv,1};
-                            lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)),
+                            lapSolver = (H -> augTreeLap(H,tol=1e-8,maxits=1000,verbose=true)),
+#                            lapSolver = cholLap,
                              tol::Real=1e-6)
 
     maxIter = 100
@@ -175,7 +176,7 @@ function ipm_max_flow_shur_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
                           s::Array{Tv,1},
                           m::Integer,
                           n::Integer,
-                          lapSolver)
+                          lapSolver::Function)
 
     x1 = x[1:m,1]
     x2 = x[m+1:2*m,1]
@@ -199,8 +200,9 @@ function ipm_max_flow_shur_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
     println("Ratio of edge weights: ", ratioWt)
 
     
-    la = Bt*spdiagm(wt[:,1])*Bt' 
-   # laInv = lapSolver(la)
+    la = Bt*spdiagm(wt[:,1])*Bt'
+    a = spdiagm(diag(la)) - la
+    laInv = lapSolver(a)
     
 
     dinv = 1./(d1 + d2)
@@ -217,10 +219,8 @@ function ipm_max_flow_shur_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
         rr = (rhs1 - Bt*D1*Dinv*rhs2)
         v = d3*b1
      
-        #v1 = laInv(v)
-        #v2 = laInv(rr)
-        u1 = la\v
-        u2 = la\rr
+        u1 = laInv(v)
+        u2 = laInv(rr)
         
         df = u2 - BLAS.dot(v,u2)*u1/(1+BLAS.dot(v,u1))
         dw = Dinv*(rhs2 - D1*Bt'*df) 
