@@ -213,7 +213,11 @@
 adding/removing them based on the value of (Deg_external - Deg_Internal).
 </code></pre>
 
+<<<<<<< HEAD
 <p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3a1a9a6a35cdc4e4fddbbec8effeb9e50d94c640/src/cutHeuristics.jl#L100-L103' class='documenter-source'>source</a><br></p>
+=======
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/cutHeuristics.jl#L100-L103' class='documenter-source'>source</a><br></p>
+>>>>>>> 5f0005bf07b47e5031e8029d248617e13044e075
 <p><a id='Laplacians.refineCut-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}' href='#Laplacians.refineCut-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}'>#</a>
 <strong><code>Laplacians.refineCut</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>Modify a cluster by adding or removing vertices by picking at each step 
@@ -221,11 +225,19 @@ the vertex that has the maximum value of (Deg_external - Deg_Internal).
 Each vertex can be added in/removed only once.
 </code></pre>
 
+<<<<<<< HEAD
 <p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3a1a9a6a35cdc4e4fddbbec8effeb9e50d94c640/src/cutHeuristics.jl#L2-L6' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.apr-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}' href='#Laplacians.apr-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}'>#</a>
 <strong><code>Laplacians.apr</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes</p>
 <p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3a1a9a6a35cdc4e4fddbbec8effeb9e50d94c640/src/localClustering.jl#L432-L436' class='documenter-source'>source</a><br></p>
+=======
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/cutHeuristics.jl#L2-L6' class='documenter-source'>source</a><br></p>
+<p><a id='Laplacians.apr-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}' href='#Laplacians.apr-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}'>#</a>
+<strong><code>Laplacians.apr</code></strong> &mdash; <em>Method</em>.</p>
+<p>Computes an approximate page rank vector from a starting set s, an alpha and an epsilon The algorithm follows the Anderson,Chung,Lang paper and Dan Spielman's lecture notes</p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/localClustering.jl#L432-L436' class='documenter-source'>source</a><br></p>
+>>>>>>> 5f0005bf07b47e5031e8029d248617e13044e075
 <p><a id='Laplacians.localImprove-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}' href='#Laplacians.localImprove-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}'>#</a>
 <strong><code>Laplacians.localImprove</code></strong> &mdash; <em>Method</em>.</p>
 <p>localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)</p>
@@ -237,14 +249,22 @@ Each vertex can be added in/removed only once.
 <li>err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10</li>
 <li>maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|</li>
 </ul>
+<<<<<<< HEAD
 <p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3a1a9a6a35cdc4e4fddbbec8effeb9e50d94c640/src/localClustering.jl#L1-L17' class='documenter-source'>source</a><br></p>
+=======
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/localClustering.jl#L1-L17' class='documenter-source'>source</a><br></p>
+>>>>>>> 5f0005bf07b47e5031e8029d248617e13044e075
 <p><a id='Laplacians.prn-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Int64}' href='#Laplacians.prn-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Int64}'>#</a>
 <strong><code>Laplacians.prn</code></strong> &mdash; <em>Method</em>.</p>
 <p>prn{Tv, Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, b::Int64)</p>
 <p>The PageRank-Nibble cutting algorithm from the Anderson/Chung/Lang paper</p>
 <p>s is a set of starting vertices, phi is a constant in (0, 1], and b is an integer in [1, [log m]]</p>
 <p>phi is a bound on the quality of the conductance of the cut - the smaller the phi, the higher the quality.  b is used to handle precision throughout the algorithm - the higher the b, the greater the precision.</p>
+<<<<<<< HEAD
 <p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3a1a9a6a35cdc4e4fddbbec8effeb9e50d94c640/src/localClustering.jl#L363-L372' class='documenter-source'>source</a><br></p>
+=======
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/localClustering.jl#L363-L372' class='documenter-source'>source</a><br></p>
+>>>>>>> 5f0005bf07b47e5031e8029d248617e13044e075
               
             </div>
           </div>

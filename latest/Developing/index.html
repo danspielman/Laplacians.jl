@@ -223,6 +223,21 @@
 </code></pre>
 
 <ul>
+<<<<<<< HEAD
+=======
+<li>Make sure that your .gitignore file contains the lines</li>
+</ul>
+<pre><code>*~
+*#
+.ipynb_*
+.DS_Store
+*.cov
+docs/build
+docs/site
+</code></pre>
+
+<ul>
+>>>>>>> 5f0005bf07b47e5031e8029d248617e13044e075
 <li>Now, read about Git.  I recommend the book <a href="https://git-scm.com/book/en/v2">Pro Git</a>, which is available online for free.</li>
 <li>Stop thinking about Git like subversion or dropbox.</li>
 <li>The master branch will be the one for public consumption. It should (mostly) work.</li>
@@ -249,7 +264,11 @@
 <li>Add docstrings to everything that needs it, and in particular to the routines you create.  The API is built from the docstrings.</li>
 <li>Run <code>julia make.jl; mkdocs build</code> in the <code>docs</code> directory to generate the documentation from the Markdown.</li>
 <li>
+<<<<<<< HEAD
 <p><em>WARNING</em>: You should not include any pages that are generated in the git repository.  So, make sure that your .gitignore file contains the line <code>docs/build</code>.</p>
+=======
+<p><em>WARNING</em>: You should not include any pages that are generated in the git repository.  So, make sure that your .gitignore file contains the line <code>docs/build</code> and <code>docs/site</code>.</p>
+>>>>>>> 5f0005bf07b47e5031e8029d248617e13044e075
 </li>
 <li>
 <p>Once you like the documentation, you can upload it with</p>
