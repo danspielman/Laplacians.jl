@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../lambda2.ico">
+  
+  <title>graphAlgs - Laplacians.jl</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="../assets/Laplacians.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "graphAlgs";
+    var mkdocs_page_input_path = "graphAlgs.md";
+    var mkdocs_page_url = "/graphAlgs/index.html";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../index.html" class="icon icon-home"> Laplacians.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../index.html">About</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">User Guide</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../Installation/index.html">Installation</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../Julia/index.html">Using Julia</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../Examples/index.html">Examples</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../CSCgraph/index.html">Sparse matrices as graphs</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../usingSolvers/index.html">Solving Linear Equations</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../LSST/index.html">Low Stretch Spanning Trees</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Developing</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../Developing/index.html">Developing Laplacians</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">API</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../graphGenerators/index.html">generators</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../operators/index.html">operators</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../graphUtils/index.html">graphUtils</a>
+                </li>
+                <li class=" current">
+                    
+    <a class="current" href="index.html">graphAlgs</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l3"><a href="#graph-algorithms">Graph Algorithms</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l4" href="#function-list">Function list</a></li>
+        
+        </ul>
+    
+
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../IO/index.html">IO</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../treeAlgs/index.html">treeAlgs</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../akpw/index.html">akpw</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../randTrees/index.html">randTrees</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../solvers/index.html">solvers</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../localClustering/index.html">localClustering</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../privateFuncs/index.html">Private Functions</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../indexOfAll/index.html">All of the above</a>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Laplacians.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>API &raquo;</li>
+        
+      
+    
+    <li>graphAlgs</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/danspielman/Laplacians.jl/edit/master/docs/graphAlgs.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='Graph-Algorithms-1'></a></p>
+<h1 id="graph-algorithms">Graph Algorithms</h1>
+<p>These are basic graph algorithms.</p>
+<p><a id='Function-list-1'></a></p>
+<h2 id="function-list">Function list</h2>
+<ul>
+<li><a href="index.html#Laplacians.biggestComp-Tuple{SparseMatrixCSC}"><code>Laplacians.biggestComp</code></a></li>
+<li><a href="index.html#Laplacians.components-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.components</code></a></li>
+<li><a href="index.html#Laplacians.isConnected-Tuple{SparseMatrixCSC}"><code>Laplacians.isConnected</code></a></li>
+<li><a href="index.html#Laplacians.kruskal-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.kruskal</code></a></li>
+<li><a href="index.html#Laplacians.prim-Tuple{SparseMatrixCSC}"><code>Laplacians.prim</code></a></li>
+<li><a href="index.html#Laplacians.shortestPathTree-Tuple{Any,Any}"><code>Laplacians.shortestPathTree</code></a></li>
+<li><a href="index.html#Laplacians.shortestPaths-Tuple{SparseMatrixCSC{Tv,Ti},Ti}"><code>Laplacians.shortestPaths</code></a></li>
+<li><a href="index.html#Laplacians.vecToComps-Tuple{Array{Ti,1}}"><code>Laplacians.vecToComps</code></a></li>
+</ul>
+<p><a id='Laplacians.biggestComp-Tuple{SparseMatrixCSC}' href='#Laplacians.biggestComp-Tuple{SparseMatrixCSC}'>#</a>
+<strong><code>Laplacians.biggestComp</code></strong> &mdash; <em>Method</em>.</p>
+<p>Return the biggest component in a graph, as a graph</p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/graphAlgs.jl#L157' class='documenter-source'>source</a><br></p>
+<p><a id='Laplacians.components-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.components-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
+<strong><code>Laplacians.components</code></strong> &mdash; <em>Method</em>.</p>
+<p>Computes the connected components of a graph. Returns them as a vector of length equal to the number of vertices. The vector numbers the components from 1 through the maximum number. For example,</p>
+<pre><code class="julia">gr = ErdosRenyi(10,11)
+c = components(gr)
+
+10-element Array{Int64,1}:
+ 1
+ 1
+ 1
+ 1
+ 2
+ 1
+ 1
+ 1
+ 3
+ 2
+</code></pre>
+
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/graphAlgs.jl#L41-L64' class='documenter-source'>source</a><br></p>
+<p><a id='Laplacians.isConnected-Tuple{SparseMatrixCSC}' href='#Laplacians.isConnected-Tuple{SparseMatrixCSC}'>#</a>
+<strong><code>Laplacians.isConnected</code></strong> &mdash; <em>Method</em>.</p>
+<p>Returns true if graph is connected.  Calls components.</p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/graphAlgs.jl#L110' class='documenter-source'>source</a><br></p>
+<p><a id='Laplacians.kruskal-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.kruskal-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
+<strong><code>Laplacians.kruskal</code></strong> &mdash; <em>Method</em>.</p>
+<p><code>(kruskal::SparseMatrixCSC; kind=:max)</code> Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree. Set kind=:min if you want the min spanning tree. It returns it a a graph</p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/graphAlgs.jl#L403-L407' class='documenter-source'>source</a><br></p>
+<p><a id='Laplacians.prim-Tuple{SparseMatrixCSC}' href='#Laplacians.prim-Tuple{SparseMatrixCSC}'>#</a>
+<strong><code>Laplacians.prim</code></strong> &mdash; <em>Method</em>.</p>
+<p><code>prim(mat::SparseMatrixCSC; kind=:max)</code> Compute a maximum spanning tree of the matrix <code>mat</code>.   If <code>kind=:min</code>, computes a minimum spanning tree.</p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/graphAlgs.jl#L436-L439' class='documenter-source'>source</a><br></p>
+<p><a id='Laplacians.shortestPathTree-Tuple{Any,Any}' href='#Laplacians.shortestPathTree-Tuple{Any,Any}'>#</a>
+<strong><code>Laplacians.shortestPathTree</code></strong> &mdash; <em>Method</em>.</p>
+<p>Computes the shortest path tree, and returns it as a sparse matrix. Treats edge weights as reciprocals of lengths. For example:</p>
+<pre><code class="julia">a = [0 2 1; 2 0 3; 1 3 0]
+tr = full(shortestPathTree(sparse(a),1))
+
+3x3 Array{Float64,2}:
+ 0.0  2.0  0.0
+ 2.0  0.0  3.0
+ 0.0  3.0  0.0
+</code></pre>
+
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/graphAlgs.jl#L224-L238' class='documenter-source'>source</a><br></p>
+<p><a id='Laplacians.shortestPaths-Tuple{SparseMatrixCSC{Tv,Ti},Ti}' href='#Laplacians.shortestPaths-Tuple{SparseMatrixCSC{Tv,Ti},Ti}'>#</a>
+<strong><code>Laplacians.shortestPaths</code></strong> &mdash; <em>Method</em>.</p>
+<p>Computes the lenghts of shortest paths from <code>start</code>. Returns both a vector of the lenghts, and the parent array in the shortest path tree.</p>
+<p>This algorithm treats edge weights as reciprocals of distances. DOC BETTER</p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/graphAlgs.jl#L167-L174' class='documenter-source'>source</a><br></p>
+<p><a id='Laplacians.vecToComps-Tuple{Array{Ti,1}}' href='#Laplacians.vecToComps-Tuple{Array{Ti,1}}'>#</a>
+<strong><code>Laplacians.vecToComps</code></strong> &mdash; <em>Method</em>.</p>
+<p>This turns a component vector, like that generated by components, into an array of arrays of indices of vertices in each component.  For example,</p>
+<pre><code class="julia">comps = vecToComps(c)
+
+3-element Array{Array{Int64,1},1}:
+ [1,2,3,4,6,7,8]
+ [5,10]
+ [9]
+</code></pre>
+
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/facf9060606992e7f9339084d6863925063b8491/src/graphAlgs.jl#L122-L135' class='documenter-source'>source</a><br></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../IO/index.html" class="btn btn-neutral float-right" title="IO">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../graphUtils/index.html" class="btn btn-neutral" title="graphUtils"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+    
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/danspielman/Laplacians.jl" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../graphUtils/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../IO/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script src="../js/theme.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="../assets/mathjaxhelper.js"></script>
+
+</body>
+</html>
