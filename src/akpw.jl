@@ -213,7 +213,7 @@ function akpwUsub(graph)
 
         cGraph = compGraphU(graph, comp)
 
-        edgeMap = cGraph.nzval
+        edgeMap = copy(cGraph.nzval)
         for i in 1:length(edgeMap)
             cGraph.nzval[i] = 1
         end

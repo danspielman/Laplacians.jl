@@ -228,7 +228,8 @@ function cgBLAS{Tval}(mat, b::Array{Tval,1};
       end
 
     if verbose
-        println("CG BLAS stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("CG BLAS stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+
     end
 
     if length(pcgIts) > 0
@@ -302,7 +303,7 @@ function cgSlow{Tval}(mat, b::Array{Tval,1};
       end
 
     if verbose
-        println("CG Slow stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("CG Slow stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0
@@ -384,7 +385,7 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
       end
 
     if verbose
-        println("PCG BLAS stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("PCG BLAS stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0
@@ -461,7 +462,7 @@ function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
     end
 
     if verbose
-        println("PCG Slow stopped after: ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("PCG Slow stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0

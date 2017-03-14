@@ -230,6 +230,8 @@ An "augmented spanning tree" solver for positive definite diagonally dominant ma
 """
 function augTreeSddm{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],  params=AugTreeParams())
 
+    t1 = time()
+    
     F = augTreePrecon(sddm; params=params)
     tol_=tol
     maxits_=maxits
@@ -238,6 +240,10 @@ function augTreeSddm{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits
     pcgIts_=pcgIts
     
     f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_,pcgIts=pcgIts_) = pcg(sddm, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+
+    if verbose
+        println("Solver build time: ", round((time() - t1),3), " seconds.")
+    end
   
     return f
 
