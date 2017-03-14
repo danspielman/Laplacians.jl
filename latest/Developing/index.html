@@ -223,8 +223,6 @@
 </code></pre>
 
 <ul>
-<<<<<<< HEAD
-=======
 <li>Make sure that your .gitignore file contains the lines</li>
 </ul>
 <pre><code>*~
@@ -237,7 +235,6 @@ docs/site
 </code></pre>
 
 <ul>
->>>>>>> 5f0005bf07b47e5031e8029d248617e13044e075
 <li>Now, read about Git.  I recommend the book <a href="https://git-scm.com/book/en/v2">Pro Git</a>, which is available online for free.</li>
 <li>Stop thinking about Git like subversion or dropbox.</li>
 <li>The master branch will be the one for public consumption. It should (mostly) work.</li>
@@ -262,24 +259,16 @@ docs/site
 <li>Edit Markdown files in the <code>docs</code> directory.  For example, you could use MacDown to do this.</li>
 <li>If you want to add a new page to the documention, create one.  Edit the file mkdocs.yml so show where it should appear.</li>
 <li>Add docstrings to everything that needs it, and in particular to the routines you create.  The API is built from the docstrings.</li>
-<li>Run <code>julia make.jl; mkdocs build</code> in the <code>docs</code> directory to generate the documentation from the Markdown.</li>
+<li>Run <code>julia make.jl; mkdocs build</code> in the <code>docs</code> directory to generate the documentation from the Markdown.  This will generate a local copy of the documentation that you can use for reference.</li>
 <li>
-<<<<<<< HEAD
-<p><em>WARNING</em>: You should not include any pages that are generated in the git repository.  So, make sure that your .gitignore file contains the line <code>docs/build</code>.</p>
-=======
 <p><em>WARNING</em>: You should not include any pages that are generated in the git repository.  So, make sure that your .gitignore file contains the line <code>docs/build</code> and <code>docs/site</code>.</p>
->>>>>>> 5f0005bf07b47e5031e8029d248617e13044e075
 </li>
 <li>
-<p>Once you like the documentation, you can upload it with</p>
+<p>When you push to the master branch on GitHub, Travis will automatically build and update the docs.  <b>DO NOT RUN <code>mkdocs gh-deploy</code></b></p>
 </li>
-</ul>
-<pre><code>mkdocs gh-deploy --clean -b gh-pages
-</code></pre>
-
-<ul>
-<li><em>Warning:</em> mkdocs deletes everying in gh-pages that it does not put there itself.</li>
-<li>If you create a Julia notebook that you would like to include as documentation.   You should  put it in the notebooks directory (.julia/v0.5/Laplacians/notebooks) and then link to it's page on GitHub.  While it seems that one should convert it to html (and one can), and then include it in MkDocs, MkDocs does something funny to the resulting html that does not look nice.</li>
+<li>
+<p>If you create a Julia notebook that you would like to include as documentation.   You should  put it in the notebooks directory (.julia/v0.5/Laplacians/notebooks) and then link to it's page on GitHub.  While it seems that one should convert it to html (and one can), and then include it in MkDocs, MkDocs does something funny to the resulting html that does not look nice.</p>
+</li>
 </ul>
 <p><a id='Parametric-Types-1'></a></p>
 <h2 id="parametric-types">Parametric Types</h2>
