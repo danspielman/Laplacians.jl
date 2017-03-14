@@ -58,17 +58,12 @@ The steps to generate and improve the documentation are:
 * Edit Markdown files in the `docs` directory.  For example, you could use MacDown to do this.
 * If you want to add a new page to the documention, create one.  Edit the file mkdocs.yml so show where it should appear.
 * Add docstrings to everything that needs it, and in particular to the routines you create.  The API is built from the docstrings. 
-* Run `julia make.jl; mkdocs build` in the `docs` directory to generate the documentation from the Markdown.
+* Run `julia make.jl; mkdocs build` in the `docs` directory to generate the documentation from the Markdown.  This will generate a local copy of the documentation that you can use for reference.
 
 * *WARNING*: You should not include any pages that are generated in the git repository.  So, make sure that your .gitignore file contains the line `docs/build` and `docs/site`.
  
-* Once you like the documentation, you can upload it with 
+* When you push to the master branch on GitHub, Travis will automatically build and update the docs.  <b>DO NOT RUN `mkdocs gh-deploy`</b>
 
-~~~
-mkdocs gh-deploy --clean -b gh-pages
-~~~
-
-* *Warning:* mkdocs deletes everying in gh-pages that it does not put there itself.
 
 * If you create a Julia notebook that you would like to include as documentation.   You should
    put it in the notebooks directory (.julia/v0.5/Laplacians/notebooks) and then link to it's page on GitHub.  While it seems that one should convert it to html (and one can), and then include it in MkDocs, MkDocs does something funny to the resulting html that does not look nice.
