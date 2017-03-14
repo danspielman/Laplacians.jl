@@ -91,7 +91,7 @@ matlab_ichol_lap = lapWrapSDDM(matlab_ichol_sddm)
 
 This runs Koutis's CMG solver.  You must have installed the solver, and it must be on Matlab's default path.  This routine does not implement all of our preferred interface.  Use the same solver for sddm and Laplacian matrices.
 """
-function matlabCmgSolver(mat::SparseMatrixCSC, b; tol::Real=1e-6, maxits=10000)
+function matlabCmgSolver(mat::SparseMatrixCSC, b; tol::Real=1e-6, maxits=10000, verbose=false, params...)
 
     maxits = min(10000,maxits)
     
