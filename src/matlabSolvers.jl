@@ -109,4 +109,21 @@ function matlabCmgSolver(mat, b; tol::Real=1e-6, maxits=10000)
     return x
 end
 
+"""
+    solver = matlabCmgSolver(mat; tol::Real=1e-6, maxits=10000)
+
+This runs Koutis's CMG solver.  You must have installed the solver, and it must be on Matlab's default path.  This routine does not implement all of our preferred interface.  Use the same solver for sddm and Laplacian matrices.
+
+Note that this does not build the solver.  Rather, it just makes sure that the call to `solver` will.
+"""
+function matlabCmgSolver(mat; tol::Real=1e-6, maxits=10000)
+
+    tol_=tol
+    maxits_=maxits
+    
+    f(b; tol=tol_, maxits=maxits_) = matlabCmgSolver(mat, b; tol=tol, maxits=maxits)
+
+    return f
+end
+
 

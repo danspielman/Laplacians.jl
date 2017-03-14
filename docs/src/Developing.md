@@ -17,6 +17,15 @@ git checkout -b MyName
 * You should also read the 
 [section of the Julia docs about building packages.](http://docs.julialang.org/en/release-0.4/manual/packages/#package-development)
 
+## Tests
+
+Every piece of code should have a test in the "tests" directory.  Ideally, it should have enough tests to run every line of the code.  To run all the tests from the command prompt, type
+
+~~~
+julia -e 'Pkg.test("Laplacians")'
+~~~
+
+
 ## Fast code?
 
 Just go for it.

@@ -308,3 +308,8 @@ You must have installed Yiannis Koutis's [Combinatorial Multigrid Code](http://w
 
 The matrix `mat` can either be SDDM or a Laplacian.  This solves the system in `b`.
  
+If you need to specify the solver separately from `b`, you can call
+
+* `x = matlabCmgSolver(mat; tol::Real=1e-6, maxits=10000)`
+
+However, this does not create the solver.  It merely returns a call to the previous routine.
