@@ -8,6 +8,18 @@
 git checkout -b MyName
 ~~~
 
+* Make sure that your .gitignore file contains the lines
+
+~~~
+*~
+*#
+.ipynb_*
+.DS_Store
+*.cov
+docs/build
+docs/site
+~~~
+
 * Now, read about Git.  I recommend the book [Pro Git](https://git-scm.com/book/en/v2), which is available online for free.
 
 * Stop thinking about Git like subversion or dropbox.
@@ -48,7 +60,7 @@ The steps to generate and improve the documentation are:
 * Add docstrings to everything that needs it, and in particular to the routines you create.  The API is built from the docstrings. 
 * Run `julia make.jl; mkdocs build` in the `docs` directory to generate the documentation from the Markdown.
 
-* *WARNING*: You should not include any pages that are generated in the git repository.  So, make sure that your .gitignore file contains the line `docs/build`.
+* *WARNING*: You should not include any pages that are generated in the git repository.  So, make sure that your .gitignore file contains the line `docs/build` and `docs/site`.
  
 * Once you like the documentation, you can upload it with 
 

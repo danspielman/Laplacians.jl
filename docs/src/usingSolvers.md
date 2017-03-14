@@ -312,4 +312,8 @@ If you need to specify the solver separately from `b`, you can call
 
 * `x = matlabCmgSolver(mat; tol::Real=1e-6, maxits=10000)`
 
+or, for the Laplacians of the adjacency matrix `A`,
+
+* `x = matlabCmgLap(A; tol::Real=1e-6, maxits=10000)`
+
 However, this does not create the solver.  It merely returns a call to the previous routine.
