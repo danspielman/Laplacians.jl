@@ -32,16 +32,28 @@ julia> norm(a*solvea(b, verbose=false, maxtime = 10)-b)
 ```
 """
 function wrapInterface(solver::Function, a::AbstractMatrix; tol=0, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],params...)
+    t1 = time()
     sol = solver(a)
-    f = function(b; jnk=false, jnkargs...)
+    if verbose
+        println("Solver build time: ", round((time() - t1),3), " seconds.")
+    end
+    
+    f = function(b; verbose=false, jnkargs...)
         if length(pcgIts) > 0
             pcgIts[1] = 1
         end
+
+        t1 = time()
         if isa(sol,Factorization)
             x = sol \ b
         else
             x = sol(b; params...)
         end
+
+        if verbose
+            println("Solve time: ", round((time() - t1),3), " seconds.")
+        end
+
         return x
     end
     return f
@@ -49,7 +61,7 @@ end
 
 function wrapInterface(solver::Function)
     f = function(a::AbstractArray; tol=0, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
-        return wrapInterface(solver, a; pcgIts=Int[], params...)
+        return wrapInterface(solver, a; pcgIts=Int[], verbose=verbose, params...)
     end
     return f
 end
