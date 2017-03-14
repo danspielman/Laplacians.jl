@@ -9,7 +9,7 @@ function minCostFlow{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
                             b1::Array{Tv,1},
                             c1::Array{Tv,1},
                             u::Array{Tv,1};
-                            lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)),
+                            lapSolver = cholLap,
                              tol::Real=1e-6)
 
 	m = size(Bt)[2]
@@ -266,8 +266,9 @@ function shurSolve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
     Sinv = spdiagm((s.^-1)[:,1])
     X = spdiagm(x[:,1])
 
+    Adj = abs(spdiagm(diag(la)) - la)
  
-    laInv = lapSolver(la)
+    laInv = lapSolver(Adj)
 ##
     function Hinv(rhs)
         rhs1 = rhs[1:n,1]

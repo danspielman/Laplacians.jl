@@ -11,12 +11,13 @@ TODO: Active, non-active constraints
 function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                               c::Array{Tv,1},
                               b::Array{Tv,1},
-                              u::Array{Tv,1},
-                              lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)),
+                              u::Array{Tv,1};
+                              #                              lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)),
+                              lapSolver = cholLap,
                               tol::Real=1e-6)
   # Problem dimensions.
   m = size(B)[1];
-	n = size(B)[2];
+  n = size(B)[2];
 
   # Parameters for the algorithm.
   max_iter = 200;
@@ -30,7 +31,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   gamma = 1;
 
   # Compute initial point.
-  (x,y,s,z) = ipm_min_cost_flow_initial_point(B,c,b,u,m,n,lapSolver);
+  (x,y,s,z) = ipm_min_cost_flow_initial_point(B,c,b,u,m,n,sddmSolver=cholSDDM);
 
   for k = 1:max_iter+1
 
@@ -68,7 +69,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     rhs_g1  = lambda1_sq;
     rhs_g2  = lambda2_sq;
 
-    (dx_a,dy_a,ds_a,dz_a) = ipm_directions_min_cost_flow(B,r_p,r_d,rhs_g1,rhs_g2,lambda1,lambda2,w1,w2,n,lapSolver);
+    (dx_a,dy_a,ds_a,dz_a) = ipm_directions_min_cost_flow(B,r_p,r_d,rhs_g1,rhs_g2,lambda1,lambda2,w1,w2,n,lapSolver=lapSolver);
 
     # Step-size and parameters.
     alpha_x = calstepsize(x,dx_a);
@@ -85,7 +86,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     rhs_g2 = lambda2_sq - (sigma*mu).*ones(m) - gamma*(dx_a./w2).*(dz_a.*w2);
 
     (dx,dy,ds,dz) = ipm_directions_min_cost_flow(B,(1-eta).*r_p,(1-eta).*r_d,
-                                            rhs_g1,rhs_g2,lambda1,lambda2,w1,w2,n,lapSolver);
+                                            rhs_g1,rhs_g2,lambda1,lambda2,w1,w2,n,lapSolver=lapSolver);
 
     # Update variables.
     alpha_x = calstepsize(x,dx);
@@ -111,8 +112,10 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                                              lambda2::Array{Tv,1},
                                              w1::Array{Tv,1},
                                              w2::Array{Tv,1},
-                                             m::Integer,
-                                             lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)))
+                                             m::Integer;
+                                             lapSolver = cholLap
+#                                             lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000))
+)
   # Solve saddle point system to compute directions dx,ds,dy.
   d1 = 1./(w1.*w1);
   d2 = 1./(w2.*w2);
@@ -121,7 +124,8 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 
   L = B'*(D*B);
 
-  laInv = lapSolver(L);
+  Adj = abs(spdiagm(diag(L)) - L)
+  laInv = lapSolver(Adj);
 
   lambda1_w1 = lambda1.*w1;
   lambda2_w2 = lambda2.*w2;
@@ -156,12 +160,14 @@ function ipm_min_cost_flow_initial_point{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                                                 b::Array{Tv,1},
                                                 u::Array{Tv,1},
                                                 m::Integer,
-                                                n::Integer,
-                                                lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)))
+                                                n::Integer;
+                                                sddmSolver = cholSDDM
+#                                                lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000))
+)
   # Solve the optimization problem.
   L = B'*B + speye(n);
 
-  laInv = lapSolver(L);
+  laInv = sddmSolver(L);
 
   y = laInv(-b - B'*c + B'*u);
   #y = L\(-b - B'*c + B'*u);
