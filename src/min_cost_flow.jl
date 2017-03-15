@@ -115,16 +115,21 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                                              m::Integer;
                                              lapSolver = cholLap
 #                                             lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000))
-)
+    )
+
+    Bt = B';
+    
   # Solve saddle point system to compute directions dx,ds,dy.
   d1 = 1./(w1.*w1);
   d2 = 1./(w2.*w2);
   d  = 1./(d1 + d2);
   D = spdiagm(d);
 
-  L = B'*(D*B);
+  # Replacing this with the following faster code
+  # L = B'*(D*B);
+    # Adj = abs(spdiagm(diag(L)) - L)
+    Adj = makeAdj(Bt,d)
 
-  Adj = abs(spdiagm(diag(L)) - L)
   laInv = lapSolver(Adj);
 
   lambda1_w1 = lambda1.*w1;
@@ -132,8 +137,8 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 
   rhs_comp = (-rhs_d - rhs_g1./lambda1_w1 + rhs_g2./lambda2_w2).*d;
 
-  dy = laInv(rhs_p + B'*rhs_comp);
-  #dy = L\(rhs_p + B'*rhs_comp);
+  dy = laInv(rhs_p + Bt*rhs_comp);
+  #dy = L\(rhs_p + Bt*rhs_comp);
   dx = -(B*dy).*d + rhs_comp;
   ds = -d1.*dx - rhs_g1./lambda1_w1;
   dz = d2.*dx - rhs_g2./lambda2_w2;
@@ -218,4 +223,12 @@ function calstepsize{Tv}(x::Array{Tv,1},dx::Array{Tv,1},maxstepsize::Float64 = 0
   else
       return minimum([0.999*stepsizes[idx_pos]; maxstepsize]);
   end
+end
+
+function makeAdj(Bt,w)
+    n,m = size(Bt)
+    bi = Bt.rowval[Bt.nzval.==1];
+    bj = Bt.rowval[Bt.nzval.==-1];
+    a = sparse([bj;bi],[bi;bj],[w;w],n,n)
+    return a
 end
