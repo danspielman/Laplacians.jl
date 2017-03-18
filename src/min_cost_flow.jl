@@ -8,6 +8,29 @@ TODO: Add adaptive regularization.
 TODO: Active, non-active constraints
 =#
 
+
+
+
+function min_cost_flow{Tv,Ti}(mcfp::MCFproblem{Tv,Ti};
+                              lapSolver = cholLap,
+                              tol::Real=1e-6)
+
+    edge_list = mcfp.edge_list
+    m = size(edge_list,1)
+    n = maximum(edge_list)
+    B = sparse(collect(1:m), edge_list[:,1], 1.0, m, n) -
+      sparse(collect(1:m), edge_list[:,2], 1.0, m, n)
+    
+    return min_cost_flow(B,
+                         mcfp.costs,
+                         mcfp.demands,
+                         mcfp.capacities,
+                         lapSolver = lapSolver,
+                         tol = tol
+                         )
+end
+
+
 function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                               c::Array{Tv,1},
                               b::Array{Tv,1},
@@ -69,6 +92,9 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     rhs_g1  = lambda1_sq;
     rhs_g2  = lambda2_sq;
 
+      # note: w1, w2 and B do not change in here.
+      # so, we can construct and reuse a solver
+      
     (dx_a,dy_a,ds_a,dz_a) = ipm_directions_min_cost_flow(B,r_p,r_d,rhs_g1,rhs_g2,lambda1,lambda2,w1,w2,n,lapSolver=lapSolver);
 
     # Step-size and parameters.
@@ -130,7 +156,7 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     # Adj = abs(spdiagm(diag(L)) - L)
     Adj = makeAdj(Bt,d)
 
-  laInv = lapSolver(Adj);
+  laInv = lapSolver((Adj+Adj')/2);
 
   lambda1_w1 = lambda1.*w1;
   lambda2_w2 = lambda2.*w2;

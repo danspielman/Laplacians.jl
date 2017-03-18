@@ -1,4 +1,103 @@
 
+
+"""
+type MCFproblem{Tv,Ti}
+    edge_vertex_mat::SparseMatrixCSC{Tv,Ti}
+    costs::Array{Tv,1}
+    capacities::Array{Tv,1}
+    demands::Array{Tv,1}
+end
+
+  Each row of the edge_list has the origin followed by the destination of the edge.
+  The positive demands are the on the nodes that flow comes from, and it goes to negative.
+  So, if there is just a source and sink, then the demand at the source should be positive.
+"""
+type MCFproblem{Tv,Ti}
+    edge_list::Array{Ti,2}
+    capacities::Array{Tv,1}
+    costs::Array{Tv,1}
+    demands::Array{Tv,1}
+end
+
+
+
+"""
+  mcfp = readDimacsMCF(filename)
+
+Read a minimum cost flow problem in the <a href="http://lpsolve.sourceforge.net/5.5/DIMACS_mcf.htm">Dimacs format</a>.
+Our code only handles 0 lower bounds on flows.
+"""
+function readDimacsMCF(filename)
+
+    fi = open(filename)
+    lines = readlines(fi)
+    close(fi)
+
+    edge_list = []
+    dems = []
+    costs = []
+    caps = []
+    
+    edge_list_ptr = 0
+    for line in lines
+
+        if line[1] == 'p'
+            line_parts = split(line)
+            n = parse(Int,line_parts[3])
+            m = parse(Int,line_parts[4])
+            edge_list = zeros(Int,m,2)
+            caps = zeros(Float64,m)
+            costs = zeros(Float64,m)
+            dems = zeros(Float64,n)
+        end
+
+        if line[1] == 'n'
+            line_parts = split(line)
+            u = parse(Int,line_parts[2])
+            d = parse(Float64,line_parts[3])
+            dems[u] = d 
+        end
+        
+        if line[1] == 'a'
+            line_parts = split(line)
+            src = parse(Int,line_parts[2])
+            dst = parse(Int,line_parts[3])
+            low = parse(Int,line_parts[4])
+            cap = parse(Float64,line_parts[5])
+            cost = parse(Float64,line_parts[6])
+            
+
+            if (low > 0) 
+                error("we only handle zero lower bounds on flows")
+            end
+            edge_list_ptr += 1
+            edge_list[edge_list_ptr,:] = [src dst]
+            caps[edge_list_ptr] = cap
+            costs[edge_list_ptr] = cost
+        end
+    end
+
+    mcfp = MCFproblem(edge_list, caps, costs, dems)
+
+    return mcfp
+end
+
+
+
+"""
+  A Max Flow Problem is specified by an edge list (from to) for each,
+  capacities on edges,
+  and a demands on vertices that sum to 0
+"""
+type MaxFlowProblem{Tv,Ti}
+    edge_list::Array{Ti,2}
+    capacities::Array{Tv,1}
+    demands::Array{Tv,1}
+end
+
+
+
+
 function makeSTFlowProblem(a; k=round(Int,sqrt(size(a,1))))
 
     n = size(a,1)

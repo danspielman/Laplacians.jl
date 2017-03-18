@@ -200,8 +200,10 @@ function ipm_max_flow_shur_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
     println("Ratio of edge weights: ", ratioWt)
 
     
-    la = Bt*spdiagm(wt[:,1])*Bt'
-    a = spdiagm(diag(la)) - la
+    #la = Bt*spdiagm(wt[:,1])*Bt'
+    #a = spdiagm(diag(la)) - la
+
+    a = makeAdj(Bt,wt)
     laInv = lapSolver(a)
     
 
@@ -233,3 +235,10 @@ function ipm_max_flow_shur_solve{Tv,Ti}(Bt::SparseMatrixCSC{Tv,Ti},
 end
 
 
+function makeAdj(Bt,w)
+    n,m = size(Bt)
+    bi = Bt.rowval[Bt.nzval.==1];
+    bj = Bt.rowval[Bt.nzval.==-1];
+    a = sparse([bj;bi],[bi;bj],[w;w],n,n)
+    return a
+end
