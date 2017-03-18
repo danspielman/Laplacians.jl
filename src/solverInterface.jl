@@ -109,7 +109,11 @@ Passes on kwargs to the solver.
 function lapWrapConnected(solver, a::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
     la = forceLap(a)
     N = size(la)[1]
-    lasub = la[1:(N-1),1:(N-1)]
+
+    ind = findmax(diag(la))[2]
+    leave = [1:(ind-1);(ind+1):N]
+    
+    lasub = la[leave,leave]
     subSolver = solver(lasub; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts);
 
     tol_=tol
@@ -120,11 +124,12 @@ function lapWrapConnected(solver, a::AbstractMatrix; tol::Real=1e-6, maxits=Inf,
 
     f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
 
-        bs = b[1:(N-1)] - mean(b)
+        bs = b[leave] - mean(b)
         
         xs = subSolver(bs, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
-        x = [xs;0]
+        x = zeros(b)
+        x[leave] = xs
         x = x - mean(x)
         return x
     end
