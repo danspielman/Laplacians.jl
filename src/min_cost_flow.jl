@@ -42,6 +42,8 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   m = size(B)[1];
   n = size(B)[2];
 
+  Bt = B'
+    
   # Parameters for the algorithm.
   max_iter = 200;
 
@@ -66,7 +68,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     lambda2 = w2.*z;
 
     # Compute feasibility residuals and paramete mu.
-    r_p = B'*x - b;
+    r_p = Bt*x - b;
     r_d = c + B*y - s + z;
     mu  = (lambda1'*lambda1 + lambda2'*lambda2)/m;
 
@@ -94,8 +96,22 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 
       # note: w1, w2 and B do not change in here.
       # so, we can construct and reuse a solver
+
+      # Solve saddle point system to compute directions dx,ds,dy.
+      d1 = 1./(w1.*w1);
+      d2 = 1./(w2.*w2);
+      d  = 1./(d1 + d2);
+      D = spdiagm(d);
+
+      # Replacing this with the following faster code
+      # L = B'*(D*B);
+      # Adj = abs(spdiagm(diag(L)) - L)
+      Adj = makeAdj(Bt,d)
+
+      laInv = lapSolver((Adj+Adj')/2);
+
       
-    (dx_a,dy_a,ds_a,dz_a) = ipm_directions_min_cost_flow(B,r_p,r_d,rhs_g1,rhs_g2,lambda1,lambda2,w1,w2,n,lapSolver=lapSolver);
+    (dx_a,dy_a,ds_a,dz_a) = ipm_directions_min_cost_flow(B,Bt,d,d1,d2,r_p,r_d,rhs_g1,rhs_g2,lambda1,lambda2,w1,w2,n,laInv);
 
     # Step-size and parameters.
     alpha_x = calstepsize(x,dx_a);
@@ -111,8 +127,8 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     rhs_g1 = lambda1_sq - (sigma*mu).*ones(m) + gamma*(dx_a./w1).*(ds_a.*w1);
     rhs_g2 = lambda2_sq - (sigma*mu).*ones(m) - gamma*(dx_a./w2).*(dz_a.*w2);
 
-    (dx,dy,ds,dz) = ipm_directions_min_cost_flow(B,(1-eta).*r_p,(1-eta).*r_d,
-                                            rhs_g1,rhs_g2,lambda1,lambda2,w1,w2,n,lapSolver=lapSolver);
+    (dx,dy,ds,dz) = ipm_directions_min_cost_flow(B,Bt,d,d1,d2,(1-eta).*r_p,(1-eta).*r_d,
+                                            rhs_g1,rhs_g2,lambda1,lambda2,w1,w2,n,laInv);
 
     # Update variables.
     alpha_x = calstepsize(x,dx);
@@ -130,6 +146,8 @@ end
 
 # Compute directions for nt_ipm.
 function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
+                                             Bt::SparseMatrixCSC{Tv,Ti},
+                                             d, d1, d2,
                                              rhs_p::Array{Tv,1},
                                              rhs_d::Array{Tv,1},
                                              rhs_g1::Array{Tv,1},
@@ -138,13 +156,14 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                                              lambda2::Array{Tv,1},
                                              w1::Array{Tv,1},
                                              w2::Array{Tv,1},
-                                             m::Integer;
-                                             lapSolver = cholLap
+                                             m::Integer,
+                                             laInv
 #                                             lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000))
     )
 
-    Bt = B';
-    
+  #    Bt = B';
+
+  #=
   # Solve saddle point system to compute directions dx,ds,dy.
   d1 = 1./(w1.*w1);
   d2 = 1./(w2.*w2);
@@ -156,7 +175,8 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     # Adj = abs(spdiagm(diag(L)) - L)
     Adj = makeAdj(Bt,d)
 
-  laInv = lapSolver((Adj+Adj')/2);
+  laInv = lapSolver(Adj);
+  =#
 
   lambda1_w1 = lambda1.*w1;
   lambda2_w2 = lambda2.*w2;

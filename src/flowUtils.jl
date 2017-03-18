@@ -19,6 +19,19 @@ type MCFproblem{Tv,Ti}
     demands::Array{Tv,1}
 end
 
+function reportMCFresults(mcfp, flow)
+    println("Cost: ", (mcfp.costs'*flow)[1])
+    println("Min flow: ", minimum(flow))
+    println("Min slack: ", minimum(mcfp.capacities-flow))
+
+    edge_list = mcfp.edge_list
+    m = size(edge_list,1)
+    n = maximum(edge_list)
+    B = sparse(collect(1:m), edge_list[:,1], 1.0, m, n) -
+    sparse(collect(1:m), edge_list[:,2], 1.0, m, n)
+
+    println("Error on demands: ", sum(abs(B'*flow- mcfp.demands)))
+end
 
 
 """
