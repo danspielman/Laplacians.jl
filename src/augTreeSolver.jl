@@ -259,18 +259,24 @@ and another sqrt(n) sampled according to stretch.
 For most purposes, one should directly call `augTreeLapSolver`."""
 function augTreeLapPrecon{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; params=AugTreeParams())
 
-  tree = params.treeAlg(a)
+    tree = params.treeAlg(a)
 
-  if params.opt  
-      augtree = augmentTreeOpt(tree,a, params=params)
-  else
-      augtree = augmentTree(tree,a,convert(Int,round(sqrt(a.n))))
-  end
+    if params.opt  
+        augtree = augmentTreeOpt(tree,a, params=params)
+    else
+        augtree = augmentTree(tree,a,convert(Int,round(sqrt(a.n))))
+    end
 
+    F = (h -> h)
 
-  F = cholLap(augtree)
+    try
+        F = cholLap(augtree)
+    catch
+        println("cholfact failed in augTreeLapPrecon.  Going to backup routine")
+        F = augTreeFactor(augtree, tree)
+    end
 
-  return F
+    return F
 
 end
 
@@ -307,3 +313,92 @@ function augTreeLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=In
 
 end
      
+
+function augTreeFactor(a, tree; verbose=false,
+                      tol::Real=1e-6, maxits::Integer=1000, maxtime=Inf, pcgIts=Int[])
+    n = size(a,1);
+
+    ord::Array{Int64,1} = Laplacians.dfsOrder(tree)
+
+    # these lines could be MUCH faster
+    aord = symPermuteCSC(a,ord)
+    tord = symPermuteCSC(tree,ord)
+    
+    laord = lap(aord)
+
+    Aminus = aord - tord
+    
+    (aminusi, aminusj, aminusv) = findnz(Aminus)
+
+    marked = ones(Int64,n)
+    marked[aminusi] = 0
+    marked[aminusj] = 0
+
+    if (nnz(a) == 2*(n - 1))
+        if verbose
+            println("The graph is a tree.")
+        end
+
+        # mark something so this code stops somewhere
+        i = 1
+        j = nbri(aord, i, 1)
+        marked[i] = 0
+        marked[j] = 0
+    end
+
+
+
+    elims1, elims2, ind::Array{Int64,1}, subtree = elimDeg12(tord, marked)
+    
+    map = zeros(Int64,n)
+
+    n1 = length(ind)
+
+    map[ind] = collect(1:n1)
+    mapi = map[aminusi]
+    mapj = map[aminusj]
+
+    rest = sparse(mapi, mapj, aminusv, n1,n1)
+    a1 = rest + subtree
+    la1 = lap(a1)
+
+    fsub = cholLap(a1)
+
+
+    f1 = function(b::Array{Float64,1})
+
+        subMean!(b) # b = b - mean(b)
+        
+        y = forwardSolve(b, elims1, elims2)
+        ys = y[ind]
+
+        xs = fsub(ys)
+        
+        x = zeros(Float64,n)
+        x[ind] = xs
+
+        backSolve(x, y, elims1, elims2)
+        subMean!(x) # x = x - mean(x)
+
+        return x
+    end
+
+
+    f = function(b)
+
+        bord = b[ord] 
+
+        xord = f1(bord)
+        
+        #xord = pcg(laord, bord, f1, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+
+        x = zeros(Float64,n)
+        x[ord] = xord - mean(xord)
+
+        return x
+    end
+
+    return f
+
+end
+
