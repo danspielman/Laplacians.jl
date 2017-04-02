@@ -241,6 +241,7 @@
 <p><a id='Solving-linear-equations-in-Laplacians-and-SDD-matrices-1'></a></p>
 <h1 id="solving-linear-equations-in-laplacians-and-sdd-matrices">Solving linear equations in Laplacians and SDD matrices</h1>
 <p>The main purpose of this package is to experiment with the implementation of algorithms for solving systems of linear equations in Laplacian and symmetric, diagonally dominant, M-matrices (SDDM).</p>
+<p>At present, the fastest solver in this package is <a href="../solvers/index.html#Laplacians.edgeElimLap-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>edgeElimLap</code></a>.</p>
 <p>We recall that a matrix $ L $ is a <em>Laplacian</em> matrix if:</p>
 <ul>
 <li>It is symmetric,</li>
@@ -449,9 +450,14 @@ PCG BLAS stopped after: 260 iterations with relative error 0.009864463201800925.
 <p><a id='Sampling-Solvers-of-Kyng-and-Sachdeva-1'></a></p>
 <h2 id="sampling-solvers-of-kyng-and-sachdeva">Sampling Solvers of Kyng and Sachdeva</h2>
 <p>These are inspired by the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. </p>
+<p>These first two follow that paper reasonably closely.</p>
 <ul>
 <li><a href="../solvers/index.html#Laplacians.samplingSDDMSolver-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>samplingSDDMSolver</code></a></li>
 <li><a href="../solvers/index.html#Laplacians.samplingLapSolver-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>samplingLapSolver</code></a></li>
+</ul>
+<p>The following is a modification of the algorithm that eliminates edges one at a time.  The code is by Daniel Spielman.  The algorithm has not yet been analyzed.  It is presently the fastest in this package.</p>
+<ul>
+<li><a href="../solvers/index.html#Laplacians.edgeElimLap-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>edgeElimLap</code></a></li>
 </ul>
 <p><a id='Algebraic-Multigrid-1'></a></p>
 <h2 id="algebraic-multigrid">Algebraic Multigrid</h2>
