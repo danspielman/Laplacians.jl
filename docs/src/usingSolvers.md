@@ -4,6 +4,8 @@
 
 The main purpose of this package is to experiment with the implementation of algorithms for solving systems of linear equations in Laplacian and symmetric, diagonally dominant, M-matrices (SDDM).
 
+At present, the fastest solver in this package is [`edgeElimLap`](@ref).
+
 We recall that a matrix $ L $ is a _Laplacian_ matrix if:
 
 * It is symmetric,
@@ -264,8 +266,14 @@ Solvers inspired by the algorithm from "Approaching optimality for solving SDD s
 
 These are inspired by the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
 
+These first two follow that paper reasonably closely.
+
 * [`samplingSDDMSolver`](@ref)
 * [`samplingLapSolver`](@ref)
+
+The following is a modification of the algorithm that eliminates edges one at a time.  The code is by Daniel Spielman.  The algorithm has not yet been analyzed.  It is presently the fastest in this package.
+
+* [`edgeElimLap`](@ref)
 
 ## Algebraic Multigrid
 

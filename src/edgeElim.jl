@@ -322,7 +322,11 @@ end
 
 
 
+""" 
+    solver = KMPLapSolver(A; verbose, tol, maxits, maxtime, pcgIts)
 
+A heuristic by Daniel Spielman inspired by the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.  Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
+"""
 function edgeElimLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     return Laplacians.lapWrapComponents(edgeElimLap1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts)

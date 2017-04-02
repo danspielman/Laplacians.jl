@@ -28,6 +28,8 @@ If you want to solve Laplacian equations, we recommend the KMPLapSolver.  For SD
 The algorithms provide by Laplacians.jl include:
 
 * `akpw`, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.
+* `edgeElimLap`: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians:
+Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.  <i>Analysis to come</i>.
 * `KMPLapSolver` and `KMPSDDSolver`: linear equation solvers based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
 * `samplingSDDSolver` and `samplingLapSolver`, based on the paper "Approximate Gaussian Elimination for Laplacians:
 Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
@@ -39,9 +41,16 @@ Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
-## Version 0.1.1, December 26, 2016
+## Version 0.1.2, April 2, 2017
 
-This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`.  
+This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`. 
+
+Major Changes:
+
+* added `edgeElimLap` - a fast Laplacian solver.
+* fixed a bug in the unweighted version of `akpw`. 
+
+## Version 0.1.1, December 26, 2016
 
 Changelist:
 
