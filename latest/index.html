@@ -60,6 +60,8 @@
         
             <li><a class="toctree-l3" href="#current-development-version">Current Development Version</a></li>
         
+            <li><a class="toctree-l3" href="#version-012-april-2-2017">Version 0.1.2, April 2, 2017</a></li>
+        
             <li><a class="toctree-l3" href="#version-011-december-26-2016">Version 0.1.1, December 26, 2016</a></li>
         
             <li><a class="toctree-l3" href="#version-003-010-november-20-2016">Version 0.0.3 / 0.1.0, November 20, 2016</a></li>
@@ -209,7 +211,7 @@
 <p><a href="https://travis-ci.org/danspielman/Laplacians.jl"><img alt="Build Status" src="https://travis-ci.org/danspielman/Laplacians.jl.svg?branch=master" /></a> <a href="https://codecov.io/gh/danspielman/Laplacians.jl"><img alt="codecov" src="https://codecov.io/gh/danspielman/Laplacians.jl/branch/master/graph/badge.svg" /></a> <a href="https://danspielman.github.io/Laplacians.jl/stable"><img alt="" src="https://img.shields.io/badge/docs-stable-blue.svg" /></a> <a href="https://danspielman.github.io/Laplacians.jl/latest"><img alt="" src="https://img.shields.io/badge/docs-latest-blue.svg" /></a></p>
 <p>Laplacians is a package containing graph algorithms, with an emphasis on tasks related to spectral and algebraic graph theory. It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.</p>
 <p>All graphs are represented by sparse adjacency matrices. This is both for speed, and because our main concerns are algebraic tasks. It does not handle dynamic graphs. It would be very slow to implement dynamic graphs this way.</p>
-<p>The documentation may be found by clicking on one of the "docs" links above.</p>
+<p>The documentation may be found in <a href="http://danspielman.github.io/Laplacians.jl/about/index.html">http://danspielman.github.io/Laplacians.jl/about/index.html</a>.</p>
 <p>This includes instructions for installing Julia, and some tips for how to start using it.  It also includes guidelines for Dan Spielman's collaborators.</p>
 <p>For some examples of some of the things you can do with Laplacians, look at </p>
 <ul>
@@ -222,6 +224,10 @@
 <p>The algorithms provide by Laplacians.jl include:</p>
 <ul>
 <li><code>akpw</code>, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.</li>
+<li><code>edgeElimLap</code>: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians:</li>
+</ul>
+<p>Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.  <i>Analysis to come</i>.</p>
+<ul>
 <li><code>KMPLapSolver</code> and <code>KMPSDDSolver</code>: linear equation solvers based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.</li>
 <li><code>samplingSDDSolver</code> and <code>samplingLapSolver</code>, based on the paper "Approximate Gaussian Elimination for Laplacians:</li>
 </ul>
@@ -233,9 +239,16 @@
 <p><a id='Current-Development-Version-1'></a></p>
 <h2 id="current-development-version">Current Development Version</h2>
 <p>To get the current version of the master branch, run <code>Pkg.checkout("Laplacians")</code></p>
+<p><a id='Version-0.1.2,-April-2,-2017-1'></a></p>
+<h2 id="version-012-april-2-2017">Version 0.1.2, April 2, 2017</h2>
+<p>This is the current version.  It is what you retrieve when you run <code>Pkg.add("Laplacians")</code>. </p>
+<p>Major Changes:</p>
+<ul>
+<li>added <code>edgeElimLap</code> - a fast Laplacian solver.</li>
+<li>fixed a bug in the unweighted version of <code>akpw</code>.</li>
+</ul>
 <p><a id='Version-0.1.1,-December-26,-2016-1'></a></p>
 <h2 id="version-011-december-26-2016">Version 0.1.1, December 26, 2016</h2>
-<p>This is the current version.  It is what you retrieve when you run <code>Pkg.add("Laplacians")</code>.  </p>
 <p>Changelist:</p>
 <ul>
 <li>All of the linear equation solvers now have the same interface, and the Laplacian solvers work for disconnected graphs.</li>
@@ -299,5 +312,5 @@
 
 <!--
 MkDocs version : 0.16.2
-Build Date UTC : 2017-04-02 23:55:08
+Build Date UTC : 2017-04-03 00:24:26
 -->
