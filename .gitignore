@@ -7,4 +7,5 @@ docs/API
 *.cov
 docs/build
 docs/site
+deps/
 

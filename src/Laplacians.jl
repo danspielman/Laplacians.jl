@@ -191,6 +191,10 @@ and exports the functions for which it seems appropriate.
   export KMPLapSolver
   export KMPParams
 
+  include("edgeElimTypes.jl")
+  include("edgeElim.jl")
+  export edgeElimLap
+
   include("complexSolvers.jl")
   export SDDMSolvers
   export LapSolvers
