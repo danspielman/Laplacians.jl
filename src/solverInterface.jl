@@ -307,3 +307,77 @@ function sddmWrapLap(lapSolver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf,
     return f
                                      
 end
+
+"""
+    f = wrapCaptureRhs(sola::Function, rhss; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+
+Captures all the right-hand-sides that are passed to the solver `sola`.  It pushes them into an array called rhhs.
+For example
+
+```julia
+julia> rhss = []
+julia> a = wtedChimera(100)
+julia> sola = edgeElimLap(a)
+julia> wrappedSolver = wrapCaptureRhs(sola,rhss)
+julia> b = randn(100)
+julia> x = wrappedSolver(b,verbose=true)
+
+PCG BLAS stopped after: 0.0 seconds and 11 iterations with relative error 3.160275810360986e-7.
+
+julia> length(rhss[1])
+
+100
+```
+
+"""
+function wrapCaptureRhs(sola::Function, rhss; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+    
+    tol_=tol
+    maxits_=maxits
+    maxtime_=maxtime
+    verbose_=verbose
+    pcgIts_=pcgIts
+
+    f = function(b::AbstractArray; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
+        push!(rhss, b)
+        x = sola(b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+    end
+end
+
+"""
+    f = wrapCapture(solver::Function, mats, rhss; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+
+This wraps a solver so that we can capture all the matrices that it solves and all the right-hand-sides.
+Those are pushed into the arrays `mats` and `rhss`.
+For example
+
+```julia
+julia> mats = []
+julia> rhss = []
+julia> solver = wrapCapture(edgeElimLap, mats, rhss)
+julia> a = chimera(10)
+julia> f = solver(a);
+julia> size(mats[1])
+(10,10)
+julia> b = randn(10)
+julia> x = f(b);
+julia> rhss
+1-element Array{Any,1}:
+ [0.404962,-0.827718,0.704616,-0.403223,0.204891,-0.505589,0.907015,1.90266,-0.438115,0.0464351]
+```
+"""    
+
+function wrapCapture(solver::Function, mats, rhss)
+    f = function(a::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+        tol_=tol
+        maxits_=maxits
+        maxtime_=maxtime
+        verbose_=verbose
+        pcgIts_=pcgIts    
+        
+        push!(mats,a)
+        sol1 = solver(a, tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_, params...)
+        return wrapCaptureRhs(sol1, rhss, tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
+    end
+    return f
+end    

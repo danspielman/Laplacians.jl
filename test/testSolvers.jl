@@ -73,6 +73,17 @@ f = fs(a, tol=1e-2, verbose=true)
 x = f(b, tol=1e-6);
              
 
+mats = []
+rhss = []
+solver = Laplacians.wrapCapture(edgeElimLap, mats, rhss)
+a = chimera(10)
+f = solver(a);
+size(mats[1])
+b = randn(10)
+x = f(b);
+
+
+
 
 # testing by repitition
 
