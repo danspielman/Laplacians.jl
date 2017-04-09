@@ -348,20 +348,149 @@ function edgeElimLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1
 
     if verbose
       println("Factorization time: ", time()-t1)
-      println("Edges in a: ", div(nnz(a),2))
-      println("Edges in factorizaton: ", length(ldli.fval))
-      println("Ratio: ", 2 * length(ldli.fval) / nnz(a))
+      println("Ratio of operator edges to original edges: ", 2 * length(ldli.fval) / nnz(a))
     end
 
     F(b) = LDLsolver(ldli, b)
 
     la = lap(a)
 
+    if verbose
+        println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la))) 
+    end
+
 
     f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
 
     return f
 end
+
+
+
+#===========================================
+
+  Alternate solver approach
+
+===========================================#
+
+
+"""
+    L = ldli2Chol(ldli)
+This produces a matrix L so that L L^T approximate the original Laplacians.
+It is not quite a Cholesky factor, because it is off by a perm
+(and the all-1s vector orthogonality.
+"""
+function ldli2Chol(ldli)
+    n = length(ldli.colptr)
+    m = n + length(ldli.fval)
+    li = zeros(Int,m)
+    lj = zeros(Int,m)
+    lv = zeros(Float64,m)
+    lptr = 0
+    
+    dhi = zeros(n)
+    for i in 1:n
+        if ldli.d[i] == 0
+            dhi[i] = 1.0
+        else
+            dhi[i] = sqrt(ldli.d[i])
+        end
+    end
+    
+    scales = ones(n)
+    for ii in 1:(n-1)
+        i = ldli.col[ii]
+        j0 = ldli.colptr[ii]
+        j1 = ldli.colptr[ii+1]-1    
+        scales[i] = prod(1.0-ldli.fval[j0:(j1-1)]) 
+    end
+    
+    for ii in 1:(n-1)
+        i = ldli.col[ii]
+        j0 = ldli.colptr[ii]
+        j1 = ldli.colptr[ii+1]-1    
+        scale = scales[i] / dhi[i]  
+
+        scj = 1
+        for jj in j0:(j1-1)
+            j = ldli.rowval[jj]
+            f = ldli.fval[jj]
+            
+            lptr += 1
+            li[lptr] = i
+            lj[lptr] = j
+            lv[lptr] = -f*scj/scale
+
+            
+            scj = scj*(1-f)
+        end
+        j = ldli.rowval[j1]
+
+        lptr += 1        
+        li[lptr] = i
+        lj[lptr] = j
+        lv[lptr] = -dhi[i]
+        
+        lptr += 1       
+        li[lptr] = i
+        lj[lptr] = i
+        lv[lptr] = 1/scale
+
+    end
+    
+    for i in 1:n
+        if ldli.d[i] == 0
+            lptr += 1       
+            li[lptr] = i
+            lj[lptr] = i
+            lv[lptr] = 1.0
+        end
+    end
+    
+    return sparse(li,lj,lv,n,n)
+    #return li, lj, lv
+end
+
+function LDLsolver(L::SparseMatrixCSC, b::Array)
+    y = x6 = L \ (L' \ b)
+    return y - mean(y)
+end
+
+
+function edgeElimLap1a{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[])
+
+    tol_ =tol
+    maxits_ =maxits
+    maxtime_ =maxtime
+    verbose_ =verbose
+    pcgIts_ =pcgIts
+
+    t1 = time()
+    llmat = LLmatp(a)
+
+    ldli = edgeElim(llmat)
+
+    chL = ldli2Chol(ldli)
+
+    if verbose
+      println("Factorization time: ", time()-t1)
+      println("Ratio of operator edges to original edges: ", 2 * length(ldli.fval) / nnz(a))
+    end
+
+    F(b) = LDLsolver(chL, b)
+
+    la = lap(a)
+
+    if verbose
+        println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la))) 
+    end
+
+
+    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
+
+    return f
+end
+
 
 
 
