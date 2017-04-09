@@ -493,7 +493,7 @@ function edgeElimPQInc!(pq::EdgeElimPQ, i::Int)
         edgeElimPQMove!(pq, i, pq.elems[i].key + 1, oldlist, newlist)
 
     else
-        pq.elems[i] = EdgeElimPQElem3Elem(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key + 1)
+        pq.elems[i] = EdgeElimPQElem(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key + 1)
     end
 
     return Void

@@ -158,12 +158,21 @@ n = size(a,1)
 b = randn(n)
 b = b - mean(b)
 la = lap(a)
-for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver]
+for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver, edgeElimLap]
     f = solver(a, tol=1e-6, maxtime=5);
     x = f(b);
     @test norm(la*x - b)/norm(b) <= 1e-1
 end
 
+
+
+n = 10
+a = rand(n,n)
+a = a + a'
+a = a - diagm(diag(a))
+a = sparse(a)
+println("rand complete graph")
+testSolvers(a,maxtime=10)
 
 
 
