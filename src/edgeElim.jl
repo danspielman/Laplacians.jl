@@ -132,6 +132,38 @@ function compressCol!(a::LLmatp, colspace::Array{LLp,1}, len::Int, pq::EdgeElimP
     return ptr
 end
 
+function compressCol!(a::LLmatp, colspace::Array{LLp,1}, len::Int)
+
+    o = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
+
+    sort!(colspace, 1, len, QuickSort, o)
+
+    ptr::Int = 0
+    currow::Int = 0
+
+    c = colspace
+
+    for i in 1:len
+
+        if c[i].row != currow
+            currow = c[i].row
+            ptr = ptr+1
+            c[ptr] = c[i]
+
+        else
+            c[ptr].val = c[ptr].val + c[i].val
+            c[i].reverse.val = 0.0
+
+        end
+    end
+
+
+    o = Base.Order.ord(isless, x->x.val, false, Base.Order.Forward)
+    sort!(colspace, 1, ptr, QuickSort, o)
+
+    return ptr
+end
+
 
 
 # this one is greedy on the degree - also a big win
@@ -250,6 +282,113 @@ function edgeElim(a::LLmatp)
     return ldli
 end
 
+# This version eliminates in a fixed ordering
+function edgeElimOrdered(a::LLmatp, ord::Array{Int,1})
+    n = a.n
+
+    ldli = LDLinv(n)
+    ldli_row_ptr = 1
+
+    d = zeros(n)
+
+    it = 1
+
+    colspace = Array(LLp,n)
+    cumspace = Array(Float64,n)
+    vals = Array(Float64,n) # will be able to delete this
+
+    o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
+
+    while it < n
+
+        i = ord[it]
+
+        ldli.col[it] = i
+        ldli.colptr[it] = ldli_row_ptr
+
+        it = it + 1
+
+        len = get_ll_col(a, i, colspace)
+
+        len = compressCol!(a,colspace, len)  #3hog
+
+        csum = 0.0
+        for ii in 1:len
+            vals[ii] = colspace[ii].val
+            csum = csum + colspace[ii].val
+            cumspace[ii] = csum
+        end
+        wdeg = csum
+
+        colScale = 1.0
+
+        for joffset in 1:(len-1)
+
+            ll = colspace[joffset]
+            w = vals[joffset] * colScale
+            j = ll.row
+            revj = ll.reverse
+
+            f = w/(wdeg)
+
+            vals[joffset] = 0.0
+
+            # kind = Laplacians.blockSample(vals,k=1)[1]
+            r = rand() * (csum - cumspace[joffset]) + cumspace[joffset]
+            koff = searchsortedfirst(cumspace,r,1,len,o)
+
+            k = colspace[koff].row
+
+            newEdgeVal = f*(1-f)*wdeg
+
+            # fix row k in col j
+            revj.row = k   # dense time hog: presumably becaus of cache
+            revj.val = newEdgeVal
+            revj.reverse = ll
+
+            # fix row j in col k
+            khead = a.cols[k]
+            a.cols[k] = ll
+            ll.next = khead
+            ll.reverse = revj
+            ll.val = newEdgeVal
+            ll.row = j
+
+
+            colScale = colScale*(1-f)
+            wdeg = wdeg*(1-f)^2
+
+            push!(ldli.rowval,j)
+            push!(ldli.fval, f)
+            ldli_row_ptr = ldli_row_ptr + 1
+
+            # push!(ops, IJop(i,j,1-f,f))  # another time suck
+
+
+        end # for
+
+
+        ll = colspace[len]
+        w = vals[len] * colScale
+        j = ll.row
+        revj = ll.reverse
+
+        revj.val = 0.0
+
+        push!(ldli.rowval,j)
+        push!(ldli.fval, 1.0)
+        ldli_row_ptr = ldli_row_ptr + 1
+
+        d[i] = w
+
+    end
+
+    ldli.colptr[it] = ldli_row_ptr
+
+    ldli.d = d
+
+    return ldli
+end
 
 #=============================================================
 
@@ -322,7 +461,7 @@ end
 
 
 
-""" 
+"""
     solver = KMPLapSolver(A; verbose, tol, maxits, maxtime, pcgIts)
 
 A heuristic by Daniel Spielman inspired by the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.  Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
@@ -356,7 +495,7 @@ function edgeElimLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1
     la = lap(a)
 
     if verbose
-        println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la))) 
+        println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la)))
     end
 
 
@@ -387,7 +526,7 @@ function ldli2Chol(ldli)
     lj = zeros(Int,m)
     lv = zeros(Float64,m)
     lptr = 0
-    
+
     dhi = zeros(n)
     for i in 1:n
         if ldli.d[i] == 0
@@ -396,57 +535,57 @@ function ldli2Chol(ldli)
             dhi[i] = sqrt(ldli.d[i])
         end
     end
-    
+
     scales = ones(n)
     for ii in 1:(n-1)
         i = ldli.col[ii]
         j0 = ldli.colptr[ii]
-        j1 = ldli.colptr[ii+1]-1    
-        scales[i] = prod(1.0-ldli.fval[j0:(j1-1)]) 
+        j1 = ldli.colptr[ii+1]-1
+        scales[i] = prod(1.0-ldli.fval[j0:(j1-1)])
     end
-    
+
     for ii in 1:(n-1)
         i = ldli.col[ii]
         j0 = ldli.colptr[ii]
-        j1 = ldli.colptr[ii+1]-1    
-        scale = scales[i] / dhi[i]  
+        j1 = ldli.colptr[ii+1]-1
+        scale = scales[i] / dhi[i]
 
         scj = 1
         for jj in j0:(j1-1)
             j = ldli.rowval[jj]
             f = ldli.fval[jj]
-            
+
             lptr += 1
             li[lptr] = i
             lj[lptr] = j
             lv[lptr] = -f*scj/scale
 
-            
+
             scj = scj*(1-f)
         end
         j = ldli.rowval[j1]
 
-        lptr += 1        
+        lptr += 1
         li[lptr] = i
         lj[lptr] = j
         lv[lptr] = -dhi[i]
-        
-        lptr += 1       
+
+        lptr += 1
         li[lptr] = i
         lj[lptr] = i
         lv[lptr] = 1/scale
 
     end
-    
+
     for i in 1:n
         if ldli.d[i] == 0
-            lptr += 1       
+            lptr += 1
             li[lptr] = i
             lj[lptr] = i
             lv[lptr] = 1.0
         end
     end
-    
+
     return sparse(li,lj,lv,n,n)
     #return li, lj, lv
 end
@@ -486,7 +625,7 @@ function edgeElimLapChol{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxit
     la = lap(a)
 
     if verbose
-        println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la))) 
+        println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la)))
     end
 
 
