@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../lambda2.ico">
+  
+  <title>Developing Laplacians - Laplacians.jl</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="../assets/Laplacians.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Developing Laplacians";
+    var mkdocs_page_input_path = "Developing.md";
+    var mkdocs_page_url = "/Developing/index.html";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../index.html" class="icon icon-home"> Laplacians.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../index.html">About</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">User Guide</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../Installation/index.html">Installation</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../Julia/index.html">Using Julia</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../Examples/index.html">Examples</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../CSCgraph/index.html">Sparse matrices as graphs</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../usingSolvers/index.html">Solving Linear Equations</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../LSST/index.html">Low Stretch Spanning Trees</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Developing</span>
+    <ul class="subnav">
+                <li class=" current">
+                    
+    <a class="current" href="index.html">Developing Laplacians</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l3"><a href="#developing-laplaciansjl">Developing Laplacians.jl</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l4" href="#learn-to-use-git">Learn to use git</a></li>
+        
+            <li><a class="toctree-l4" href="#tests">Tests</a></li>
+        
+            <li><a class="toctree-l4" href="#fast-code">Fast code?</a></li>
+        
+            <li><a class="toctree-l4" href="#documentation">Documentation</a></li>
+        
+            <li><a class="toctree-l4" href="#parametric-types">Parametric Types</a></li>
+        
+            <li><a class="toctree-l4" href="#integration-with-other-packages">Integration with other packages.</a></li>
+        
+        </ul>
+    
+
+    </ul>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">API</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../graphGenerators/index.html">generators</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../operators/index.html">operators</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../graphUtils/index.html">graphUtils</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../graphAlgs/index.html">graphAlgs</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../IO/index.html">IO</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../treeAlgs/index.html">treeAlgs</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../akpw/index.html">akpw</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../randTrees/index.html">randTrees</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../solvers/index.html">solvers</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../localClustering/index.html">localClustering</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../privateFuncs/index.html">Private Functions</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../indexOfAll/index.html">All of the above</a>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Laplacians.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Developing &raquo;</li>
+        
+      
+    
+    <li>Developing Laplacians</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/danspielman/Laplacians.jl/edit/master/docs/Developing.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='Developing-Laplacians.jl-1'></a></p>
+<h1 id="developing-laplaciansjl">Developing Laplacians.jl</h1>
+<p><a id='Learn-to-use-git-1'></a></p>
+<h2 id="learn-to-use-git">Learn to use git</h2>
+<ul>
+<li>If you don't know anything about git, then just know that you should make a branch for you own code.  Type</li>
+</ul>
+<pre><code>git checkout -b MyName
+</code></pre>
+
+<ul>
+<li>Make sure that your .gitignore file contains the lines</li>
+</ul>
+<pre><code>*~
+*#
+.ipynb_*
+.DS_Store
+*.cov
+docs/build
+docs/site
+</code></pre>
+
+<ul>
+<li>Now, read about Git.  I recommend the book <a href="https://git-scm.com/book/en/v2">Pro Git</a>, which is available online for free.</li>
+<li>Stop thinking about Git like subversion or dropbox.</li>
+<li>The master branch will be the one for public consumption. It should (mostly) work.</li>
+<li>You should also read the</li>
+</ul>
+<p><a href="http://docs.julialang.org/en/release-0.4/manual/packages/#package-development">section of the Julia docs about building packages.</a></p>
+<p><a id='Tests-1'></a></p>
+<h2 id="tests">Tests</h2>
+<p>Every piece of code should have a test in the "tests" directory.  Ideally, it should have enough tests to run every line of the code.  To run all the tests from the command prompt, type</p>
+<pre><code>julia -e 'Pkg.test(&quot;Laplacians&quot;)'
+</code></pre>
+
+<p><a id='Fast-code?-1'></a></p>
+<h2 id="fast-code">Fast code?</h2>
+<p>Just go for it. Don't worry about writing fast code at first. Just get it to work. We can speed it up later.</p>
+<p>Within some of the files, I am keeping old, unoptimized versions of code around for comparison (and for satisfaction).  I will give them the name "XSlow"</p>
+<p><a id='Documentation-1'></a></p>
+<h2 id="documentation">Documentation</h2>
+<p>This documentation is still very rough. It is generated by a combination of Markdown and semi-automatic generation, using the <a href="https://juliadocs.github.io/Documenter.jl/stable/">Documenter.jl</a> package.  The one annoying feature of this package is that it will not allow the inclusion of a docstring on more than one page.  I don't know why.</p>
+<p>The steps to generate and improve the documentation are:</p>
+<ul>
+<li>Edit Markdown files in the <code>docs</code> directory.  For example, you could use MacDown to do this.</li>
+<li>If you want to add a new page to the documention, create one.  Edit the file mkdocs.yml so show where it should appear.</li>
+<li>Add docstrings to everything that needs it, and in particular to the routines you create.  The API is built from the docstrings.</li>
+<li>Run <code>julia make.jl; mkdocs build</code> in the <code>docs</code> directory to generate the documentation from the Markdown.  This will generate a local copy of the documentation that you can use for reference.</li>
+<li>
+<p><em>WARNING</em>: You should not include any pages that are generated in the git repository.  So, make sure that your .gitignore file contains the line <code>docs/build</code> and <code>docs/site</code>.</p>
+</li>
+<li>
+<p>When you push to the master branch on GitHub, Travis will automatically build and update the docs.  <b>DO NOT RUN <code>mkdocs gh-deploy</code></b></p>
+</li>
+<li>
+<p>If you create a Julia notebook that you would like to include as documentation.   You should  put it in the notebooks directory (.julia/v0.5/Laplacians/notebooks) and then link to it's page on GitHub.  While it seems that one should convert it to html (and one can), and then include it in MkDocs, MkDocs does something funny to the resulting html that does not look nice.</p>
+</li>
+</ul>
+<p><a id='Parametric-Types-1'></a></p>
+<h2 id="parametric-types">Parametric Types</h2>
+<p>A sparse matrix has two types associated with it: the types of its indices (some sort of integer) and the types of its values (some sort of number).  Most of the code has been written so that once these types are fixed, the type of everything else in the function has been too.  This is accomplished by putting curly braces after a function name, with the names of the types that we want to use in the braces.  For example,</p>
+<pre><code class="julia">shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
+</code></pre>
+
+<p><code>Tv</code>, sometimes written <code>Tval</code> denotes the types of the values, and <code>Ti</code> or <code>Tind</code> denotes the types of the indices.  This function will only be called if the node from which we compute the shortest paths, <code>start</code> is of type <code>Ti</code>.  Inside the code, whenever we write something like <code>pArray = zeros(Ti,n)</code>, it creates an array of zeros of type Ti.  Using these parameteric types is <em>much</em> faster than leaving the types unfixed.</p>
+<p><a id='Data-structures:-1'></a></p>
+<h3 id="data-structures">Data structures:</h3>
+<ul>
+<li><code>IntHeap</code> a heap that stores small integers (like indices of nodes in a graph) and that makes deletion fast.  Was much faster than using Julia's more general heap.</li>
+</ul>
+<p><a id='Interface-issue:-1'></a></p>
+<h3 id="interface-issue">Interface issue:</h3>
+<p>There are many different sorts of things that our code could be passing around.  For example, kruskal returns a graph as a sparse matrix.  But, we could use a format that is more specialized for trees, like the RootedTree type.  At some point, when we optimize code, we will need to figure out the right interfaces between routines.  For example, some routines symmetrize at the end.  This is slow, and should be skipped if not necessary.  It also doubles storage.</p>
+<p><a id='Integration-with-other-packages.-1'></a></p>
+<h2 id="integration-with-other-packages">Integration with other packages.</h2>
+<p>There are other graph packages that we might want to sometimes use.</p>
+<ul>
+<li><a href="http://github.com/JuliaLang/Graphs.jl">Graphs.jl</a> : I found this one to be too slow and awkward to be useful.</li>
+<li><a href="http://github.com/JuliaGraphs/LightGraphs.jl">LightGraphs.jl</a> : this looks more promising.  We will have to check it out.  It is reasonably fast, and the code looks pretty.</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../graphGenerators/index.html" class="btn btn-neutral float-right" title="generators">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../LSST/index.html" class="btn btn-neutral" title="Low Stretch Spanning Trees"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+    
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/danspielman/Laplacians.jl" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../LSST/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../graphGenerators/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script src="../js/theme.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="../assets/mathjaxhelper.js"></script>
+
+</body>
+</html>
