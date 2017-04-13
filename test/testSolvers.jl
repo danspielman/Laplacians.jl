@@ -232,8 +232,19 @@ a = wtedChimera(n,1)
 b = randn(n)
 b = b - mean(b)
 la = lap(a)
+
 f = samplingLapSolver(a,tol=1e-6)
 x = f(b)
+
+params = deepcopy(Laplacians.defaultSamplingParams)
+params.verboseSS = true
+params.returnCN = true
+params.fixTree = true
+f = samplingLapSolver(a,tol=1e-6,params=params)
+x = f(b)
+
+
+
 
 
 # testing compare_solvers
