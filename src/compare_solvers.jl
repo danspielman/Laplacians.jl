@@ -33,7 +33,7 @@ end
 
 Runs many Laplacians solvers.  Puts the build and solve time results into a dictionary dic.  It would be easiest to look at it via DataFrame(dic).  Returns the answer from the last solver.  `solvers` should be an array of `SolverTest`.
 """
-function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=Inf, maxtime=Inf, verbose=false)
+function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=10000, maxtime=1000, verbose=false)
 
     b = b - mean(b)
     
@@ -70,14 +70,27 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
     push!(dic["hash_a"],hash_a)
 
     x = []
+
+
+    maxtime_ = maxtime
+    maxits_ = maxits
+    verbose_ = verbose
+    tol_ = tol
     
     for solverTest in solvers
+        if verbose
+            println()
+            println(solverTest.name)
+        end
+
+        gc()
         tic()
-        f = solverTest.solver(a, tol=tol, maxtime=maxtime, maxits=maxits, verbose=verbose)
+        f = solverTest.solver(a, tol=tol_, maxits=maxits_, verbose=verbose_)
         build_time = toq()
 
+        gc()
         tic()
-        x = f(b, pcgIts = it)
+        x = f(b, pcgIts = it, tol=tol_, maxits=maxits_, verbose=verbose_)
         solve_time = toq()
 
         err = norm(la * x - b) / norm(b)
