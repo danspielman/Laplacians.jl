@@ -261,11 +261,5 @@ b = b - mean(b)
 @time gn = augTreeSddm(sdd)
 @time gold = augTreeSddm(sdd,params=AugTreeParamsOld())
 
-lnew(a; kwargs...) = augTreeLap(a; params=AugTreeParams(), kwargs...)
-lold(a; kwargs...) = augTreeLap(a; params=AugTreeParamsOld(), kwargs...)
-solvers = [SolverTest(lnew,"new") SolverTest(lold,"old")]
-
-dic = Dict()
-x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2)
 
 

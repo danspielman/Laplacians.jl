@@ -1,7 +1,7 @@
 #==========================================================
 Code for comparing solvers
 ===========================================================#
-    
+
 
 """
     SolverTest(solver, name)
@@ -17,7 +17,7 @@ end
 """
     initDictCol!(dic, name, typ)
 
-For a dictionary in which each key indexes an array.  
+For a dictionary in which each key indexes an array.
 If dic does not contain an entry of `name`, create with set to `Array(typ,0)`.
 """
 function initDictCol!(dic, name, typ)
@@ -36,7 +36,7 @@ Runs many Laplacians solvers.  Puts the build and solve time results into a dict
 function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=10000, maxtime=1000, verbose=false)
 
     b = b - mean(b)
-    
+
     la = lap(a)
 
     it = Int[1]
@@ -45,13 +45,13 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
     initDictCol!(dic, "nv", Int)
     initDictCol!(dic, "ne", Int)
     initDictCol!(dic, "hash_a", UInt64)
-    
+
     solvecol(name) = "$(name)_solve"
     buildcol(name) = "$(name)_build"
     totcol(name) = "$(name)_tot"
     itscol(name) = "$(name)_its"
     errcol(name) = "$(name)_err"
-    
+
     for solver in solvers
         name = solver.name
         initDictCol!(dic, solvecol(name), Float64)
@@ -60,7 +60,7 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
         initDictCol!(dic, itscol(name), Float64)
         initDictCol!(dic, errcol(name), Float64)
     end
-    
+
     nv = size(a,1)
     ne = nnz(a)
     hash_a = hash(a)
@@ -76,7 +76,7 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
     maxits_ = maxits
     verbose_ = verbose
     tol_ = tol
-    
+
     for solverTest in solvers
         if verbose
             println()
@@ -108,3 +108,31 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
 
 end
 
+using Plots
+
+"""
+    Given the list of solvers that were used, and a dic containing the results.
+    Plot some graphs explaining how it went.
+"""
+function plots_and_stats(solvers,dic)
+  pyplot()
+  default(show = true)
+
+  plots_and_stats_raw(solvers,dic,"tot","Total Time")
+  plots_and_stats_raw(solvers,dic,"build","Build Time")
+  plots_and_stats_raw(solvers,dic,"solve","Solve Time")
+  plots_and_stats_raw(solvers,dic,"its","Iterations")
+
+end
+
+
+function plots_and_stats_raw(solvers,dic,str,title)
+
+  Plots.plot(title = title)
+  sol1 = solvers[1]
+  p = sortperm(dic["$(sol1.name)_$(str)"])
+  for solver in solvers
+      println(solver.name)
+      Plots.plot!(dic["$(solver.name)_$(str)"][p], label=solver.name)
+  end
+end
