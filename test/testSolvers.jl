@@ -262,4 +262,15 @@ b = b - mean(b)
 @time gold = augTreeSddm(sdd,params=AugTreeParamsOld())
 
 
+# test augTreeFactor (not yet exported)
+
+a = wtedChimera(100);
+tr = akpw(a);
+f = Laplacians.augTreeFactor(a,tr);
+b = randn(100)
+b = b - mean(b)
+x = f(b);
+f = Laplacians.augTreeFactor(a,tr,verbose=true);
+x = f(b);
+f = Laplacians.augTreeFactor(tr,tr,verbose=true);
 

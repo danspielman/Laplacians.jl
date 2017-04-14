@@ -5,6 +5,7 @@
 #============================================================#
 # Test compare_solvers code
 
+#=
 include("$(Pkg.dir("Laplacians"))/src/compare_solvers.jl")
 
 lnew(a; kwargs...) = augTreeLap(a; params=AugTreeParams(), kwargs...)
@@ -13,7 +14,7 @@ solvers = [SolverTest(lnew,"new") SolverTest(lold,"old")]
 
 dic = Dict()
 x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2)
-
+=#
 
 #============================================================#
 # Test Lex by running code from its notebook
