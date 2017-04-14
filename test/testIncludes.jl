@@ -21,15 +21,8 @@ x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2)
 
 include("$(Pkg.dir("Laplacians"))/src/lex.jl")
 
-n = 10
-Pn = pathGraph(n)
 
-isTerm = zeros(Bool, n)
-isTerm[1] = true
-isTerm[n] = true
-
-initVal = zeros(n)
-initVal[n] = 1.0
+setLexDebugFlag(true)
 
 # inf-minimizer
 infMinVolt = CompInfMin(Pn, isTerm, initVal)
