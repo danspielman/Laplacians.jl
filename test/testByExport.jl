@@ -283,6 +283,12 @@ dumbRefineCut(a,collect(1:10))
 
   # export FastSampler, sample, sampleMany
 
+
+r = rand(10)
+s = FastSampler(r)
+sample(s)
+blockSample(r)
+
   # export johnlind
 
 johnlind(a)
