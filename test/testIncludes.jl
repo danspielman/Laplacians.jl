@@ -24,6 +24,16 @@ include("$(Pkg.dir("Laplacians"))/src/lex.jl")
 
 setLexDebugFlag(true)
 
+n = 10
+Pn = pathGraph(n)
+
+isTerm = zeros(Bool, n)
+isTerm[1] = true
+isTerm[n] = true
+
+initVal = zeros(n)
+initVal[n] = 1.0
+
 # inf-minimizer
 infMinVolt = CompInfMin(Pn, isTerm, initVal)
 println(infMinVolt)
