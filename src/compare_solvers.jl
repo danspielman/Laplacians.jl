@@ -174,6 +174,8 @@ function testSolverTimed(timelimit, solver, a, b, tol, maxits, verbose)
     error("Run addprocs() before setting up this code.")
   end
   proc = workers()[1]
+  remotecall_fetch(gc, proc)
+
 
   c = Channel(1)
   @async put!(c, remotecall_fetch(()->(testSolver(solver, a, b, tol, maxits, verbose)),proc))
