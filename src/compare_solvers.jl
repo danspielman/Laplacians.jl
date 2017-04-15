@@ -1,5 +1,18 @@
 #==========================================================
 Code for comparing solvers
+
+This will run tests of solvers inside a thread so that it can impose a
+time limit.
+
+For this reason, julia should either be started with workers "julia -p 2",
+or workers should be added before including Laplacians, like
+addprocs()
+@everywhere using Laplacians
+@everywere inlclude(this_file)
+
+Routines for plotting results and producing reports are in
+compare_solvers_reports.jl
+
 ===========================================================#
 
 
@@ -52,6 +65,8 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
     itscol(name) = "$(name)_its"
     errcol(name) = "$(name)_err"
 
+    dic["names"] = [t.name for t in tests]
+
     for solver in solvers
         name = solver.name
         initDictCol!(dic, solvecol(name), Float64)
@@ -71,36 +86,29 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
 
     x = []
 
+    for i in 1:length(solvers)
+        solverTest = solvers[i]
 
-    maxtime_ = maxtime
-    maxits_ = maxits
-    verbose_ = verbose
-    tol_ = tol
-
-    for solverTest in solvers
         if verbose
             println()
             println(solverTest.name)
         end
 
-        gc()
-        tic()
-        f = solverTest.solver(a, tol=tol_, maxits=maxits_, verbose=verbose_)
-        build_time = toq()
-
-        gc()
-        tic()
-        x = f(b, pcgIts = it, tol=tol_, maxits=maxits_, verbose=verbose_)
-        solve_time = toq()
-
-        err = norm(la * x - b) / norm(b)
+        time_limit = 10.0
+        if i == 1
+          t0 = time()
+          ret = testSolver(solverTest.solver, a, b, tol, maxits, verbose)
+          time_limit = 10*(time()-t0)
+        else
+          ret = testSolverTimed(time_limit, solverTest.solver, a, b, tol, maxits, verbose)
+        end
 
         name = solverTest.name
-        push!(dic[solvecol(name)],solve_time)
-        push!(dic[buildcol(name)],build_time)
-        push!(dic[totcol(name)],solve_time + build_time)
-        push!(dic[itscol(name)],it[1])
-        push!(dic[errcol(name)],err)
+        push!(dic[solvecol(name)],ret[1])
+        push!(dic[buildcol(name)],ret[2])
+        push!(dic[totcol(name)],ret[1]+ret[2])
+        push!(dic[itscol(name)],ret[3])
+        push!(dic[errcol(name)],ret[4])
 
     end
 
@@ -108,31 +116,65 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
 
 end
 
-using Plots
 
-"""
-    Given the list of solvers that were used, and a dic containing the results.
-    Plot some graphs explaining how it went.
-"""
-function plots_and_stats(solvers,dic)
-  pyplot()
-  default(show = true)
+function testSolver(solver, a, b, tol, maxits, verbose)
 
-  plots_and_stats_raw(solvers,dic,"tot","Total Time")
-  plots_and_stats_raw(solvers,dic,"build","Build Time")
-  plots_and_stats_raw(solvers,dic,"solve","Solve Time")
-  plots_and_stats_raw(solvers,dic,"its","Iterations")
+  try
+
+    gc()
+    tic()
+    f = solver(a, tol=tol, maxits=maxits, verbose=verbose)
+    build_time = toq()
+
+    it = [0]
+    gc()
+    tic()
+    x = f(b, pcgIts = it, tol=tol, maxits=maxits, verbose=verbose)
+    solve_time = toq()
+
+    err = norm(lap(a) * x - b) / norm(b)
+
+    ret = (solve_time, build_time, it[1], err)
+    if verbose
+      println(ret)
+    end
+    return ret
+  catch
+    println("Solver Error.")
+    return (Inf, Inf, Inf, Inf)
+  end
 
 end
 
+function testSolverTimed(timelimit, solver, a, b, tol, maxits, verbose)
 
-function plots_and_stats_raw(solvers,dic,str,title)
+  #@everywhere ts(a,b,c,d,e,f) = testSolver(a,b,c,d,e,f)
 
-  Plots.plot(title = title)
-  sol1 = solvers[1]
-  p = sortperm(dic["$(sol1.name)_$(str)"])
-  for solver in solvers
-      println(solver.name)
-      Plots.plot!(dic["$(solver.name)_$(str)"][p], label=solver.name)
+  if length(workers()) < 1
+    error("Run addprocs() before setting up this code.")
   end
+  proc = workers()[1]
+
+  c = Channel(1)
+  @async put!(c, remotecall_fetch(()->(testSolver(solver, a, b, tol, maxits, verbose)),proc))
+  t0 = time()
+  while !isready(c) && (time() - t0) < timelimit
+    sleep(0.1)
+  end
+
+  ret = (Inf,Inf,Inf,Inf)
+
+  if isready(c)
+    ret = fetch(c)
+
+  else
+    println("Interrupt process!")
+    interrupt(proc)
+    sleep(1)
+    ret = (Inf,Inf,Inf,Inf)
+
+  end
+
+  return ret
+
 end
