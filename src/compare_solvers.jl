@@ -86,7 +86,31 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
 
     x = []
 
-    for i in 1:length(solvers)
+    i = 1
+
+    solverTest = solvers[i]
+
+    if verbose
+        println()
+        println(solverTest.name)
+    end
+
+
+    t0 = time()
+    ret = testSolver(solverTest.solver, a, b, tol, maxits, verbose)
+    tl = 10*(time()-t0)
+    if verbose
+      println("time limit: ", tl)
+    end
+
+    name = solverTest.name
+    push!(dic[solvecol(name)],ret[1])
+    push!(dic[buildcol(name)],ret[2])
+    push!(dic[totcol(name)],ret[1]+ret[2])
+    push!(dic[itscol(name)],ret[3])
+    push!(dic[errcol(name)],ret[4])
+
+    for i in 2:length(solvers)
         solverTest = solvers[i]
 
         if verbose
@@ -94,17 +118,10 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
             println(solverTest.name)
         end
 
-        time_limit = 10.0
-        if i == 1
-          t0 = time()
-          ret = testSolver(solverTest.solver, a, b, tol, maxits, verbose)
-          time_limit = 10*(time()-t0)
-          if verbose
-            println("time limit: ", time_limit)
-          end
-        else
-          ret = testSolverTimed(time_limit, solverTest.solver, a, b, tol, maxits, verbose)
-        end
+        #time_limit = 10.0
+
+        ret = testSolverTimed(tl, solverTest.solver, a, b, tol, maxits, verbose)
+
 
         name = solverTest.name
         push!(dic[solvecol(name)],ret[1])
