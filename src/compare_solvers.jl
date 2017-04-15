@@ -99,6 +99,9 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
           t0 = time()
           ret = testSolver(solverTest.solver, a, b, tol, maxits, verbose)
           time_limit = 10*(time()-t0)
+          if verbose
+            println("time limit: ", time_limit)
+          end
         else
           ret = testSolverTimed(time_limit, solverTest.solver, a, b, tol, maxits, verbose)
         end
@@ -168,7 +171,7 @@ function testSolverTimed(timelimit, solver, a, b, tol, maxits, verbose)
     ret = fetch(c)
 
   else
-    println("Interrupt process!")
+    println("Interrupt process at time", time()-t0)
     interrupt(proc)
     sleep(1)
     ret = (Inf,Inf,Inf,Inf)
