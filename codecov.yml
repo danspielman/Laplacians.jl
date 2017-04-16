@@ -1,6 +1,6 @@
 ignore:
   - "src/matlabSolvers.jl"
-  - "src/compare_solvers.jl"
+  - "src/compare_solvers_report.jl"
   - "src/pcgMatNorm.jl"
   - "src/preconditioners.jl"
 

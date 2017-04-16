@@ -1,17 +1,12 @@
 #==========================================================
 Code for comparing solvers
 
-This will run tests of solvers inside a thread so that it can impose a
-time limit.
+For comparing possibly flaky code, we need an ability to stop the code
+if it runs for too long.
+Code that does that is in the compare directory.
 
-For this reason, julia should either be started with workers "julia -p 2",
-or workers should be added before including Laplacians, like
-addprocs()
-@everywhere using Laplacians
-@everywere inlclude(this_file)
-
-Routines for plotting results and producing reports are in
-compare_solvers_reports.jl
+It uses threads for Julia code,
+and has special code for the matlab solvers
 
 ===========================================================#
 
@@ -42,11 +37,24 @@ end
 
 
 """
+`ret` is the answer returned by a speed test.
+This pushed it into the dictionary on which we are storing the tests.
+"""
+function pushSpeedResult!(dic, name, ret)
+    push!(dic["$(name)_solve"],ret[1])
+    push!(dic["$(name)_build"],ret[2])
+    push!(dic["$(name)_tot"],ret[1]+ret[2])
+    push!(dic["$(name)_its"],ret[3])
+    push!(dic["$(name)_err"],ret[4])
+end
+
+
+"""
     function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=Inf, maxtime=Inf, verbose=false)
 
 Runs many Laplacians solvers.  Puts the build and solve time results into a dictionary dic.  It would be easiest to look at it via DataFrame(dic).  Returns the answer from the last solver.  `solvers` should be an array of `SolverTest`.
 """
-function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=10000, maxtime=1000, verbose=false)
+function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=10000, maxtime=1000, verbose=false, testName="")
 
     b = b - mean(b)
 
@@ -58,14 +66,15 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
     initDictCol!(dic, "nv", Int)
     initDictCol!(dic, "ne", Int)
     initDictCol!(dic, "hash_a", UInt64)
-
+    initDictCol!(dic, "testName", String)
+    
     solvecol(name) = "$(name)_solve"
     buildcol(name) = "$(name)_build"
     totcol(name) = "$(name)_tot"
     itscol(name) = "$(name)_its"
     errcol(name) = "$(name)_err"
 
-    dic["names"] = [t.name for t in tests]
+    dic["names"] = [t.name for t in solvers]
 
     for solver in solvers
         name = solver.name
@@ -83,34 +92,11 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
     push!(dic["nv"],nv)
     push!(dic["ne"],ne)
     push!(dic["hash_a"],hash_a)
-
+    push!(dic["testName"],testName)
+    
     x = []
 
-    i = 1
-
-    solverTest = solvers[i]
-
-    if verbose
-        println()
-        println(solverTest.name)
-    end
-
-
-    t0 = time()
-    ret = testSolver(solverTest.solver, a, b, tol, maxits, verbose)
-    tl = 10*(time()-t0)
-    if verbose
-      println("time limit: ", tl)
-    end
-
-    name = solverTest.name
-    push!(dic[solvecol(name)],ret[1])
-    push!(dic[buildcol(name)],ret[2])
-    push!(dic[totcol(name)],ret[1]+ret[2])
-    push!(dic[itscol(name)],ret[3])
-    push!(dic[errcol(name)],ret[4])
-
-    for i in 2:length(solvers)
+    for i in 1:length(solvers)
         solverTest = solvers[i]
 
         if verbose
@@ -118,18 +104,14 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
             println(solverTest.name)
         end
 
-        #time_limit = 10.0
+        ret = testSolver(solverTest.solver, a, b, tol, maxits, verbose)
 
-        ret = testSolverTimed(tl, solverTest.solver, a, b, tol, maxits, verbose)
-
-
-        name = solverTest.name
-        push!(dic[solvecol(name)],ret[1])
-        push!(dic[buildcol(name)],ret[2])
-        push!(dic[totcol(name)],ret[1]+ret[2])
-        push!(dic[itscol(name)],ret[3])
-        push!(dic[errcol(name)],ret[4])
-
+        if i == 1
+            x = ret[5]
+        end
+        
+        
+        pushSpeedResult!(dic, solverTest.name, ret)
     end
 
     return x
@@ -154,49 +136,14 @@ function testSolver(solver, a, b, tol, maxits, verbose)
 
     err = norm(lap(a) * x - b) / norm(b)
 
-    ret = (solve_time, build_time, it[1], err)
+    ret = (solve_time, build_time, it[1], err, x)
     if verbose
-      println(ret)
+      println((solve_time, build_time, it[1], err))
     end
     return ret
   catch
     println("Solver Error.")
     return (Inf, Inf, Inf, Inf)
   end
-
-end
-
-function testSolverTimed(timelimit, solver, a, b, tol, maxits, verbose)
-
-  #@everywhere ts(a,b,c,d,e,f) = testSolver(a,b,c,d,e,f)
-
-  if length(workers()) < 1
-    error("Run addprocs() before setting up this code.")
-  end
-  proc = workers()[1]
-  remotecall_fetch(gc, proc)
-
-
-  c = Channel(1)
-  @async put!(c, remotecall_fetch(()->(testSolver(solver, a, b, tol, maxits, verbose)),proc))
-  t0 = time()
-  while !isready(c) && (time() - t0) < timelimit
-    sleep(0.1)
-  end
-
-  ret = (Inf,Inf,Inf,Inf)
-
-  if isready(c)
-    ret = fetch(c)
-
-  else
-    println("Interrupt process at time", time()-t0)
-    interrupt(proc)
-    sleep(1)
-    ret = (Inf,Inf,Inf,Inf)
-
-  end
-
-  return ret
 
 end
