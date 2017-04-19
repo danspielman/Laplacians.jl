@@ -231,3 +231,11 @@ function testVMatlabLap{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array
     return x
 
 end
+
+function testVMatlabLap{Tv,Ti}(solvers, dic, maker::Function; testName="")
+    a = maker()
+    n = size(a,1)
+    b = randn(n);
+    b = b - mean(b);
+    testVMatlabLap{Tv,Ti}(solvers, dic, a, b, testName=testName)    
+end
