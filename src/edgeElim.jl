@@ -6,7 +6,17 @@ algorithm inspired by the Approximate Gaussian Elimination algorithm of
 Kyng and Sachdeva.
 
 =#
+#=
+type AugTreeParams
+    treeAlg::Function
+    opt::Bool
+    nnzL_fac::Float64
+    flops::Float64
+    verbose::Bool
+end
 
+AugTreeParams() = AugTreeParams(akpw, true, 4.0, 200.0, false)
+=#
 
 LDLinv(n) = LDLinv(zeros(Int,n-1),zeros(Int,n),Array(Int,0),Array(Float64,0),zeros(Float64,n))
 
@@ -227,7 +237,7 @@ function edgeElim(a::LLmatp)
 
             edgeElimPQInc!(pq, k)
 
-            newEdgeVal = f*(1-f)*wdeg
+            newEdgeVal = w*(1.0-f)
 
             # fix row k in col j
             revj.row = k   # dense time hog: presumably becaus of cache
@@ -243,8 +253,9 @@ function edgeElim(a::LLmatp)
             ll.row = j
 
 
-            colScale = colScale*(1-f)
-            wdeg = wdeg*(1-f)^2
+            colScale = colScale*(1.0-f)
+            #wdeg = wdeg*(1.0-f)^2
+            wdeg = wdeg - 2w + w^2/wdeg
 
             push!(ldli.rowval,j)
             push!(ldli.fval, f)
@@ -591,7 +602,7 @@ function ldli2Chol(ldli)
 end
 
 function LDLsolver(L::SparseMatrixCSC, b::Array)
-    y = x6 = L \ (L' \ b)
+    y = L \ (L' \ b)
     return y - mean(y)
 end
 
