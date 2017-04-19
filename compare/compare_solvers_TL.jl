@@ -175,6 +175,7 @@ function testVMatlabLap{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array
     end
     
     push!(dic["names"], "cmg")
+    push!(dic["names"], "icc")
     
     for name in dic["names"]
         initDictCol!(dic, solvecol(name), Float64)
@@ -223,6 +224,9 @@ function testVMatlabLap{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array
     
     ret = timeLimitCmg(tl, lap(a), b,verbose = true);
     pushSpeedResult!(dic, "cmg", ret)
+
+    ret = timeLimitIcc(tl, lap(a), b,verbose = true);
+    pushSpeedResult!(dic, "icc", ret)
 
     return x
 
