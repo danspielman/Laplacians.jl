@@ -307,3 +307,4 @@ johnlind(a)
 
   # export toposort, dirEdgeVertexMat
 
+println("End of testByExport")
