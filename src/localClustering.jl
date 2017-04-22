@@ -42,7 +42,7 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
     end
   end
   if length(nbrs) > maxSize
-    print_with_color(:red, "maxSize should be at least ", length(nbrs), " .....finishing execution")
+    print_with_color(:red, string("maxSize should be at least ", length(nbrs), " .....finishing execution"))
     return [],0
   end
 
