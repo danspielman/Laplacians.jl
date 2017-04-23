@@ -781,3 +781,51 @@ function edgeElimPQInc!(pq::EdgeElimPQ, i::Int)
 
     return Void
 end
+
+
+#========================================
+
+The following is unused code.
+It shows how we would adjust ldli if we wanted to parallelize
+the forward and backward solves
+
+
+function forward3!(ldli::LDLinv, y::Array{Float64,1})
+    @inbounds for ii in 1:length(ldli.col)
+        i = ldli.col[ii]
+
+        j0 = ldli.colptr[ii]
+        j1 = ldli.colptr[ii+1]-1
+
+        
+        fc = copy(ldli.fval[j0:(j1-1)])
+        pfc = prod(1-fc)
+        println("pfc: ",pfc)
+        
+        yi = y[i]*pfc
+
+        for h in 1:length(fc)
+            z = fc[h]
+            fc[h] = fc[h]/pfc
+            pfc = pfc / (1-z)
+        end
+        
+        #println("1? ",pfc)
+        
+        @inbounds @simd for jj in j0:(j1-1)
+            j = ldli.rowval[jj]            
+            y[j] += fc[jj-j0+1] * yi
+            
+            #println(j, ": ", y[j], " + ",  fc[jj-j0+1] * yi)
+            #yi *= (1-ldli.fval[jj])
+        end
+        j = ldli.rowval[j1]
+        y[j] += yi
+        #println(j, ": ", y[j], " + ",  yi)
+        y[i] = yi
+               
+    end
+end
+
+========================================#
+
