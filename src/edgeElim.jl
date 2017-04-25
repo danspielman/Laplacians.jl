@@ -797,11 +797,11 @@ function forward3!(ldli::LDLinv, y::Array{Float64,1})
         j0 = ldli.colptr[ii]
         j1 = ldli.colptr[ii+1]-1
 
-        
+
         fc = copy(ldli.fval[j0:(j1-1)])
         pfc = prod(1-fc)
         println("pfc: ",pfc)
-        
+
         yi = y[i]*pfc
 
         for h in 1:length(fc)
@@ -809,13 +809,13 @@ function forward3!(ldli::LDLinv, y::Array{Float64,1})
             fc[h] = fc[h]/pfc
             pfc = pfc / (1-z)
         end
-        
+
         #println("1? ",pfc)
-        
+
         @inbounds @simd for jj in j0:(j1-1)
-            j = ldli.rowval[jj]            
+            j = ldli.rowval[jj]
             y[j] += fc[jj-j0+1] * yi
-            
+
             #println(j, ": ", y[j], " + ",  fc[jj-j0+1] * yi)
             #yi *= (1-ldli.fval[jj])
         end
@@ -823,9 +823,10 @@ function forward3!(ldli::LDLinv, y::Array{Float64,1})
         y[j] += yi
         #println(j, ": ", y[j], " + ",  yi)
         y[i] = yi
-               
+
     end
 end
 
 ========================================#
 
+include("/Users/spielman/Laplacians/src/edgeElimOrd.jl")

@@ -43,6 +43,7 @@ end
   Print a column in an LLmatp matrix.
   This is here for diagnostics.
 """
+#=
 function print_ll_col(llmat::LLMatOrd, i::Int)
     ll = llmat.cols[i]
     println("col $i, row $(ll.row) : $(ll.val)")
@@ -52,6 +53,7 @@ function print_ll_col(llmat::LLMatOrd, i::Int)
         println("col $i, row $(ll.row) : $(ll.val)")
     end
 end
+=#
 
 #=============================================================
 
@@ -145,9 +147,10 @@ function edgeElim{Tind,Tval}(a::LLMatOrd{Tind,Tval})
 
     o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
 
-    for i in 1:(n-1)
 
-        println(i)
+    # issue: need to allow degree 0.  So, do not want a head,
+    # and do not want ptr based.
+    for i in 1:(n-1)
 
         ldli.col[i] = i  # will get rid of this with new data type
         ldli.colptr[i] = ldli_row_ptr
