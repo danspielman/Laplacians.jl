@@ -44,17 +44,14 @@ end
   Row tells us the row, and should be bigger than the column.
   Val is the entry.
   val is set to zero for some edges that we should remove.
-  next gives the next in the column.  It points to itself to terminate.
+  next gives the index of the next in the column.
+  It should be 0 to terminate.
 
 """
-type LLord{Tind,Tval}
+immutable LLord{Tind,Tval}
     row::Tind
+    next::Tind
     val::Tval
-    next::LLord
-
-    LLord{Tind,Tval}(row::Tind, val::Tval) = (x = new(row, val); x.next = x)
-    LLord{Tind,Tval}(row::Tind, val::Tval, next) = (x = new(row, val, next))
-
 end
 
 """
@@ -67,7 +64,7 @@ end
 """
 type LLMatOrd{Tind,Tval}
     n::Tind
-    cols::Array{LLord{Tind,Tval},1}
+    cols::Array{Tind,1}
     lles::Array{LLord{Tind,Tval},1}
 end
 

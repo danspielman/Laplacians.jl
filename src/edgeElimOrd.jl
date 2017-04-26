@@ -17,21 +17,24 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
     n = size(a,1)
     m = nnz(a)
 
-    cols = Array(LLord{Tind,Tval}, n)
+    cols = zeros(Tind, n)
     llelems = Array(LLord{Tind,Tval}, m)
 
-    for i in 1:n
+    ptr = one(Tind)
 
-        ind = a.colptr[i]
-        j = a.rowval[ind]
-        v = a.nzval[ind]
+    for i in 1:(n-1)
+        next = zero(Tind)
 
-        llpend = LLord{Tind,Tval}(j,v)
-        next = llelems[ind] = llpend
-        for ind in (a.colptr[i]+1):(a.colptr[i+1]-1)
+        for ind in (a.colptr[i]):(a.colptr[i+1]-1)
             j = a.rowval[ind]
-            v = a.nzval[ind]
-            next = llelems[ind] = LLord{Tind,Tval}(j,v,next)
+            if (i < j)
+
+              v = a.nzval[ind]
+              llelems[ptr] = LLord{Tind,Tval}(j, next, v)
+              next = ptr
+              ptr += 1
+
+            end
         end
         cols[i] = next
     end
@@ -40,20 +43,19 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
 end
 
 """
-  Print a column in an LLmatp matrix.
+  Print a column in an LLMatOrd matrix.
   This is here for diagnostics.
 """
-#=
 function print_ll_col(llmat::LLMatOrd, i::Int)
-    ll = llmat.cols[i]
-    println("col $i, row $(ll.row) : $(ll.val)")
+    ptr = llmat.cols[i]
+    while ptr != 0
+      ll = llmat.lles[ptr]
+      println("col $i, row $(ll.row) : $(ll.val)")
 
-    while ll.next != ll
-        ll = ll.next
-        println("col $i, row $(ll.row) : $(ll.val)")
+      ptr = ll.next
     end
 end
-=#
+
 
 #=============================================================
 
