@@ -69,35 +69,27 @@ The approximate factorization
 #
 function get_ll_col(llmat, i::Int, colspace)
 
-
-    ll = llmat.cols[i]
+    ptr = llmat.cols[i]
     len = 0
-    while ll.next != ll
+    while ptr != 0
 
-        if ll.val > 0
+        #if ll.val > 0
             len = len+1
             if (len > length(colspace))
                 push!(colspace,ll)
             else
-                colspace[len] = ll
+                colspace[len] = llmat.lles[ptr]
             end
-        end
+        #end
 
-        ll = ll.next
-    end
-
-    if ll.val > 0
-        len = len+1
-        if (len > length(colspace))
-            push!(colspace,ll)
-        else
-            colspace[len] = ll
-        end
+        ptr = llmat.lles[ptr].next
     end
 
     return len
 end
 
+
+## to here
 
 function compressCol!{Tind,Tval}(a::LLMatOrd{Tind,Tval}, colspace::Array{LLord{Tind,Tval},1}, len::Int)
 
