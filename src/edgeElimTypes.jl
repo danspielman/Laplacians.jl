@@ -38,39 +38,24 @@ type LLmatp
     lles::Array{LLp,1}
 end
 
-"""
-  LLord: for an elimination of fixed order.
-  Elements are all in the same column.
-  Row tells us the row, and should be bigger than the column.
-  Val is the entry.
-  val is set to zero for some edges that we should remove.
-  next gives the index of the next in the column.
-  It should be 0 to terminate.
-
-"""
+# these are the types we use with a fixed ordering
 immutable LLord{Tind,Tval}
     row::Tind
     next::Tind
     val::Tval
 end
 
-"""
-  LLMatOrd is the data structure used to maintain the matrix during elimination,
-  when the order of elimination is pre-determined.
-  It stores the elements in each column in a singly linked list (only next ptrs)
-  Each element is an LLord (linked list pointer).
-  The head of each column is pointed to by cols.
-
-"""
 type LLMatOrd{Tind,Tval}
     n::Tind
     cols::Array{Tind,1}
     lles::Array{LLord{Tind,Tval},1}
 end
 
-
-
-
+immutable LLcol{Tind,Tval}
+      row::Tind
+      ptr::Tind
+      val::Tval
+  end
 
 #=============================================================
 
