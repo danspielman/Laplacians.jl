@@ -133,8 +133,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}, perm::Array)
     n = size(a,1)
     m = nnz(a)
 
-    invp = zeros(perm)
-    invp[perm] = collect(1:n)
+    invp = invperm(perm)
 
     cols = zeros(Tind, n)
     llelems = Array(LLord{Tind,Tval}, m)
