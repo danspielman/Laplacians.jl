@@ -193,7 +193,7 @@ and exports the functions for which it seems appropriate.
 
   include("edgeElimTypes.jl")
   include("edgeElim.jl")
-  export edgeElimLap
+  export edgeElimLap, EdgeElimParams
 
   include("complexSolvers.jl")
   export SDDMSolvers

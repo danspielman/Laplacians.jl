@@ -27,19 +27,19 @@ fa = conSolve(a)
 a2 = disjoin(chimera(100,2),wtedChimera(200,3))
 la2 = lap(a2)
 n = size(a2,1)
-b2 = randn(n); 
+b2 = randn(n);
 b2[1:100] = b2[1:100] - mean(b2[1:100]);
 b2[101:300] = b2[101:300] - mean(b2[101:300]);
 
 f = Laplacians.lapWrapComponents(conSolve, a2)
 
 x = f(b2,verbose=true)
-norm(la2*x-b2)/norm(b2) 
+norm(la2*x-b2)/norm(b2)
 
 f = Laplacians.lapWrapComponents(Laplacians.cgLapSolver, a2)
 
 x1 = f(b2,verbose=true)
-norm(la2*x1-b2)/norm(b2) 
+norm(la2*x1-b2)/norm(b2)
 
 sum(x1[101:300])
 
@@ -71,7 +71,7 @@ f = Laplacians.cholLap(a)
 fs = Laplacians.lapWrapSDDM(cgSolver)
 f = fs(a, tol=1e-2, verbose=true)
 x = f(b, tol=1e-6);
-             
+
 
 mats = []
 rhss = []
@@ -98,7 +98,7 @@ end
 function testSolvers(a;maxtime=5)
 
     maxits = 200
-    
+
     n = a.n
     excess = zeros(n); excess[1] = excess[n] = 0.1;
     la = lap(a);
@@ -108,7 +108,7 @@ function testSolvers(a;maxtime=5)
     its = Int[0]
 
 
-    
+
     for solver in SDDMSolvers
         f = solver(sddm, tol=1e-6, maxtime=maxtime,verbose=true);
         x = f(b,tol=1e-6,maxits=maxits,verbose=true,pcgIts=its);
@@ -145,7 +145,7 @@ for i in 1:100
 
     nnzL, flops = ask_cholmod(lap(gr))
     pe = cholmod_perm(lap(gr))
-    
+
     testSolvers(gr)
 
     gru = unweight(gr)
@@ -160,7 +160,16 @@ n = size(a,1)
 b = randn(n)
 b = b - mean(b)
 la = lap(a)
-for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver, edgeElimLap]
+ee1 = function(a; verbose=false, args...)
+    edgeElimLap(a; params=EdgeElimParams(:deg), verbose=verbose, args...)
+end
+ee2 = function(a; verbose=false, args...)
+    edgeElimLap(a; params=EdgeElimParams(:wdeg), verbose=verbose, args...)
+end
+ee3 = function(a; verbose=false, args...)
+    edgeElimLap(a; params=EdgeElimParams(:given), verbose=verbose, args...)
+end
+for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver, ee1, ee2, ee3]
     f = solver(a, tol=1e-6, maxtime=5);
     x = f(b);
     @test norm(la*x - b)/norm(b) <= 1e-1
@@ -256,5 +265,3 @@ solvers = [SolverTest(lnew,"new") SolverTest(lold,"old")]
 
 dic = Dict()
 x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2)
-
-
