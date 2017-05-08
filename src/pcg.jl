@@ -53,18 +53,6 @@ The parameters are as described in pcg.
 """
 function pcgSolver end
 
-function cg(mat, b::Array{Float64,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
-    cgBLAS(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
-end
-
-function cg(mat, b::Array{Float32,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
-    cgBLAS(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
-end
-
-function cg(mat, b; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=true, pcgIts=Int[])
-    cgSlow(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
-end
-
 function cgSolver(mat; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     tol_=tol
@@ -118,20 +106,6 @@ function pcg(mat, b, pre::Union{AbstractArray,Matrix}; tol::Real=1e-6, maxits=In
 end
 
 
-function pcg(mat, b::Array{Float64,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
-    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
-end
-
-function pcg(mat, b::Array{Float32,1}, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
-    pcgBLAS(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
-end
-
-
-function pcg(mat, b, pre::Function; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
-    pcgSlow(mat, b, pre, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
-end
-
-
 function pcgSolver(mat, pre; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
     tol_=tol
     maxits_=maxits
@@ -167,9 +141,234 @@ function pcgLapSolver(A::AbstractMatrix, B::AbstractMatrix; tol::Real=1e-6, maxi
 
 end
 
+function cg{Tval}(mat, b::Array{Tval,1};
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+
+    local al::Tval
+
+    n = size(mat,2)
+
+    nb = norm(b)
+
+    # If input vector is zero, quit
+    if nb == 0
+      return bestx
+    end
+
+    x = zeros(Tval,n)
+    bestx = zeros(Tval,n)
+    bestnr = one(Tval)
+
+    r = copy(b)
+
+    p = copy(r)
+
+    rho = norm(r)^2
+
+    t1 = time()
+
+    itcnt = 0
+    while itcnt < maxits
+        itcnt = itcnt+1
+
+        q = mat*p
+
+        al = rho/dot(p, q)
+
+        axpy2!(al,p,x)
+        # x = x + al * p
+
+        axpy2!(-al,q,r)
+        #r .= r .- al.*q
+
+        nr = norm(r)/nb
+        if nr < bestnr
+          bestnr = nr
+          @inbounds @simd for i in 1:n
+            bestx[i] = x[i]
+          end
+        end
+        if nr < tol #Converged?
+            break
+        end
+
+        # here is the top of the code in numerical templates
+
+        oldrho = rho
+        rho = norm(r)^2
+        if (rho < eps(Tval) || isinf(rho))
+            println("CG stopped for rho: ", rho)
+          break
+        end
+
+        # the following would have higher accuracy
+        #       rho = sum(r.^2)
+
+        beta = rho/oldrho
+        if (beta< eps(Tval) || isinf(beta))
+            println("CG stopped for beta: ", beta)
+
+          break
+        end
+
+        bzbeta!(beta,p,r)
+        # p = z + beta*p
+
+        if (time() - t1) > maxtime
+            if verbose
+                println("CG stopped at maxtime.")
+            end
+            break
+        end
+
+    end
+
+    if verbose
+        println("CG stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+    end
+
+    if length(pcgIts) > 0
+        pcgIts[1] = itcnt
+    end
+
+
+    return bestx
+end
+
+function pcg{Tval}(mat, b::Array{Tval,1}, pre::Function;
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+
+    local al::Tval
+
+    n = size(mat,2)
+
+    nb = norm(b)
+
+    # If input vector is zero, quit
+    if nb == 0
+      return bestx
+    end
+
+    x = zeros(Tval,n)
+    bestx = zeros(Tval,n)
+    bestnr = one(Tval)
+
+    r = copy(b)
+    z = pre(r)
+    p = copy(z)
+
+    rho = dot(r, z)
+
+    t1 = time()
+
+    itcnt = 0
+    while itcnt < maxits
+        itcnt = itcnt+1
+
+        q = mat*p
+
+        al = rho/dot(p, q)
+
+        axpy2!(al,p,x)
+        # x = x + al * p
+        #=
+        @inbounds @simd for i in 1:n
+            x[i] += al*p[i]
+        end
+        =#
+        #axpy
+
+        axpy2!(-al,q,r)
+        #r .= r .- al.*q
+        #=
+        @inbounds @simd for i in 1:n
+            r[i] -= al*q[i]
+        end
+        =#
+
+        nr = norm(r)/nb
+        if nr < bestnr
+          bestnr = nr
+          @inbounds @simd for i in 1:n
+            bestx[i] = x[i]
+          end
+        end
+        if nr < tol #Converged?
+            break
+        end
+
+        # here is the top of the code in numerical templates
+
+        z = pre(r)
+
+        oldrho = rho
+        rho = dot(z, r)
+        if (rho < eps(Tval) || isinf(rho))
+          break
+        end
+
+        # the following would have higher accuracy
+        #       rho = sum(r.^2)
+
+        beta = rho/oldrho
+        if (beta< eps(Tval) || isinf(beta))
+          break
+        end
+
+        bzbeta!(beta,p,z)
+        #=
+        # p = z + beta*p
+        @inbounds @simd for i in 1:n
+            p[i] = z[i] + beta*p[i]
+        end
+        =#
+
+        if (time() - t1) > maxtime
+            if verbose
+                println("PCG New stopped at maxtime.")
+            end
+            break
+        end
+
+    end
+
+    if verbose
+        println("PCG stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+    end
+
+    if length(pcgIts) > 0
+        pcgIts[1] = itcnt
+    end
+
+
+    return bestx
+end
+
+
+function axpy2!(al,p::Array,x::Array)
+  n = length(x)
+  @inbounds @simd for i in 1:n
+      x[i] = x[i] + al*p[i]
+  end
+end
+
+# p[i] = z[i] + beta*p[i]
+function bzbeta!(beta,p::Array,z::Array)
+  n = length(p)
+  @inbounds @simd for i in 1:n
+      p[i] = z[i] + beta*p[i]
+  end
+end
 
 
 
+
+
+
+#==========================================================
+   Code we no longer use
+===========================================================#
+   
 
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar paramaters

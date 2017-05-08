@@ -1,7 +1,15 @@
 #==========================================================
 Code for comparing solvers
+
+For comparing possibly flaky code, we need an ability to stop the code
+if it runs for too long.
+Code that does that is in the compare directory.
+
+It uses threads for Julia code,
+and has special code for the matlab solvers
+
 ===========================================================#
-    
+
 
 """
     SolverTest(solver, name)
@@ -17,7 +25,7 @@ end
 """
     initDictCol!(dic, name, typ)
 
-For a dictionary in which each key indexes an array.  
+For a dictionary in which each key indexes an array.
 If dic does not contain an entry of `name`, create with set to `Array(typ,0)`.
 """
 function initDictCol!(dic, name, typ)
@@ -29,14 +37,27 @@ end
 
 
 """
-    function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+`ret` is the answer returned by a speed test.
+This pushed it into the dictionary on which we are storing the tests.
+"""
+function pushSpeedResult!(dic, name, ret)
+    push!(dic["$(name)_solve"],ret[1])
+    push!(dic["$(name)_build"],ret[2])
+    push!(dic["$(name)_tot"],ret[1]+ret[2])
+    push!(dic["$(name)_its"],ret[3])
+    push!(dic["$(name)_err"],ret[4])
+end
+
+
+"""
+    function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=Inf, maxtime=Inf, verbose=false)
 
 Runs many Laplacians solvers.  Puts the build and solve time results into a dictionary dic.  It would be easiest to look at it via DataFrame(dic).  Returns the answer from the last solver.  `solvers` should be an array of `SolverTest`.
 """
-function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=Inf, maxtime=Inf, verbose=false)
+function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=10000, maxtime=1000, verbose=false, testName="")
 
     b = b - mean(b)
-    
+
     la = lap(a)
 
     it = Int[1]
@@ -45,13 +66,16 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
     initDictCol!(dic, "nv", Int)
     initDictCol!(dic, "ne", Int)
     initDictCol!(dic, "hash_a", UInt64)
+    initDictCol!(dic, "testName", String)
     
     solvecol(name) = "$(name)_solve"
     buildcol(name) = "$(name)_build"
     totcol(name) = "$(name)_tot"
     itscol(name) = "$(name)_its"
     errcol(name) = "$(name)_err"
-    
+
+    dic["names"] = [t.name for t in solvers]
+
     for solver in solvers
         name = solver.name
         initDictCol!(dic, solvecol(name), Float64)
@@ -60,7 +84,7 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
         initDictCol!(dic, itscol(name), Float64)
         initDictCol!(dic, errcol(name), Float64)
     end
-    
+
     nv = size(a,1)
     ne = nnz(a)
     hash_a = hash(a)
@@ -68,30 +92,58 @@ function speedTestLapSolvers{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::
     push!(dic["nv"],nv)
     push!(dic["ne"],ne)
     push!(dic["hash_a"],hash_a)
-
-    x = []
+    push!(dic["testName"],testName)
     
-    for solverTest in solvers
-        tic()
-        f = solverTest.solver(a, tol=tol, maxtime=maxtime, maxits=maxits, verbose=verbose)
-        build_time = toq()
+    x = []
 
-        tic()
-        x = f(b, pcgIts = it)
-        solve_time = toq()
+    for i in 1:length(solvers)
+        solverTest = solvers[i]
 
-        err = norm(la * x - b) / norm(b)
+        if verbose
+            println()
+            println(solverTest.name)
+        end
 
-        name = solverTest.name
-        push!(dic[solvecol(name)],solve_time)
-        push!(dic[buildcol(name)],build_time)
-        push!(dic[totcol(name)],solve_time + build_time)
-        push!(dic[itscol(name)],it[1])
-        push!(dic[errcol(name)],err)
+        ret = testSolver(solverTest.solver, a, b, tol, maxits, verbose)
 
+        if i == 1
+            x = ret[5]
+        end
+        
+        
+        pushSpeedResult!(dic, solverTest.name, ret)
     end
 
     return x
 
 end
 
+
+function testSolver(solver, a, b, tol, maxits, verbose)
+
+  try
+
+    gc()
+    tic()
+    f = solver(a, tol=tol, maxits=maxits, verbose=verbose)
+    build_time = toq()
+
+    it = [0]
+    gc()
+    tic()
+    x = f(b, pcgIts = it, tol=tol, maxits=maxits, verbose=verbose)
+    solve_time = toq()
+
+    err = norm(lap(a) * x - b) / norm(b)
+
+    ret = (solve_time, build_time, it[1], err, x)
+    if verbose
+      println((solve_time, build_time, it[1], err))
+    end
+    return ret
+  catch
+    println("Solver Error.")
+    return (Inf, Inf, Inf, Inf)
+  end
+
+end
