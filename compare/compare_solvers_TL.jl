@@ -38,7 +38,7 @@ function speedTestLapTL{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array
     initDictCol!(dic, "ne", Int)
     initDictCol!(dic, "hash_a", UInt64)
     initDictCol!(dic, "testName", String)
-    
+
     solvecol(name) = "$(name)_solve"
     buildcol(name) = "$(name)_build"
     totcol(name) = "$(name)_tot"
@@ -64,7 +64,7 @@ function speedTestLapTL{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array
     push!(dic["ne"],ne)
     push!(dic["hash_a"],hash_a)
     push!(dic["testName"],testName)
-    
+
     x = []
 
     i = 1
@@ -149,7 +149,9 @@ Runs many Laplacians solvers.  Puts the build and solve time results into a dict
 
 Also compares them against the solvers we have in matlab, with a time limit of 10x the first solver here.
 """
-function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="")
+function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
+  tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
+  test_icc=true, test_cmg=true, test_lamg=true)
 
     b = b - mean(b)
 
@@ -162,7 +164,7 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
     initDictCol!(dic, "ne", Int)
     initDictCol!(dic, "hash_a", UInt64)
     initDictCol!(dic, "testName", String)
-    
+
     solvecol(name) = "$(name)_solve"
     buildcol(name) = "$(name)_build"
     totcol(name) = "$(name)_tot"
@@ -173,11 +175,17 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
     for t in solvers
         push!(dic["names"], t.name)
     end
-    
-    push!(dic["names"], "cmg")
-    push!(dic["names"], "icc")
-    push!(dic["names"], "lamg")
-    
+
+    if test_cmg
+      push!(dic["names"], "cmg")
+    end
+    if test_icc
+      push!(dic["names"], "icc")
+    end
+    if test_lamg
+      push!(dic["names"], "lamg")
+    end
+
     for name in dic["names"]
         initDictCol!(dic, solvecol(name), Float64)
         initDictCol!(dic, buildcol(name), Float64)
@@ -194,7 +202,7 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
     push!(dic["ne"],ne)
     push!(dic["hash_a"],hash_a)
     push!(dic["testName"],testName)
-    
+
     x = []
 
     tl = 0
@@ -213,8 +221,8 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
             x = ret[5]
             tl = round(Int,30 + 10*(ret[1]+ret[2]))
         end
-        
-        
+
+
         pushSpeedResult!(dic, solverTest.name, ret)
 
     end
@@ -223,24 +231,30 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
         error("tl is zero")
     end
 
-    if verbose
-        println("cmg")
-    end
-    
-    ret = timeLimitCmg(tl, lap(a), b,verbose = true);
-    pushSpeedResult!(dic, "cmg", ret)
+    if test_cmg
+      if verbose
+          println("cmg")
+      end
 
-    if verbose
-        println("icc")
+      ret = timeLimitCmg(tl, lap(a), b,verbose = true);
+      pushSpeedResult!(dic, "cmg", ret)
     end
-    ret = timeLimitIcc(tl, lap(a), b,verbose = true);
-    pushSpeedResult!(dic, "icc", ret)
 
-    if verbose
-        println("lamg")
+    if test_icc
+      if verbose
+          println("icc")
+      end
+      ret = timeLimitIcc(tl, lap(a), b,verbose = true);
+      pushSpeedResult!(dic, "icc", ret)
     end
-    ret = timeLimitLamg(tl, lap(a), b,verbose = true);
-    pushSpeedResult!(dic, "lamg", ret)
+
+    if test_lamg
+      if verbose
+          println("lamg")
+      end
+      ret = timeLimitLamg(tl, lap(a), b,verbose = true);
+      pushSpeedResult!(dic, "lamg", ret)
+    end
 
     return x
 
@@ -252,5 +266,5 @@ function testVMatlabLap(solvers::Array, dic::Dict, maker::Function; testName="")
     n = size(a,1)
     b = randn(n);
     b = b - mean(b);
-    testVMatlabLap(solvers, dic, a, b, testName=testName, verbose=true)    
+    testVMatlabLap(solvers, dic, a, b, testName=testName, verbose=true)
 end

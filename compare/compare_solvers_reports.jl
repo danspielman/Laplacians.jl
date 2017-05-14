@@ -73,7 +73,7 @@ function plots_and_stats_raw(dic,str,title)
     p = sortperm(dic[key])
 
     baserow = dic["$(sol1)_$(str)"][p]
-    
+
     for name in dic["names"]
         key = "$(name)_$(str)"
         thisrow = dic[key][p]
@@ -107,5 +107,33 @@ function plot_relative(dic,str,title)
         print(str, " " ,rowname, " ")
         vec_stats(threshrow, thisrow)
   end
+  display(plt)
+end
+
+function compare_two(dic,sol1,sol2)
+
+  plt = Plots.plot(title = "Total Time, Relative")
+    key1 = "$(sol1)_tot"
+    key2 = "$(sol2)_tot"
+
+    tot1 = dic[key1]
+    tot2 = dic[key2]
+
+    Plots.plot!(sort(tot1./tot2), label="$(sol1) / $(sol2)")
+    Plots.plot!(sort(tot2./tot1), label="$(sol2) / $(sol1)")
+
+  display(plt)
+
+  plt = Plots.plot(title = "Total Time / nnz")
+    key1 = "$(sol1)_tot"
+    key2 = "$(sol2)_tot"
+
+    tot1 = dic[key1]
+    tot2 = dic[key2]
+    ne = dic["ne"]
+
+    Plots.plot!(sort(tot1./ne), label="$(sol1) / nnz")
+    Plots.plot!(sort(tot2./ne), label="$(sol2) / nnz")
+
   display(plt)
 end
