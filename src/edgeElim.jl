@@ -61,7 +61,7 @@ function LLmatp(a::SparseMatrixCSC)
     cols = Array(LLp, n)
     llelems = Array(LLp, m)
 
-    for i in 1:n
+    @inbounds for i in 1:n
         degs[i] = a.colptr[i+1] - a.colptr[i]
 
         ind = a.colptr[i]
@@ -77,7 +77,7 @@ function LLmatp(a::SparseMatrixCSC)
         cols[i] = next
     end
 
-    for i in 1:n
+    @inbounds for i in 1:n
         for ind in a.colptr[i]:(a.colptr[i+1]-1)
             llelems[ind].reverse = llelems[flips[ind]]
         end
@@ -109,7 +109,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
 
     ptr = one(Tind)
 
-    for i in 1:(n-1)
+    @inbounds for i in 1:(n-1)
         next = zero(Tind)
 
         for ind in (a.colptr[i]):(a.colptr[i+1]-1)
@@ -140,7 +140,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}, perm::Array)
 
     ptr = one(Tind)
 
-    for i0 in 1:n
+    @inbounds for i0 in 1:n
         i = invp[i0]
         next = zero(Tind)
 
@@ -188,7 +188,7 @@ function get_ll_col(llmat::LLmatp, i::Int, colspace::Array{LLp,1})
 
     ll = llmat.cols[i]
     len = 0
-    while ll.next != ll
+    @inbounds while ll.next != ll
 
         if ll.val > 0
             len = len+1
@@ -218,7 +218,7 @@ function get_ll_col{Tind,Tval}(llmat::LLMatOrd{Tind,Tval}, i::Tind, colspace)
 
     ptr = llmat.cols[i]
     len = zero(Tind)
-    while ptr != 0
+    @inbounds while ptr != 0
 
         #if ll.val > 0
             len = len+1
@@ -251,7 +251,7 @@ function compressCol!(a::LLmatp, colspace::Array{LLp,1}, len::Int, pq::EdgeElimP
 
     c = colspace
 
-    for i in 1:len
+    @inbounds for i in 1:len
 
         if c[i].row != currow
             currow = c[i].row
@@ -286,7 +286,7 @@ function compressCol!{Tind,Tval}(colspace::Array{LLcol{Tind,Tval},1}, len::Tind)
     curval = c[1].val
     curptr = c[1].ptr
 
-    for i in 2:len
+    @inbounds for i in 2:len
 
         if c[i].row != currow
 
@@ -441,7 +441,7 @@ function edgeElim(a::LLmatp)
 
     o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
 
-    while it < n
+    @inbounds while it < n
 
         i = edgeElimPQPop!(pq)
 
@@ -539,6 +539,7 @@ function edgeElim(a::LLmatp)
 end
 
 
+
 #=============================================================
 
 The routines that do the solve.
@@ -550,7 +551,7 @@ function LDLsolver{Tv}(ldli::LDLinv, b::Array{Tv,1})
 
     forward!(ldli, y)
 
-    for i in 1:(length(ldli.d))
+    @inbounds for i in 1:(length(ldli.d))
         if ldli.d[i] != 0
             y[i] /= ldli.d[i]
         end
@@ -559,7 +560,7 @@ function LDLsolver{Tv}(ldli::LDLinv, b::Array{Tv,1})
     backward!(ldli, y)
 
     mu = mean(y)
-    for i in eachindex(y)
+    @inbounds for i in eachindex(y)
         y[i] = y[i] - mu
     end
 
@@ -568,7 +569,7 @@ end
 
 
 function forward!(ldli::LDLinv, y::Array{Float64,1})
-    for ii in 1:length(ldli.col)
+    @inbounds for ii in 1:length(ldli.col)
         i = ldli.col[ii]
 
         j0 = ldli.colptr[ii]
@@ -588,7 +589,7 @@ function forward!(ldli::LDLinv, y::Array{Float64,1})
 end
 
 function backward!(ldli::LDLinv, y::Array{Float64,1})
-    for ii in length(ldli.col):-1:1
+    @inbounds for ii in length(ldli.col):-1:1
         i = ldli.col[ii]
 
         j0 = ldli.colptr[ii]

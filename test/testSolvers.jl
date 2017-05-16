@@ -85,6 +85,12 @@ x = f(b);
 solver = Laplacians.edgeElimLapChol(a,verbose=true)
 x = solver(b);
 
+# testing edgeElim internals
+a = randRegular(20,3)
+llp = Laplacians.LLmatp(a)
+Laplacians.print_ll_col(llp,1)
+llo = Laplacians.LLMatOrd(a);
+Laplacians.print_ll_col(llo,1)
 
 
 # testing by repitition
