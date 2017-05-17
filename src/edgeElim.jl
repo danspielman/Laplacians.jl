@@ -42,10 +42,11 @@ order can be one of
 """
 type EdgeElimParams
     order::Symbol
+    stag_test::Integer
 end
 
-EdgeElimParams() = EdgeElimParams(:deg)
-
+EdgeElimParams() = EdgeElimParams(:deg, 5)
+EdgeElimParams(sym::Symbol) = EdgeElimParams(sym, 5)
 
 LDLinv(n) = LDLinv(zeros(Int,n-1),zeros(Int,n),Array(Int,0),Array(Float64,0),zeros(Float64,n))
 
@@ -675,7 +676,7 @@ function edgeElimLapGreedy(a::SparseMatrixCSC;
   end
 
 
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
 
 end
 
@@ -711,7 +712,7 @@ function edgeElimLapGiven(a::SparseMatrixCSC;
   end
 
 
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
 
 end
 

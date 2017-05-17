@@ -24,7 +24,7 @@ solves a symmetric linear system `mat x = b`.
 function cg end
 
 """
-    x = pcg(mat, b, pre; tol, maxits, maxtime, verbose, pcgIts)`
+    x = pcg(mat, b, pre; tol, maxits, maxtime, verbose, pcgIts, stag_test)`
 
 solves a symmetric linear system using preconditioner `pre`.
 # Arguments
@@ -34,6 +34,7 @@ solves a symmetric linear system using preconditioner `pre`.
 * `maxtime` defaults to Inf.  It measures seconds.
 * `verbose` defaults to false
 * `pcgIts` is an array for returning the number of pcgIterations.  Default is length 0, in which case nothing is returned.
+* `stag_test=k` stops the code if rho[it] > (1-1/k) rho[it-k].  Set to 0 to deactivate.
 """
 function pcg end
 
@@ -177,6 +178,13 @@ function cg{Tval}(mat, b::Array{Tval,1};
 
         al = rho/dot(p, q)
 
+        if (al < eps(Tval) || isinf(al))
+          if verbose
+            println("CG Stopped due to small or large alpha")
+          end
+          break
+        end
+
         axpy2!(al,p,x)
         # x = x + al * p
 
@@ -184,6 +192,14 @@ function cg{Tval}(mat, b::Array{Tval,1};
         #r .= r .- al.*q
 
         nr = norm(r)/nb
+
+        if (nr < eps(Tval) || isinf(nr))
+          if verbose
+            println("CG Stopped due to small or large norm(r)")
+          end
+          break
+        end
+
         if nr < bestnr
           bestnr = nr
           @inbounds @simd for i in 1:n
@@ -199,7 +215,7 @@ function cg{Tval}(mat, b::Array{Tval,1};
         oldrho = rho
         rho = norm(r)^2
         if (rho < eps(Tval) || isinf(rho))
-            println("CG stopped for rho: ", rho)
+          println("CG stopped for rho: ", rho)
           break
         end
 
@@ -208,8 +224,7 @@ function cg{Tval}(mat, b::Array{Tval,1};
 
         beta = rho/oldrho
         if (beta< eps(Tval) || isinf(beta))
-            println("CG stopped for beta: ", beta)
-
+          println("CG stopped for beta: ", beta)
           break
         end
 
@@ -238,7 +253,8 @@ function cg{Tval}(mat, b::Array{Tval,1};
 end
 
 function pcg{Tval}(mat, b::Array{Tval,1}, pre::Function;
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],
+        stag_test::Integer=0)
 
     local al::Tval
 
@@ -260,6 +276,8 @@ function pcg{Tval}(mat, b::Array{Tval,1}, pre::Function;
     p = copy(z)
 
     rho = dot(r, z)
+    best_rho = rho
+    stag_count = 0
 
     t1 = time()
 
@@ -280,8 +298,12 @@ function pcg{Tval}(mat, b::Array{Tval,1}, pre::Function;
 
         al = rho/pq
 
+        # the following line could cause slowdown
         if al*norm(p) < eps(Tval)*norm(x)
-          println("PCG: stagnation warning.")
+          if verbose
+            println("PCG: Stopped due to stagnation.")
+          end
+          break
         end
 
         axpy2!(al,p,x)
@@ -318,6 +340,22 @@ function pcg{Tval}(mat, b::Array{Tval,1}, pre::Function;
 
         oldrho = rho
         rho = dot(z, r) # this is gamma in hypre.
+
+        if rho < best_rho*(1-1/stag_test)
+          best_rho = rho
+          stag_count = 0
+        else
+          if stag_test > 0
+            if best_rho > (1-1/stag_test)*rho
+              stag_count += 1
+              if stag_count > stag_test
+                println("PCG Stopped by stagnation test ", stag_test)
+                break
+              end
+            end
+          end
+        end
+
         if (rho < eps(Tval) || isinf(rho))
           if verbose
             println("PCG Stopped due to small or large rho")
@@ -381,7 +419,7 @@ function bzbeta!(beta,p::Array,z::Array)
   end
 end
 
-
+#=
 function pcgDiagnose{Tval}(mat, b::Array{Tval,1}, pre::Function;
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
@@ -436,25 +474,20 @@ function pcgDiagnose{Tval}(mat, b::Array{Tval,1}, pre::Function;
         push!(dic["alpha"],al)
 
         if al*norm(p) < eps(Tval)*norm(x)
-          println("PCG: stagnation warning.")
+          if verbose
+            println("PCG: Stopped due to stagnation.")
+          end
+          break
         end
 
         axpy2!(al,p,x)
         # x = x + al * p
-        #=
-        @inbounds @simd for i in 1:n
-            x[i] += al*p[i]
-        end
-        =#
+
         #axpy
 
         axpy2!(-al,q,r)
         #r .= r .- al.*q
-        #=
-        @inbounds @simd for i in 1:n
-            r[i] -= al*q[i]
-        end
-        =#
+
 
         nr = norm(r)/nb
         push!(dic["nr"],nr)
@@ -498,12 +531,7 @@ function pcgDiagnose{Tval}(mat, b::Array{Tval,1}, pre::Function;
         end
 
         bzbeta!(beta,p,z)
-        #=
-        # p = z + beta*p
-        @inbounds @simd for i in 1:n
-            p[i] = z[i] + beta*p[i]
-        end
-        =#
+
 
         if (time() - t1) > maxtime
             if verbose
@@ -525,7 +553,7 @@ function pcgDiagnose{Tval}(mat, b::Array{Tval,1}, pre::Function;
 
     return bestx, dic
 end
-
+=#
 
 
 #==========================================================
