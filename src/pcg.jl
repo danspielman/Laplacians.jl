@@ -1,7 +1,9 @@
 #=
 
-Implementations of cg and pcg that use BLAS when they can.
-
+Implementations of cg and pcg.
+Need to add conditions for termination when stagnate.
+Look at two approaches: Matlab's, and
+hypre: https://github.com/LLNL/hypre/blob/master/src/krylov/pcg.c
 Started by Dan Spielman.
 Contributors:
 
@@ -22,7 +24,7 @@ solves a symmetric linear system `mat x = b`.
 function cg end
 
 """
-    x = pcg(mat, b, pre; tol, maxits, maxtime, verbose, pcgIts)` 
+    x = pcg(mat, b, pre; tol, maxits, maxtime, verbose, pcgIts)`
 
 solves a symmetric linear system using preconditioner `pre`.
 # Arguments
@@ -65,12 +67,12 @@ function cgSolver(mat; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, p
     f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =
        cg(mat, b, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end
-    
+
 
 """
     x = cgLapSolver(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
-Create a solver that uses cg to solve Laplacian systems in the laplacian of A. 
+Create a solver that uses cg to solve Laplacian systems in the laplacian of A.
 This just exists to satisfy our interface.
 It does nothing more than create the Laplacian and call cg on each connected component.
 """
@@ -85,7 +87,7 @@ end
 function cgLapSolver1(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     la = forceLap(A)
-    
+
     tol_=tol
     maxits_=maxits
     maxtime_=maxtime
@@ -127,7 +129,7 @@ It solves the preconditioner by Cholesky Factorization.
 """
 function pcgLapSolver(A::AbstractMatrix, B::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
     fact = cholLap(B)
-    
+
     tol_=tol
     maxits_=maxits
     maxtime_=maxtime
@@ -267,7 +269,20 @@ function pcg{Tval}(mat, b::Array{Tval,1}, pre::Function;
 
         q = mat*p
 
-        al = rho/dot(p, q)
+        pq = dot(p,q)
+
+        if (pq < eps(Tval) || isinf(pq))
+          if verbose
+            println("PCG Stopped due to small or large pq")
+          end
+          break
+        end
+
+        al = rho/pq
+
+        if al*norm(p) < eps(Tval)*norm(x)
+          println("PCG: stagnation warning.")
+        end
 
         axpy2!(al,p,x)
         # x = x + al * p
@@ -302,8 +317,11 @@ function pcg{Tval}(mat, b::Array{Tval,1}, pre::Function;
         z = pre(r)
 
         oldrho = rho
-        rho = dot(z, r)
+        rho = dot(z, r) # this is gamma in hypre.
         if (rho < eps(Tval) || isinf(rho))
+          if verbose
+            println("PCG Stopped due to small or large rho")
+          end
           break
         end
 
@@ -311,7 +329,10 @@ function pcg{Tval}(mat, b::Array{Tval,1}, pre::Function;
         #       rho = sum(r.^2)
 
         beta = rho/oldrho
-        if (beta< eps(Tval) || isinf(beta))
+        if (beta < eps(Tval) || isinf(beta))
+          if verbose
+            println("PCG Stopped due to small or large beta")
+          end
           break
         end
 
@@ -361,14 +382,156 @@ function bzbeta!(beta,p::Array,z::Array)
 end
 
 
+function pcgDiagnose{Tval}(mat, b::Array{Tval,1}, pre::Function;
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
+    local al::Tval
+
+    n = size(mat,2)
+
+    dic = Dict()
+    dic["rho"] = []
+    dic["alpha"] = []
+    dic["beta"] = []
+    dic["nr"] = []
+    dic["pq"] = []
+
+    nb = norm(b)
+
+    # If input vector is zero, quit
+    if nb == 0
+      return bestx
+    end
+
+    x = zeros(Tval,n)
+    bestx = zeros(Tval,n)
+    bestnr = one(Tval)
+
+    r = copy(b)
+    z = pre(r)
+    p = copy(z)
+
+    rho = dot(r, z)
+    push!(dic["rho"],rho)
+
+    t1 = time()
+
+    itcnt = 0
+    while itcnt < maxits
+        itcnt = itcnt+1
+
+        q = mat*p
+
+        pq = dot(p,q)
+        push!(dic["pq"],pq)
+
+        if (pq < eps(Tval) || isinf(pq))
+          if verbose
+            println("PCG Stopped due to small or large pq")
+          end
+          break
+        end
+
+        al = rho/pq
+        push!(dic["alpha"],al)
+
+        if al*norm(p) < eps(Tval)*norm(x)
+          println("PCG: stagnation warning.")
+        end
+
+        axpy2!(al,p,x)
+        # x = x + al * p
+        #=
+        @inbounds @simd for i in 1:n
+            x[i] += al*p[i]
+        end
+        =#
+        #axpy
+
+        axpy2!(-al,q,r)
+        #r .= r .- al.*q
+        #=
+        @inbounds @simd for i in 1:n
+            r[i] -= al*q[i]
+        end
+        =#
+
+        nr = norm(r)/nb
+        push!(dic["nr"],nr)
+
+        if nr < bestnr
+          bestnr = nr
+          @inbounds @simd for i in 1:n
+            bestx[i] = x[i]
+          end
+        end
+        if nr < tol #Converged?
+            break
+        end
+
+        # here is the top of the code in numerical templates
+
+        z = pre(r)
+
+        oldrho = rho
+        rho = dot(z, r) # this is gamma in hypre.
+
+        push!(dic["rho"],rho)
+        if (rho < eps(Tval) || isinf(rho))
+          if verbose
+            println("PCG Stopped due to small or large rho")
+          end
+          break
+        end
+
+        # the following would have higher accuracy
+        #       rho = sum(r.^2)
+
+        beta = rho/oldrho
+
+        push!(dic["beta"],beta)
+        if (beta < eps(Tval) || isinf(beta))
+          if verbose
+            println("PCG Stopped due to small or large beta")
+          end
+          break
+        end
+
+        bzbeta!(beta,p,z)
+        #=
+        # p = z + beta*p
+        @inbounds @simd for i in 1:n
+            p[i] = z[i] + beta*p[i]
+        end
+        =#
+
+        if (time() - t1) > maxtime
+            if verbose
+                println("PCG New stopped at maxtime.")
+            end
+            break
+        end
+
+    end
+
+    if verbose
+        println("PCG stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+    end
+
+    if length(pcgIts) > 0
+        pcgIts[1] = itcnt
+    end
+
+
+    return bestx, dic
+end
 
 
 
 #==========================================================
    Code we no longer use
 ===========================================================#
-   
+
 
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar paramaters
@@ -376,11 +539,11 @@ function cgBLAS{Tval}(mat, b::Array{Tval,1};
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     n = size(mat,2)
-    
+
     x = zeros(Tval,n)
-    
+
     tol = tol * norm(b)
-    r = copy(b) 
+    r = copy(b)
     p = copy(r)
 
     # the following would have higher accuracy
@@ -392,7 +555,7 @@ function cgBLAS{Tval}(mat, b::Array{Tval,1};
     itcnt = 0
     while itcnt < maxits
         itcnt = itcnt+1
-    
+
         q = mat*p
 
         al = rho/dot(p, q)
@@ -410,14 +573,14 @@ function cgBLAS{Tval}(mat, b::Array{Tval,1};
 
         # the following would have higher accuracy
         #       rho = sum(r.^2)
-        
+
         beta = rho/oldrho
 
         # p = r + beta*p
         BLAS.scal!(n,beta,p,1) # p *= beta
         BLAS.axpy!(1.0,r,p) # p += r
 
-       
+
         if (time() - t1) > maxtime
             if verbose
                 println("CG BLAS stopped at maxtime.")
@@ -434,7 +597,7 @@ function cgBLAS{Tval}(mat, b::Array{Tval,1};
     if length(pcgIts) > 0
         pcgIts[1] = itcnt
     end
-    
+
     return x
 end
 
@@ -444,11 +607,11 @@ function cgSlow{Tval}(mat, b::Array{Tval,1};
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     n = size(mat,2)
-    
+
     x = zeros(Tval,n)
-    
+
     tol = tol * norm(b)
-    r = copy(b) 
+    r = copy(b)
     p = copy(r)
 
     # the following would have higher accuracy
@@ -456,11 +619,11 @@ function cgSlow{Tval}(mat, b::Array{Tval,1};
     rho = norm(r)^2
 
     t1 = time()
-    
+
     itcnt = 0
     while itcnt < maxits
         itcnt = itcnt+1
-    
+
         q = mat*p
 
         al = rho/dot(p, q)
@@ -475,7 +638,7 @@ function cgSlow{Tval}(mat, b::Array{Tval,1};
             r[i] = r[i] - al*q[i]
         end
 
-        if norm(r) < tol 
+        if norm(r) < tol
             break
         end
 
@@ -484,7 +647,7 @@ function cgSlow{Tval}(mat, b::Array{Tval,1};
 
         # the following would have higher accuracy
         #       rho = sum(r.^2)
-        
+
         beta = rho/oldrho
 
 
@@ -523,11 +686,11 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     n = size(mat,2)
-    
+
     x = zeros(Tval,n)
-    
+
     tol = tol * norm(b)
-    r = copy(b) 
+    r = copy(b)
     z = pre(r)
     p = copy(z)
 
@@ -538,7 +701,7 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
     itcnt = 0
     while itcnt < maxits
         itcnt = itcnt+1
-        
+
         q = mat*p
 
         if dot(p,q) == 0
@@ -564,7 +727,7 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
 
         # the following would have higher accuracy
         #       rho = sum(r.^2)
-        
+
         beta = rho/oldrho
 
 
@@ -580,7 +743,7 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
             break
         end
 
-       
+
       end
 
     if verbose
@@ -600,22 +763,22 @@ function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
 
 
     n = size(mat,2)
-    
+
     x = zeros(Tval,n)
-    
+
     tol = tol * norm(b)
-    r = copy(b) 
+    r = copy(b)
     z = pre(r)
     p = copy(z)
 
-    rho = dot(r, z) 
+    rho = dot(r, z)
 
     t1 = time()
 
     itcnt = 0
     while itcnt < maxits
         itcnt = itcnt+1
-    
+
         q = mat*p
 
         al = rho/dot(p, q)
@@ -643,7 +806,7 @@ function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
 
         # the following would have higher accuracy
         #       rho = sum(r.^2)
-        
+
         beta = rho/oldrho
 
         # p = z + beta*p
@@ -657,7 +820,7 @@ function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
             end
             break
         end
-       
+
     end
 
     if verbose
