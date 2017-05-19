@@ -146,12 +146,17 @@ end
 
 
 """
-    a_new = thicken(a,k)
+    a_new = thicken(A,k)
 
-Create a new graph with at least k times as many edges as a
+Create a new graph with at least k times as many edges as A
 By connecting nodes with common neighbors at random.
 When this stops working (not enough new edges),
 repeat on the most recently produced graph.
+If k is too big, it is decreased so the average degree will not
+be pushed much above n/2.
+
+
+When called without k, it just runs thicken_once.
 
 For example:
 ```
@@ -163,6 +168,8 @@ plotGraph(a2,x,y)
 """
 function thicken(a::SparseMatrixCSC,k)
     n = a.n
+
+    k = min(k, round(Int, n^2/nnz(a)/2 ))
 
     ne0 = nnz(a)/2
 
@@ -183,6 +190,7 @@ function thicken(a::SparseMatrixCSC,k)
 
 end
 
+thicken(a) = unweight(a + thicken_once(a))
 
 """
     graph = generalizedNecklace(A, H, k::Int64)
