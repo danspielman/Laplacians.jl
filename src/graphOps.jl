@@ -140,7 +140,8 @@ function thicken_once(a::SparseMatrixCSC)
             e_new[ptr,:] = [nbri(a,i,nbr1) nbri(a,i,nbr2)]
         end
     end
-    a_new = sparse(e_new[:,1], e_new[:,2], 1, n, n)
+
+    a_new = sparse(e_new[1:ptr,1], e_new[1:ptr,2], 1, n, n)
     return unweight(a_new + a_new')
 end
 
