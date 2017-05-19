@@ -102,6 +102,8 @@ and exports the functions for which it seems appropriate.
 
   export edgeVertexMat
 
+  export thicken_once, thicken
+
   export productGraph
   export generalizedNecklace
   export subsampleEdges
