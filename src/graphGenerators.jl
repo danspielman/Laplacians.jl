@@ -665,7 +665,13 @@ function randWeight(a)
 
     if (rand() < .2)
         return a
+    else
+        return randWeightSub(a)
     end
+end
+
+
+function randWeightSub(a)
 
     n = a.n
     (ai,aj) = findnz(a)
