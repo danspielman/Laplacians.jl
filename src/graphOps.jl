@@ -46,7 +46,7 @@ function unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
     a = copy(ain)
     m = length(a.nzval)
     for i in 1:m
-        a.nzval[i] = 1
+        a.nzval[i] = one(Tval)
     end
     return a
 end # unweight
@@ -59,7 +59,7 @@ Change the weight of every edge in a to 1
 function unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
     m = length(a.nzval)
     for i in 1:m
-        a.nzval[i] = 1
+        a.nzval[i] = one(Tval)
     end
 end # unweight
 
