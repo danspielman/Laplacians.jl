@@ -33,7 +33,7 @@ The simple ring on n vertices
 """
 function ringGraph(n::Int64)
     a = spdiagm(ones(n-1),1,n,n)
-    a[1,n] = 1
+    a[1,n] = 1.0
     a = a + a'
 end
 
@@ -113,10 +113,10 @@ The complete binary tree on n vertices
 function completeBinaryTree(n::Int64)
 
   k = div(n-1,2)
-  a = sparse(collect(1:k),2*collect(1:k),1,n,n) + sparse(collect(1:k),2*collect(1:k)+1,1,n,n)
+  a = sparse(collect(1:k),2*collect(1:k),1.0,n,n) + sparse(collect(1:k),2*collect(1:k)+1,1.0,n,n)
 
   if 2*k+1 < n
-    a[n-1,n] = 1
+    a[n-1,n] = 1.0
   end
 
   a = a + a'
@@ -251,7 +251,7 @@ function grownGraph(n::Int64, k::Int64)
   a = spzeros(n,n)
 
   for i = 1:k
-    a = a + sparse(2:n,ceil(Integer,collect(1:n-1).*rand(n-1)),1,n,n)
+    a = a + sparse(2:n,ceil(Integer,collect(1:n-1).*rand(n-1)),1.0,n,n)
   end
 
   a = a + a'
@@ -295,10 +295,10 @@ function grownGraphD(n::Int64, k::Int64)
         v[(i-k-2)*k + collect(1:k)] = nb
     end
 
-    a = sparse(u,v,1,n,n)
+    a = sparse(u,v,1.0,n,n)
 
     (ai,aj) = findnz(triu(ones(k+1,k+1),1))
-    a = a + sparse(ai,aj,1,n,n)
+    a = a + sparse(ai,aj,1.0,n,n)
     a = a + a'
 
 end # grownGraphD
@@ -403,7 +403,7 @@ function ErdosRenyi(n::Integer, m::Integer)
     ai = rand(1:n, m)
     aj = rand(1:n, m)
     ind = (ai .!= aj)
-    mat = sparse(ai[ind],aj[ind],1,n,n)
+    mat = sparse(ai[ind],aj[ind],1.0,n,n)
     mat = mat + mat'
     unweight!(mat)
     return mat
@@ -423,7 +423,7 @@ function ErdosRenyiCluster(n::Integer, k::Integer)
     ai = rand(1:n, m)
     aj = rand(1:n, m)
     ind = (ai .!= aj)
-    mat = sparse(ai[ind],aj[ind],1,n,n)
+    mat = sparse(ai[ind],aj[ind],1.0,n,n)
     mat = mat + mat'
 
     return biggestComp(mat)
