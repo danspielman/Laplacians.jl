@@ -1,6 +1,6 @@
-#=
+ApproxChol#=
 
-edgeElim Laplacian solver by Daniel A. Spielman, 2017.
+approxChol Laplacian solver by Daniel A. Spielman, 2017.
 This algorithm is an implementation of an approximate edge-by-edge elimination
 algorithm inspired by the Approximate Gaussian Elimination algorithm of
 Kyng and Sachdeva.
@@ -14,19 +14,19 @@ LLOrdMat is for the fixed order, and LLmatp is for the adaptive order.
 These coes produce a structure we call LDLinv that is then used in the solve.
 The structure of this code is as follows:
 
-The data structures appear in EdgeElimTypes.jl
+The data structures appear in approxCholTypes.jl
 We then have the outline:
 
 * constructors for LLmatp and LLMatOrd
 * get_ll_col and compress_ll_col : used inside the elimination
-* edgeElim : the main routine
+* approxChol : the main routine
 * LDLsolver, and its forward and backward solve the apply LDLinv
-* edgeElimLap: the main solver, which calls edgeElimLap1 on connected
+* approxCholLap: the main solver, which calls approxCholLap1 on connected
     components.
-    This then calls one of edgeElimLapWdeg, edgeElimLapGiven or edgeElimLapGreedy,
+    This then calls one of approxCholLapWdeg, approxCholLapGiven or approxCholLapGreedy,
     depending on the parameters.
 
-* edgeElimLapChol - for producing a Cholesky factor instead of an LDLinv.
+* approxCholLapChol - for producing a Cholesky factor instead of an LDLinv.
   might be useful if optimized.
 * data structures that are used for the adaptive low-degree version to
   choose the next vertex.
@@ -34,19 +34,19 @@ We then have the outline:
 =#
 
 """
-    params = EdgeElimParams(order, output)
+    params = ApproxCholParams(order, output)
 order can be one of
 * :deg (by degree, adaptive),
 * :wdeg (by original wted degree, nonadaptive),
 * :given
 """
-type EdgeElimParams
+type ApproxCholParams
     order::Symbol
     stag_test::Integer
 end
 
-EdgeElimParams() = EdgeElimParams(:deg, 5)
-EdgeElimParams(sym::Symbol) = EdgeElimParams(sym, 5)
+ApproxCholParams() = ApproxCholParams(:deg, 5)
+ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5)
 
 LDLinv(n) = LDLinv(zeros(Int,n-1),zeros(Int,n),Array(Int,0),Array(Float64,0),zeros(Float64,n))
 
@@ -241,7 +241,7 @@ end
 
 
 
-function compressCol!(a::LLmatp, colspace::Array{LLp,1}, len::Int, pq::EdgeElimPQ)
+function compressCol!(a::LLmatp, colspace::Array{LLp,1}, len::Int, pq::ApproxCholPQ)
 
     o = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
 
@@ -263,7 +263,7 @@ function compressCol!(a::LLmatp, colspace::Array{LLp,1}, len::Int, pq::EdgeElimP
             c[ptr].val = c[ptr].val + c[i].val
             c[i].reverse.val = 0.0
 
-            edgeElimPQDec!(pq, currow)
+            approxCholPQDec!(pq, currow)
         end
     end
 
@@ -318,7 +318,7 @@ function compressCol!{Tind,Tval}(colspace::Array{LLcol{Tind,Tval},1}, len::Tind)
 end
 
 
-function edgeElim{Tind,Tval}(a::LLMatOrd{Tind,Tval})
+function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
     n = a.n
 
     # need to make custom one without col info later.
@@ -424,7 +424,7 @@ function edgeElim{Tind,Tval}(a::LLMatOrd{Tind,Tval})
 end
 
 # this one is greedy on the degree - also a big win
-function edgeElim(a::LLmatp)
+function approxChol(a::LLmatp)
     n = a.n
 
     ldli = LDLinv(n)
@@ -432,7 +432,7 @@ function edgeElim(a::LLmatp)
 
     d = zeros(n)
 
-    pq = EdgeElimPQ(a.degs)
+    pq = ApproxCholPQ(a.degs)
 
     it = 1
 
@@ -444,7 +444,7 @@ function edgeElim(a::LLmatp)
 
     @inbounds while it < n
 
-        i = edgeElimPQPop!(pq)
+        i = approxCholPQPop!(pq)
 
         ldli.col[it] = i
         ldli.colptr[it] = ldli_row_ptr
@@ -482,7 +482,7 @@ function edgeElim(a::LLmatp)
 
             k = colspace[koff].row
 
-            edgeElimPQInc!(pq, k)
+            approxCholPQInc!(pq, k)
 
             newEdgeVal = f*(1-f)*wdeg
 
@@ -519,7 +519,7 @@ function edgeElim(a::LLmatp)
         revj = ll.reverse
 
         if it < n
-            edgeElimPQDec!(pq, j)
+            approxCholPQDec!(pq, j)
         end
 
         revj.val = 0.0
@@ -616,24 +616,24 @@ end
     solver = KMPLapSolver(A; verbose, tol, maxits, maxtime, pcgIts)
 
 A heuristic by Daniel Spielman inspired by the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.  Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
-The `EdgeElimParams` let you choose one of three orderings to perform the elimination.
+The `ApproxCholParams` let you choose one of three orderings to perform the elimination.
 
-* EdgeElimParams(:given) - in the order given.
+* ApproxCholParams(:given) - in the order given.
     This is the fastest for construction the preconditioner, but the slowest solve.
-* EdgeElimParams(:deg) - always eliminate the node of lowest degree.
+* ApproxCholParams(:deg) - always eliminate the node of lowest degree.
     This is the slowest build, but the fastest solve.
-* EdgeElimParams(:wdeg) - go by a perturbed order of wted degree.
+* ApproxCholParams(:wdeg) - go by a perturbed order of wted degree.
     This is the sweet spot in between.
 """
-function edgeElimLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
+function approxCholLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
   verbose=false,
   pcgIts=Int[],
-  params=EdgeElimParams())
+  params=ApproxCholParams())
 
-    return Laplacians.lapWrapComponents(edgeElimLap1, a,
+    return Laplacians.lapWrapComponents(approxCholLap1, a,
     verbose=verbose,
     tol=tol,
     maxits=maxits,
@@ -644,13 +644,13 @@ function edgeElimLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
 end
 
-function edgeElimLapGreedy(a::SparseMatrixCSC;
+function approxCholLapGreedy(a::SparseMatrixCSC;
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
   verbose=false,
   pcgIts=Int[],
-  params=EdgeElimParams())
+  params=ApproxCholParams())
 
   tol_ =tol
   maxits_ =maxits
@@ -663,7 +663,7 @@ function edgeElimLapGreedy(a::SparseMatrixCSC;
   la = lap(a)
 
   llmat = LLmatp(a)
-  ldli = edgeElim(llmat)
+  ldli = approxChol(llmat)
   F(b) = LDLsolver(ldli, b)
 
   if verbose
@@ -680,13 +680,13 @@ function edgeElimLapGreedy(a::SparseMatrixCSC;
 
 end
 
-function edgeElimLapGiven(a::SparseMatrixCSC;
+function approxCholLapGiven(a::SparseMatrixCSC;
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
   verbose=false,
   pcgIts=Int[],
-  params=EdgeElimParams())
+  params=ApproxCholParams())
 
   tol_ =tol
   maxits_ =maxits
@@ -699,7 +699,7 @@ function edgeElimLapGiven(a::SparseMatrixCSC;
   la = lap(a)
 
   llmat = LLMatOrd(a)
-  ldli = edgeElim(llmat)
+  ldli = approxChol(llmat)
   F(b) = LDLsolver(ldli, b)
 
   if verbose
@@ -716,13 +716,13 @@ function edgeElimLapGiven(a::SparseMatrixCSC;
 
 end
 
-function edgeElimLapWdeg(a::SparseMatrixCSC;
+function approxCholLapWdeg(a::SparseMatrixCSC;
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
   verbose=false,
   pcgIts=Int[],
-  params=EdgeElimParams())
+  params=ApproxCholParams())
 
   tol_ =tol
   maxits_ =maxits
@@ -739,7 +739,7 @@ function edgeElimLapWdeg(a::SparseMatrixCSC;
   p = sortperm(v)
 
   llmat = LLMatOrd(a,p)
-  ldli = edgeElim(llmat)
+  ldli = approxChol(llmat)
 
   ip = invperm(p)
   ldlip = LDLinv(p[ldli.col], ldli.colptr, p[ldli.rowval], ldli.fval, ldli.d[ip]);
@@ -767,13 +767,13 @@ end
 
 
 
-function edgeElimLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
+function approxCholLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
   verbose=false,
   pcgIts=Int[],
-  params=EdgeElimParams())
+  params=ApproxCholParams())
 
     tol_ =tol
     maxits_ =maxits
@@ -784,7 +784,7 @@ function edgeElimLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     if params.order == :deg
 
-      return edgeElimLapGreedy(a,
+      return approxCholLapGreedy(a,
         verbose=verbose,
         tol=tol,
         maxits=maxits,
@@ -795,7 +795,7 @@ function edgeElimLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
     elseif params.order == :wdeg
 
-      return edgeElimLapWdeg(a,
+      return approxCholLapWdeg(a,
         verbose=verbose,
         tol=tol,
         maxits=maxits,
@@ -805,7 +805,7 @@ function edgeElimLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
 
     else
-      return edgeElimLapGiven(a,
+      return approxCholLapGiven(a,
         verbose=verbose,
         tol=tol,
         maxits=maxits,
@@ -911,10 +911,10 @@ end
 
 
 """
-This variation of edgeElim creates a cholesky factor to do the elimination.
+This variation of approxChol creates a cholesky factor to do the elimination.
 It has not yet been optimized, and does not yet make the cholesky factor lower triangular
 """
-function edgeElimLapChol{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[])
+function approxCholLapChol{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     tol_ =tol
     maxits_ =maxits
@@ -925,7 +925,7 @@ function edgeElimLapChol{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxit
     t1 = time()
     llmat = LLmatp(a)
 
-    ldli = edgeElim(llmat)
+    ldli = approxChol(llmat)
 
     chL = ldli2Chol(ldli)
 
@@ -953,7 +953,7 @@ end
 
 #=============================================================
 
-EdgeElimPQ
+ApproxCholPQ
 It only implements pop, increment key, and decrement key.
 All nodes with degrees 1 through n appear in their own doubly-linked lists.
 Nodes of higher degrees are bundled together.
@@ -965,10 +965,10 @@ function keyMap(x::Int, n::Int)
     return x <= n ? x : n + div(x,n)
 end
 
-function EdgeElimPQ(a::Array{Int,1})
+function ApproxCholPQ(a::Array{Int,1})
 
     n = length(a)
-    elems = Array(EdgeElimPQElem,n)
+    elems = Array(ApproxCholPQElem,n)
     lists = zeros(Int, 2*n+1)
     minlist = 1
 
@@ -977,21 +977,21 @@ function EdgeElimPQ(a::Array{Int,1})
         head = lists[key]
 
         if head > 0
-            elems[i] = EdgeElimPQElem(0, head, key)
+            elems[i] = ApproxCholPQElem(0, head, key)
 
-            elems[head] = EdgeElimPQElem(i, elems[head].next, elems[head].key)
+            elems[head] = ApproxCholPQElem(i, elems[head].next, elems[head].key)
         else
-            elems[i] = EdgeElimPQElem(0, 0, key)
+            elems[i] = ApproxCholPQElem(0, 0, key)
 
         end
 
         lists[key] = i
     end
 
-    return EdgeElimPQ(elems, lists, minlist, n, n)
+    return ApproxCholPQ(elems, lists, minlist, n, n)
 end
 
-function edgeElimPQPop!(pq::EdgeElimPQ)
+function approxCholPQPop!(pq::ApproxCholPQ)
     if pq.nitems == 0
         error("ApproxPQ is empty")
     end
@@ -1004,7 +1004,7 @@ function edgeElimPQPop!(pq::EdgeElimPQ)
 
     pq.lists[pq.minlist] = next
     if next > 0
-        pq.elems[next] = EdgeElimPQElem(0, pq.elems[next].next, pq.elems[next].key)
+        pq.elems[next] = ApproxCholPQElem(0, pq.elems[next].next, pq.elems[next].key)
     end
 
     pq.nitems -= 1
@@ -1012,17 +1012,17 @@ function edgeElimPQPop!(pq::EdgeElimPQ)
     return i
 end
 
-function edgeElimPQMove!(pq::EdgeElimPQ, i::Int, newkey::Int, oldlist::Int, newlist::Int)
+function approxCholPQMove!(pq::ApproxCholPQ, i::Int, newkey::Int, oldlist::Int, newlist::Int)
 
     prev = pq.elems[i].prev
     next = pq.elems[i].next
 
     # remove i from its old list
     if next > 0
-        pq.elems[next] = EdgeElimPQElem(prev, pq.elems[next].next, pq.elems[next].key)
+        pq.elems[next] = ApproxCholPQElem(prev, pq.elems[next].next, pq.elems[next].key)
     end
     if prev > 0
-        pq.elems[prev] = EdgeElimPQElem(pq.elems[prev].prev, next, pq.elems[prev].key)
+        pq.elems[prev] = ApproxCholPQElem(pq.elems[prev].prev, next, pq.elems[prev].key)
 
     else
         pq.lists[oldlist] = next
@@ -1031,11 +1031,11 @@ function edgeElimPQMove!(pq::EdgeElimPQ, i::Int, newkey::Int, oldlist::Int, newl
     # insert i into its new list
     head = pq.lists[newlist]
     if head > 0
-        pq.elems[head] = EdgeElimPQElem(i, pq.elems[head].next, pq.elems[head].key)
+        pq.elems[head] = ApproxCholPQElem(i, pq.elems[head].next, pq.elems[head].key)
     end
     pq.lists[newlist] = i
 
-    pq.elems[i] = EdgeElimPQElem(0, head, newkey)
+    pq.elems[i] = ApproxCholPQElem(0, head, newkey)
 
     return Void
 end
@@ -1044,21 +1044,21 @@ end
     Decrement the key of element i
     This could crash if i exceeds the maxkey
 """
-function edgeElimPQDec!(pq::EdgeElimPQ, i::Int)
+function approxCholPQDec!(pq::ApproxCholPQ, i::Int)
 
     oldlist = keyMap(pq.elems[i].key, pq.n)
     newlist = keyMap(pq.elems[i].key - 1, pq.n)
 
     if newlist != oldlist
 
-        edgeElimPQMove!(pq, i, pq.elems[i].key - 1, oldlist, newlist)
+        approxCholPQMove!(pq, i, pq.elems[i].key - 1, oldlist, newlist)
 
         if newlist < pq.minlist
             pq.minlist = newlist
         end
 
     else
-        pq.elems[i] = EdgeElimPQElem(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key - 1)
+        pq.elems[i] = ApproxCholPQElem(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key - 1)
     end
 
 
@@ -1069,17 +1069,17 @@ end
     Increment the key of element i
     This could crash if i exceeds the maxkey
 """
-function edgeElimPQInc!(pq::EdgeElimPQ, i::Int)
+function approxCholPQInc!(pq::ApproxCholPQ, i::Int)
 
     oldlist = keyMap(pq.elems[i].key, pq.n)
     newlist = keyMap(pq.elems[i].key + 1, pq.n)
 
     if newlist != oldlist
 
-        edgeElimPQMove!(pq, i, pq.elems[i].key + 1, oldlist, newlist)
+        approxCholPQMove!(pq, i, pq.elems[i].key + 1, oldlist, newlist)
 
     else
-        pq.elems[i] = EdgeElimPQElem(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key + 1)
+        pq.elems[i] = ApproxCholPQElem(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key + 1)
     end
 
     return Void

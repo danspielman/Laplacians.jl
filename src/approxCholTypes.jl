@@ -1,5 +1,5 @@
 #=
-  Types for the edgeElim solver
+  Types for the approxChol solver
 =#
 
 
@@ -80,12 +80,12 @@ end
 
 #=============================================================
 
-EdgeElimPQ
+ApproxCholPQ
 the data strcture we use to keep track of degrees
 
 =============================================================#
 
-immutable EdgeElimPQElem
+immutable ApproxCholPQElem
     prev::Int
     next::Int
     key::Int
@@ -98,8 +98,8 @@ end
   It should always be a lower bound.
   keyMap maps keys to lists
 """
-type EdgeElimPQ
-    elems::Array{EdgeElimPQElem,1} # indexed by node name
+type ApproxCholPQ
+    elems::Array{ApproxCholPQElem,1} # indexed by node name
     lists::Array{Int,1}
     minlist::Int
     nitems::Int

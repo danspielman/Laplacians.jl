@@ -75,17 +75,17 @@ x = f(b, tol=1e-6);
 
 mats = []
 rhss = []
-solver = Laplacians.wrapCapture(edgeElimLap, mats, rhss)
+solver = Laplacians.wrapCapture(approxCholLap, mats, rhss)
 a = chimera(10)
 f = solver(a);
 size(mats[1])
 b = randn(10)
 x = f(b);
 
-solver = Laplacians.edgeElimLapChol(a,verbose=true)
+solver = Laplacians.approxCholLapChol(a,verbose=true)
 x = solver(b);
 
-# testing edgeElim internals
+# testing approxChol internals
 a = randRegular(20,3)
 llp = Laplacians.LLmatp(a)
 Laplacians.print_ll_col(llp,1)
@@ -167,13 +167,13 @@ b = randn(n)
 b = b - mean(b)
 la = lap(a)
 ee1 = function(a; verbose=false, args...)
-    edgeElimLap(a; params=EdgeElimParams(:deg), verbose=verbose, args...)
+    approxCholLap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
 end
 ee2 = function(a; verbose=false, args...)
-    edgeElimLap(a; params=EdgeElimParams(:wdeg), verbose=verbose, args...)
+    approxCholLap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
 end
 ee3 = function(a; verbose=false, args...)
-    edgeElimLap(a; params=EdgeElimParams(:given), verbose=verbose, args...)
+    approxCholLap(a; params=ApproxCholParams(:given), verbose=verbose, args...)
 end
 for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver, ee1, ee2, ee3]
     f = solver(a, tol=1e-6, maxtime=5);
