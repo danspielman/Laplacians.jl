@@ -1,4 +1,4 @@
-ApproxChol#=
+#=
 
 approxChol Laplacian solver by Daniel A. Spielman, 2017.
 This algorithm is an implementation of an approximate edge-by-edge elimination
