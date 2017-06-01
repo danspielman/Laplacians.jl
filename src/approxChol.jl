@@ -48,7 +48,14 @@ end
 ApproxCholParams() = ApproxCholParams(:deg, 5)
 ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5)
 
-LDLinv{Tind}(n::Tind, Tval::Type) = LDLinv(zeros(Tind,n-1),zeros(Tind,n),Array(Tind,0),Array(Tval,0),zeros(Tval,n))
+LDLinv{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}) =
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array(Tind,0),Array(Tval,0),zeros(Tval,a.n))
+
+LDLinv{Tind,Tval}(a::LLMatOrd{Tind,Tval}) =
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array(Tind,0),Array(Tval,0),zeros(Tval,a.n))
+
+LDLinv{Tind,Tval}(a::LLmatp{Tind,Tval}) =
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array(Tind,0),Array(Tval,0),zeros(Tval,a.n))
 
 
 function LLmatp{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
@@ -70,7 +77,7 @@ function LLmatp{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
         v = a.nzval[ind]
         llpend = LLp{Tind,Tval}(j,v)
         next = llelems[ind] = llpend
-        for ind in (a.colptr[i]+1):(a.colptr[i+1]-1)
+        for ind in (a.colptr[i]+one(Tind)):(a.colptr[i+1]-one(Tind))
             j = a.rowval[ind]
             v = a.nzval[ind]
             next = llelems[ind] = LLp{Tind,Tval}(j,v,next)
@@ -79,7 +86,7 @@ function LLmatp{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
     end
 
     @inbounds for i in 1:n
-        for ind in a.colptr[i]:(a.colptr[i+1]-1)
+        for ind in a.colptr[i]:(a.colptr[i+1]-one(Tind))
             llelems[ind].reverse = llelems[flips[ind]]
         end
     end
@@ -110,7 +117,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
 
     ptr = one(Tind)
 
-    @inbounds for i in 1:(n-1)
+    @inbounds for i in Tind(1):Tind(n-1)
         next = zero(Tind)
 
         for ind in (a.colptr[i]):(a.colptr[i+1]-1)
@@ -120,7 +127,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
               v = a.nzval[ind]
               llelems[ptr] = LLord{Tind,Tval}(j, next, v)
               next = ptr
-              ptr += 1
+              ptr += one(Tind)
 
             end
         end
@@ -141,7 +148,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}, perm::Array)
 
     ptr = one(Tind)
 
-    @inbounds for i0 in 1:n
+    @inbounds for i0 in Tind(1):Tind(n)
         i = invp[i0]
         next = zero(Tind)
 
@@ -152,7 +159,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}, perm::Array)
               v = a.nzval[ind]
               llelems[ptr] = LLord{Tind,Tval}(j, next, v)
               next = ptr
-              ptr += 1
+              ptr += one(ptr)
 
             end
         end
@@ -217,10 +224,12 @@ function get_ll_col{Tind,Tval}(llmat::LLmatp{Tind,Tval},
     return len
 end
 
-function get_ll_col{Tind,Tval}(llmat::LLMatOrd{Tind,Tval}, i, colspace)
+function get_ll_col{Tind,Tval}(llmat::LLMatOrd{Tind,Tval},
+  i,
+  colspace::Array{LLcol{Tind,Tval},1})
 
     ptr = llmat.cols[i]
-    len = zero(Tind)
+    len = 0
     @inbounds while ptr != 0
 
         #if ll.val > 0
@@ -245,7 +254,7 @@ end
 
 function compressCol!{Tind,Tval}(a::LLmatp{Tind,Tval},
   colspace::Array{LLp{Tind,Tval},1},
-  len,
+  len::Int,
   pq::ApproxCholPQ{Tind})
 
     o = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
@@ -279,7 +288,10 @@ function compressCol!{Tind,Tval}(a::LLmatp{Tind,Tval},
     return ptr
 end
 
-function compressCol!{Tind,Tval}(colspace::Array{LLcol{Tind,Tval},1}, len)
+function compressCol!{Tind,Tval}(
+  colspace::Array{LLcol{Tind,Tval},1},
+  len::Int
+  )
 
     o = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
 
@@ -327,7 +339,7 @@ function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
     n = a.n
 
     # need to make custom one without col info later.
-    ldli = LDLinv(n,Tval)
+    ldli = LDLinv(a)
     ldli_row_ptr = one(Tind)
 
     d = zeros(Tval,n)
@@ -339,7 +351,7 @@ function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
     o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
 
 
-    for i in 1:(n-1)
+    for i in Tind(1):Tind(n-1)
 
         ldli.col[i] = i  # will get rid of this with new data type
         ldli.colptr[i] = ldli_row_ptr
@@ -400,7 +412,7 @@ function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
 
             push!(ldli.rowval,j)
             push!(ldli.fval, f)
-            ldli_row_ptr = ldli_row_ptr + 1
+            ldli_row_ptr = ldli_row_ptr + one(Tind)
 
             # push!(ops, IJop(i,j,1-f,f))  # another time suck
 
@@ -414,7 +426,7 @@ function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
 
         push!(ldli.rowval,j)
         push!(ldli.fval, one(Tval))
-        ldli_row_ptr = ldli_row_ptr + 1
+        ldli_row_ptr = ldli_row_ptr + one(Tind)
 
         d[i] = w
 
@@ -432,7 +444,7 @@ end
 function approxChol{Tind,Tval}(a::LLmatp{Tind,Tval})
     n = a.n
 
-    ldli = LDLinv(n,Tval)
+    ldli = LDLinv(a)
     ldli_row_ptr = one(Tind)
 
     d = zeros(n)
@@ -458,7 +470,7 @@ function approxChol{Tind,Tval}(a::LLmatp{Tind,Tval})
 
         len = get_ll_col(a, i, colspace)
 
-        len = compressCol!(a,colspace, len, pq)  #3hog
+        len = compressCol!(a, colspace, len, pq)  #3hog
 
         csum = zero(Tval)
         for ii in 1:len
@@ -510,7 +522,7 @@ function approxChol{Tind,Tval}(a::LLmatp{Tind,Tval})
 
             push!(ldli.rowval,j)
             push!(ldli.fval, f)
-            ldli_row_ptr = ldli_row_ptr + 1
+            ldli_row_ptr = ldli_row_ptr + one(Tind)
 
             # push!(ops, IJop(i,j,1-f,f))  # another time suck
 
@@ -531,7 +543,7 @@ function approxChol{Tind,Tval}(a::LLmatp{Tind,Tval})
 
         push!(ldli.rowval,j)
         push!(ldli.fval, one(Tval))
-        ldli_row_ptr = ldli_row_ptr + 1
+        ldli_row_ptr = ldli_row_ptr + one(Tind)
 
         d[i] = w
 
@@ -552,7 +564,7 @@ The routines that do the solve.
 
 =============================================================#
 
-function LDLsolver{Tv}(ldli::LDLinv, b::Array{Tv,1})
+function LDLsolver(ldli::LDLinv, b)
     y = copy(b)
 
     forward!(ldli, y)
@@ -574,19 +586,19 @@ function LDLsolver{Tv}(ldli::LDLinv, b::Array{Tv,1})
 end
 
 
-function forward!(ldli::LDLinv, y::Array{Float64,1})
+function forward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y)
     @inbounds for ii in 1:length(ldli.col)
         i = ldli.col[ii]
 
         j0 = ldli.colptr[ii]
-        j1 = ldli.colptr[ii+1]-1
+        j1 = ldli.colptr[ii+1]-one(Tind)
 
         yi = y[i]
 
         for jj in j0:(j1-1)
             j = ldli.rowval[jj]
             y[j] += ldli.fval[jj] * yi
-            yi *= (1-ldli.fval[jj])
+            yi *= (one(Tval)-ldli.fval[jj])
         end
         j = ldli.rowval[j1]
         y[j] += yi
@@ -594,20 +606,21 @@ function forward!(ldli::LDLinv, y::Array{Float64,1})
     end
 end
 
-function backward!(ldli::LDLinv, y::Array{Float64,1})
+function backward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y)
+    o = one(Tind)
     @inbounds for ii in length(ldli.col):-1:1
         i = ldli.col[ii]
 
         j0 = ldli.colptr[ii]
-        j1 = ldli.colptr[ii+1]-1
+        j1 = ldli.colptr[ii+1]-o
 
         j = ldli.rowval[j1]
         yi = y[i]
         yi = yi + y[j]
 
-        for jj in (j1-1):-1:j0
+        for jj in (j1-o):-o:j0
             j = ldli.rowval[jj]
-            yi = (1-ldli.fval[jj])*yi + ldli.fval[jj]*y[j]
+            yi = (one(Tval)-ldli.fval[jj])*yi + ldli.fval[jj]*y[j]
         end
         y[i] = yi
     end
