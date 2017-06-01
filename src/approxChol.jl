@@ -48,19 +48,19 @@ end
 ApproxCholParams() = ApproxCholParams(:deg, 5)
 ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5)
 
-LDLinv(n) = LDLinv(zeros(Int,n-1),zeros(Int,n),Array(Int,0),Array(Float64,0),zeros(Float64,n))
+LDLinv{Tind}(n::Tind, Tval::Type) = LDLinv(zeros(Tind,n-1),zeros(Tind,n),Array(Tind,0),Array(Tval,0),zeros(Tval,n))
 
 
-function LLmatp(a::SparseMatrixCSC)
+function LLmatp{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
     n = size(a,1)
     m = nnz(a)
 
-    degs = zeros(Int,n)
+    degs = zeros(Tind,n)
 
     flips = flipIndex(a)
 
-    cols = Array(LLp, n)
-    llelems = Array(LLp, m)
+    cols = Array(LLp{Tind,Tval}, n)
+    llelems = Array(LLp{Tind,Tval}, m)
 
     @inbounds for i in 1:n
         degs[i] = a.colptr[i+1] - a.colptr[i]
@@ -68,12 +68,12 @@ function LLmatp(a::SparseMatrixCSC)
         ind = a.colptr[i]
         j = a.rowval[ind]
         v = a.nzval[ind]
-        llpend = LLp(j,v)
+        llpend = LLp{Tind,Tval}(j,v)
         next = llelems[ind] = llpend
         for ind in (a.colptr[i]+1):(a.colptr[i+1]-1)
             j = a.rowval[ind]
             v = a.nzval[ind]
-            next = llelems[ind] = LLp(j,v,next)
+            next = llelems[ind] = LLp{Tind,Tval}(j,v,next)
         end
         cols[i] = next
     end
@@ -84,7 +84,7 @@ function LLmatp(a::SparseMatrixCSC)
         end
     end
 
-    return LLmatp(n, degs, cols, llelems)
+    return LLmatp{Tind,Tval}(n, degs, cols, llelems)
 end
 
 """
@@ -184,14 +184,16 @@ The approximate factorization
 
 =============================================================#
 
-function get_ll_col(llmat::LLmatp, i::Int, colspace::Array{LLp,1})
+function get_ll_col{Tind,Tval}(llmat::LLmatp{Tind,Tval},
+  i,
+  colspace::Array{LLp{Tind,Tval},1})
 
 
     ll = llmat.cols[i]
     len = 0
     @inbounds while ll.next != ll
 
-        if ll.val > 0
+        if ll.val > zero(Tval)
             len = len+1
             if (len > length(colspace))
                 push!(colspace,ll)
@@ -203,7 +205,7 @@ function get_ll_col(llmat::LLmatp, i::Int, colspace::Array{LLp,1})
         ll = ll.next
     end
 
-    if ll.val > 0
+    if ll.val > zero(Tval)
         len = len+1
         if (len > length(colspace))
             push!(colspace,ll)
@@ -215,7 +217,7 @@ function get_ll_col(llmat::LLmatp, i::Int, colspace::Array{LLp,1})
     return len
 end
 
-function get_ll_col{Tind,Tval}(llmat::LLMatOrd{Tind,Tval}, i::Tind, colspace)
+function get_ll_col{Tind,Tval}(llmat::LLMatOrd{Tind,Tval}, i, colspace)
 
     ptr = llmat.cols[i]
     len = zero(Tind)
@@ -241,14 +243,17 @@ end
 
 
 
-function compressCol!(a::LLmatp, colspace::Array{LLp,1}, len::Int, pq::ApproxCholPQ)
+function compressCol!{Tind,Tval}(a::LLmatp{Tind,Tval},
+  colspace::Array{LLp{Tind,Tval},1},
+  len,
+  pq::ApproxCholPQ{Tind})
 
     o = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
 
     sort!(colspace, 1, len, QuickSort, o)
 
-    ptr::Int = 0
-    currow::Int = 0
+    ptr = 0
+    currow::Tind = 0
 
     c = colspace
 
@@ -261,7 +266,7 @@ function compressCol!(a::LLmatp, colspace::Array{LLp,1}, len::Int, pq::ApproxCho
 
         else
             c[ptr].val = c[ptr].val + c[i].val
-            c[i].reverse.val = 0.0
+            c[i].reverse.val = zero(Tval)
 
             approxCholPQDec!(pq, currow)
         end
@@ -274,15 +279,15 @@ function compressCol!(a::LLmatp, colspace::Array{LLp,1}, len::Int, pq::ApproxCho
     return ptr
 end
 
-function compressCol!{Tind,Tval}(colspace::Array{LLcol{Tind,Tval},1}, len::Tind)
+function compressCol!{Tind,Tval}(colspace::Array{LLcol{Tind,Tval},1}, len)
 
     o = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
 
-    sort!(colspace, 1, len, QuickSort, o)
+    sort!(colspace, one(len), len, QuickSort, o)
 
     c = colspace
 
-    ptr::Tind = 0
+    ptr = 0
     currow = c[1].row
     curval = c[1].val
     curptr = c[1].ptr
@@ -312,7 +317,7 @@ function compressCol!{Tind,Tval}(colspace::Array{LLcol{Tind,Tval},1}, len::Tind)
     c[ptr] = LLcol(currow, curptr, curval)
 
     o = Base.Order.ord(isless, x->x.val, false, Base.Order.Forward)
-    sort!(colspace, 1, ptr, QuickSort, o)
+    sort!(colspace, one(ptr), ptr, QuickSort, o)
 
     return ptr
 end
@@ -322,7 +327,7 @@ function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
     n = a.n
 
     # need to make custom one without col info later.
-    ldli = LDLinv(n)
+    ldli = LDLinv(n,Tval)
     ldli_row_ptr = one(Tind)
 
     d = zeros(Tval,n)
@@ -365,7 +370,7 @@ function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
 
             # kind = Laplacians.blockSample(vals,k=1)[1]
             r = rand() * (csum - cumspace[joffset]) + cumspace[joffset]
-            koff = searchsortedfirst(cumspace,r,1,len,o)
+            koff = searchsortedfirst(cumspace,r,one(len),len,o)
 
             k = colspace[koff].row
 
@@ -424,11 +429,11 @@ function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
 end
 
 # this one is greedy on the degree - also a big win
-function approxChol(a::LLmatp)
+function approxChol{Tind,Tval}(a::LLmatp{Tind,Tval})
     n = a.n
 
-    ldli = LDLinv(n)
-    ldli_row_ptr = 1
+    ldli = LDLinv(n,Tval)
+    ldli_row_ptr = one(Tind)
 
     d = zeros(n)
 
@@ -436,9 +441,9 @@ function approxChol(a::LLmatp)
 
     it = 1
 
-    colspace = Array(LLp,n)
-    cumspace = Array(Float64,n)
-    vals = Array(Float64,n) # will be able to delete this
+    colspace = Array(LLp{Tind,Tval},n)
+    cumspace = Array(Tval,n)
+    vals = Array(Tval,n) # will be able to delete this
 
     o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
 
@@ -455,7 +460,7 @@ function approxChol(a::LLmatp)
 
         len = compressCol!(a,colspace, len, pq)  #3hog
 
-        csum = 0.0
+        csum = zero(Tval)
         for ii in 1:len
             vals[ii] = colspace[ii].val
             csum = csum + colspace[ii].val
@@ -463,7 +468,7 @@ function approxChol(a::LLmatp)
         end
         wdeg = csum
 
-        colScale = 1.0
+        colScale = one(Tval)
 
         for joffset in 1:(len-1)
 
@@ -474,17 +479,17 @@ function approxChol(a::LLmatp)
 
             f = w/(wdeg)
 
-            vals[joffset] = 0.0
+            vals[joffset] = zero(Tval)
 
             # kind = Laplacians.blockSample(vals,k=1)[1]
             r = rand() * (csum - cumspace[joffset]) + cumspace[joffset]
-            koff = searchsortedfirst(cumspace,r,1,len,o)
+            koff = searchsortedfirst(cumspace,r,one(len),len,o)
 
             k = colspace[koff].row
 
             approxCholPQInc!(pq, k)
 
-            newEdgeVal = f*(1-f)*wdeg
+            newEdgeVal = f*(one(Tval)-f)*wdeg
 
             # fix row k in col j
             revj.row = k   # dense time hog: presumably becaus of cache
@@ -500,8 +505,8 @@ function approxChol(a::LLmatp)
             ll.row = j
 
 
-            colScale = colScale*(1-f)
-            wdeg = wdeg*(1-f)^2
+            colScale = colScale*(one(Tval)-f)
+            wdeg = wdeg*(one(Tval)-f)^2
 
             push!(ldli.rowval,j)
             push!(ldli.fval, f)
@@ -522,10 +527,10 @@ function approxChol(a::LLmatp)
             approxCholPQDec!(pq, j)
         end
 
-        revj.val = 0.0
+        revj.val = zero(Tval)
 
         push!(ldli.rowval,j)
-        push!(ldli.fval, 1.0)
+        push!(ldli.fval, one(Tval))
         ldli_row_ptr = ldli_row_ptr + 1
 
         d[i] = w
@@ -961,27 +966,27 @@ Nodes of higher degrees are bundled together.
 =============================================================#
 
 
-function keyMap(x::Int, n::Int)
+function keyMap(x, n)
     return x <= n ? x : n + div(x,n)
 end
 
-function ApproxCholPQ(a::Array{Int,1})
+function ApproxCholPQ{Tind}(a::Array{Tind,1})
 
     n = length(a)
-    elems = Array(ApproxCholPQElem,n)
-    lists = zeros(Int, 2*n+1)
-    minlist = 1
+    elems = Array(ApproxCholPQElem{Tind},n)
+    lists = zeros(Tind, 2*n+1)
+    minlist = one(n)
 
     for i in 1:length(a)
         key = a[i]
         head = lists[key]
 
-        if head > 0
-            elems[i] = ApproxCholPQElem(0, head, key)
+        if head > zero(Tind)
+            elems[i] = ApproxCholPQElem{Tind}(zero(Tind), head, key)
 
-            elems[head] = ApproxCholPQElem(i, elems[head].next, elems[head].key)
+            elems[head] = ApproxCholPQElem{Tind}(i, elems[head].next, elems[head].key)
         else
-            elems[i] = ApproxCholPQElem(0, 0, key)
+            elems[i] = ApproxCholPQElem{Tind}(zero(Tind), zero(Tind), key)
 
         end
 
@@ -991,7 +996,7 @@ function ApproxCholPQ(a::Array{Int,1})
     return ApproxCholPQ(elems, lists, minlist, n, n)
 end
 
-function approxCholPQPop!(pq::ApproxCholPQ)
+function approxCholPQPop!{Tind}(pq::ApproxCholPQ{Tind})
     if pq.nitems == 0
         error("ApproxPQ is empty")
     end
@@ -1004,7 +1009,7 @@ function approxCholPQPop!(pq::ApproxCholPQ)
 
     pq.lists[pq.minlist] = next
     if next > 0
-        pq.elems[next] = ApproxCholPQElem(0, pq.elems[next].next, pq.elems[next].key)
+        pq.elems[next] = ApproxCholPQElem(zero(Tind), pq.elems[next].next, pq.elems[next].key)
     end
 
     pq.nitems -= 1
@@ -1012,17 +1017,17 @@ function approxCholPQPop!(pq::ApproxCholPQ)
     return i
 end
 
-function approxCholPQMove!(pq::ApproxCholPQ, i::Int, newkey::Int, oldlist::Int, newlist::Int)
+function approxCholPQMove!{Tind}(pq::ApproxCholPQ{Tind}, i, newkey, oldlist, newlist)
 
     prev = pq.elems[i].prev
     next = pq.elems[i].next
 
     # remove i from its old list
     if next > 0
-        pq.elems[next] = ApproxCholPQElem(prev, pq.elems[next].next, pq.elems[next].key)
+        pq.elems[next] = ApproxCholPQElem{Tind}(prev, pq.elems[next].next, pq.elems[next].key)
     end
     if prev > 0
-        pq.elems[prev] = ApproxCholPQElem(pq.elems[prev].prev, next, pq.elems[prev].key)
+        pq.elems[prev] = ApproxCholPQElem{Tind}(pq.elems[prev].prev, next, pq.elems[prev].key)
 
     else
         pq.lists[oldlist] = next
@@ -1031,11 +1036,11 @@ function approxCholPQMove!(pq::ApproxCholPQ, i::Int, newkey::Int, oldlist::Int, 
     # insert i into its new list
     head = pq.lists[newlist]
     if head > 0
-        pq.elems[head] = ApproxCholPQElem(i, pq.elems[head].next, pq.elems[head].key)
+        pq.elems[head] = ApproxCholPQElem{Tind}(i, pq.elems[head].next, pq.elems[head].key)
     end
     pq.lists[newlist] = i
 
-    pq.elems[i] = ApproxCholPQElem(0, head, newkey)
+    pq.elems[i] = ApproxCholPQElem{Tind}(zero(Tind), head, newkey)
 
     return Void
 end
@@ -1044,7 +1049,7 @@ end
     Decrement the key of element i
     This could crash if i exceeds the maxkey
 """
-function approxCholPQDec!(pq::ApproxCholPQ, i::Int)
+function approxCholPQDec!{Tind}(pq::ApproxCholPQ{Tind}, i)
 
     oldlist = keyMap(pq.elems[i].key, pq.n)
     newlist = keyMap(pq.elems[i].key - 1, pq.n)
@@ -1058,7 +1063,7 @@ function approxCholPQDec!(pq::ApproxCholPQ, i::Int)
         end
 
     else
-        pq.elems[i] = ApproxCholPQElem(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key - 1)
+        pq.elems[i] = ApproxCholPQElem{Tind}(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key - 1)
     end
 
 
@@ -1069,7 +1074,7 @@ end
     Increment the key of element i
     This could crash if i exceeds the maxkey
 """
-function approxCholPQInc!(pq::ApproxCholPQ, i::Int)
+function approxCholPQInc!{Tind}(pq::ApproxCholPQ{Tind}, i)
 
     oldlist = keyMap(pq.elems[i].key, pq.n)
     newlist = keyMap(pq.elems[i].key + 1, pq.n)
@@ -1079,7 +1084,7 @@ function approxCholPQInc!(pq::ApproxCholPQ, i::Int)
         approxCholPQMove!(pq, i, pq.elems[i].key + 1, oldlist, newlist)
 
     else
-        pq.elems[i] = ApproxCholPQElem(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key + 1)
+        pq.elems[i] = ApproxCholPQElem{Tind}(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key + 1)
     end
 
     return Void
