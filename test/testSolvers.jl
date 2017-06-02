@@ -77,10 +77,13 @@ mats = []
 rhss = []
 solver = Laplacians.wrapCapture(approxCholLap, mats, rhss)
 a = chimera(10)
+as = shortIntGraph(a)
 f = solver(a);
+fs = solver(as);
 size(mats[1])
 b = randn(10)
 x = f(b);
+xs = fs(b);
 
 solver = Laplacians.approxCholLapChol(a,verbose=true)
 x = solver(b);
