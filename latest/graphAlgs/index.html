@@ -220,7 +220,7 @@
 <p><a id='Laplacians.biggestComp-Tuple{SparseMatrixCSC}' href='#Laplacians.biggestComp-Tuple{SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.biggestComp</code></strong> &mdash; <em>Method</em>.</p>
 <p>Return the biggest component in a graph, as a graph</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/56efe8fc8f9b134f6d9abad3d6fdf50ad4430bb4/src/graphAlgs.jl#L157' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/graphAlgs.jl#L157' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.components-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.components-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.components</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes the connected components of a graph. Returns them as a vector of length equal to the number of vertices. The vector numbers the components from 1 through the maximum number. For example,</p>
@@ -240,19 +240,19 @@ c = components(gr)
  2
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/56efe8fc8f9b134f6d9abad3d6fdf50ad4430bb4/src/graphAlgs.jl#L41-L64' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/graphAlgs.jl#L41-L64' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.isConnected-Tuple{SparseMatrixCSC}' href='#Laplacians.isConnected-Tuple{SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.isConnected</code></strong> &mdash; <em>Method</em>.</p>
 <p>Returns true if graph is connected.  Calls components.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/56efe8fc8f9b134f6d9abad3d6fdf50ad4430bb4/src/graphAlgs.jl#L110' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/graphAlgs.jl#L110' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.kruskal-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.kruskal-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.kruskal</code></strong> &mdash; <em>Method</em>.</p>
 <p><code>(kruskal::SparseMatrixCSC; kind=:max)</code> Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree. Set kind=:min if you want the min spanning tree. It returns it a a graph</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/56efe8fc8f9b134f6d9abad3d6fdf50ad4430bb4/src/graphAlgs.jl#L403-L407' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/graphAlgs.jl#L403-L407' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.prim-Tuple{SparseMatrixCSC}' href='#Laplacians.prim-Tuple{SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.prim</code></strong> &mdash; <em>Method</em>.</p>
 <p><code>prim(mat::SparseMatrixCSC; kind=:max)</code> Compute a maximum spanning tree of the matrix <code>mat</code>.   If <code>kind=:min</code>, computes a minimum spanning tree.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/56efe8fc8f9b134f6d9abad3d6fdf50ad4430bb4/src/graphAlgs.jl#L436-L439' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/graphAlgs.jl#L436-L439' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.shortestPathTree-Tuple{Any,Any}' href='#Laplacians.shortestPathTree-Tuple{Any,Any}'>#</a>
 <strong><code>Laplacians.shortestPathTree</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes the shortest path tree, and returns it as a sparse matrix. Treats edge weights as reciprocals of lengths. For example:</p>
@@ -265,12 +265,12 @@ tr = full(shortestPathTree(sparse(a),1))
  0.0  3.0  0.0
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/56efe8fc8f9b134f6d9abad3d6fdf50ad4430bb4/src/graphAlgs.jl#L224-L238' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/graphAlgs.jl#L224-L238' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.shortestPaths-Tuple{SparseMatrixCSC{Tv,Ti},Ti}' href='#Laplacians.shortestPaths-Tuple{SparseMatrixCSC{Tv,Ti},Ti}'>#</a>
 <strong><code>Laplacians.shortestPaths</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes the lenghts of shortest paths from <code>start</code>. Returns both a vector of the lenghts, and the parent array in the shortest path tree.</p>
 <p>This algorithm treats edge weights as reciprocals of distances. DOC BETTER</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/56efe8fc8f9b134f6d9abad3d6fdf50ad4430bb4/src/graphAlgs.jl#L167-L174' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/graphAlgs.jl#L167-L174' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.vecToComps-Tuple{Array{Ti,1}}' href='#Laplacians.vecToComps-Tuple{Array{Ti,1}}'>#</a>
 <strong><code>Laplacians.vecToComps</code></strong> &mdash; <em>Method</em>.</p>
 <p>This turns a component vector, like that generated by components, into an array of arrays of indices of vertices in each component.  For example,</p>
@@ -282,7 +282,7 @@ tr = full(shortestPathTree(sparse(a),1))
  [9]
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/56efe8fc8f9b134f6d9abad3d6fdf50ad4430bb4/src/graphAlgs.jl#L122-L135' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/graphAlgs.jl#L122-L135' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
