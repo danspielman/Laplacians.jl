@@ -17,9 +17,10 @@ end
 
 test1 = SolverTest(ac_deg, "ac")
 test2 = SolverTest(ac_wdeg, "ac_w")
-test3 = SolverTest(cholLap, "chol")
-test4 = SolverTest(cgLapSolver, "cg")
-tests = [test1 test2 test3 test4]
+# removed chol because killing it can cause a crash
+#test3 = SolverTest(cholLap, "chol")
+#test4 = SolverTest(cgLapSolver, "cg")
+tests = [test1 test2]
 
 
 # warm up the code
