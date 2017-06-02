@@ -20,7 +20,7 @@ end # pathGraph
     graph = completeGraph(n::Int64)
 
 The complete graph
-""" 
+"""
 function completeGraph(n::Int64)
   return sparse(ones(n,n) - eye(n))
 end # completeGraph
@@ -33,7 +33,7 @@ The simple ring on n vertices
 """
 function ringGraph(n::Int64)
     a = spdiagm(ones(n-1),1,n,n)
-    a[1,n] = 1
+    a[1,n] = 1.0
     a = a + a'
 end
 
@@ -43,7 +43,7 @@ end
 A generalization of a ring graph.
 The vertices are integers modulo n.
 Two are connected if their difference is in gens.
-For example, 
+For example,
 
 ```
 generalizedRing(17, [1 5])
@@ -113,10 +113,10 @@ The complete binary tree on n vertices
 function completeBinaryTree(n::Int64)
 
   k = div(n-1,2)
-  a = sparse(collect(1:k),2*collect(1:k),1,n,n) + sparse(collect(1:k),2*collect(1:k)+1,1,n,n)
+  a = sparse(collect(1:k),2*collect(1:k),1.0,n,n) + sparse(collect(1:k),2*collect(1:k)+1,1.0,n,n)
 
   if 2*k+1 < n
-    a[n-1,n] = 1
+    a[n-1,n] = 1.0
   end
 
   a = a + a'
@@ -127,7 +127,7 @@ end # completeBinaryTree
 """
     graph = wGrid2(n::Int64; weightGen::Function=rand)
 
-An n by n grid with random weights. User can specify the weighting scheme. 
+An n by n grid with random weights. User can specify the weighting scheme.
 """
 function wGrid2(n::Int64; weightGen::Function=rand)
     gr2 = sparse(grid2(n));
@@ -145,11 +145,11 @@ end
 """
     graph = wGrid3(n::Int64; weightGen::Function=rand)
 
-An n^3 grid with random weights. User can specify the weighting scheme. 
+An n^3 grid with random weights. User can specify the weighting scheme.
 """
 function wGrid3(n::Int64; weightGen::Function=rand)
     gr3 = grid3(n);
-    
+
     a = kron(speye(n), gr3);
     b = kron(gr3, speye(n));
 
@@ -245,13 +245,13 @@ end # randRegular
 Create a graph on n vertices.
 For each vertex, give it k edges to randomly chosen prior
 vertices.
-This is a variety of a preferential attachment graph.    
+This is a variety of a preferential attachment graph.
 """
 function grownGraph(n::Int64, k::Int64)
   a = spzeros(n,n)
 
   for i = 1:k
-    a = a + sparse(2:n,ceil(Integer,collect(1:n-1).*rand(n-1)),1,n,n)
+    a = a + sparse(2:n,ceil(Integer,collect(1:n-1).*rand(n-1)),1.0,n,n)
   end
 
   a = a + a'
@@ -295,10 +295,10 @@ function grownGraphD(n::Int64, k::Int64)
         v[(i-k-2)*k + collect(1:k)] = nb
     end
 
-    a = sparse(u,v,1,n,n)
+    a = sparse(u,v,1.0,n,n)
 
     (ai,aj) = findnz(triu(ones(k+1,k+1),1))
-    a = a + sparse(ai,aj,1,n,n)
+    a = a + sparse(ai,aj,1.0,n,n)
     a = a + a'
 
 end # grownGraphD
@@ -403,7 +403,7 @@ function ErdosRenyi(n::Integer, m::Integer)
     ai = rand(1:n, m)
     aj = rand(1:n, m)
     ind = (ai .!= aj)
-    mat = sparse(ai[ind],aj[ind],1,n,n)
+    mat = sparse(ai[ind],aj[ind],1.0,n,n)
     mat = mat + mat'
     unweight!(mat)
     return mat
@@ -423,9 +423,9 @@ function ErdosRenyiCluster(n::Integer, k::Integer)
     ai = rand(1:n, m)
     aj = rand(1:n, m)
     ind = (ai .!= aj)
-    mat = sparse(ai[ind],aj[ind],1,n,n)
+    mat = sparse(ai[ind],aj[ind],1.0,n,n)
     mat = mat + mat'
-   
+
     return biggestComp(mat)
 end
 
@@ -446,18 +446,18 @@ function ErdosRenyiClusterFix(n::Integer, k::Integer)
     end
 end
 
-    
-    
+
+
 """
     graph = pureRandomGraph(n::Integer; verbose=false)
 
 Generate a random graph with n vertices from one of our natural distributions
 """
-function pureRandomGraph(n::Integer; verbose=false)
-   
+function pureRandomGraph(n::Integer; verbose=false, prefix="")
+
     gr = []
     wt = []
-    
+
     push!(gr,:(pathGraph($n)))
     push!(wt,1)
 
@@ -490,9 +490,9 @@ function pureRandomGraph(n::Integer; verbose=false)
     its = 0
     mat = eval(gr[i])
     if verbose
-        println(gr[i])
+        println(prefix, gr[i])
     end
-        
+
 
     while (~isConnected(mat)) && (its < 100)
         i = sampleByWeight(wt)
@@ -508,9 +508,9 @@ function pureRandomGraph(n::Integer; verbose=false)
         error("nonzero diag from $(gr[i])")
     end
 
-    
+
     return floatGraph(mat)
-      
+
 end
 
 """
@@ -529,22 +529,22 @@ end
 A Chimera graph with some weights.  The weights just appear when graphs are combined.
 For more interesting weights, use `wtedChimera`
 """
-function semiWtedChimera(n::Integer; verbose=false)
+function semiWtedChimera(n::Integer; verbose=false, prefix="")
 
     if (n < 2)
         return spzeros(1,1)
     end
 
     r = rand()^2
-    
+
     if (n < 30) || (rand() < .2)
 
-        gr = pureRandomGraph(n, verbose=verbose)
+        gr = pureRandomGraph(n, verbose=verbose, prefix=prefix)
 
         return randperm(gr)
     end
 
-    if (n < 200) 
+    if (n < 200)
         # just join disjoint copies of graphs
 
         n1 = 10 + floor(Integer,(n-20)*rand())
@@ -552,10 +552,12 @@ function semiWtedChimera(n::Integer; verbose=false)
         k = ceil(Integer,exp(rand()*log(min(n1,n2)/2)))
 
         if verbose
-            println("joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+            println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
         end
 
-        gr = joinGraphs(r*chimera(n1;verbose=verbose),chimera(n2;verbose=verbose),k)
+        pr = string(" ",prefix)
+        gr = joinGraphs(r*chimera(n1;verbose=verbose,prefix=pr),
+          chimera(n2;verbose=verbose,prefix=pr),k)
 
         return randperm(gr)
     end
@@ -569,10 +571,12 @@ function semiWtedChimera(n::Integer; verbose=false)
         k = floor(Integer,1+exp(rand()*log(min(n1,n2)/2)))
 
         if verbose
-            println("joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+            println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
         end
 
-        gr = joinGraphs(r*chimera(n1;verbose=verbose),chimera(n2;verbose=verbose),k)
+        pr = string(" ",prefix)
+        gr = joinGraphs(r*chimera(n1;verbose=verbose,prefix=pr),
+          chimera(n2;verbose=verbose,prefix=pr),k)
 
         return randperm(gr)
 
@@ -584,19 +588,22 @@ function semiWtedChimera(n::Integer; verbose=false)
         if (rand() < .5)
 
             if verbose
-                println("productGraph($(r)*chimera($(n1)),chimera($(n2)))")
+                println(prefix,"productGraph($(r)*chimera($(n1)),chimera($(n2)))")
             end
-            gr = productGraph(r*chimera(n1;verbose=verbose),chimera(n2;verbose=verbose))
+            pr = string(" ",prefix)
+            gr = productGraph(r*chimera(n1;verbose=verbose,prefix=pr),
+              chimera(n2;verbose=verbose,prefix=pr))
 
         else
 
             k = floor(Integer,1+exp(rand()*log(min(n1,n2)/10)))
 
             if verbose
-                println("generalizedNecklace($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+                println(prefix, "generalizedNecklace($(r)*chimera($(n1)),chimera($(n2)),$(k))")
             end
-
-            gr = generalizedNecklace(r*chimera(n1;verbose=verbose),chimera(n2;verbose=verbose),k)
+            pr = string(" ",prefix)
+            gr = generalizedNecklace(r*chimera(n1;verbose=verbose,prefix=pr),
+              chimera(n2;verbose=verbose,prefix=pr),k)
 
         end
 
@@ -604,15 +611,16 @@ function semiWtedChimera(n::Integer; verbose=false)
         if (n3 > 0)
 
             if verbose
-                println("joinGraphs(gr,chimera($(n3)),2)")
+                println(prefix, "joinGraphs(gr,chimera($(n3)),2)")
             end
 
-            gr = joinGraphs(gr,chimera(n3;verbose=verbose),2)
+            pr = string(" ",prefix)
+            gr = joinGraphs(gr,chimera(n3;verbose=verbose,prefix=pr),2)
 
         end
 
         return randperm(gr)
-        
+
     end
 end
 
@@ -624,14 +632,14 @@ Builds a chimeric graph on n vertices.
 The components come from pureRandomGraph,
 connected by joinGraphs, productGraph and generalizedNecklace
 """
-function chimera(n::Integer; verbose=false)
+function chimera(n::Integer; verbose=false, prefix="")
 
 
-    gr = semiWtedChimera(n; verbose=verbose)
+    gr = semiWtedChimera(n; verbose=verbose, prefix=prefix)
     unweight!(gr)
 
     return gr
-        
+
 end
 
 """
@@ -642,9 +650,9 @@ It does this by resetting the random number generator seed.
 It should captute the state of the generator before that and then
 return it, but it does not yet.
 """
-function chimera(n::Integer, k::Integer; verbose=false)
+function chimera(n::Integer, k::Integer; verbose=false, prefix="")
     srand(100*n+k)
-    g = chimera(n; verbose=verbose)
+    g = chimera(n; verbose=verbose, prefix=prefix)
     return g
 end
 
@@ -657,12 +665,18 @@ function randWeight(a)
 
     if (rand() < .2)
         return a
+    else
+        return randWeightSub(a)
     end
-    
+end
+
+
+function randWeightSub(a)
+
     n = a.n
     (ai,aj) = findnz(a)
     m = length(ai)
-    
+
     # potentials or edge-based
 
     if (rand() < .3)
@@ -688,7 +702,7 @@ function randWeight(a)
             end
         end
 
-        w = abs(v[ai]-v[aj]) 
+        w = abs(v[ai]-v[aj])
 
     end
 
@@ -722,9 +736,9 @@ function wtedChimera(n::Integer, k::Integer; verbose=false)
     return g
 end
 
-function semiWtedChimera(n::Integer, k::Integer; verbose=false)
+function semiWtedChimera(n::Integer, k::Integer; verbose=false, prefix="")
     srand(100*n+k)
-    g = semiWtedChimera(n; verbose=verbose)
+    g = semiWtedChimera(n; verbose=verbose, prefix=prefix)
     return g
 end
 
@@ -737,4 +751,3 @@ Generate a chimera, and then apply a random weighting scheme
 function wtedChimera(n::Integer; verbose=false)
     return randWeight(semiWtedChimera(n; verbose=verbose))
 end
-

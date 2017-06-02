@@ -43,7 +43,7 @@ for i in 1:n
     end
     w += wdeg(a,i)
 end
-@test x == y == z == w == sum(a) 
+@test x == y == z == w == sum(a)
 
 # export setValue
 
@@ -178,6 +178,11 @@ uniformWeight!(a2)
 b = edgeVertexMat(a2)
 @test sum(abs(b'*b - lap(unweight(a2)))) == 0
 
+  # export thicken_once, thicken
+
+  a = thicken_once(grid2(10))
+  a = thicken(grid2(10),4)
+
   # export productGraph
   # export generalizedNecklace
   # export subsampleEdges
@@ -291,7 +296,7 @@ blockSample(r)
 
   # export SolverTest, speedTestLapSolvers
 
-solvers = [SolverTest(edgeElimLap,"ee") SolverTest(augTreeLap,"aug")]
+solvers = [SolverTest(approxCholLap,"ac") SolverTest(augTreeLap,"aug")]
 
 dic = Dict()
 n = 1000

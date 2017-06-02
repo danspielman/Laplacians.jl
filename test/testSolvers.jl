@@ -27,19 +27,19 @@ fa = conSolve(a)
 a2 = disjoin(chimera(100,2),wtedChimera(200,3))
 la2 = lap(a2)
 n = size(a2,1)
-b2 = randn(n); 
+b2 = randn(n);
 b2[1:100] = b2[1:100] - mean(b2[1:100]);
 b2[101:300] = b2[101:300] - mean(b2[101:300]);
 
 f = Laplacians.lapWrapComponents(conSolve, a2)
 
 x = f(b2,verbose=true)
-norm(la2*x-b2)/norm(b2) 
+norm(la2*x-b2)/norm(b2)
 
 f = Laplacians.lapWrapComponents(Laplacians.cgLapSolver, a2)
 
 x1 = f(b2,verbose=true)
-norm(la2*x1-b2)/norm(b2) 
+norm(la2*x1-b2)/norm(b2)
 
 sum(x1[101:300])
 
@@ -71,20 +71,29 @@ f = Laplacians.cholLap(a)
 fs = Laplacians.lapWrapSDDM(cgSolver)
 f = fs(a, tol=1e-2, verbose=true)
 x = f(b, tol=1e-6);
-             
+
 
 mats = []
 rhss = []
-solver = Laplacians.wrapCapture(edgeElimLap, mats, rhss)
+solver = Laplacians.wrapCapture(approxCholLap, mats, rhss)
 a = chimera(10)
+as = shortIntGraph(a)
 f = solver(a);
+fs = solver(as);
 size(mats[1])
 b = randn(10)
 x = f(b);
+xs = fs(b);
 
-solver = Laplacians.edgeElimLapChol(a,verbose=true)
+solver = Laplacians.approxCholLapChol(a,verbose=true)
 x = solver(b);
 
+# testing approxChol internals
+a = randRegular(20,3)
+llp = Laplacians.LLmatp(a)
+Laplacians.print_ll_col(llp,1)
+llo = Laplacians.LLMatOrd(a);
+Laplacians.print_ll_col(llo,1)
 
 
 # testing by repitition
@@ -98,7 +107,7 @@ end
 function testSolvers(a;maxtime=5)
 
     maxits = 200
-    
+
     n = a.n
     excess = zeros(n); excess[1] = excess[n] = 0.1;
     la = lap(a);
@@ -108,7 +117,7 @@ function testSolvers(a;maxtime=5)
     its = Int[0]
 
 
-    
+
     for solver in SDDMSolvers
         f = solver(sddm, tol=1e-6, maxtime=maxtime,verbose=true);
         x = f(b,tol=1e-6,maxits=maxits,verbose=true,pcgIts=its);
@@ -145,7 +154,7 @@ for i in 1:50
 
     nnzL, flops = ask_cholmod(lap(gr))
     pe = cholmod_perm(lap(gr))
-    
+
     testSolvers(gr)
 
     gru = unweight(gr)
@@ -160,7 +169,16 @@ n = size(a,1)
 b = randn(n)
 b = b - mean(b)
 la = lap(a)
-for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver, edgeElimLap]
+ee1 = function(a; verbose=false, args...)
+    approxCholLap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
+end
+ee2 = function(a; verbose=false, args...)
+    approxCholLap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
+end
+ee3 = function(a; verbose=false, args...)
+    approxCholLap(a; params=ApproxCholParams(:given), verbose=verbose, args...)
+end
+for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver, ee1, ee2, ee3]
     f = solver(a, tol=1e-6, maxtime=5);
     x = f(b);
     @test norm(la*x - b)/norm(b) <= 1e-1
@@ -261,16 +279,9 @@ b = b - mean(b)
 @time gn = augTreeSddm(sdd)
 @time gold = augTreeSddm(sdd,params=AugTreeParamsOld())
 
+lnew(a; kwargs...) = augTreeLap(a; params=AugTreeParams(), kwargs...)
+lold(a; kwargs...) = augTreeLap(a; params=AugTreeParamsOld(), kwargs...)
+solvers = [SolverTest(lnew,"new") SolverTest(lold,"old")]
 
-# test augTreeFactor (not yet exported)
-
-a = wtedChimera(100);
-tr = akpw(a);
-f = Laplacians.augTreeFactor(a,tr);
-b = randn(100)
-b = b - mean(b)
-x = f(b);
-f = Laplacians.augTreeFactor(a,tr,verbose=true);
-x = f(b);
-f = Laplacians.augTreeFactor(tr,tr,verbose=true);
-
+dic = Dict()
+x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2)

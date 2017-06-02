@@ -11,8 +11,8 @@ Laplacians is a package containing graph algorithms, with an emphasis on tasks r
 
 All graphs are represented by sparse adjacency matrices. This is both for speed, and because our main concerns are algebraic tasks. It does not handle dynamic graphs. It would be very slow to implement dynamic graphs this way.
 
-The documentation may be found in
-[http://danspielman.github.io/Laplacians.jl/about/index.html](http://danspielman.github.io/Laplacians.jl/about/index.html).
+The documentation may be found by clicking on one of the "docs" links above.
+
 
 This includes instructions for installing Julia, and some tips for how to start using it.  It also includes guidelines for Dan Spielman's collaborators.
 
@@ -28,7 +28,7 @@ If you want to solve Laplacian equations, we recommend the KMPLapSolver.  For SD
 The algorithms provide by Laplacians.jl include:
 
 * `akpw`, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.
-* `edgeElimLap`: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
+* `approxCholLap`: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
 * `KMPLapSolver` and `KMPSDDSolver`: linear equation solvers based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
 * `samplingSDDSolver` and `samplingLapSolver`, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
 * `chimera` and `wtedChimera` graph generators for testing graph algorithms, by Daniel Spielman.
@@ -39,9 +39,18 @@ The algorithms provide by Laplacians.jl include:
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
-## Version 0.1.2, April 2, 2017
+## Version 0.1.3, June 2, 2017
 
 This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`. 
+
+Major Changes:
+
+* Changed the name of the approximate Cholesky solver from `edgeElimLap` to `approxCholLap`.  Made improvements in this solver.
+* Improved PCG so that it can now detect stagnation.  Made options to do this even better when using it with a good preconditioner, like `edgeElimLap`.
+* Added in code for comparing the running times of solvers.  The difficulty here is that we need to stop them if they run too long.  Added code to do this with threads inside Julia, and with `gtimeout` when calling Matlab to use icc, CMG, or LAMG.
+
+## Version 0.1.2, April 2, 2017
+
 
 Major Changes:
 

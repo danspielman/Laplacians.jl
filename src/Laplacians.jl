@@ -102,6 +102,8 @@ and exports the functions for which it seems appropriate.
 
   export edgeVertexMat
 
+  export thicken_once, thicken
+
   export productGraph
   export generalizedNecklace
   export subsampleEdges
@@ -191,9 +193,9 @@ and exports the functions for which it seems appropriate.
   export KMPLapSolver
   export KMPParams
 
-  include("edgeElimTypes.jl")
-  include("edgeElim.jl")
-  export edgeElimLap
+  include("approxCholTypes.jl")
+  include("approxChol.jl")
+  export approxCholLap, ApproxCholParams
 
   include("complexSolvers.jl")
   export SDDMSolvers
