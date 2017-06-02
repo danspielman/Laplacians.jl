@@ -45,7 +45,7 @@ This is the current version.  It is what you retrieve when you run `Pkg.add("Lap
 Major Changes:
 
 * Changed the name of the approximate Cholesky solver from `edgeElimLap` to `approxCholLap`.  Made improvements in this solver.
-* Improved PCG so that it can now detect stagnation.  Made options to do this even better when using it with a good preconditioner, like `edgeElimLap`.
+* Improved PCG so that it can now detect stagnation.  Made options to do this even better when using it with a good preconditioner, like `approxCholLap`.
 * Added in code for comparing the running times of solvers.  The difficulty here is that we need to stop them if they run too long.  Added code to do this with threads inside Julia, and with `gtimeout` when calling Matlab to use icc, CMG, or LAMG.
 
 ## Version 0.1.2, April 2, 2017
