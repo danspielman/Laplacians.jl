@@ -120,7 +120,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
     @inbounds for i in Tind(1):Tind(n-1)
         next = zero(Tind)
 
-        for ind in (a.colptr[i]):(a.colptr[i+1]-1)
+        for ind in (a.colptr[i]):(a.colptr[i+1]-one(Tind))
             j = a.rowval[ind]
             if (i < j)
 
@@ -152,7 +152,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}, perm::Array)
         i = invp[i0]
         next = zero(Tind)
 
-        for ind in (a.colptr[i0]):(a.colptr[i0+1]-1)
+        for ind in (a.colptr[i0]):(a.colptr[i0+1]-one(Tind))
             j = invp[a.rowval[ind]]
             if (i < j)
 
@@ -587,6 +587,7 @@ end
 
 
 function forward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y)
+
     @inbounds for ii in 1:length(ldli.col)
         i = ldli.col[ii]
 
@@ -1036,10 +1037,10 @@ function approxCholPQMove!{Tind}(pq::ApproxCholPQ{Tind}, i, newkey, oldlist, new
     next = pq.elems[i].next
 
     # remove i from its old list
-    if next > 0
+    if next > zero(Tind)
         pq.elems[next] = ApproxCholPQElem{Tind}(prev, pq.elems[next].next, pq.elems[next].key)
     end
-    if prev > 0
+    if prev > zero(Tind)
         pq.elems[prev] = ApproxCholPQElem{Tind}(pq.elems[prev].prev, next, pq.elems[prev].key)
 
     else
@@ -1065,18 +1066,18 @@ end
 function approxCholPQDec!{Tind}(pq::ApproxCholPQ{Tind}, i)
 
     oldlist = keyMap(pq.elems[i].key, pq.n)
-    newlist = keyMap(pq.elems[i].key - 1, pq.n)
+    newlist = keyMap(pq.elems[i].key - one(Tind), pq.n)
 
     if newlist != oldlist
 
-        approxCholPQMove!(pq, i, pq.elems[i].key - 1, oldlist, newlist)
+        approxCholPQMove!(pq, i, pq.elems[i].key - one(Tind), oldlist, newlist)
 
         if newlist < pq.minlist
             pq.minlist = newlist
         end
 
     else
-        pq.elems[i] = ApproxCholPQElem{Tind}(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key - 1)
+        pq.elems[i] = ApproxCholPQElem{Tind}(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key - one(Tind))
     end
 
 
@@ -1090,14 +1091,14 @@ end
 function approxCholPQInc!{Tind}(pq::ApproxCholPQ{Tind}, i)
 
     oldlist = keyMap(pq.elems[i].key, pq.n)
-    newlist = keyMap(pq.elems[i].key + 1, pq.n)
+    newlist = keyMap(pq.elems[i].key + one(Tind), pq.n)
 
     if newlist != oldlist
 
-        approxCholPQMove!(pq, i, pq.elems[i].key + 1, oldlist, newlist)
+        approxCholPQMove!(pq, i, pq.elems[i].key + one(Tind), oldlist, newlist)
 
     else
-        pq.elems[i] = ApproxCholPQElem{Tind}(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key + 1)
+        pq.elems[i] = ApproxCholPQElem{Tind}(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key + one(Tind))
     end
 
     return Void
