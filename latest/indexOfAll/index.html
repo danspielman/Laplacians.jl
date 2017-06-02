@@ -200,7 +200,7 @@
 <h1 id="index-of-all-exported">Index of all exported</h1>
 <p>This is an index of all the exported methods. We would include the docstrings, but Documenter.jl does not let us.</p>
 <ul>
-<li><a href="../privateFuncs/index.html#Laplacians.EdgeElimPQ"><code>Laplacians.EdgeElimPQ</code></a></li>
+<li><a href="../privateFuncs/index.html#Laplacians.ApproxCholPQ"><code>Laplacians.ApproxCholPQ</code></a></li>
 <li><a href="../solvers/index.html#Laplacians.KMPParams"><code>Laplacians.KMPParams</code></a></li>
 <li><a href="../privateFuncs/index.html#Laplacians.LDLinv"><code>Laplacians.LDLinv</code></a></li>
 <li><a href="../privateFuncs/index.html#Laplacians.LLmatp"><code>Laplacians.LLmatp</code></a></li>
@@ -218,6 +218,9 @@
 <li><a href="../operators/index.html#Laplacians.adj-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.adj</code></a></li>
 <li><a href="../akpw/index.html#Laplacians.akpw-Tuple{Any}"><code>Laplacians.akpw</code></a></li>
 <li><a href="../akpw/index.html#Laplacians.akpwU-Tuple{Any}"><code>Laplacians.akpwU</code></a></li>
+<li><a href="../privateFuncs/index.html#Laplacians.approxCholLapChol-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.approxCholLapChol</code></a></li>
+<li><a href="../privateFuncs/index.html#Laplacians.approxCholPQDec!-Tuple{Laplacians.ApproxCholPQ{Tind},Any}"><code>Laplacians.approxCholPQDec!</code></a></li>
+<li><a href="../privateFuncs/index.html#Laplacians.approxCholPQInc!-Tuple{Laplacians.ApproxCholPQ{Tind},Any}"><code>Laplacians.approxCholPQInc!</code></a></li>
 <li><a href="../localClustering/index.html#Laplacians.apr-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}"><code>Laplacians.apr</code></a></li>
 <li><a href="../solvers/index.html#Laplacians.augTreeLap-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.augTreeLap</code></a></li>
 <li><a href="../solvers/index.html#Laplacians.augTreeLapPrecon-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.augTreeLapPrecon</code></a></li>
@@ -244,10 +247,6 @@
 <li><a href="../operators/index.html#Laplacians.diagmat-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.diagmat</code></a></li>
 <li><a href="../operators/index.html#Laplacians.disjoin-Tuple{Any,Any}"><code>Laplacians.disjoin</code></a></li>
 <li><a href="../localClustering/index.html#Laplacians.dumbRefineCut-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}"><code>Laplacians.dumbRefineCut</code></a></li>
-<li><a href="../solvers/index.html#Laplacians.edgeElimLap-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.edgeElimLap</code></a></li>
-<li><a href="../privateFuncs/index.html#Laplacians.edgeElimLapChol-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.edgeElimLapChol</code></a></li>
-<li><a href="../privateFuncs/index.html#Laplacians.edgeElimPQDec!-Tuple{Laplacians.EdgeElimPQ,Int64}"><code>Laplacians.edgeElimPQDec!</code></a></li>
-<li><a href="../privateFuncs/index.html#Laplacians.edgeElimPQInc!-Tuple{Laplacians.EdgeElimPQ,Int64}"><code>Laplacians.edgeElimPQInc!</code></a></li>
 <li><a href="../operators/index.html#Laplacians.edgeVertexMat-Tuple{SparseMatrixCSC}"><code>Laplacians.edgeVertexMat</code></a></li>
 <li><a href="../privateFuncs/index.html#Laplacians.extendMatrix-Tuple{SparseMatrixCSC{Tv,Ti},Array{Tv,1}}"><code>Laplacians.extendMatrix</code></a></li>
 <li><a href="../graphUtils/index.html#Laplacians.findEntries-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.findEntries</code></a></li>
@@ -286,6 +285,7 @@
 <li><a href="../operators/index.html#Laplacians.plotGraph"><code>Laplacians.plotGraph</code></a></li>
 <li><a href="../graphGenerators/index.html#Laplacians.prefAttach-Tuple{Int64,Int64,Float64}"><code>Laplacians.prefAttach</code></a></li>
 <li><a href="../graphAlgs/index.html#Laplacians.prim-Tuple{SparseMatrixCSC}"><code>Laplacians.prim</code></a></li>
+<li><a href="../privateFuncs/index.html#Laplacians.print_ll_col-Tuple{Laplacians.LLMatOrd,Int64}"><code>Laplacians.print_ll_col</code></a></li>
 <li><a href="../privateFuncs/index.html#Laplacians.print_ll_col-Tuple{Laplacians.LLmatp,Int64}"><code>Laplacians.print_ll_col</code></a></li>
 <li><a href="../localClustering/index.html#Laplacians.prn-Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Int64}"><code>Laplacians.prn</code></a></li>
 <li><a href="../operators/index.html#Laplacians.productGraph-Tuple{SparseMatrixCSC,SparseMatrixCSC}"><code>Laplacians.productGraph</code></a></li>
@@ -314,6 +314,8 @@
 <li><a href="../operators/index.html#Laplacians.spectralCoords-Tuple{Any}"><code>Laplacians.spectralCoords</code></a></li>
 <li><a href="../operators/index.html#Laplacians.spectralDrawing-Tuple{Any}"><code>Laplacians.spectralDrawing</code></a></li>
 <li><a href="../operators/index.html#Laplacians.subsampleEdges-Tuple{SparseMatrixCSC,Float64}"><code>Laplacians.subsampleEdges</code></a></li>
+<li><a href="../operators/index.html#Laplacians.thicken-Tuple{SparseMatrixCSC,Any}"><code>Laplacians.thicken</code></a></li>
+<li><a href="../operators/index.html#Laplacians.thicken_once-Tuple{SparseMatrixCSC}"><code>Laplacians.thicken_once</code></a></li>
 <li><a href="../privateFuncs/index.html#Laplacians.treeDepthDFS-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>Laplacians.treeDepthDFS</code></a></li>
 <li><a href="../operators/index.html#Laplacians.twoLift-Tuple{Any,AbstractArray{Bool,1}}"><code>Laplacians.twoLift</code></a></li>
 <li><a href="../operators/index.html#Laplacians.uniformWeight-Tuple{SparseMatrixCSC{Tval,Tind}}"><code>Laplacians.uniformWeight</code></a></li>
@@ -328,8 +330,8 @@
 <li><a href="../privateFuncs/index.html#Laplacians.wrapCaptureRhs-Tuple{Function,Any}"><code>Laplacians.wrapCaptureRhs</code></a></li>
 <li><a href="../privateFuncs/index.html#Laplacians.wrapInterface-Tuple{Function,AbstractArray{T,2}}"><code>Laplacians.wrapInterface</code></a></li>
 <li><a href="../IO/index.html#Laplacians.writeIJV-Tuple{AbstractString,Any}"><code>Laplacians.writeIJV</code></a></li>
-<li><a href="../graphGenerators/index.html#Laplacians.wtedChimera-Tuple{Integer}"><code>Laplacians.wtedChimera</code></a></li>
 <li><a href="../graphGenerators/index.html#Laplacians.wtedChimera-Tuple{Integer,Integer}"><code>Laplacians.wtedChimera</code></a></li>
+<li><a href="../graphGenerators/index.html#Laplacians.wtedChimera-Tuple{Integer}"><code>Laplacians.wtedChimera</code></a></li>
 </ul>
               
             </div>
