@@ -463,7 +463,7 @@ function approxChol{Tind,Tval}(a::LLmatp{Tind,Tval})
 
         i = approxCholPQPop!(pq)
 
-        ldli.col[it] = i
+        ldli.col[it] = i # conversion!
         ldli.colptr[it] = ldli_row_ptr
 
         it = it + 1
@@ -678,7 +678,7 @@ function approxCholLapGreedy(a::SparseMatrixCSC;
 
   t1 = time()
 
-  la = lap(a)
+  la = lap(a) # a hit !?
 
   llmat = LLmatp(a)
   ldli = approxChol(llmat)

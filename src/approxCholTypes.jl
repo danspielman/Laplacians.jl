@@ -101,7 +101,7 @@ end
 type ApproxCholPQ{Tind}
     elems::Array{ApproxCholPQElem{Tind},1} # indexed by node name
     lists::Array{Tind,1}
-    minlist
-    nitems::Int64
-    n::Int64
+    minlist::Int
+    nitems::Int
+    n::Int
 end
