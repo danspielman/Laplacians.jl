@@ -12,3 +12,56 @@ All graphs are represented by sparse adjacency matrices. This is both for speed,
 
 The documentation may be found by clicking on one of the "docs" links above.
 
+
+## Current Development Version
+
+To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
+
+## Version 0.1.4, June 6, 2017
+
+This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`. 
+
+Changes:
+
+* Added `sparsify`, an implementation of sparsification by effective resistance sampling, following Spielman and Srivastava.
+* Added `approxQual` and `conditionNumber` for checking how well one graph approximates another.
+* Fixed a bug in the solution of Laplacian systems in disconnected graphs.
+
+## Version 0.1.3, June 2, 2017
+
+Major Changes:
+
+* Changed the name of the approximate Cholesky solver from `edgeElimLap` to `approxCholLap`.  Made improvements in this solver.
+* Improved PCG so that it can now detect stagnation.  Made options to do this even better when using it with a good preconditioner, like `approxCholLap`.
+* Added in code for comparing the running times of solvers.  The difficulty here is that we need to stop them if they run too long.  Added code to do this with threads inside Julia, and with `gtimeout` when calling Matlab to use icc, CMG, or LAMG.
+
+## Version 0.1.2, April 2, 2017
+
+
+Major Changes:
+
+* added `edgeElimLap` - a fast Laplacian solver.
+* fixed a bug in the unweighted version of `akpw`. 
+
+## Version 0.1.1, December 26, 2016
+
+Changelist:
+
+* All of the linear equation solvers now have the same interface, and the Laplacian solvers work for disconnected graphs. 
+* Some support for calling solvers from Matlab has been added.
+* Documentation is now through Documenter.jl.
+
+## Version 0.0.3 / 0.1.0, November 20, 2016
+
+Versions 0.0.3 and 0.1.0 are the same.
+These versions works with Julia 0.5.
+
+Warning: the behavior of chimera and wtedChimera differs between Julia 0.4 and Julia 0.5 because randperm acts differently in these.
+
+## Version 0.0.2, November 19, 2016
+
+This is the version that works with Julia 0.4.
+It was captured right before the upgrade to Julia 0.5
+
+
+
