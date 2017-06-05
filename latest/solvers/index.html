@@ -120,18 +120,6 @@
                     
     <a class="" href="../IO/index.html">IO</a>
                 </li>
-                <li class="">
-                    
-    <a class="" href="../treeAlgs/index.html">treeAlgs</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../akpw/index.html">akpw</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../randTrees/index.html">randTrees</a>
-                </li>
                 <li class=" current">
                     
     <a class="current" href="index.html">solvers</a>
@@ -141,6 +129,22 @@
     
 
     </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../sparsification/index.html">sparsification</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../akpw/index.html">akpw</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../treeAlgs/index.html">treeAlgs</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../randTrees/index.html">randTrees</a>
                 </li>
                 <li class="">
                     
@@ -229,14 +233,14 @@
 </code></pre>
 
 <p>Uses Cholesky Factorization to solve systems in Laplacians.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/solverInterface.jl#L273-L277' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/solverInterface.jl#L276-L280' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.cholSDDM' href='#Laplacians.cholSDDM'>#</a>
 <strong><code>Laplacians.cholSDDM</code></strong> &mdash; <em>Function</em>.</p>
 <pre><code>solveSDDM = cholSDDM(sddm::AbstractMatrix; tol, maxits, maxtime, verbose, pcgIts=Int[])
 </code></pre>
 
 <p>This functions wraps cholfact so that it satsfies our interface. It ignores all the keyword arguments.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/solverInterface.jl#L70-L75' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/solverInterface.jl#L73-L78' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.lapWrapSDDM-Tuple{Any,AbstractArray}' href='#Laplacians.lapWrapSDDM-Tuple{Any,AbstractArray}'>#</a>
 <strong><code>Laplacians.lapWrapSDDM</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>f = lapWrapSDDM(sddmSolver, A::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
@@ -244,7 +248,7 @@ f = lapWrapSDDM(sddmSolver)
 </code></pre>
 
 <p>Uses a <code>sddmSolver</code> to solve systems of linear equations in Laplacian matrices.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/solverInterface.jl#L248-L253' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/solverInterface.jl#L251-L256' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.cg' href='#Laplacians.cg'>#</a>
 <strong><code>Laplacians.cg</code></strong> &mdash; <em>Function</em>.</p>
 <pre><code>x = cg(mat, b; tol, maxits, maxtime, verbose, pcgIts)
@@ -259,21 +263,21 @@ f = lapWrapSDDM(sddmSolver)
 <li><code>verbose</code> defaults to false</li>
 <li><code>pcgIts</code> is an array for returning the number of pcgIterations.  Default is length 0, in which case nothing is returned.</li>
 </ul>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/pcg.jl#L13-L23' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/pcg.jl#L13-L23' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.cgLapSolver-Tuple{SparseMatrixCSC}' href='#Laplacians.cgLapSolver-Tuple{SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.cgLapSolver</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>x = cgLapSolver(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 </code></pre>
 
 <p>Create a solver that uses cg to solve Laplacian systems in the laplacian of A. This just exists to satisfy our interface. It does nothing more than create the Laplacian and call cg on each connected component.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/pcg.jl#L73-L79' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/pcg.jl#L73-L79' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.cgSolver' href='#Laplacians.cgSolver'>#</a>
 <strong><code>Laplacians.cgSolver</code></strong> &mdash; <em>Function</em>.</p>
 <pre><code>x = cgSolver(mat; tol, maxits, maxtime, verbose, pcgIts)
 </code></pre>
 
 <p>creates a solver for a PSD system <code>mat</code>. The parameters are as described in cg.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/pcg.jl#L42-L47' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/pcg.jl#L42-L47' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.pcg' href='#Laplacians.pcg'>#</a>
 <strong><code>Laplacians.pcg</code></strong> &mdash; <em>Function</em>.</p>
 <pre><code>x = pcg(mat, b, pre; tol, maxits, maxtime, verbose, pcgIts, stag_test)`
@@ -290,21 +294,21 @@ f = lapWrapSDDM(sddmSolver)
 <li><code>pcgIts</code> is an array for returning the number of pcgIterations.  Default is length 0, in which case nothing is returned.</li>
 <li><code>stag_test=k</code> stops the code if rho[it] &gt; (1-1/k) rho[it-k].  Set to 0 to deactivate.</li>
 </ul>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/pcg.jl#L26-L38' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/pcg.jl#L26-L38' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.pcgLapSolver-Tuple{AbstractArray{T,2},AbstractArray{T,2}}' href='#Laplacians.pcgLapSolver-Tuple{AbstractArray{T,2},AbstractArray{T,2}}'>#</a>
 <strong><code>Laplacians.pcgLapSolver</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>x = pcgLapSolver(A, B; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 </code></pre>
 
 <p>Create a solver that uses pcg to solve Laplacian systems in <code>A</code> Specialized for the case when the preconditioner the Laplacian matrix of <code>B</code>. It solves the preconditioner by Cholesky Factorization.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/pcg.jl#L124-L130' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/pcg.jl#L124-L130' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.pcgSolver' href='#Laplacians.pcgSolver'>#</a>
 <strong><code>Laplacians.pcgSolver</code></strong> &mdash; <em>Function</em>.</p>
 <pre><code>x = pcgSolver(mat, pre; tol, maxits, maxtime, verbose, pcgIts)
 </code></pre>
 
 <p>creates a solver for a PSD system using preconditioner <code>pre</code>. The parameters are as described in pcg.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/pcg.jl#L51-L56' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/pcg.jl#L51-L56' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.augTreeLap-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.augTreeLap-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.augTreeLap</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>solver = augTreeLap(A; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params=AugTreeParams())
@@ -315,21 +319,21 @@ f = lapWrapSDDM(sddmSolver)
 <li><code>params.treeAlg</code> default to <code>akpw</code></li>
 <li><code>params.opt</code> if true, it interacts with cholmod to choose a good number of edges to add back.  If false, it adds back 2*sqrt(n).</li>
 </ul>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/augTreeSolver.jl#L283-L290' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/augTreeSolver.jl#L283-L290' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.augTreeLapPrecon-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.augTreeLapPrecon-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.augTreeLapPrecon</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>pre = augTreeLapPrecon{Tv,Ti}(A; params=AugTreeParams())
 </code></pre>
 
 <p>This is an augmented spanning tree preconditioner for Laplacians. It takes as optional input a tree growing algorithm. It adds back 2sqrt(n) edges via <code>augmentTree</code>: the sqrt(n) of highest stretch and another sqrt(n) sampled according to stretch. For most purposes, one should directly call <code>augTreeLapSolver</code>.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/augTreeSolver.jl#L252-L259' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/augTreeSolver.jl#L252-L259' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.augTreePrecon-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.augTreePrecon-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.augTreePrecon</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>pre = augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; params=AugTreeParams())
 </code></pre>
 
 <p>This is an augmented spanning tree preconditioner for diagonally dominant linear systems.  It takes as optional input a tree growing algorithm. It adds back 2sqrt(n) edges via augmentTree: the sqrt(n) of highest stretch and another sqrt(n) sampled according to stretch. For most purposes, one should directly call <code>augTreeSolver</code>.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/augTreeSolver.jl#L187-L195' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/augTreeSolver.jl#L187-L195' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.augTreeSddm-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.augTreeSddm-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.augTreeSddm</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>solver = augTreeSddm(sddm; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],  params=AugTreeParams())
@@ -340,7 +344,7 @@ f = lapWrapSDDM(sddmSolver)
 <li><code>params.treeAlg</code> default to <code>akpw</code></li>
 <li><code>params.opt</code> if true, it interacts with cholmod to choose a good number of edges to add back.  If false, it adds back 2*sqrt(n).</li>
 </ul>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/augTreeSolver.jl#L223-L230' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/augTreeSolver.jl#L223-L230' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.augmentTree-Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti},Ti}' href='#Laplacians.augmentTree-Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti},Ti}'>#</a>
 <strong><code>Laplacians.augmentTree</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>B = augmentTree{Tv,Ti}(tree, A, k)
@@ -348,29 +352,29 @@ f = lapWrapSDDM(sddmSolver)
 
 <p>Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It then adds back the k edges of highest stretch, and k edges sampled according to stretch.</p>
 <p>This is the old alg.  We now recommend using augmentTreeOpt.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/augTreeSolver.jl#L30-L40' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/augTreeSolver.jl#L30-L40' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.samplingParams' href='#Laplacians.samplingParams'>#</a>
 <strong><code>Laplacians.samplingParams</code></strong> &mdash; <em>Type</em>.</p>
 <p>Parameters for the sampling solver.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/samplingSolver.jl#L10-L12' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/samplingSolver.jl#L10-L12' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.samplingLapSolver-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.samplingLapSolver-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.samplingLapSolver</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>solver = samplingLapSolver(A)
 </code></pre>
 
 <p>An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/samplingSolver.jl#L100-L105' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/samplingSolver.jl#L100-L105' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.samplingSDDMSolver-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.samplingSDDMSolver-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.samplingSDDMSolver</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>solver = samplingSDDMSolver(sddm)
 </code></pre>
 
 <p>An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/samplingSolver.jl#L43-L48' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/samplingSolver.jl#L43-L48' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.KMPParams' href='#Laplacians.KMPParams'>#</a>
 <strong><code>Laplacians.KMPParams</code></strong> &mdash; <em>Type</em>.</p>
 <p>Parameters for the KMP solver</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/KMPSolver.jl#L19' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/KMPSolver.jl#L19' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.KMPLapSolver-Tuple{Any}' href='#Laplacians.KMPLapSolver-Tuple{Any}'>#</a>
 <strong><code>Laplacians.KMPLapSolver</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>lapSolver = KMPLapSolver(A; verbose, tol, maxits, maxtime, pcgIts, params::KMPParams)
@@ -378,28 +382,28 @@ f = lapWrapSDDM(sddmSolver)
 
 <p>Solves linear equations in the Laplacian of graph with adjacency matrix <code>A</code>.</p>
 <p>Based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/KMPSolver.jl#L235-L241' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/KMPSolver.jl#L235-L241' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.KMPSDDMSolver-Tuple{Any}' href='#Laplacians.KMPSDDMSolver-Tuple{Any}'>#</a>
 <strong><code>Laplacians.KMPSDDMSolver</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>sddmSolver = KMPSDDMSolver(mat; verbose, tol, maxits, maxtime, pcgIts, params::KMPParams)
 </code></pre>
 
 <p>Solves linear equations in symmetric, diagonally dominant matrices with non-positive off-diagonals.  Based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/KMPSolver.jl#L187-L191' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/KMPSolver.jl#L187-L191' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.AMGLapSolver-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.AMGLapSolver-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.AMGLapSolver</code></strong> &mdash; <em>Method</em>.</p>
 <p>A wrapper for the PyAMG solver. In line with our other solvers, takes in an adjacency matrix.</p>
 <pre><code class="julia"> amgSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, pcgIts=Int[], verbose=false)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/externalSolvers.jl#L30-L36' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/externalSolvers.jl#L30-L36' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.AMGSolver-Tuple{SparseMatrixCSC{Tv,Ti}}' href='#Laplacians.AMGSolver-Tuple{SparseMatrixCSC{Tv,Ti}}'>#</a>
 <strong><code>Laplacians.AMGSolver</code></strong> &mdash; <em>Method</em>.</p>
 <p>A wrapper for the PyAMG solver.</p>
 <pre><code class="julia"> amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, pcgIts=Int[], verbose=false)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/3c259368ce6348f59389e1d29b13ca837dec8cb2/src/externalSolvers.jl#L1-L7' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/5b7cfaffb709b80d45ca2dbb9e6c8c3f41ee6e3c/src/externalSolvers.jl#L1-L7' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
@@ -407,10 +411,10 @@ f = lapWrapSDDM(sddmSolver)
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../localClustering/index.html" class="btn btn-neutral float-right" title="localClustering">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../sparsification/index.html" class="btn btn-neutral float-right" title="sparsification">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../randTrees/index.html" class="btn btn-neutral" title="randTrees"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../IO/index.html" class="btn btn-neutral" title="IO"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -438,10 +442,10 @@ f = lapWrapSDDM(sddmSolver)
           <a href="https://github.com/danspielman/Laplacians.jl" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-        <span><a href="../randTrees/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../IO/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../localClustering/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../sparsification/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>
