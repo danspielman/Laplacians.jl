@@ -207,6 +207,9 @@ and exports the functions for which it seems appropriate.
   include("conditionNumber.jl")
   export support, approxQual, conditionNumber
 
+  include("sparsify.jl")
+  export sparsify
+
   include("johnlind.jl")
   export johnlind
 

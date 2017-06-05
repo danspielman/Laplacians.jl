@@ -309,6 +309,20 @@ b = randn(n)
 b = b - mean(b)
 x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2, verbose=true)
 
+  # include("conditionNumber.jl")
+  # export support, approxQual, conditionNumber
+
+  # include("sparsify.jl")
+  # export sparsify
+
+a = wtedChimera(1000,1)
+dave = nnz(a)/size(a,1)
+a = thicken(a,round(Int,200/dave))
+as = sparsify(a,ep=1,JLfac=4);
+@test approxQual(a,as,verbose=true) < 2
+@test conditionNumber(a,as,tol=1e-4) < 10
+
+
 
   # export johnlind
 

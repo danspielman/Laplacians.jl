@@ -19,8 +19,17 @@ function support(a1,a2; tol=1e-5)
     op12 = SqLinOp(false,1.0,size(a1,1),b->la2*f1(b))
     op21 = SqLinOp(false,1.0,size(a2,1),b->la1*f2(b))
 
-    sup12 = abs(eigs(op12;nev=1,which=:LM,tol=tol)[1][1])
-    sup21 = abs(eigs(op21;nev=1,which=:LM,tol=tol)[1][1])
+    if isConnected(a1)
+      sup12 = abs(eigs(op12;nev=1,which=:LM,tol=tol)[1][1])
+    else
+      sup12 = Inf
+    end
+    if isConnected(a2)
+      sup21 = abs(eigs(op21;nev=1,which=:LM,tol=tol)[1][1])
+    else
+      sup21 = Inf
+    end
+    
 
     return sup12, sup21
 end

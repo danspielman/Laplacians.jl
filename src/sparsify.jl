@@ -6,11 +6,16 @@ Right now, just implements Spielman-Srivastava
 
 =#
 
-function sparsify(a; ep=0.3, matrixConcConst=4.0, JLfac=16)
+"""
+    as = sparsify(a; ep=0.5)
+
+Apply Spielman-Srivastava sparsification: sampling by effective resistances.
+"""
+function sparsify(a; ep=0.3, matrixConcConst=4.0, JLfac=4.0)
   f = approxCholLap(a,tol=1e-2);
 
   n = size(a,1)
-  @show k = round(Int, JLfac*log(n)) # number of dims for JL
+  k = round(Int, JLfac*log(n)) # number of dims for JL
 
   U = wtedEdgeVertexMat(a)
   m = size(U,1)
