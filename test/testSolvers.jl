@@ -73,6 +73,12 @@ f = fs(a, tol=1e-2, verbose=true)
 x = f(b, tol=1e-6);
 
 
+# even more disjoint
+a2 = subsampleEdges(grid2(20),0.5)
+f = approxCholLap(a2)
+
+
+
 mats = []
 rhss = []
 solver = Laplacians.wrapCapture(approxCholLap, mats, rhss)
@@ -94,6 +100,12 @@ llp = Laplacians.LLmatp(a)
 Laplacians.print_ll_col(llp,1)
 llo = Laplacians.LLMatOrd(a);
 Laplacians.print_ll_col(llo,1)
+
+a = wtedChimera(1111,1);
+llp = Laplacians.LLmatp(a)
+srand(1)
+ldli = Laplacians.approxChol(llp);
+@test Laplacians.condNumber(a, ldli, verbose=true) < 10
 
 
 # testing by repitition

@@ -66,6 +66,9 @@ function wrapInterface(solver::Function)
     return f
 end
 
+function nullSolver(a;params...)
+    return 0.0
+end
 
 """
     solveSDDM = cholSDDM(sddm::AbstractMatrix; tol, maxits, maxtime, verbose, pcgIts=Int[])
@@ -215,10 +218,10 @@ function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf,
             asub = a[ind,ind]
 
             if (length(ind) == 1)
-                ssubSolver = x->0
+                subSolver = nullSolver
 
             elseif (length(ind) < 50)
-                subSolver = lapWrapConnected(cholfact,asub)
+                subSolver = lapWrapConnected(cholSDDM,asub)
 
             else
 
