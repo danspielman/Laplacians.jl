@@ -182,8 +182,9 @@ a = wtedChimera(102,2)
 b = wtedEdgeVertexMat(a)
 @test sum(abs(b'*b - lap(a))) < 1e-8
 
-  # export thicken_once, thicken
+  # export power, thicken_once, thicken
 
+  a = power(grid2(10),4)
   a = thicken_once(grid2(10))
   a = thicken(grid2(10),4)
 

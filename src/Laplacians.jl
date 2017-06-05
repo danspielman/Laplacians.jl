@@ -102,7 +102,7 @@ and exports the functions for which it seems appropriate.
 
   export edgeVertexMat, wtedEdgeVertexMat
 
-  export thicken_once, thicken
+  export power, thicken_once, thicken
 
   export productGraph
   export generalizedNecklace

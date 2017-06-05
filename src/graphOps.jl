@@ -110,6 +110,17 @@ function productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
 end # productGraph
 
 """
+    ap = power(a::SparseMatrixCSC, k::Int)
+
+Returns the kth power of a.
+"""
+function power(a::SparseMatrixCSC, k::Int)
+  ap = a^k
+  ap = ap - spdiagm(diag(ap))
+end
+
+
+"""
     a_new = thicken_once(a)
 
 Creates one edge for every vertex in a of degree > 1
