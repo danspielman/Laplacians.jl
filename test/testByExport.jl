@@ -178,6 +178,10 @@ uniformWeight!(a2)
 b = edgeVertexMat(a2)
 @test sum(abs(b'*b - lap(unweight(a2)))) == 0
 
+a = wtedChimera(102,2)
+b = wtedEdgeVertexMat(a)
+@test sum(abs(b'*b - lap(a))) < 1e-8
+
   # export thicken_once, thicken
 
   a = thicken_once(grid2(10))

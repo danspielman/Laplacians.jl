@@ -100,7 +100,7 @@ and exports the functions for which it seems appropriate.
   export mapweight
   export uniformWeight, uniformWeight!
 
-  export edgeVertexMat
+  export edgeVertexMat, wtedEdgeVertexMat
 
   export thicken_once, thicken
 

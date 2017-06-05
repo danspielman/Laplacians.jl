@@ -6,7 +6,7 @@ Operators transform graphs to produce new graphs.
 
 ```@index
 Order = [:type, :function]
-Pages   = ["graphGenerators.md"]
+Pages   = ["graphOps.md"]
 ```
 
 ```@autodocs
