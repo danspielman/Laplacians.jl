@@ -564,7 +564,7 @@ The routines that do the solve.
 
 =============================================================#
 
-function LDLsolver(ldli::LDLinv, b)
+function LDLsolver(ldli::LDLinv, b::Vector)
     y = copy(b)
 
     forward!(ldli, y)
@@ -586,7 +586,7 @@ function LDLsolver(ldli::LDLinv, b)
 end
 
 
-function forward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y)
+function forward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y::Vector)
 
     @inbounds for ii in 1:length(ldli.col)
         i = ldli.col[ii]
@@ -607,7 +607,7 @@ function forward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y)
     end
 end
 
-function backward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y)
+function backward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y::Vector)
     o = one(Tind)
     @inbounds for ii in length(ldli.col):-1:1
         i = ldli.col[ii]
@@ -627,7 +627,100 @@ function backward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y)
     end
 end
 
+function LDLsolver(ldli::LDLinv, b::Matrix)
+    y = copy(b)
 
+    (d, n) = size(y)
+    @assert n == length(ldli.col)+1
+
+    forward!(ldli, y)
+
+    @inbounds for i in 1:(length(ldli.d))
+        if ldli.d[i] != 0
+          @simd for j in 1:d
+            y[j,i] = y[j,i] / ldli.d[i]
+          end
+        end
+    end
+
+    backward!(ldli, y)
+
+    @inbounds for j in 1:size(y,1)
+        mu = mean(y[j,:])
+
+        for i in 1:size(y,2)
+            y[j,i] = y[j,i] - mu
+        end
+    end
+
+    return y
+end
+
+
+#=
+  An attempt at an efficient solver for the case when y is a matrix.
+  Have not yet found a meaningful speedup
+
+function forward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y::Matrix)
+
+    (d, n) = size(y)
+    @assert n == length(ldli.col)+1
+
+    #yi = zeros(y[:,1])
+
+    @inbounds for ii in 1:length(ldli.col)
+        i = ldli.col[ii]
+
+        j0 = ldli.colptr[ii]
+        j1 = ldli.colptr[ii+1]-one(Tind)
+
+        for jj in j0:(j1-1)
+            j = ldli.rowval[jj]
+            @simd for k in 1:d
+              y[k,j] = y[k,j] + (ldli.fval[jj] * y[k,i])
+              y[k,i] = y[k,i] * (one(Tval)-ldli.fval[jj])
+          end
+        end
+        j = ldli.rowval[j1]
+
+        @simd for k in 1:d
+          y[k,j] = y[k,j] + y[k,i]
+        end
+    end
+end
+
+function backward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y::Matrix)
+    o = one(Tind)
+
+    (d, n) = size(y)
+    @assert n == length(ldli.col)+1
+
+    yi = zeros(y[:,1])
+
+    @inbounds for ii in length(ldli.col):-1:1
+        i = ldli.col[ii]
+
+        j0 = ldli.colptr[ii]
+        j1 = ldli.colptr[ii+1]-o
+
+        j = ldli.rowval[j1]
+        #copy!(yi, y[:,i])
+
+        @simd for k in 1:d
+          y[k,i] = y[k,i] + y[k,j]
+        end
+
+        for jj in (j1-o):-o:j0
+            j = ldli.rowval[jj]
+            @simd for k in 1:d
+              y[k,i] = (one(Tval)-ldli.fval[jj])*y[k,i] + ldli.fval[jj].*y[k,j]
+            end
+        end
+        #y[:,i] = yi
+    end
+end
+
+=#
 
 
 
@@ -834,6 +927,81 @@ function approxCholLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 
 
     end
+
+end
+
+
+#===============================
+
+  Checking the condition number
+
+=================================#
+
+"""
+    cn = condNumber(a, ldli; verbose=false)
+
+Given an adjacency matrix a and an ldli computed by approxChol,
+this computes the condition number.
+"""
+function condNumber(a, ldli; verbose=false)
+  la = lap(a)
+
+  # construct the square operator
+  g = function(b)
+
+    y = copy(b)
+
+    #=
+    mu = mean(y)
+    @inbounds for i in eachindex(y)
+        y[i] = y[i] - mu
+    end
+      =#
+
+    @inbounds for i in 1:(length(ldli.d))
+        if ldli.d[i] != 0
+            y[i] /= (ldli.d[i])^(1/2)
+        else
+            y[i] = 0
+        end
+    end
+
+    backward!(ldli, y)
+
+    y = la * y
+
+    forward!(ldli, y)
+
+    @inbounds for i in 1:(length(ldli.d))
+        if ldli.d[i] != 0
+            y[i] /= (ldli.d[i])^(1/2)
+        else
+            y[i] = 0
+        end
+    end
+
+    #=
+    mu = mean(y)
+    @inbounds for i in eachindex(y)
+        y[i] = y[i] - mu
+    end
+    =#
+
+    return y
+  end
+
+  gOp = SqLinOp(true,1.0,size(a,1),g)
+  upper = eigs(gOp;nev=1,which=:LM,tol=1e-2)[1][1]
+
+  g2(b) = upper*b - g(b)
+  g2Op = SqLinOp(true,1.0,size(a,1),g2)
+  lower = upper - eigs(g2Op;nev=2,which=:LM,tol=1e-2)[1][2]
+
+  if verbose
+      println("lower: ", lower, ", upper: ", upper);
+  end
+
+  return upper/lower
 
 end
 
