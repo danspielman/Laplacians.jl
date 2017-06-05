@@ -10,8 +10,14 @@ Right now, just implements Spielman-Srivastava
     as = sparsify(a; ep=0.5)
 
 Apply Spielman-Srivastava sparsification: sampling by effective resistances.
+`ep` should be less than 1.
 """
 function sparsify(a; ep=0.3, matrixConcConst=4.0, JLfac=4.0)
+
+  if ep > 1
+    warn("Calling sparsify with ep > 1 can produce a disconnected graph.")
+  end
+
   f = approxCholLap(a,tol=1e-2);
 
   n = size(a,1)
