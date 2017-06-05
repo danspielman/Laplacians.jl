@@ -1,4 +1,7 @@
 #=
+This is old, but is being maintained for some backwards compatability.
+Generally more useful routines are in conditionNumber.
+
 Compute the condition number given the initial graph and the preconditioner.
 Uses cholfact, so, if the initial graph is not sdd or if inverse has a lot of nonzeros this fails. 
 =#

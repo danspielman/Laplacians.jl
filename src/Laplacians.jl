@@ -204,6 +204,9 @@ and exports the functions for which it seems appropriate.
   include("compare_solvers.jl")
   export SolverTest, speedTestLapSolvers
 
+  include("conditionNumber.jl")
+  export support, approxQual, conditionNumber
+
   include("johnlind.jl")
   export johnlind
 
