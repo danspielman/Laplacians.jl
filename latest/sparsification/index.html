@@ -215,7 +215,7 @@
 </code></pre>
 
 <p>Apply Spielman-Srivastava sparsification: sampling by effective resistances. <code>ep</code> should be less than 1.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/80a16c4678262daa0bfb96da6b30d96e0948b0f1/src/sparsify.jl#L9-L14' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/25929b6dbf5cab93c1d4d7a17410d686ea09ece4/src/sparsify.jl#L9-L14' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.approxQual-Tuple{Any,Any}' href='#Laplacians.approxQual-Tuple{Any,Any}'>#</a>
 <strong><code>Laplacians.approxQual</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>eps = approxQual(graph1, graph2; tol=1e-5, verbose=false)
@@ -223,7 +223,7 @@
 
 <p>Computes the eps for which graph1 and graph2 are eps approximations of each other. That is, L1 &lt;= (1+eps) L2, and vice versa.</p>
 <p>It is randomized, so you might want to run it again if you don't trust the answers.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/80a16c4678262daa0bfb96da6b30d96e0948b0f1/src/conditionNumber.jl#L37-L44' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/25929b6dbf5cab93c1d4d7a17410d686ea09ece4/src/conditionNumber.jl#L37-L44' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.conditionNumber-Tuple{SparseMatrixCSC,Function}' href='#Laplacians.conditionNumber-Tuple{SparseMatrixCSC,Function}'>#</a>
 <strong><code>Laplacians.conditionNumber</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>kappa = conditionNumber(graph, precon; tol=1e-5, verbose=false)
@@ -231,7 +231,7 @@
 
 <p>Computes the relative condition number of graph and a preconditioning function.</p>
 <p>It is randomized, so you might want to run it again if you don't trust the answers.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/80a16c4678262daa0bfb96da6b30d96e0948b0f1/src/conditionNumber.jl#L72-L78' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/25929b6dbf5cab93c1d4d7a17410d686ea09ece4/src/conditionNumber.jl#L72-L78' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.conditionNumber-Tuple{SparseMatrixCSC,SparseMatrixCSC}' href='#Laplacians.conditionNumber-Tuple{SparseMatrixCSC,SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.conditionNumber</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>kapps = conditionNumber(graph1, graph2; tol=1e-5, verbose=false)
@@ -239,14 +239,14 @@
 
 <p>Computes the relative condition number of graph1 and graph2.</p>
 <p>It is randomized, so you might want to run it again if you don't trust the answers.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/80a16c4678262daa0bfb96da6b30d96e0948b0f1/src/conditionNumber.jl#L55-L61' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/25929b6dbf5cab93c1d4d7a17410d686ea09ece4/src/conditionNumber.jl#L55-L61' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.support-Tuple{Any,Any}' href='#Laplacians.support-Tuple{Any,Any}'>#</a>
 <strong><code>Laplacians.support</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>sup12, sup21 = support(graph1, graph2; tol=1e-5)
 </code></pre>
 
 <p>Computes the support of graph1 wrt graph2, and the other way around. It is randomized, so you might want to run it again if you don't trust the answers.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/80a16c4678262daa0bfb96da6b30d96e0948b0f1/src/conditionNumber.jl#L8-L13' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/25929b6dbf5cab93c1d4d7a17410d686ea09ece4/src/conditionNumber.jl#L8-L13' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
