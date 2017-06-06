@@ -29,7 +29,7 @@ function support(a1,a2; tol=1e-5)
     else
       sup21 = Inf
     end
-    
+
 
     return sup12, sup21
 end
@@ -76,7 +76,7 @@ Computes the relative condition number of graph and a preconditioning function.
 
 It is randomized, so you might want to run it again if you don't trust the answers.
 """
-function conditionNumber(a::SparseMatrixCSC, precon::Function; tol=1e-5, verbose=false)
+function conditionNumber(a::SparseMatrixCSC, f::Function; tol=1e-5, verbose=false)
 
   la = lap(a)
 

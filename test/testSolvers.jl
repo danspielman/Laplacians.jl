@@ -73,10 +73,6 @@ f = fs(a, tol=1e-2, verbose=true)
 x = f(b, tol=1e-6);
 
 
-# even more disjoint
-a2 = subsampleEdges(grid2(20),0.5)
-f = approxCholLap(a2)
-
 
 
 mats = []
@@ -206,6 +202,13 @@ a = sparse(a)
 println("rand complete graph")
 testSolvers(a,maxtime=10)
 
+n = 100
+a = rand(n,n)
+a = a + a'
+a = a - diagm(diag(a))
+a = sparse(a)
+println("rand complete graph")
+testSolvers(a,maxtime=10)
 
 
 n = 20000

@@ -91,6 +91,8 @@ a2 = grownGraphD(100,3)
 # export prefAttach
 
 a2 = prefAttach(100,3,0.5)
+a2 = prefAttach(5,4,0.5)
+
 
 # export hyperCube
 
@@ -114,7 +116,7 @@ a2 = wGrid2(3)
 
 # export wGrid3
 
-a3 = wGrid2(3)
+a3 = wGrid3(3)
 
 # export grid2
 
@@ -210,6 +212,7 @@ twoLift(a,3)
   # export spectralCoords
   # export spectralDrawing
 
+a = wtedChimera(102,2)
 spectralDrawing(a)
 
   # export toUnitVector
@@ -310,6 +313,8 @@ b = randn(n)
 b = b - mean(b)
 x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2, verbose=true)
 
+f = Laplacians.augTreeFactor(a, akpw(a));
+
   # include("conditionNumber.jl")
   # export support, approxQual, conditionNumber
 
@@ -327,6 +332,7 @@ as = sparsify(a,ep=1,JLfac=4);
 
   # export johnlind
 
+a = chimera(n,1)
 johnlind(a)
 
   # export toposort, dirEdgeVertexMat

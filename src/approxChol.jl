@@ -627,6 +627,10 @@ function backward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y::Vector)
     end
 end
 
+#=
+  An attempt at an efficient solver for the case when y is a matrix.
+  Have not yet found a meaningful speedup
+
 function LDLsolver(ldli::LDLinv, b::Matrix)
     y = copy(b)
 
@@ -657,9 +661,6 @@ function LDLsolver(ldli::LDLinv, b::Matrix)
 end
 
 
-#=
-  An attempt at an efficient solver for the case when y is a matrix.
-  Have not yet found a meaningful speedup
 
 function forward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y::Matrix)
 
