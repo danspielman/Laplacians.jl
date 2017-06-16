@@ -245,7 +245,7 @@
 <p><a id='Solving-linear-equations-in-Laplacians-and-SDD-matrices-1'></a></p>
 <h1 id="solving-linear-equations-in-laplacians-and-sdd-matrices">Solving linear equations in Laplacians and SDD matrices</h1>
 <p>The main purpose of this package is to experiment with the implementation of algorithms for solving systems of linear equations in Laplacian and symmetric, diagonally dominant, M-matrices (SDDM).</p>
-<p>At present, the fastest solver in this package is <a href="../@ref"><code>approxCholLap</code></a>.</p>
+<p>At present, the fastest solver in this package is <a href="../solvers/index.html#Laplacians.approxCholLap-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>approxCholLap</code></a>.</p>
 <p>We recall that a matrix $ L $ is a <em>Laplacian</em> matrix if:</p>
 <ul>
 <li>It is symmetric,</li>
@@ -461,7 +461,7 @@ PCG BLAS stopped after: 260 iterations with relative error 0.009864463201800925.
 </ul>
 <p>The following is a modification of the algorithm that eliminates edges one at a time.  The code is by Daniel Spielman.  The algorithm has not yet been analyzed.  It is presently the fastest in this package.</p>
 <ul>
-<li><a href="../@ref"><code>approxCholLap</code></a></li>
+<li><a href="../solvers/index.html#Laplacians.approxCholLap-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>approxCholLap</code></a></li>
 </ul>
 <p><a id='Algebraic-Multigrid-1'></a></p>
 <h2 id="algebraic-multigrid">Algebraic Multigrid</h2>
