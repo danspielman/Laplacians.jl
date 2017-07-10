@@ -726,7 +726,7 @@ end
 
 
 """
-    solver = KMPLapSolver(A; verbose, tol, maxits, maxtime, pcgIts)
+    solver = approxCholLap(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
 
 A heuristic by Daniel Spielman inspired by the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.  Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
 The `ApproxCholParams` let you choose one of three orderings to perform the elimination.
