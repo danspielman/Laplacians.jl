@@ -163,7 +163,9 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
   test_icc=true, test_cmg=true, test_lamg=true)
 
     b = b - mean(b)
-
+    nrm = norm(b)
+    b = b / nrm;
+    
     la = lap(a)
 
     it = Int[1]
@@ -265,7 +267,7 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
       pushSpeedResult!(dic, "lamg", ret)
     end
 
-    return x
+    return x*nrm
 
 end
 
