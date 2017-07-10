@@ -137,3 +137,29 @@ function compare_two(dic,sol1,sol2)
 
   display(plt)
 end
+
+"""
+    sd = mask_dict(mcf,mask)
+
+For example:
+```
+mask = mask = mcf["nv"] .> 20000
+@show sum(mask)
+sd = mask_dict(mcf,mask)
+```
+"""
+function mask_dict(dic,mask)
+    sol = dic["names"][1]
+    ntests = length(dic["$(sol)_tot"])    
+    
+    subdict = Dict()
+
+    for (key, value) in dic
+        if length(dic[key]) == ntests
+            subdict[key] = dic[key][mask]
+        else
+            subdict[key] = dic[key]
+        end
+    end
+    return subdict
+end
