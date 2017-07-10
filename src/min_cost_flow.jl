@@ -13,7 +13,8 @@ TODO: Active, non-active constraints
 
 function min_cost_flow{Tv,Ti}(mcfp::MCFproblem{Tv,Ti};
                               lapSolver = cholLap,
-                              tol::Real=1e-6)
+                              tol::Real=1e-6,
+                              stopRatio=Inf)
 
     edge_list = mcfp.edge_list
     m = size(edge_list,1)
@@ -26,7 +27,8 @@ function min_cost_flow{Tv,Ti}(mcfp::MCFproblem{Tv,Ti};
                          mcfp.demands,
                          mcfp.capacities,
                          lapSolver = lapSolver,
-                         tol = tol
+                         tol = tol,
+                         stopRatio = stopRatio
                          )
 end
 
@@ -37,7 +39,8 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                               u::Array{Tv,1};
                               #                              lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)),
                               lapSolver = cholLap,
-                              tol::Real=1e-6)
+                              tol::Real=1e-6,
+                              stopRatio = Inf)
   # Problem dimensions.
   m = size(B)[1];
   n = size(B)[2];
@@ -108,6 +111,14 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
       # Adj = abs(spdiagm(diag(L)) - L)
       Adj = makeAdj(Bt,d)
 
+      dAdj = diag(Adj)
+      rat = maximum(dAdj)/minimum(dAdj)
+      if rat > stopRatio
+          println("Stopped with diagonal ratio:", rat);
+          return (x,s,y);
+      end
+          
+      
       laInv = lapSolver((Adj+Adj')/2);
 
       
