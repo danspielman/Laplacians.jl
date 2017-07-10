@@ -144,6 +144,15 @@ import Laplacians.initDictCol!
 import Laplacians.testSolver
 import Laplacians.pushSpeedResult!
 
+function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti};
+  tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
+  test_icc=true, test_cmg=true, test_lamg=true)
+
+    return b->(testVMatlabLap(solvers, dic, a, b;
+                              tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, testName=testName,
+                              test_icc=test_icc, test_cmg=test_cmg, test_lamg=test_lamg))
+end
+
 """
 Runs many Laplacians solvers.  Puts the build and solve time results into a dictionary dic.  It would be easiest to look at it via DataFrame(dic).  Returns the answer from the last solver.  `solvers` should be an array of `SolverTest`.
 

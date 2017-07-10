@@ -111,8 +111,9 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
       # Adj = abs(spdiagm(diag(L)) - L)
       Adj = makeAdj(Bt,d)
 
-      dAdj = diag(Adj)
+      dAdj = sum(Adj,1)
       rat = maximum(dAdj)/minimum(dAdj)
+      # println("Ratio: ", rat)
       if rat > stopRatio
           println("Stopped with diagonal ratio:", rat);
           return (x,s,y);
