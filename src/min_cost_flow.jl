@@ -12,7 +12,7 @@ TODO: Active, non-active constraints
 
 
 function min_cost_flow{Tv,Ti}(mcfp::MCFproblem{Tv,Ti};
-                              lapSolver = cholLap,
+                              lapSolver = approxCholLap,
                               tol::Real=1e-6,
                               stopRatio=Inf)
 
@@ -38,7 +38,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                               b::Array{Tv,1},
                               u::Array{Tv,1};
                               #                              lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000)),
-                              lapSolver = cholLap,
+                              lapSolver = approxCholLap,
                               tol::Real=1e-6,
                               stopRatio = Inf)
   # Problem dimensions.
@@ -59,7 +59,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   gamma = 1;
 
   # Compute initial point.
-  (x,y,s,z) = ipm_min_cost_flow_initial_point(B,c,b,u,m,n,sddmSolver=cholSDDM);
+  (x,y,s,z) = ipm_min_cost_flow_initial_point(B,c,b,u,m,n,sddmSolver=augTreeSddm);
 
   for k = 1:max_iter+1
 
@@ -224,7 +224,7 @@ function ipm_min_cost_flow_initial_point{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                                                 u::Array{Tv,1},
                                                 m::Integer,
                                                 n::Integer;
-                                                sddmSolver = cholSDDM
+                                                sddmSolver = augTreeSddm
 #                                                lapSolver = (H -> lapWrapSolver(augTreeSolver,H,tol=1e-8,maxits=1000))
 )
   # Solve the optimization problem.
