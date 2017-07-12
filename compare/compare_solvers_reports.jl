@@ -1,6 +1,27 @@
 using Plots
 plotlyjs()
 
+
+function total_time(dic; names = dic["names"])
+  plt = Plots.plot(title = "Total Time Distribution")
+  for name in names
+      Plots.plot!(sort(dic["$(name)_tot"]), label=name)
+  end
+  display(plt)
+  return plt
+end
+
+function total_time_nnz(dic; names = dic["names"])
+  plt = Plots.plot(title = "(Total Time / Edges) Distribution")
+  for name in names
+      Plots.plot!(sort(dic["$(name)_tot"] ./ dic["ne"]), label=name)
+  end
+  display(plt)
+  return plt
+end
+
+
+
 """
     Given the list of solvers that were used, and a dic containing the results.
     Plot some graphs explaining how it went.
