@@ -15,8 +15,10 @@ println(fn)
 using Laplacians
 using MATLAB
 
-include("/Users/spielman/Laplacians/compare/matlabSafe.jl")
-include("/Users/spielman/Laplacians/compare/compare_solvers_TL.jl")
+lapdir = Pkg.dir("Laplacians")
+
+include("$(lapdir)/compare/matlabSafe.jl")
+include("$(lapdir)/compare/compare_solvers_TL.jl")
 
 
 ac_deg = function(a; verbose=false, args...)
