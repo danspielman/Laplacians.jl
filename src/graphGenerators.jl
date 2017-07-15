@@ -79,8 +79,8 @@ are chosen from an exponential distribution
 function randGenRing(n::Int64, k::Integer)
     # if any of n, 2n, 3n etc. is in gens we will have self loops
     gens = [0]
-    while 0 in (gens % n)
-        gens = [1; 1 + ceil(Integer,exp(rand(k-1)*log(n-1)))]
+    while 0 in (gens .% n)
+        gens = [1; 1 + ceil.(Integer,exp.(rand(k-1)*log(n-1)))]
     end
 
     return generalizedRing(n, gens)
@@ -251,7 +251,7 @@ function grownGraph(n::Int64, k::Int64)
   a = spzeros(n,n)
 
   for i = 1:k
-    a = a + sparse(2:n,ceil(Integer,collect(1:n-1).*rand(n-1)),1.0,n,n)
+    a = a + sparse(2:n,ceil.(Integer,collect(1:n-1).*rand(n-1)),1.0,n,n)
   end
 
   a = a + a'
@@ -265,10 +265,10 @@ function randSet(n::Integer,k::Integer)
         error("n must be at least k")
     else
 
-        s = sort(ceil(Integer,n*rand(k)))
+        s = sort(ceil.(Integer,n*rand(k)))
         good = (minimum(s[2:end]-s[1:(end-1)]) > 0)
         while good == false
-            s = sort(ceil(Integer,n*rand(k)))
+            s = sort(ceil.(Integer,n*rand(k)))
             good = (minimum(s[2:end]-s[1:(end-1)]) > 0)
         end
 
@@ -702,14 +702,14 @@ function randWeightSub(a)
             end
         end
 
-        w = abs(v[ai]-v[aj])
+        w = abs.(v[ai]-v[aj])
 
     end
 
     # reciprocate or not?
 
     w[w.==0] = 1
-    w[isnan(w)] = 1
+    w[isnan.(w)] = 1
 
     if (rand() < .5)
         w = 1./w
