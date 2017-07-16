@@ -16,8 +16,8 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
 	# pq_in - costs are maintained to add elements to the set
 	# pq_out - costs are maintained to remove elements from the set
-	pq_in = Collections.PriorityQueue{Int64,Int64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}(Base.Order.Reverse) 
-	pq_out = Collections.PriorityQueue{Int64,Int64,Base.Order.ForwardOrdering}()
+	pq_in = DataStructures.PriorityQueue{Int64,Int64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}(Base.Order.Reverse) 
+	pq_out = DataStructures.PriorityQueue{Int64,Int64,Base.Order.ForwardOrdering}()
 
 	for u in 1:n
 		cost = 0
@@ -46,11 +46,11 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
 		# try to add a new vertex into the set
 		if !isempty(pq_in)
-			u,contrib = Base.Collections.peek(pq_in)
+			u,contrib = DataStructures.peek(pq_in)
 
 			if contrib >= 0
 				improve = true
-				Collections.dequeue!(pq_in)
+				DataStructures.dequeue!(pq_in)
 				inset[u] = true
 
 				for i in 1:deg(G,u)
@@ -68,10 +68,10 @@ function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
 
 		# try to remove a vertex from the set
 		if !isempty(pq_out)
-			u,contrib = Base.Collections.peek(pq_out)
+			u,contrib = DataStructures.peek(pq_out)
 			if contrib < 0
 				improve = true
-				Collections.dequeue!(pq_out)
+				DataStructures.dequeue!(pq_out)
 				inset[u] = false
 
 				for i in 1:deg(G,u)

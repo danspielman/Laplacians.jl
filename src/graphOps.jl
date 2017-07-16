@@ -310,7 +310,7 @@ function twoLift(a, flip::AbstractArray{Bool,1})
     #flip = rand(false:true,m)
     n = size(a)[1]
     a0 = sparse(ai[flip],aj[flip],1,n,n)
-    a1 = sparse(ai[!flip],aj[!flip],1,n,n)
+    a1 = sparse(ai[.!(flip)],aj[.!(flip)],1,n,n)
     a00 = a0 + a0'
     a11 = a1 + a1'
     return [a00 a11; a11 a00]

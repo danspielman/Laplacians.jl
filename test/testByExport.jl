@@ -43,7 +43,10 @@ for i in 1:n
     end
     w += wdeg(a,i)
 end
-@test x == y == z == w == sum(a)
+@test isapprox(x,y)
+@test isapprox(x,z)
+@test isapprox(x,w)
+@test isapprox(x,sum(a))
 
 # export setValue
 
