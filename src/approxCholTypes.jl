@@ -17,10 +17,10 @@ type LLp{Tind,Tval}
     next::LLp{Tind,Tval}
     reverse::LLp{Tind,Tval}
 
-    LLp() = (x = new(zero(Tind), zero(Tval)); x.next = x; x.reverse = x)
-    LLp(row, val, next, rev) = new(row, val, next, rev)
-    LLp(row, val) = (x = new(row, val); x.next = x; x.reverse = x)
-    LLp(row, val, next) = (x = new(row, val, next); x.reverse = x)
+    LLp{Tind,Tval}() where {Tind,Tval} = (x = new(zero(Tind), zero(Tval)); x.next = x; x.reverse = x)
+    LLp{Tind,Tval}(row, val, next, rev) where {Tind,Tval} = new(row, val, next, rev)
+    LLp{Tind,Tval}(row, val) where {Tind,Tval} = (x = new(row, val); x.next = x; x.reverse = x)
+    LLp{Tind,Tval}(row, val, next) where {Tind,Tval} = (x = new(row, val, next); x.reverse = x)
 end
 
 """
