@@ -203,7 +203,7 @@ function KMPSDDMSolver(mat; verbose=false,
     end
     
     # Force symmetric and diagonal zero
-    a = triu(abs(mat),1)
+    a = triu(abs.(mat),1)
     a = a + a'
     
     a1 = [sparse([0 s']); [s a]]

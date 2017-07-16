@@ -7,7 +7,7 @@ a = randn(10,10)
 a = Laplacians.forceLap(a)
 
 Laplacians.forceLap(a)
-Laplacians.forceLap(abs(a))
+Laplacians.forceLap(abs.(a))
 
 
 a = wtedChimera(100,101);

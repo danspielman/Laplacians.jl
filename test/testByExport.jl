@@ -11,12 +11,12 @@ ap = symPermuteCSC(a,rp);
 rpi = zeros(Int,n);
 rpi[rp] = 1:n
 
-@test sum(abs(a-symPermuteCSC(ap,rpi))) == 0
+@test sum(abs.(a-symPermuteCSC(ap,rpi))) == 0
 
 # export symTransposeCSC
 
 a2 = triu(a) + (tril(a) .> 0)
-@test sum(abs(symTransposeCSC(a2) - a2')) == 0
+@test sum(abs.(symTransposeCSC(a2) - a2')) == 0
 
 # export submatrixCSC
 
@@ -162,7 +162,7 @@ n = 101
 a = wtedChimera(n,1)
 writeIJV("tmp.txt",a)
 a2 = readIJV("tmp.txt")
-@test sum(abs(a-a2)) == 0
+@test sum(abs.(a-a2)) == 0
 
 # export unweight, unweight!
 
@@ -178,11 +178,11 @@ uniformWeight!(a2)
   # export edgeVertexMat
 
 b = edgeVertexMat(a2)
-@test sum(abs(b'*b - lap(unweight(a2)))) == 0
+@test sum(abs.(b'*b - lap(unweight(a2)))) == 0
 
 a = wtedChimera(102,2)
 b = wtedEdgeVertexMat(a)
-@test sum(abs(b'*b - lap(a))) < 1e-8
+@test sum(abs.(b'*b - lap(a))) < 1e-8
 
   # export power, thicken_once, thicken
 
