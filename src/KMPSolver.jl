@@ -196,7 +196,7 @@ function KMPSDDMSolver(mat; verbose=false,
     s = mat*ones(n)
 
     dmat = diag(mat)
-    s = sparse(max(s,0) .* (s .> (dmat*1e-12)))
+    s = sparse(max.(s,0.0) .* (s .> (dmat*1e-12)))
 
     if (s == 0)
         error("Matrix was not diagonally dominant.")

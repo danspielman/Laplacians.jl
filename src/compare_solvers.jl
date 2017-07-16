@@ -30,7 +30,7 @@ If dic does not contain an entry of `name`, create with set to `Array(typ,0)`.
 """
 function initDictCol!(dic, name, typ)
     if ~haskey(dic,name)
-        dic[name] = Array(typ,0)
+        dic[name] = Array{typ}(0)
     end
 end
 
