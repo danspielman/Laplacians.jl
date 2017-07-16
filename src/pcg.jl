@@ -144,7 +144,7 @@ function pcgLapSolver(A::AbstractMatrix, B::AbstractMatrix; tol::Real=1e-6, maxi
 
 end
 
-function cg{Tval}(mat, b::Array{Tval,1};
+function cg{Tval}(mat, b::Vector{Tval};
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     local al::Tval
@@ -252,7 +252,7 @@ function cg{Tval}(mat, b::Array{Tval,1};
     return bestx
 end
 
-function pcg{Tval}(mat, b::Array{Tval,1}, pre::Function;
+function pcg{Tval}(mat, b::Vector{Tval}, pre::Function;
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],
         stag_test::Integer=0)
 
@@ -567,7 +567,7 @@ end
 
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar paramaters
-function cgBLAS{Tval}(mat, b::Array{Tval,1};
+function cgBLAS{Tval}(mat, b::Vector{Tval};
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     n = size(mat,2)
@@ -635,7 +635,7 @@ end
 
 # For when you can't use BLAS.
 # set to use similar paramaters similar to MATLAB
-function cgSlow{Tval}(mat, b::Array{Tval,1};
+function cgSlow{Tval}(mat, b::Vector{Tval};
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     n = size(mat,2)
@@ -714,7 +714,7 @@ end
 
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar parameters "
-function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
+function pcgBLAS{Tval}(mat, b::Vector{Tval}, pre;
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     n = size(mat,2)
@@ -790,7 +790,7 @@ function pcgBLAS{Tval}(mat, b::Array{Tval,1}, pre;
     return x
 end
 
-function pcgSlow{Tval}(mat, b::Array{Tval,1}, pre;
+function pcgSlow{Tval}(mat, b::Vector{Tval}, pre;
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
 

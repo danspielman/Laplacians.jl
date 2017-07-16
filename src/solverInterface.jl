@@ -89,9 +89,9 @@ function forceLap(a::AbstractArray)
 
     if minimum(a) < 0
         warn("The input should be an adjacency matrix, whereas this one has negative entries.")
-        af = abs(a)
+        af = abs.(a)
         af = af - spdiagm(diag(af))
-    elseif sum(abs(diag(a))) > 0
+    elseif sum(abs.(diag(a))) > 0
         warn("The input should be an adjacency matrix, whereas this one has diagonal entries.")
         af = a - spdiagm(diag(a))
     else
@@ -257,7 +257,7 @@ Uses a `sddmSolver` to solve systems of linear equations in Laplacian matrices.
 function lapWrapSDDM(sddmSolver, a::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
 
     @assert(minimum(a) >= 0, "A must be nonnegative")
-    @assert(sum(abs(diag(a))) == 0, "A must have zero diagonal")
+    @assert(sum(abs.(diag(a))) == 0, "A must have zero diagonal")
 
     f = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(sddmSolver))(a, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 

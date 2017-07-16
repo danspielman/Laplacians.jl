@@ -49,13 +49,13 @@ ApproxCholParams() = ApproxCholParams(:deg, 5)
 ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5)
 
 LDLinv{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}) =
-  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array(Tind,0),Array(Tval,0),zeros(Tval,a.n))
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array{Tind}(0),Array{Tval}(0),zeros(Tval,a.n))
 
 LDLinv{Tind,Tval}(a::LLMatOrd{Tind,Tval}) =
-  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array(Tind,0),Array(Tval,0),zeros(Tval,a.n))
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array{Tind}(0),Array{Tval}(0),zeros(Tval,a.n))
 
 LDLinv{Tind,Tval}(a::LLmatp{Tind,Tval}) =
-  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array(Tind,0),Array(Tval,0),zeros(Tval,a.n))
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array{Tind}(0),Array{Tval}(0),zeros(Tval,a.n))
 
 
 function LLmatp{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
@@ -66,8 +66,8 @@ function LLmatp{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
 
     flips = flipIndex(a)
 
-    cols = Array(LLp{Tind,Tval}, n)
-    llelems = Array(LLp{Tind,Tval}, m)
+    cols = Array{LLp{Tind,Tval}}(n)
+    llelems = Array{LLp{Tind,Tval}}(m)
 
     @inbounds for i in 1:n
         degs[i] = a.colptr[i+1] - a.colptr[i]
@@ -113,7 +113,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
     m = nnz(a)
 
     cols = zeros(Tind, n)
-    llelems = Array(LLord{Tind,Tval}, m)
+    llelems = Array{LLord{Tind,Tval}}(m)
 
     ptr = one(Tind)
 
@@ -144,7 +144,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}, perm::Array)
     invp = invperm(perm)
 
     cols = zeros(Tind, n)
-    llelems = Array(LLord{Tind,Tval}, m)
+    llelems = Array{LLord{Tind,Tval}}(m)
 
     ptr = one(Tind)
 
@@ -193,7 +193,7 @@ The approximate factorization
 
 function get_ll_col{Tind,Tval}(llmat::LLmatp{Tind,Tval},
   i,
-  colspace::Array{LLp{Tind,Tval},1})
+  colspace::Vector{LLp{Tind,Tval}})
 
 
     ll = llmat.cols[i]
@@ -226,7 +226,7 @@ end
 
 function get_ll_col{Tind,Tval}(llmat::LLMatOrd{Tind,Tval},
   i,
-  colspace::Array{LLcol{Tind,Tval},1})
+  colspace::Vector{LLcol{Tind,Tval}})
 
     ptr = llmat.cols[i]
     len = 0
@@ -253,7 +253,7 @@ end
 
 
 function compressCol!{Tind,Tval}(a::LLmatp{Tind,Tval},
-  colspace::Array{LLp{Tind,Tval},1},
+  colspace::Vector{LLp{Tind,Tval}},
   len::Int,
   pq::ApproxCholPQ{Tind})
 
@@ -289,7 +289,7 @@ function compressCol!{Tind,Tval}(a::LLmatp{Tind,Tval},
 end
 
 function compressCol!{Tind,Tval}(
-  colspace::Array{LLcol{Tind,Tval},1},
+  colspace::Vector{LLcol{Tind,Tval}},
   len::Int
   )
 
@@ -344,8 +344,8 @@ function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
 
     d = zeros(Tval,n)
 
-    colspace = Array(LLcol{Tind,Tval},n)
-    cumspace = Array(Tval,n)
+    colspace = Array{LLcol{Tind,Tval}}(n)
+    cumspace = Array{Tval}(n)
     #vals = Array(Tval,n) # will be able to delete this
 
     o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
@@ -453,9 +453,9 @@ function approxChol{Tind,Tval}(a::LLmatp{Tind,Tval})
 
     it = 1
 
-    colspace = Array(LLp{Tind,Tval},n)
-    cumspace = Array(Tval,n)
-    vals = Array(Tval,n) # will be able to delete this
+    colspace = Array{LLp{Tind,Tval}}(n)
+    cumspace = Array{Tval}(n)
+    vals = Array{Tval}(n) # will be able to delete this
 
     o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
 
@@ -1153,10 +1153,10 @@ function keyMap(x, n)
     return x <= n ? x : n + div(x,n)
 end
 
-function ApproxCholPQ{Tind}(a::Array{Tind,1})
+function ApproxCholPQ{Tind}(a::Vector{Tind})
 
     n = length(a)
-    elems = Array(ApproxCholPQElem{Tind},n)
+    elems = Array{ApproxCholPQElem{Tind}}(n)
     lists = zeros(Tind, 2*n+1)
     minlist = one(n)
 
