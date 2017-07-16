@@ -10,7 +10,7 @@
 
 import Base.push!
 
-type Sampler
+mutable struct Sampler
     sums::Array{Float64,1}
     nitems::Int
     n::Int

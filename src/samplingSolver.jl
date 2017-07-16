@@ -10,7 +10,7 @@
 """
 Parameters for the sampling solver.
 """
-type samplingParams{Tv,Ti}
+mutable struct samplingParams{Tv,Ti}
     eps::Tv
     sampConst::Tv       # we create sampConst * log(n)^2 / eps^2 multiedges in the beginning
     beta::Tv            # we scale the tree up by beta

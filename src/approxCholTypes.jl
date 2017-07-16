@@ -1,5 +1,5 @@
 #=
-  Types for the approxChol solver
+  Structs for the approxChol solver
 =#
 
 
@@ -11,7 +11,7 @@
   reverse is the index into lles of the other copy of this edge,
   since every edge is stored twice as we do not know the order of elimination in advance.
 """
-type LLp{Tind,Tval}
+mutable struct LLp{Tind,Tval}
     row::Tind
     val::Tval
     next::LLp{Tind,Tval}
@@ -31,7 +31,7 @@ end
 
   We probably can get rid of degs - as it is only used to store initial degrees.
 """
-type LLmatp{Tind,Tval}
+mutable struct LLmatp{Tind,Tval}
     n::Int64
     degs::Array{Tind,1}
     cols::Array{LLp{Tind,Tval},1}
@@ -39,19 +39,19 @@ type LLmatp{Tind,Tval}
 end
 
 # these are the types we use with a fixed ordering
-immutable LLord{Tind,Tval}
+struct LLord{Tind,Tval}
     row::Tind
     next::Tind
     val::Tval
 end
 
-type LLMatOrd{Tind,Tval}
+mutable struct LLMatOrd{Tind,Tval}
     n::Int64
     cols::Array{Tind,1}
     lles::Array{LLord{Tind,Tval},1}
 end
 
-immutable LLcol{Tind,Tval}
+struct LLcol{Tind,Tval}
       row::Tind
       ptr::Tind
       val::Tval
@@ -70,7 +70,7 @@ LDLinv
   It does not explicitly make the matrix triangular.
   Rather, col[i] is the name of the ith col to be eliminated
 """
-type LDLinv{Tind,Tval}
+mutable struct LDLinv{Tind,Tval}
     col::Array{Tind,1}
     colptr::Array{Tind,1}
     rowval::Array{Tind,1}
@@ -85,7 +85,7 @@ the data strcture we use to keep track of degrees
 
 =============================================================#
 
-immutable ApproxCholPQElem{Tind}
+struct ApproxCholPQElem{Tind}
     prev::Tind
     next::Tind
     key::Tind
@@ -98,7 +98,7 @@ end
   It should always be a lower bound.
   keyMap maps keys to lists
 """
-type ApproxCholPQ{Tind}
+mutable struct ApproxCholPQ{Tind}
     elems::Array{ApproxCholPQElem{Tind},1} # indexed by node name
     lists::Array{Tind,1}
     minlist::Int

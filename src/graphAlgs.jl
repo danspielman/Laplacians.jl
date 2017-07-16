@@ -244,7 +244,7 @@ function shortestPathTree(a,start)
     tr = (tr + tr');
 end
 
-type intHeap{Tkey,Tind}
+mutable struct intHeap{Tkey,Tind}
   keys::Vector{Tkey}
   heap::Vector{Tind}
   index::Vector{Tind}

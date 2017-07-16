@@ -16,7 +16,7 @@ and has special code for the matlab solvers
 
 Encloses a solver with its name, so that we can compare it in tests
 """
-type SolverTest
+struct SolverTest
     solver::Function
     name::String
 end

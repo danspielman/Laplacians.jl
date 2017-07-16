@@ -19,7 +19,7 @@ using DataStructures
 =#
 
 
-type fastQueue
+mutable struct fastQueue
     q::Vector{Int64}
     n::Int64
     curPtr::Int64
@@ -54,7 +54,7 @@ function reset!(fq::fastQueue)
     fq.endPtr = 0
 end
 
-type fastPairQueue
+mutable struct fastPairQueue
     q::Matrix{Int}
     n::Int64
     curPtr::Int64
@@ -90,7 +90,7 @@ function reset!(fq::fastPairQueue)
 end
 
 
-type reusableIntMap
+mutable struct reusableIntMap
     q::fastQueue
     map::Vector{Int}
 end
@@ -123,7 +123,7 @@ end
 
 
 
-immutable IJVind
+struct IJVind
     i::Int64
     j::Int64
     v::Float64
@@ -134,7 +134,7 @@ import Base.isless
 isless(x::IJVind, y::IJVind) = x.v < y.v
 
 # requires sorting on i and j, with j primary
-type IJVindGraph
+mutable struct IJVindGraph
     list::Vector{IJVind}
     colptr::Vector{Int64}
 end
@@ -681,7 +681,7 @@ end
     
 
 
-immutable HeapEntry
+struct HeapEntry
     node::Int64
     edge::Int64
     dist::Float64

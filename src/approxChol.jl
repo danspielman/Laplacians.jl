@@ -40,7 +40,7 @@ order can be one of
 * :wdeg (by original wted degree, nonadaptive),
 * :given
 """
-type ApproxCholParams
+mutable struct ApproxCholParams
     order::Symbol
     stag_test::Integer
 end

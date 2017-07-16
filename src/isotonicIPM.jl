@@ -83,7 +83,7 @@ function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
     # numSteps = 0
 
     while muTooSmall
-        F(y) = mu0*norm(y-v)^2 - sum(log(Bt*y))
+        F(y) = mu0*norm(y-v)^2 - sum(log.(Bt*y))
         centered = false
         while !centered
             # numSteps += 1

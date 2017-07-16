@@ -32,8 +32,8 @@ initVal: array[n] of initial voltage assignments;
 
 function simIterLexUnwtd{Tv, Ti}(numIter::Int64,
                                  A::SparseMatrixCSC{Tv, Ti},
-                                 isTerm::Array{Bool, 1},
-                                 initVal::Array{Float64, 1}, )
+                                 isTerm::Vector{Bool},
+                                 initVal::Vector{Float64}, )
   n = A.n
   val = copy(initVal)
   nextVal = zeros(Float64, n)
@@ -72,8 +72,8 @@ end
 
 function simIterLex{Tv<:Float64, Ti}(numIter::Int64,
                                      A::SparseMatrixCSC{Tv, Ti},
-                                     isTerm::Array{Bool, 1},
-                                     initVal::Array{Float64, 1}, )
+                                     isTerm::Vector{Bool},
+                                     initVal::Vector{Float64} )
   n = A.n
   val = copy(initVal)
   nextVal = zeros(Float64, n)
@@ -177,9 +177,9 @@ fatal: if true, throws error and halt; if false, return false;
 
 =#
 function checkLex{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti},
-                          isTerm::Array{Bool, 1},
-                          initVal::Array{Float64, 1},
-                          lex::Array{Float64, 1};
+                          isTerm::Vector{Bool},
+                          initVal::Vector{Float64},
+                          lex::Vector{Float64};
                           eps::Float64 = LEX_EPS,
                           fatal::Bool = true)
   n = A.n
@@ -321,8 +321,8 @@ function termFreeShortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv, Ti},
 end # termFreeShortestPaths
 
 function ModDijkstra{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                             isTerm::Array{Bool, 1},
-                             initVal::Array{Float64, 1},
+                             isTerm::Vector{Bool},
+                             initVal::Vector{Float64},
                              alpha::Float64, )
   n = G.n
   finished = zeros(Bool, n)
@@ -360,15 +360,15 @@ function ModDijkstra{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
 end
 
 function CompVLow{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                          isTerm::Array{Bool, 1},
-                          initVal::Array{Float64, 1},
+                          isTerm::Vector{Bool},
+                          initVal::Vector{Float64},
                           alpha::Float64)
   return ModDijkstra(G, isTerm, initVal, alpha)
 end
 
 function CompVHigh{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                           isTerm::Array{Bool, 1},
-                           initVal::Array{Float64, 1},
+                           isTerm::Vector{Bool},
+                           initVal::Vector{Float64},
                            alpha::Float64)
   newInitVal = -copy(initVal)
   temp, parent = ModDijkstra(G, isTerm, newInitVal, alpha)
@@ -397,8 +397,8 @@ function fixPath!(A, isTerm, val, path)
     error(@sprintf("Value of vertex %d is not set!", path[l]))
   end
 
-  dist = Array(Float64, l-1)
-  cdist = Array(Float64, l-1)
+  dist = Array{Float64}(l-1)
+  cdist = Array{Float64}(l-1)
   for i in 1:l-1
     if (A[path[i], path[i+1]] == 0)
       error(@sprintf("No edge between vertices %d and %d!", path[i], path[i+1]))
@@ -697,8 +697,8 @@ end # SteepestPath
 # remove (x,y) in E(G) such that both x and y are terminals;
 # returns max_{x,y} grad[x,y]
 function removeTerm2TermEdges!{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                                       isTerm::Array{Bool, 1},
-                                       val::Array{Float64, 1}, )
+                                       isTerm::Vector{Bool},
+                                       val::Vector{Float64} )
   n = G.n
   terms = find(isTerm)
   alpha = -Inf
@@ -722,8 +722,8 @@ end
 # G may change (terminal to terminal edges will be removed)
 # returns a new assignment
 function CompInfMin{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                            isTerm::Array{Bool, 1},
-                            val::Array{Float64, 1}, )
+                            isTerm::Vector{Bool},
+                            val::Vector{Float64} )
   alpha = removeTerm2TermEdges!(G, isTerm, val)
 
   cpnts = components(G)
