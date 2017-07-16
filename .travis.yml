@@ -12,6 +12,10 @@ language: julia
 julia:
   - 0.6.0
 
+# now, install required python packages
+install:
+  - pip install matplotlib
+
 script:  
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.clone("PyPlot"); Pkg.build("PyPlot")'
