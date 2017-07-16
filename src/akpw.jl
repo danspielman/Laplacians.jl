@@ -55,13 +55,13 @@ function reset!(fq::fastQueue)
 end
 
 type fastPairQueue
-    q::Vector{Int64}
+    q::Matrix{Int}
     n::Int64
     curPtr::Int64
     endPtr::Int64
 end
 
-fastPairQueue(n::Int) = fastPairQueue(zeros(Int64,n,2), n, 1, 0)
+fastPairQueue(n::Int) = fastPairQueue(zeros(Int,n,2), n, 1, 0)
 
 hasMore(fq::fastPairQueue) = fq.curPtr <= fq.endPtr
 
