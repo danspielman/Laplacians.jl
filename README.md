@@ -17,6 +17,11 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
+## Version 0.2.0, July 17, 2017
+
+This version is compatabile with Julia 0.6.  It will not work with
+Julia 0.5.X.
+
 ## Version 0.1.4, June 6, 2017
 
 This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`. 

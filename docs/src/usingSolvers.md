@@ -249,8 +249,8 @@ These are obtained by constructing a spanning tree of a graph, and then adding b
 
 These are implemented in the routines
 
-* [`augTreeSolver`](@ref), for SDDM matrices
-* [`augTreeLapSolver`](@ref)
+* [`augTreeSddm`](@ref), for SDDM matrices
+* [`augTreeLap`](@ref)
 * [`augTreePrecon`](@ref)
 * [`augmentTree`](@ref)
 
