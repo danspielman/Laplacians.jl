@@ -22,6 +22,11 @@ To get the current version of the master branch, run `Pkg.checkout("Laplacians")
 This version is compatabile with Julia 0.6.  It will not work with
 Julia 0.5.X.
 
+Changes:
+
+* Added `approxCholSddm`, a wrapper of `approxCholLap` that solves
+  SDDM systems.
+
 ## Version 0.1.4, June 6, 2017
 
 This is the current version.  It is what you retrieve when you run `Pkg.add("Laplacians")`. 

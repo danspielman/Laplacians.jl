@@ -28,7 +28,7 @@ If you want to solve Laplacian equations, we recommend `approxCholLap`.
 The algorithms provide by Laplacians.jl include:
 
 * `akpw`, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.
-* `approxCholLap`: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
+* `approxCholLap`: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.   For SDDM systems, use `approxCholSddm`.
 * `sparsify`, an implementation of sparsification by effective resistance sampling, following Spielman and Srivastava.
 * `KMPLapSolver` and `KMPSDDSolver`: linear equation solvers based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
 * `samplingSDDSolver` and `samplingLapSolver`, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
@@ -43,6 +43,11 @@ To get the current version of the master branch, run `Pkg.checkout("Laplacians")
 
 This version is compatabile with Julia 0.6.  It will not work with
 Julia 0.5.X.
+
+Changes:
+
+* Added `approxCholSddm`, a wrapper of `approxCholLap` that solves
+  SDDM systems.
 
 ## Version 0.1.4, June 6, 2017
 

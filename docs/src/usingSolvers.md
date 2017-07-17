@@ -4,7 +4,9 @@
 
 The main purpose of this package is to experiment with the implementation of algorithms for solving systems of linear equations in Laplacian and symmetric, diagonally dominant, M-matrices (SDDM).
 
-At present, the fastest solver in this package is [`approxCholLap`](@ref).
+At present, the fastest solver in this package for Laplacians is
+[`approxCholLap`](@ref).
+For SDDM systems, one should use [`approxCholSddm`](@ref).
 
 We recall that a matrix $ L $ is a _Laplacian_ matrix if:
 
