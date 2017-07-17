@@ -171,7 +171,7 @@ module Laplacians
 
   include("approxCholTypes.jl")
   include("approxChol.jl")
-  export approxCholLap, ApproxCholParams
+  export approxCholLap, ApproxCholParams, approxCholSddm
 
   include("complexSolvers.jl")
   export SDDMSolvers

@@ -36,6 +36,9 @@ function adj{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti})
     return a,d
 end
 
+function adj{Tv}(sddm::Array{Tv,2})
+    return adj(sparse(sddm))
+end
 
 """
     wt1 = unweight(a)

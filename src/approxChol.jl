@@ -724,7 +724,6 @@ end
 =#
 
 
-
 """
     solver = approxCholLap(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
 
@@ -930,6 +929,16 @@ function approxCholLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
     end
 
 end
+
+"""
+    solver = approxCholSddm(sddm; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
+
+Solves sddm systems by wrapping approxCholLap.
+Not yet optimized directly for sddm.
+"""
+approxCholSddm = sddmWrapLap(approxCholLap)
+
+
 
 
 #===============================

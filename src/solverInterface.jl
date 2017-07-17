@@ -311,6 +311,14 @@ function sddmWrapLap(lapSolver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf,
 
 end
 
+function sddmWrapLap(lapSolver)
+    f = function(sddm::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+        return sddmWrapLap(lapSolver, sddm;  tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params... )
+    end
+    return f
+end
+
+    
 """
     f = wrapCaptureRhs(sola::Function, rhss; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
 
