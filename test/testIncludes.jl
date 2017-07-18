@@ -4,7 +4,7 @@
 #============================================================#
 # Test Lex by running code from its notebook
 
-include("$(Pkg.dir("Laplacians"))/src/lex.jl")
+include("$(@__DIR__)/../src/lex.jl")
 
 
 setLexDebugFlag(true)
@@ -58,7 +58,7 @@ simIterLexTest()
 #============================================================#
 # test isotonicIPM
 
-include("$(Pkg.dir("Laplacians"))/src/isotonicIPM.jl")
+include("$(@__DIR__)/../src/isotonicIPM.jl")
 
 n = 100;
 A = grid2(10,10)
