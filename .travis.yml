@@ -29,7 +29,6 @@ install:
 
 script:  
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'Pkg.clone("PyPlot"); Pkg.build("PyPlot")'
   - julia -e 'Pkg.clone(pwd()); Pkg.build("Laplacians"); Pkg.test("Laplacians"; coverage=true)'
   
 after_success:
