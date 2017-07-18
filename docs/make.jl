@@ -8,5 +8,5 @@ makedocs(modules=[Laplacians], doctest = false)
 deploydocs(
            repo = "github.com/danspielman/Laplacians.jl.git",
            deps   = Deps.pip("mkdocs", "python-markdown-math"),
-           julia  = "0.5.0"
+           julia  = "0.6"
 )

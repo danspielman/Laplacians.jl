@@ -47,6 +47,7 @@ markdown_extensions:
   - tables
   - fenced_code
 
+
 use_directory_urls: false
 
 
