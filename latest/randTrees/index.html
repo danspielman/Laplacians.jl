@@ -204,7 +204,7 @@
 <h1 id="randtrees">randTrees</h1>
 <ul>
 <li><a href="index.html#Laplacians.randishKruskal-Tuple{SparseMatrixCSC}"><code>Laplacians.randishKruskal</code></a></li>
-<li><a href="index.html#Laplacians.randishPrim-Tuple{SparseMatrixCSC{Tval,Tind}}"><code>Laplacians.randishPrim</code></a></li>
+<li><a href="index.html#Laplacians.randishPrim-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval"><code>Laplacians.randishPrim</code></a></li>
 </ul>
 <p><a id='Laplacians.randishKruskal-Tuple{SparseMatrixCSC}' href='#Laplacians.randishKruskal-Tuple{SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.randishKruskal</code></strong> &mdash; <em>Method</em>.</p>
@@ -212,14 +212,14 @@
 </code></pre>
 
 <p>A heuristic for computing low-stretch spanning trees.  Where Kruskal's MST algorithm adds edges in order of weight, this algorithm adds them at random with probability proportional to their weight.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/936b40dfc0fbafc47171a51708b5c502f2730cd1/src/randTrees.jl#L9-L13' class='documenter-source'>source</a><br></p>
-<p><a id='Laplacians.randishPrim-Tuple{SparseMatrixCSC{Tval,Tind}}' href='#Laplacians.randishPrim-Tuple{SparseMatrixCSC{Tval,Tind}}'>#</a>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/76c73d3f66e9198a35bc47c227e8a0e0ea6f976d/src/randTrees.jl#L9-L13' class='documenter-source'>source</a><br></p>
+<p><a id='Laplacians.randishPrim-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval' href='#Laplacians.randishPrim-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval'>#</a>
 <strong><code>Laplacians.randishPrim</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>tree = randishPrim(A)
 </code></pre>
 
 <p>A heuristic for computing low-stretch spanning trees.  Where Prim's MST algorithm grows a cluster by always adding the edge on the boundary of maximum weight, this algorithm adds a boundary edge with probability proportional to its weight.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/936b40dfc0fbafc47171a51708b5c502f2730cd1/src/randTrees.jl#L41-L45' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/76c73d3f66e9198a35bc47c227e8a0e0ea6f976d/src/randTrees.jl#L41-L45' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
@@ -266,7 +266,7 @@
     </span>
 </div>
     <script src="../js/theme.js"></script>
-      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
       <script src="../assets/mathjaxhelper.js"></script>
 
 </body>

@@ -245,7 +245,7 @@
 <p><a id='Solving-linear-equations-in-Laplacians-and-SDD-matrices-1'></a></p>
 <h1 id="solving-linear-equations-in-laplacians-and-sdd-matrices">Solving linear equations in Laplacians and SDD matrices</h1>
 <p>The main purpose of this package is to experiment with the implementation of algorithms for solving systems of linear equations in Laplacian and symmetric, diagonally dominant, M-matrices (SDDM).</p>
-<p>At present, the fastest solver in this package is <a href="../solvers/index.html#Laplacians.approxCholLap-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>approxCholLap</code></a>.</p>
+<p>At present, the fastest solver in this package for Laplacians is <a href="../solvers/index.html#Laplacians.approxCholLap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>approxCholLap</code></a>. For SDDM systems, one should use <a href="../solvers/index.html#Laplacians.approxCholSddm"><code>approxCholSddm</code></a>.</p>
 <p>We recall that a matrix $ L $ is a <em>Laplacian</em> matrix if:</p>
 <ul>
 <li>It is symmetric,</li>
@@ -418,7 +418,7 @@ PCG BLAS stopped after: 1019 iterations with relative error 0.009984013184429813
   1.892217 seconds (19.58 k allocations: 1.216 GB, 9.47% gc time)
 </code></pre>
 
-<p><a href="../solvers/index.html#Laplacians.pcgLapSolver-Tuple{AbstractArray{T,2},AbstractArray{T,2}}"><code>pcgLapSolver</code></a> uses the Laplacian of one matrix as a preconditioner for the first.  It solves systems of linear equations in the preconditioner by Cholesky factorization.  It performs the Cholesky factorization when <a href="../solvers/index.html#Laplacians.pcgLapSolver-Tuple{AbstractArray{T,2},AbstractArray{T,2}}"><code>pcgLapSolver</code></a> is called.  This is why we do the work of creating <code>f</code> only once.  Here is an example using a Low-Stretch Spanning Tree preconditioner.</p>
+<p><a href="../solvers/index.html#Laplacians.pcgLapSolver-Tuple{AbstractArray{T,2} where T,AbstractArray{T,2} where T}"><code>pcgLapSolver</code></a> uses the Laplacian of one matrix as a preconditioner for the first.  It solves systems of linear equations in the preconditioner by Cholesky factorization.  It performs the Cholesky factorization when <a href="../solvers/index.html#Laplacians.pcgLapSolver-Tuple{AbstractArray{T,2} where T,AbstractArray{T,2} where T}"><code>pcgLapSolver</code></a> is called.  This is why we do the work of creating <code>f</code> only once.  Here is an example using a Low-Stretch Spanning Tree preconditioner.</p>
 <pre><code class="julia">@time t = akpw(a)
   0.210467 seconds (1.43 M allocations: 91.226 MB, 19.23% gc time)
 
@@ -432,17 +432,17 @@ PCG BLAS stopped after: 260 iterations with relative error 0.009864463201800925.
 
 <p><a id='Low-Stretch-Spanning-Trees-1'></a></p>
 <h2 id="low-stretch-spanning-trees">Low-Stretch Spanning Trees</h2>
-<p>In order to make preconditioners, we will want low-stretch spanning trees.  We do not yet have any code that is guaranteed to produce these.  Instead, we supply three heuristics: <a href="../akpw/index.html#Laplacians.akpw-Tuple{Any}"><code>akpw</code></a> which is inspired by the algorith of Alon, Karp, Peleg and West, and  randomized versions of Prim and Kruskal's algorithm. <a href="../randTrees/index.html#Laplacians.randishKruskal-Tuple{SparseMatrixCSC}"><code>randishKruskal</code></a> samples the remaining edges with probability proportional to their weight.  <a href="../randTrees/index.html#Laplacians.randishPrim-Tuple{SparseMatrixCSC{Tval,Tind}}"><code>randishPrim</code></a> samples edges on the boundary while using the same rule.  We recommend using <a href="../akpw/index.html#Laplacians.akpw-Tuple{Any}"><code>akpw</code></a>.</p>
+<p>In order to make preconditioners, we will want low-stretch spanning trees.  We do not yet have any code that is guaranteed to produce these.  Instead, we supply three heuristics: <a href="../akpw/index.html#Laplacians.akpw-Tuple{Any}"><code>akpw</code></a> which is inspired by the algorith of Alon, Karp, Peleg and West, and  randomized versions of Prim and Kruskal's algorithm. <a href="../randTrees/index.html#Laplacians.randishKruskal-Tuple{SparseMatrixCSC}"><code>randishKruskal</code></a> samples the remaining edges with probability proportional to their weight.  <a href="../randTrees/index.html#Laplacians.randishPrim-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval"><code>randishPrim</code></a> samples edges on the boundary while using the same rule.  We recommend using <a href="../akpw/index.html#Laplacians.akpw-Tuple{Any}"><code>akpw</code></a>.</p>
 <p>See <a href="../LSST/index.html">Low Stretch Spanning Trees</a> to learn more about these.</p>
 <p><a id='Augmented-Spanning-Tree-Preconditioners-1'></a></p>
 <h2 id="augmented-spanning-tree-preconditioners">Augmented Spanning Tree Preconditioners</h2>
 <p>These are obtained by constructing a spanning tree of a graph, and then adding back some more edges from the graph.  The tree should have low stretch.  The edges to add back are chosen at random with probabilities proportional to their stretches.</p>
 <p>These are implemented in the routines</p>
 <ul>
-<li><a href="../@ref"><code>augTreeSolver</code></a>, for SDDM matrices</li>
-<li><a href="../@ref"><code>augTreeLapSolver</code></a></li>
-<li><a href="../solvers/index.html#Laplacians.augTreePrecon-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>augTreePrecon</code></a></li>
-<li><a href="../solvers/index.html#Laplacians.augmentTree-Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti},Ti}"><code>augmentTree</code></a></li>
+<li><a href="../solvers/index.html#Laplacians.augTreeSddm-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>augTreeSddm</code></a>, for SDDM matrices</li>
+<li><a href="../solvers/index.html#Laplacians.augTreeLap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>augTreeLap</code></a></li>
+<li><a href="../solvers/index.html#Laplacians.augTreePrecon-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>augTreePrecon</code></a></li>
+<li><a href="../solvers/index.html#Laplacians.augmentTree-Union{Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti},Ti}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>augmentTree</code></a></li>
 </ul>
 <p><a id='The-solvers-of-Koutis,-Miller-and-Peng.-1'></a></p>
 <h2 id="the-solvers-of-koutis-miller-and-peng">The solvers of Koutis, Miller and Peng.</h2>
@@ -456,19 +456,19 @@ PCG BLAS stopped after: 260 iterations with relative error 0.009864463201800925.
 <p>These are inspired by the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. </p>
 <p>These first two follow that paper reasonably closely.</p>
 <ul>
-<li><a href="../solvers/index.html#Laplacians.samplingSDDMSolver-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>samplingSDDMSolver</code></a></li>
-<li><a href="../solvers/index.html#Laplacians.samplingLapSolver-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>samplingLapSolver</code></a></li>
+<li><a href="../solvers/index.html#Laplacians.samplingSDDMSolver-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>samplingSDDMSolver</code></a></li>
+<li><a href="../solvers/index.html#Laplacians.samplingLapSolver-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>samplingLapSolver</code></a></li>
 </ul>
 <p>The following is a modification of the algorithm that eliminates edges one at a time.  The code is by Daniel Spielman.  The algorithm has not yet been analyzed.  It is presently the fastest in this package.</p>
 <ul>
-<li><a href="../solvers/index.html#Laplacians.approxCholLap-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>approxCholLap</code></a></li>
+<li><a href="../solvers/index.html#Laplacians.approxCholLap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>approxCholLap</code></a></li>
 </ul>
 <p><a id='Algebraic-Multigrid-1'></a></p>
 <h2 id="algebraic-multigrid">Algebraic Multigrid</h2>
 <p>This is an interface to the algebraic multigrid solvers from the PyAMG package.</p>
 <ul>
-<li><a href="../solvers/index.html#Laplacians.AMGLapSolver-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>AMGLapSolver</code></a></li>
-<li><a href="../solvers/index.html#Laplacians.AMGSolver-Tuple{SparseMatrixCSC{Tv,Ti}}"><code>AMGSolver</code></a>, for SDDM systems.</li>
+<li><a href="../@ref"><code>AMGLapSolver</code></a></li>
+<li><a href="../@ref"><code>AMGSolver</code></a>, for SDDM systems.</li>
 </ul>
 <p><a id='Solvers-from-Matlab-1'></a></p>
 <h2 id="solvers-from-matlab">Solvers from Matlab</h2>
@@ -552,7 +552,7 @@ PCG BLAS stopped after: 260 iterations with relative error 0.009864463201800925.
     </span>
 </div>
     <script src="../js/theme.js"></script>
-      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
       <script src="../assets/mathjaxhelper.js"></script>
 
 </body>

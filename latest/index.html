@@ -56,6 +56,26 @@
             
     <li class="toctree-l2"><a href="#laplaciansjl">Laplacians.jl</a></li>
     
+        <ul>
+        
+            <li><a class="toctree-l3" href="#current-development-version">Current Development Version</a></li>
+        
+            <li><a class="toctree-l3" href="#version-020-july-17-2017">Version 0.2.0, July 17, 2017</a></li>
+        
+            <li><a class="toctree-l3" href="#version-014-june-6-2017">Version 0.1.4, June 6, 2017</a></li>
+        
+            <li><a class="toctree-l3" href="#version-013-june-2-2017">Version 0.1.3, June 2, 2017</a></li>
+        
+            <li><a class="toctree-l3" href="#version-012-april-2-2017">Version 0.1.2, April 2, 2017</a></li>
+        
+            <li><a class="toctree-l3" href="#version-011-december-26-2016">Version 0.1.1, December 26, 2016</a></li>
+        
+            <li><a class="toctree-l3" href="#version-003-010-november-20-2016">Version 0.0.3 / 0.1.0, November 20, 2016</a></li>
+        
+            <li><a class="toctree-l3" href="#version-002-november-19-2016">Version 0.0.2, November 19, 2016</a></li>
+        
+        </ul>
+    
 
     </ul>
 	    </li>
@@ -201,7 +221,7 @@
 <p><a href="https://travis-ci.org/danspielman/Laplacians.jl"><img alt="Build Status" src="https://travis-ci.org/danspielman/Laplacians.jl.svg?branch=master" /></a> <a href="https://codecov.io/gh/danspielman/Laplacians.jl"><img alt="codecov" src="https://codecov.io/gh/danspielman/Laplacians.jl/branch/master/graph/badge.svg" /></a> <a href="https://danspielman.github.io/Laplacians.jl/latest"><img alt="" src="https://img.shields.io/badge/docs-latest-blue.svg" /></a></p>
 <p>Laplacians is a package containing graph algorithms, with an emphasis on tasks related to spectral and algebraic graph theory. It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.</p>
 <p>All graphs are represented by sparse adjacency matrices. This is both for speed, and because our main concerns are algebraic tasks. It does not handle dynamic graphs. It would be very slow to implement dynamic graphs this way.</p>
-<p>The documentation may be found by clicking on one of the "docs" links above.</p>
+<p>The documentation may be found by clicking the "docs" link above.</p>
 <p>This includes instructions for installing Julia, and some tips for how to start using it.  It also includes guidelines for Dan Spielman's collaborators.</p>
 <p>For some examples of some of the things you can do with Laplacians, look at </p>
 <ul>
@@ -211,17 +231,67 @@
 <li><a href="http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Sparsification Demo.ipynb">An example of sparsification</a></li>
 <li>And, try the chimera and wtedChimera graph generators.  They are designed to generate a wide variety of graphs so as to exercise code.</li>
 </ul>
-<p>If you want to solve Laplacian equations, we recommend the KMPLapSolver.  For SDD equations, we recommend the KMPSDDSolver.</p>
+<p>If you want to solve Laplacian equations, we recommend <code>approxCholLap</code>.</p>
 <p>The algorithms provide by Laplacians.jl include:</p>
 <ul>
 <li><code>akpw</code>, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.</li>
-<li><code>approxCholLap</code>: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.</li>
+<li><code>approxCholLap</code>: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.   For SDDM systems, use <code>approxCholSddm</code>.</li>
 <li><code>sparsify</code>, an implementation of sparsification by effective resistance sampling, following Spielman and Srivastava.</li>
 <li><code>KMPLapSolver</code> and <code>KMPSDDSolver</code>: linear equation solvers based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.</li>
 <li><code>samplingSDDSolver</code> and <code>samplingLapSolver</code>, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.</li>
 <li><code>chimera</code> and <code>wtedChimera</code> graph generators for testing graph algorithms, by Daniel Spielman.</li>
 <li>Local Graph Clustering Heuristics, implemented by Serban Stan, including <code>prn</code> a version of PageRank Nibble based on "Using PageRank to Locally Partition a Graph", <i>Internet Mathematics</i> and <code>LocalImprove</code> based on "Flow-Based Algorithms for Local Graph Clustering" by Zeyuan Allen-Zhu and Lorenzo Orecchia, SODA 2014.</li>
 </ul>
+<p><a id='Current-Development-Version-1'></a></p>
+<h2 id="current-development-version">Current Development Version</h2>
+<p>To get the current version of the master branch, run <code>Pkg.checkout("Laplacians")</code></p>
+<p><a id='Version-0.2.0,-July-17,-2017-1'></a></p>
+<h2 id="version-020-july-17-2017">Version 0.2.0, July 17, 2017</h2>
+<p>This version is compatabile with Julia 0.6.  It will not work with Julia 0.5.X.</p>
+<p>Changes:</p>
+<ul>
+<li>Added <code>approxCholSddm</code>, a wrapper of <code>approxCholLap</code> that solves SDDM systems.</li>
+</ul>
+<p><a id='Version-0.1.4,-June-6,-2017-1'></a></p>
+<h2 id="version-014-june-6-2017">Version 0.1.4, June 6, 2017</h2>
+<p>This is the current version.  It is what you retrieve when you run <code>Pkg.add("Laplacians")</code>. </p>
+<p>Changes:</p>
+<ul>
+<li>Added <code>sparsify</code>, an implementation of sparsification by effective resistance sampling, following Spielman and Srivastava.</li>
+<li>Added <code>approxQual</code> and <code>conditionNumber</code> for checking how well one graph approximates another.</li>
+<li>Fixed a bug in the solution of Laplacian systems in disconnected graphs.</li>
+</ul>
+<p><a id='Version-0.1.3,-June-2,-2017-1'></a></p>
+<h2 id="version-013-june-2-2017">Version 0.1.3, June 2, 2017</h2>
+<p>Major Changes:</p>
+<ul>
+<li>Changed the name of the approximate Cholesky solver from <code>edgeElimLap</code> to <code>approxCholLap</code>.  Made improvements in this solver.</li>
+<li>Improved PCG so that it can now detect stagnation.  Made options to do this even better when using it with a good preconditioner, like <code>approxCholLap</code>.</li>
+<li>Added in code for comparing the running times of solvers.  The difficulty here is that we need to stop them if they run too long.  Added code to do this with threads inside Julia, and with <code>gtimeout</code> when calling Matlab to use icc, CMG, or LAMG.</li>
+</ul>
+<p><a id='Version-0.1.2,-April-2,-2017-1'></a></p>
+<h2 id="version-012-april-2-2017">Version 0.1.2, April 2, 2017</h2>
+<p>This is the current version.  It is what you retrieve when you run <code>Pkg.add("Laplacians")</code>. </p>
+<p>Major Changes:</p>
+<ul>
+<li>added <code>edgeElimLap</code> - a fast Laplacian solver.</li>
+<li>fixed a bug in the unweighted version of <code>akpw</code>.</li>
+</ul>
+<p><a id='Version-0.1.1,-December-26,-2016-1'></a></p>
+<h2 id="version-011-december-26-2016">Version 0.1.1, December 26, 2016</h2>
+<p>Changelist:</p>
+<ul>
+<li>All of the linear equation solvers now have the same interface, and the Laplacian solvers work for disconnected graphs.</li>
+<li>Some support for calling solvers from Matlab has been added.</li>
+<li>Documentation is now through Documenter.jl.</li>
+</ul>
+<p><a id='Version-0.0.3-/-0.1.0,-November-20,-2016-1'></a></p>
+<h2 id="version-003-010-november-20-2016">Version 0.0.3 / 0.1.0, November 20, 2016</h2>
+<p>Versions 0.0.3 and 0.1.0 are the same. These versions works with Julia 0.5.</p>
+<p>Warning: the behavior of chimera and wtedChimera differs between Julia 0.4 and Julia 0.5 because randperm acts differently in these.</p>
+<p><a id='Version-0.0.2,-November-19,-2016-1'></a></p>
+<h2 id="version-002-november-19-2016">Version 0.0.2, November 19, 2016</h2>
+<p>This is the version that works with Julia 0.4. It was captured right before the upgrade to Julia 0.5</p>
               
             </div>
           </div>
@@ -264,7 +334,7 @@
     </span>
 </div>
     <script src="./js/theme.js"></script>
-      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
       <script src="./assets/mathjaxhelper.js"></script>
 
 </body>
@@ -272,5 +342,5 @@
 
 <!--
 MkDocs version : 0.16.3
-Build Date UTC : 2017-07-14 01:02:10
+Build Date UTC : 2017-07-18 20:06:42
 -->
