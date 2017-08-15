@@ -22,10 +22,11 @@ pages:
     - graphUtils: 'graphUtils.md'
     - graphAlgs : 'graphAlgs.md'
     - IO: 'IO.md'
-    - treeAlgs: 'treeAlgs.md'
-    - akpw: 'akpw.md'
-    - randTrees: 'randTrees.md'
     - solvers: 'solvers.md'
+    - sparsification: 'sparsification.md'
+    - akpw: 'akpw.md'
+    - treeAlgs: 'treeAlgs.md'
+    - randTrees: 'randTrees.md'
     - localClustering: 'localClustering.md'
     - Private Functions: 'privateFuncs.md'
     - All of the above: 'indexOfAll.md'
@@ -38,13 +39,14 @@ extra_css:
   - assets/Laplacians.css
 
 extra_javascript:
-  - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML
   - assets/mathjaxhelper.js
-  
+
 markdown_extensions:
   - extra
   - tables
   - fenced_code
+
 
 use_directory_urls: false
 

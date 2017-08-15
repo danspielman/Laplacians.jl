@@ -27,9 +27,9 @@ function matlab_ichol(sdd)
     end
 
     n = sdd.n
-    
+
     @mput sdd
-    
+
     mat"""
     p = symrcm(sdd);
     laperm = sdd(p,p);
@@ -42,10 +42,10 @@ function matlab_ichol(sdd)
     p = convert(Array{Int,1},vec(p))
     pi = zeros(Int,n)
     pi[p] = collect(1:n)
-    
+
     Ltri = LowerTriangular(L)
     Utri = Ltri'
-    
+
     # Create the solver function
     f = function(b::Array{Float64,1})
 
@@ -61,7 +61,7 @@ end
     f = matlab_ichol_sddm(sddm; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 
 Computes a zero-fill incomplete Cholesky factorization of sddm, and returns a function that solves systems of linear equations in it.  Uses the symrcm ordering of the matrix.  Requires that MATLAB.jl be included.
-"""    
+"""
 function matlab_ichol_sddm(sddm::SparseMatrixCSC; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
 
     F = matlab_ichol(sddm)
@@ -70,9 +70,9 @@ function matlab_ichol_sddm(sddm::SparseMatrixCSC; tol::Real=1e-6, maxits=Inf, ma
     maxtime_=maxtime
     verbose_=verbose
     pcgIts_=pcgIts
-    
+
     f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_,pcgIts=pcgIts_) = pcg(sddm, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
-  
+
     return f
 
 end
@@ -82,9 +82,9 @@ end
     f = matlab_ichol_lap(A; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
 
 Wrapper for matlab_ichol_sddm.
-"""    
+"""
 matlab_ichol_lap = lapWrapSDDM(matlab_ichol_sddm)
-    
+
 
 """
     x = matlabCmgSolver(mat, b; tol::Real=1e-6, maxits=10000)
@@ -94,7 +94,7 @@ This runs Koutis's CMG solver.  You must have installed the solver, and it must 
 function matlabCmgSolver(mat::SparseMatrixCSC, b; tol::Real=1e-6, maxits=10000, verbose=false, params...)
 
     maxits = min(10000,maxits)
-    
+
     @mput mat
     @mput b
     @mput tol
@@ -112,8 +112,8 @@ function matlabCmgSolver(mat::SparseMatrixCSC, b; tol::Real=1e-6, maxits=10000, 
     if verbose
         println("PCG stopped after $(iter) iterations.")
     end
-    
-    
+
+
     return x
 end
 
@@ -128,17 +128,80 @@ function matlabCmgSolver(mat::SparseMatrixCSC; tol::Real=1e-6, maxits=1000, para
 
     tol_=tol
     maxits_=maxits
-    
+
     f(b; tol=tol_, maxits=maxits_, params...) = matlabCmgSolver(mat, b; tol=tol, maxits=maxits)
 
     return f
 end
 
+"""
+    f = matlabCmgSolverHalf(mat; tol::Real=1e-6, maxits=10000, verbose=false)
+
+This builds Koutis's CMG solver.
+You must have installed the solver, and it must be on Matlab's default path.
+This routine does not implement all of our preferred interface.
+Use the same solver for sddm and Laplacian matrices.
+
+This returns a function that you can use to solve systems in mat thereafter.
+However, if you interact with Matlab before calling f, objects that it needs
+in Matlab's namespace can be overwritten.  Use with caution!
+"""
+function matlabCmgSolverHalf(mat::SparseMatrixCSC; tol::Real=1e-6, maxits=10000,
+  verbose=false, pcgIts=Int[], params...)
+
+    # check if this is an ajacency matrix instead of a Laplacian
+    if maximum(diag(mat)) == 0
+      mat = lap(mat)
+    end
+
+    maxits = min(10000,maxits)
+
+    @mput mat
+
+    t1 = time()
+
+    mat"""
+    pfun = cmg_sdd(mat);
+    """
+
+    if verbose
+      println("Build time ", time() - t1)
+    end
+
+    tol_=tol
+    maxits_=maxits
+    verbose_=verbose
+    pcgIts_ =pcgIts
+
+    f = function(b; tol=tol_, maxits=maxits_, verbose=verbose_, pcgIts=pcgIts_)
+      @mput b
+      @mput tol
+      @mput maxits
+
+      mat"""
+      [x,flag,relres,iter] = pcg(mat, b, tol, maxits, pfun);
+      """
+
+      @mget iter
+      @mget x
+
+      if verbose
+          println("PCG stopped after $(iter) iterations.")
+      end
+      if length(pcgIts) > 0
+          pcgIts[1] = iter
+      end
+      
+      return x
+    end
+
+    return f
+end
 
 """
     solver = matlabCmgLap(a; tol::Real=1e-6, maxits=10000)
 
-This runs Koutis's CMG solver.  You must have installed the solver, and it must be on Matlab's default path.  This routine does not implement all of our preferred interface.  
+This runs Koutis's CMG solver.  You must have installed the solver, and it must be on Matlab's default path.  This routine does not implement all of our preferred interface.
 
 The input `a` should be the adjacency matrix.  This will find connected components, and then call the sddm version of the solver.
 

@@ -12,8 +12,8 @@ sdd[1,1] += 1;
 its = [0]
 
 f = Laplacians.lapWrapConnected(cgSolver,a, tol=1e-2, verbose=true)
-@assert norm(la*f(b)-b)/norm(b) < 1e-1
-@assert norm(la*f(b,pcgIts=its,tol=1e-3,verbose=false)-b)/norm(b) < 1e-3
+@test norm(la*f(b)-b)/norm(b) < 1e-1
+@test norm(la*f(b,pcgIts=its,tol=1e-3,verbose=false)-b)/norm(b) < 1e-3
 
 norm(la*f(b,pcgIts=its)-b)/norm(b)
 norm(la*f(b,pcgIts=its,verbose=true,tol=1e-6)-b)/norm(b)
@@ -22,24 +22,24 @@ conSolve = Laplacians.lapWrapConnected(cgSolver)
 
 fa = conSolve(a)
 
-@assert norm(la*fa(b,verbose=true) - b) < 1e-2
+@test norm(la*fa(b,verbose=true) - b) < 1e-2
 
 a2 = disjoin(chimera(100,2),wtedChimera(200,3))
 la2 = lap(a2)
 n = size(a2,1)
-b2 = randn(n); 
+b2 = randn(n);
 b2[1:100] = b2[1:100] - mean(b2[1:100]);
 b2[101:300] = b2[101:300] - mean(b2[101:300]);
 
 f = Laplacians.lapWrapComponents(conSolve, a2)
 
 x = f(b2,verbose=true)
-norm(la2*x-b2)/norm(b2) 
+norm(la2*x-b2)/norm(b2)
 
 f = Laplacians.lapWrapComponents(Laplacians.cgLapSolver, a2)
 
 x1 = f(b2,verbose=true)
-norm(la2*x1-b2)/norm(b2) 
+norm(la2*x1-b2)/norm(b2)
 
 sum(x1[101:300])
 
@@ -48,14 +48,14 @@ x = f(b,verbose=true)
 norm(la*x-b)/norm(b)
 
 f0 = Laplacians.lapWrapComponents(conSolve, a)
-@assert norm(la*f0(b,tol=1e-4,maxits=200,verbose=true)-b)/norm(b) < 1e-2
+@test norm(la*f0(b,tol=1e-4,maxits=200,verbose=true)-b)/norm(b) < 1e-2
 
 f0 = Laplacians.lapWrapComponents(Laplacians.cgLapSolver, a)
-@assert norm(la*f0(b,tol=1e-4,maxits=200,verbose=true)-b)/norm(b) < 1e-2
+@test norm(la*f0(b,tol=1e-4,maxits=200,verbose=true)-b)/norm(b) < 1e-2
 
 
 f = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(cholSDDM),a)
-@assert norm(la*f(b)-b)/norm(b) < 1e-8
+@test norm(la*f(b)-b)/norm(b) < 1e-8
 
 solver = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(Laplacians.cholSDDM))
 f = solver(a,verbose = true)
@@ -63,26 +63,45 @@ norm(la*f(b,tol=1e-3)-b)/norm(b)
 
 its2 = [0]
 f = Laplacians.lapWrapSDDM(Laplacians.cgSolver,a,tol=1e-2,pcgIts=its)
-@assert norm(la*f(b,verbose=true,pcgIts = its2, tol=1e-3)-b) / norm(b) < 1e-2
+@test norm(la*f(b,verbose=true,pcgIts = its2, tol=1e-3)-b) / norm(b) < 1e-2
 f = Laplacians.lapWrapSDDM(Laplacians.cholSDDM,a)
-@assert norm(la*f(b)-b) / norm(b) < 1e-2
+@test norm(la*f(b)-b) / norm(b) < 1e-2
 f = Laplacians.cholLap(a)
-@assert norm(la*f(b)-b) / norm(b) < 1e-2
+@test norm(la*f(b)-b) / norm(b) < 1e-2
 fs = Laplacians.lapWrapSDDM(cgSolver)
 f = fs(a, tol=1e-2, verbose=true)
 x = f(b, tol=1e-6);
-             
+
+
+
 
 mats = []
 rhss = []
-solver = Laplacians.wrapCapture(edgeElimLap, mats, rhss)
+solver = Laplacians.wrapCapture(approxCholLap, mats, rhss)
 a = chimera(10)
+as = shortIntGraph(a)
 f = solver(a);
+fs = solver(as);
 size(mats[1])
 b = randn(10)
 x = f(b);
+xs = fs(b);
 
+solver = Laplacians.approxCholLapChol(a,verbose=true)
+x = solver(b);
 
+# testing approxChol internals
+a = randRegular(20,3)
+llp = Laplacians.LLmatp(a)
+Laplacians.print_ll_col(llp,1)
+llo = Laplacians.LLMatOrd(a);
+Laplacians.print_ll_col(llo,1)
+
+a = wtedChimera(1111,1);
+llp = Laplacians.LLmatp(a)
+srand(1)
+ldli = Laplacians.approxChol(llp);
+@test Laplacians.condNumber(a, ldli, verbose=true) < 10
 
 
 # testing by repitition
@@ -96,7 +115,7 @@ end
 function testSolvers(a;maxtime=5)
 
     maxits = 200
-    
+
     n = a.n
     excess = zeros(n); excess[1] = excess[n] = 0.1;
     la = lap(a);
@@ -106,7 +125,7 @@ function testSolvers(a;maxtime=5)
     its = Int[0]
 
 
-    
+
     for solver in SDDMSolvers
         f = solver(sddm, tol=1e-6, maxtime=maxtime,verbose=true);
         x = f(b,tol=1e-6,maxits=maxits,verbose=true,pcgIts=its);
@@ -126,7 +145,7 @@ end
 n = 1000
 tol = 1e-11
 
-for i in 1:100
+for i in 1:50
     println("wtedChimera($n, $i)")
     if isodd(i)
         gr = wtedChimera(n,i,verbose=true)
@@ -143,7 +162,7 @@ for i in 1:100
 
     nnzL, flops = ask_cholmod(lap(gr))
     pe = cholmod_perm(lap(gr))
-    
+
     testSolvers(gr)
 
     gru = unweight(gr)
@@ -158,7 +177,20 @@ n = size(a,1)
 b = randn(n)
 b = b - mean(b)
 la = lap(a)
+<<<<<<< HEAD
 for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver, edgeElimLap]
+=======
+ee1 = function(a; verbose=false, args...)
+    approxCholLap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
+end
+ee2 = function(a; verbose=false, args...)
+    approxCholLap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
+end
+ee3 = function(a; verbose=false, args...)
+    approxCholLap(a; params=ApproxCholParams(:given), verbose=verbose, args...)
+end
+for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver, ee1, ee2, ee3]
+>>>>>>> master
     f = solver(a, tol=1e-6, maxtime=5);
     x = f(b);
     @test norm(la*x - b)/norm(b) <= 1e-1
@@ -174,6 +206,16 @@ a = sparse(a)
 println("rand complete graph")
 testSolvers(a,maxtime=10)
 
+<<<<<<< HEAD
+=======
+n = 100
+a = rand(n,n)
+a = a + a'
+a = a - diagm(diag(a))
+a = sparse(a)
+println("rand complete graph")
+testSolvers(a,maxtime=10)
+>>>>>>> master
 
 
 n = 20000
@@ -230,8 +272,19 @@ a = wtedChimera(n,1)
 b = randn(n)
 b = b - mean(b)
 la = lap(a)
+
 f = samplingLapSolver(a,tol=1e-6)
 x = f(b)
+
+params = deepcopy(Laplacians.defaultSamplingParams)
+params.verboseSS = true
+params.returnCN = true
+params.fixTree = true
+f = samplingLapSolver(a,tol=1e-6,params=params)
+x = f(b)
+
+
+
 
 
 # testing compare_solvers
@@ -254,5 +307,3 @@ solvers = [SolverTest(lnew,"new") SolverTest(lold,"old")]
 
 dic = Dict()
 x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2)
-
-

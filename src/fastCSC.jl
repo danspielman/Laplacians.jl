@@ -13,7 +13,7 @@ routine in Julia.  It basically does a radix sort on rows than columns. It does 
 to be symmetrix.  But, the same ideas could probably speed up many sparse matrix routines.
 `sympermute(a, perm)` is the same as `a[perm,perm]`.
 """
-function symPermuteCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Array{Ti,1})
+function symPermuteCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Vector{Ti})
 
     numnz = nnz(a)
 
@@ -21,12 +21,12 @@ function symPermuteCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Array{Ti,1})
     Tv1 = Tv
 
     
-    permi = Array(Ti1, a.n)
+    permi = Vector{Ti1}(a.n)
     permi[perm] = collect(1:a.n)
     
-    J = Array(Ti1, numnz)
+    J = Vector{Ti1}(numnz)
 
-    deg = Array(Ti1, a.n)
+    deg = Vector{Ti1}(a.n)
 
     ptr = 1
     for col = 1:a.n
@@ -40,9 +40,9 @@ function symPermuteCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Array{Ti,1})
     I = permi[a.rowval];
 
     
-    I1 = Array(Ti1, numnz)
-    J1 = Array(Ti1, numnz)
-    V1 = Array(Tv1, numnz)
+    I1 = Vector{Ti1}(numnz)
+    J1 = Vector{Ti1}(numnz)
+    V1 = Vector{Tv1}(numnz)
 
     cumdeg = cumsum(deg)
     col = [1;cumdeg+1]
@@ -57,8 +57,8 @@ function symPermuteCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Array{Ti,1})
         V1[ptr] = a.nzval[i]
     end
 
-    I2 = Array(Ti1, numnz)
-    V2 = Array(Tv1, numnz)
+    I2 = Vector{Ti1}(numnz)
+    V2 = Vector{Tv1}(numnz)
 
     for i in numnz:-1:1
         ptr = cumdeg[J1[i]]
@@ -83,7 +83,7 @@ function symTransposeCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti})
     
     I = a.rowval;
 
-    V1 = Array(Tv, numnz)
+    V1 = Vector{Tv}(numnz)
 
     for i in numnz:-1:1
         ptr = cumdeg[I[i]]
@@ -96,12 +96,12 @@ function symTransposeCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti})
 end
 
 """Given a set of integers, `set` between 1 and n, return a sorted version of them"""
-function sortSet{Ti}(set::Array{Ti,1},n::Ti)
+function sortSet{Ti}(set::Vector{Ti},n::Ti)
     v = zeros(Bool,n)
     for i in set
         v[i] = true
     end
-    out = Array{Ti}(length(set))
+    out = Vector{Ti}(length(set))
     ptr = 1
     for i in 1:n
         if v[i]
@@ -120,17 +120,17 @@ This is equivalent to
 sparse(ai[list],aj[list],av[list],a.m,a.n)
 ~~~
 """
-function submatrixCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, list::Array{Ti,1})
+function submatrixCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, list::Vector{Ti})
 
     list = sortSet(list,nnz(a))
 
-    colptr = Array{Ti}(1+a.n)
+    colptr = Vector{Ti}(1+a.n)
     colptr[1] = 1
 
     numnz = length(list)
 
-    rowval = Array{Ti}(numnz)
-    nzval = Array{Tv}(numnz)
+    rowval = Vector{Ti}(numnz)
+    nzval = Vector{Tv}(numnz)
 
     ptr = 1
     col = 1

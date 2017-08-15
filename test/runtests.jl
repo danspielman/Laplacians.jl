@@ -1,6 +1,8 @@
 using Base.Test
 using Laplacians
 
+include("testByFile.jl")
+
 include("testByExport.jl")
 
 include("testSolvers.jl")

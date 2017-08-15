@@ -42,7 +42,7 @@ function localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSi
     end
   end
   if length(nbrs) > maxSize
-    print_with_color(:red, "maxSize should be at least ", length(nbrs), " .....finishing execution")
+    print_with_color(:red, string("maxSize should be at least ", length(nbrs), " .....finishing execution"))
     return [],0
   end
 
@@ -393,7 +393,7 @@ function prn{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, phi::Float64, 
   obound = 0
 
   while !isempty(p)
-    u = Collections.dequeue!(p)
+    u = DataStructures.dequeue!(p)
     push!(S, u)
 
     # update volumes and number of connecting edges
@@ -437,10 +437,10 @@ function apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64
 
   # p is ordered by p[i] / deg(i) (ordering required for prn)
   # r is oredered by r[i] - eps * deg(G,u). r is initially mimicking the unit vector
-  p = Collections.PriorityQueue{Int64,Float64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}(Base.Order.Reverse) 
+  p = DataStructures.PriorityQueue{Int64,Float64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}(Base.Order.Reverse) 
   pelems = Set(s)
 
-  r = Collections.PriorityQueue{Int64,Float64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}(Base.Order.Reverse) 
+  r = DataStructures.PriorityQueue{Int64,Float64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}(Base.Order.Reverse) 
   relems = Set(s)
 
   for u in s
@@ -450,9 +450,9 @@ function apr{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}, alpha::Float64
 
   # we are moving mass from a node u only if it has more mass than eps * deg(G,u)
   # making the inequality strictly greater than 0 deals with u being an isolated node
-  while Base.Collections.peek(r)[2] > 0
+  while DataStructures.peek(r)[2] > 0
 
-    u,ru = Base.Collections.peek(r)
+    u,ru = DataStructures.peek(r)
     ru = ru + eps * deg(G,u)
 
     # check if u is in the priority queue for p

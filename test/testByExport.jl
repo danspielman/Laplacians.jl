@@ -11,12 +11,12 @@ ap = symPermuteCSC(a,rp);
 rpi = zeros(Int,n);
 rpi[rp] = 1:n
 
-@test sum(abs(a-symPermuteCSC(ap,rpi))) == 0
+@test sum(abs.(a-symPermuteCSC(ap,rpi))) == 0
 
 # export symTransposeCSC
 
 a2 = triu(a) + (tril(a) .> 0)
-@test sum(abs(symTransposeCSC(a2) - a2')) == 0
+@test sum(abs.(symTransposeCSC(a2) - a2')) == 0
 
 # export submatrixCSC
 
@@ -43,7 +43,10 @@ for i in 1:n
     end
     w += wdeg(a,i)
 end
-@test x == y == z == w == sum(a) 
+@test isapprox(x,y)
+@test isapprox(x,z)
+@test isapprox(x,w)
+@test isapprox(x,sum(a))
 
 # export setValue
 
@@ -91,6 +94,8 @@ a2 = grownGraphD(100,3)
 # export prefAttach
 
 a2 = prefAttach(100,3,0.5)
+a2 = prefAttach(5,4,0.5)
+
 
 # export hyperCube
 
@@ -114,7 +119,7 @@ a2 = wGrid2(3)
 
 # export wGrid3
 
-a3 = wGrid2(3)
+a3 = wGrid3(3)
 
 # export grid2
 
@@ -160,7 +165,7 @@ n = 101
 a = wtedChimera(n,1)
 writeIJV("tmp.txt",a)
 a2 = readIJV("tmp.txt")
-@test sum(abs(a-a2)) == 0
+@test sum(abs.(a-a2)) == 0
 
 # export unweight, unweight!
 
@@ -176,7 +181,17 @@ uniformWeight!(a2)
   # export edgeVertexMat
 
 b = edgeVertexMat(a2)
-@test sum(abs(b'*b - lap(unweight(a2)))) == 0
+@test sum(abs.(b'*b - lap(unweight(a2)))) == 0
+
+a = wtedChimera(102,2)
+b = wtedEdgeVertexMat(a)
+@test sum(abs.(b'*b - lap(a))) < 1e-8
+
+  # export power, thicken_once, thicken
+
+  a = power(grid2(10),4)
+  a = thicken_once(grid2(10))
+  a = thicken(grid2(10),4)
 
   # export productGraph
   # export generalizedNecklace
@@ -200,6 +215,7 @@ twoLift(a,3)
   # export spectralCoords
   # export spectralDrawing
 
+a = wtedChimera(102,2)
 spectralDrawing(a)
 
   # export toUnitVector
@@ -283,9 +299,45 @@ dumbRefineCut(a,collect(1:10))
 
   # export FastSampler, sample, sampleMany
 
+
+r = rand(10)
+s = FastSampler(r)
+sample(s)
+blockSample(r)
+
+  # export SolverTest, speedTestLapSolvers
+
+solvers = [SolverTest(approxCholLap,"ac") SolverTest(augTreeLap,"aug")]
+
+dic = Dict()
+n = 1000
+a = chimera(n)
+b = randn(n)
+b = b - mean(b)
+x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2, verbose=true)
+
+f = Laplacians.augTreeFactor(a, akpw(a));
+
+  # include("conditionNumber.jl")
+  # export support, approxQual, conditionNumber
+
+  # include("sparsify.jl")
+  # export sparsify
+
+a = wtedChimera(1000,1)
+dave = nnz(a)/size(a,1)
+a = thicken(a,round(Int,200/dave))
+as = sparsify(a,ep=1,JLfac=4);
+@test approxQual(a,as,verbose=true) < 2
+@test conditionNumber(a,as,tol=1e-4) < 10
+
+
+
   # export johnlind
 
+a = chimera(n,1)
 johnlind(a)
 
   # export toposort, dirEdgeVertexMat
 
+println("End of testByExport")

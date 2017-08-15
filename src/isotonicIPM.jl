@@ -83,7 +83,7 @@ function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
     # numSteps = 0
 
     while muTooSmall
-        F(y) = mu0*norm(y-v)^2 - sum(log(Bt*y))
+        F(y) = mu0*norm(y-v)^2 - sum(log.(Bt*y))
         centered = false
         while !centered
             # numSteps += 1
@@ -145,7 +145,7 @@ function l2NewtonStep{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
 
     H = H1 + d1
 
-    invMinEntryH = maximum(abs(s)) ^ 2
+    invMinEntryH = maximum(abs.(s)) ^ 2
 
     #println("Maximum eigenvalue of the matrix we are computing: ", eigs(invMinEntryH * H;nev=1,which=:LM,tol=1e-1)[1][1])
     #println("Smallest eigenvalues of the matrix we are computing: ", eigs(invMinEntryH * H;nev=2,which=:SM,tol=1e-1)[1][1])

@@ -9,7 +9,7 @@ global KMP_MATS=[]
 global KMP_FS=[]
 =#
 
-type IJVS
+mutable struct IJVS
     i::Array{Int64,1}
     j::Array{Int64,1}
     v::Array{Float64,1}  # wt of edge
@@ -17,7 +17,7 @@ type IJVS
 end
 
 """Parameters for the KMP solver"""
-immutable KMPParams
+struct KMPParams
     frac::Float64  # fraction to decrease at each level
     iters::Int64   # iters of PCG to apply between levels
     treeScale::Float64 # scale tree by treeScale*log_2 (n) * aveStretch
@@ -28,14 +28,14 @@ end
 defaultKMPParams = KMPParams(1/36, 6, 0.125, 600, :akpw)
 
 # this is just for Laplacians, not general SDD
-immutable elimLeafNode
+struct elimLeafNode
     nodeid::Int64
     parent::Int64
     wtDeg::Float64
 end
 
 # this is just for Laplacians, not general SDD
-immutable elimDeg2Node
+struct elimDeg2Node
     nodeid::Int64
     nbr1::Int64
     nbr2::Int64
@@ -196,14 +196,14 @@ function KMPSDDMSolver(mat; verbose=false,
     s = mat*ones(n)
 
     dmat = diag(mat)
-    s = sparse(max(s,0) .* (s .> (dmat*1e-12)))
+    s = sparse(max.(s,0.0) .* (s .> (dmat*1e-12)))
 
     if (s == 0)
         error("Matrix was not diagonally dominant.")
     end
     
     # Force symmetric and diagonal zero
-    a = triu(abs(mat),1)
+    a = triu(abs.(mat),1)
     a = a + a'
     
     a1 = [sparse([0 s']); [s a]]

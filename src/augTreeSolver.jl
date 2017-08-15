@@ -15,7 +15,7 @@ Started by Dan Spielman
 =========================================#
 
 
-type AugTreeParams
+mutable struct AugTreeParams
     treeAlg::Function
     opt::Bool
     nnzL_fac::Float64
@@ -106,7 +106,7 @@ function augmentTreeOpt{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{
     _,_,sv = findnz(triu(st))
 
     
-    r = -log(rand(m)) ./ sv
+    r = -log.(rand(m)) ./ sv
     ord = sortperm(r)
 
     nnzLTooBig(nnzL) = (nnzL-2*(n-1)) > n*params.nnzL_fac

@@ -4,7 +4,9 @@
 
 The main purpose of this package is to experiment with the implementation of algorithms for solving systems of linear equations in Laplacian and symmetric, diagonally dominant, M-matrices (SDDM).
 
-At present, the fastest solver in this package is [`edgeElimLap`](@ref).
+At present, the fastest solver in this package for Laplacians is
+[`approxCholLap`](@ref).
+For SDDM systems, one should use [`approxCholSddm`](@ref).
 
 We recall that a matrix $ L $ is a _Laplacian_ matrix if:
 
@@ -249,8 +251,8 @@ These are obtained by constructing a spanning tree of a graph, and then adding b
 
 These are implemented in the routines
 
-* [`augTreeSolver`](@ref), for SDDM matrices
-* [`augTreeLapSolver`](@ref)
+* [`augTreeSddm`](@ref), for SDDM matrices
+* [`augTreeLap`](@ref)
 * [`augTreePrecon`](@ref)
 * [`augmentTree`](@ref)
 
@@ -273,7 +275,7 @@ These first two follow that paper reasonably closely.
 
 The following is a modification of the algorithm that eliminates edges one at a time.  The code is by Daniel Spielman.  The algorithm has not yet been analyzed.  It is presently the fastest in this package.
 
-* [`edgeElimLap`](@ref)
+* [`approxCholLap`](@ref)
 
 ## Algebraic Multigrid
 

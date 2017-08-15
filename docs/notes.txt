@@ -1,0 +1,5 @@
+Major changes since version 0.1.2:
+
+1. Fixed a bug in edgeElim
+2. re-wrote pcg, and it now more robust
+
