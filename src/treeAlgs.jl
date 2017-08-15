@@ -8,7 +8,7 @@
 #  We require that the children appears in a dfs order
 #
 
-struct RootedTree{Tval,Tind}
+type RootedTree{Tval,Tind}
   root::Tind
   parent::Array{Tind,1}
   children::Array{Tind,1}

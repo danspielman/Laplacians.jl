@@ -3,7 +3,7 @@
 """
 Parameters for the sampling solver.
 """
-mutable struct SimpleSamplerParams{Tv,Ti}
+type SimpleSamplerParams{Tv,Ti}
     startingSize::Ti    # the initial size of the linked list storage structure
     blockSize::Ti       # the size of each consecutive block of memory assigned to a certain element
 
@@ -15,7 +15,7 @@ mutable struct SimpleSamplerParams{Tv,Ti}
     order::Symbol    # options :min, :approx, :tree
 end
 
-mutable struct AugTreeHybridParams
+type AugTreeHybridParams
     n0::Int64      # the number of edges at which to go direct
     frac::Float64  # add frac*n edges to the tree
     subIts::Float64  # number of its of sub solver

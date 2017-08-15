@@ -1,5 +1,5 @@
 # Alias sampling  
-struct FastSampler{Tv,Ti}
+immutable FastSampler{Tv,Ti}
     F::Array{Tv,1}    # array of p[s.A[i]] / (1 / n)
     A::Array{Ti,1}    # array of indices of elements < (1 / n)
     V::Array{Ti,1}    # arary of indices of elements > (1 / n)

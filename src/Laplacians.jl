@@ -4,15 +4,36 @@ Graphs are represented by sparse adjacency matrices, etc.
 """
 module Laplacians
 
+#=
+
+Started by Dan Spielman.
+Other contributors:
+
+
+This represents graphs as sparse adjacency matrices.
+The reasons are twofold:
+  # 1. It is much faster than the Graphs.jl library, and
+  # 2. It is more compatible with linear algebraic operations
+
+This module begins by importing the packages it requires.
+It then defines a few functions for dealing with the graphs:
+deg(graph, node),  nbri(graph, node, i)  and weighti(graph, node i).
+Using these is slower than what we actually do in the code.
+But, you can start with this and then convert.
+
+This then includes code from other files,
+and exports the functions for which it seems appropriate.
+
+=#
+
 
   function __init__()
     if !isdefined(Main, :LAPLACIANS_NOPLOT)
         eval(Expr(:using, :PyPlot))
     end
 
-    if isdefined(Main, :LAPLACIANS_AMG)
+    if !isdefined(Main, :LAPLACIANS_NOAMG)
         eval(Expr(:using, :PyAMG))
-
     end
   end
 
@@ -79,9 +100,7 @@ module Laplacians
   export mapweight
   export uniformWeight, uniformWeight!
 
-  export edgeVertexMat, wtedEdgeVertexMat
-
-  export power, thicken_once, thicken
+  export edgeVertexMat
 
   export productGraph
   export generalizedNecklace
@@ -164,14 +183,17 @@ module Laplacians
   export augmentTree, augTreePrecon, augTreeSddm
   export augTreeLapPrecon, augTreeLap, AugTreeParams, AugTreeParamsOld
 
+  include("externalSolvers.jl")
+  export AMGSolver, AMGLapSolver
+
   include("KMPSolver.jl")
   export KMPSDDMSolver
   export KMPLapSolver
   export KMPParams
 
-  include("approxCholTypes.jl")
-  include("approxChol.jl")
-  export approxCholLap, ApproxCholParams, approxCholSddm
+  include("edgeElimTypes.jl")
+  include("edgeElim.jl")
+  export edgeElimLap
 
   include("complexSolvers.jl")
   export SDDMSolvers
@@ -179,12 +201,6 @@ module Laplacians
 
   include("compare_solvers.jl")
   export SolverTest, speedTestLapSolvers
-
-  include("conditionNumber.jl")
-  export support, approxQual, conditionNumber
-
-  include("sparsify.jl")
-  export sparsify
 
   include("johnlind.jl")
   export johnlind

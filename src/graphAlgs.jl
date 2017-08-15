@@ -64,7 +64,7 @@ c = components(gr)
 function components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
   n = mat.n
 
-  order = Array{Ti}(n)
+  order = Array(Ti,n)
   comp = zeros(Ti,n)
 
   # note that all of this casting is unnecessary.
@@ -72,8 +72,8 @@ function components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
   # I have not figured out the minimal necessary
   c::Ti = 0
 
-  colptr = mat.colptr
-  rowval = mat.rowval
+  colptr::Array{Ti,1} = mat.colptr
+  rowval::Array{Ti,1} = mat.rowval
 
   @inbounds for x in 1:n
     if (comp[x] == 0)
@@ -132,9 +132,9 @@ comps = vecToComps(c)
 ~~~
 
 """
-function vecToComps{Ti}(compvec::Vector{Ti})
+function vecToComps{Ti}(compvec::Array{Ti,1})
     nc = maximum(compvec)
-    comps = Vector{Vector{Ti}}(nc)
+    comps = Array(Array{Ti,1},nc)
 
     sizes = zeros(Ti,nc)
     for i in compvec
@@ -244,10 +244,10 @@ function shortestPathTree(a,start)
     tr = (tr + tr');
 end
 
-mutable struct intHeap{Tkey,Tind}
-  keys::Vector{Tkey}
-  heap::Vector{Tind}
-  index::Vector{Tind}
+type intHeap{Tkey,Tind}
+  keys::Array{Tkey,1}
+  heap::Array{Tind,1}
+  index::Array{Tind,1}
   nitems::Tind
 end #intHeap
 
@@ -359,7 +359,7 @@ function intHeapUp!{Tind}(nh::intHeap, node::Tind)
 
 end # intHeapUp!
 
-function intHeapSort(x::Array{Float64})
+function intHeapSort(x::Array{Float64,1})
   n = length(x)
   nh = intHeap(n)
 

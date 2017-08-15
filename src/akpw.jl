@@ -19,8 +19,8 @@ using DataStructures
 =#
 
 
-mutable struct fastQueue
-    q::Vector{Int64}
+type fastQueue
+    q::Array{Int64,1}
     n::Int64
     curPtr::Int64
     endPtr::Int64
@@ -54,14 +54,14 @@ function reset!(fq::fastQueue)
     fq.endPtr = 0
 end
 
-mutable struct fastPairQueue
-    q::Matrix{Int}
+type fastPairQueue
+    q::Array{Int64,2}
     n::Int64
     curPtr::Int64
     endPtr::Int64
 end
 
-fastPairQueue(n::Int) = fastPairQueue(zeros(Int,n,2), n, 1, 0)
+fastPairQueue(n::Int) = fastPairQueue(zeros(Int64,n,2), n, 1, 0)
 
 hasMore(fq::fastPairQueue) = fq.curPtr <= fq.endPtr
 
@@ -90,9 +90,9 @@ function reset!(fq::fastPairQueue)
 end
 
 
-mutable struct reusableIntMap
+type reusableIntMap
     q::fastQueue
-    map::Vector{Int}
+    map::Array{Int,1}
 end
 
 reusableIntMap(n::Int) = reusableIntMap(fastQueue(n), zeros(n))
@@ -123,7 +123,7 @@ end
 
 
 
-struct IJVind
+immutable IJVind
     i::Int64
     j::Int64
     v::Float64
@@ -134,9 +134,9 @@ import Base.isless
 isless(x::IJVind, y::IJVind) = x.v < y.v
 
 # requires sorting on i and j, with j primary
-mutable struct IJVindGraph
-    list::Vector{IJVind}
-    colptr::Vector{Int64}
+type IJVindGraph
+    list::Array{IJVind,1}
+    colptr::Array{Int64,1}
 end
 
 import Base.getindex
@@ -145,7 +145,7 @@ getindex(G::IJVindGraph, i::Int) = G.list[i]
 function printijv(ijv::IJVind)
     println(ijv.i, " ", ijv.j, " ", ijv.v, " ", ijv.ind )
 end
-function printijv(list::Vector{IJVind})
+function printijv(list::Array{IJVind,1})
     for ijv in list
         printijv(ijv)
     end
@@ -368,7 +368,7 @@ function akpwSub5(graph)
 
     rim = reusableIntMap(n)
 
-    nverts = compressIndices!(curIJVind::Vector{IJVind}, rim::reusableIntMap)
+    nverts = compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
 
     # this could be a lot of the time used
     curIJVind = sortIJVind(curIJVind)
@@ -399,7 +399,7 @@ function akpwSub5(graph)
         # and, find the max wt edge between clusters
         # remove self loops as go
 
-        newIJVind = Vector{IJVind}(0)
+        newIJVind = Array(IJVind,0)
         maxv = 0
         for i in 1:length(curIJVind)
             ijv = curIJVind[i]
@@ -435,7 +435,7 @@ function akpwSub5(graph)
         # append!(curList,origList[prevlast:last])
 
                         
-        nverts = compressIndices!(newIJVind::Vector{IJVind}, rim::reusableIntMap)
+        nverts = compressIndices!(newIJVind::Array{IJVind,1}, rim::reusableIntMap)
 
         if nverts > 1
             # this can also be a big bunch of time
@@ -455,7 +455,7 @@ end
 
 
 # based on counting sort: is stable.  exploits symmetry, can produce multiedges
-function IJVindGraph(inList::Vector{IJVind})
+function IJVindGraph(inList::Array{IJVind,1})
 
     Ti = Int64
     Tv = Float64
@@ -476,7 +476,7 @@ function IJVindGraph(inList::Vector{IJVind})
     end
 
 
-    list1 = Vector{IJVind}(numnz)
+    list1 = Array(IJVind, numnz)
     
     cumdeg = cumsum(deg)
     colptr = [1;cumdeg+1]
@@ -492,7 +492,7 @@ function IJVindGraph(inList::Vector{IJVind})
 
     cumdeg1 = copy(cumdeg)
 
-    list2 = Vector{IJVind}(numnz)
+    list2 = Array(IJVind, numnz)
 
     for i in numnz:-1:1
         thisj = list1[i].j
@@ -508,7 +508,7 @@ end
 
 # based on counting sort: is stable.  exploits symmetry, can produce multiedges
 # tried to improve this in sortIJVind3, but it was not faster
-function sortIJVind(inList::Vector{IJVind})
+function sortIJVind(inList::Array{IJVind,1})
 
     Ti = Int64
     Tv = Float64
@@ -529,7 +529,7 @@ function sortIJVind(inList::Vector{IJVind})
     end
 
 
-    list1 = Vector{IJVind}(numnz)
+    list1 = Array(IJVind, numnz)
     
     cumdeg = cumsum(deg)
     cumdeg1 = copy(cumdeg)
@@ -543,7 +543,7 @@ function sortIJVind(inList::Vector{IJVind})
 
     cumdeg1 = copy(cumdeg)
 
-    list2 = Vector{IJVind}(numnz)
+    list2 = Array(IJVind, numnz)
 
     for i in numnz:-1:1
         thisj = list1[i].j
@@ -559,9 +559,9 @@ end
 
 # combine multiedges by keeping the one of max weight.
 # must be sorted for this to work
-function compress(inList::Vector{IJVind})
+function compress(inList::Array{IJVind,1})
 
-    outlist = Vector{IJVind}(0)
+    outlist = Array(IJVind,0)
 
     ijv = inList[1]
 
@@ -596,10 +596,10 @@ end
 
 
 # convert (ai,aj,av) to an array of IJVind entries
-function IJVindList{Tv,Ti}(ai::Vector{Ti},aj::Vector{Ti},av::Vector{Tv})
+function IJVindList{Tv,Ti}(ai::Array{Ti,1},aj::Array{Ti,1},av::Array{Tv,1})
 
     m = length(ai)
-    origList = Vector{IJVind}(m)
+    origList = Array(IJVind,m)
     for i in 1:m
         origList[i] = IJVind(ai[i],aj[i],av[i],i)
     end
@@ -609,7 +609,7 @@ function IJVindList{Tv,Ti}(ai::Vector{Ti},aj::Vector{Ti},av::Vector{Tv})
 end
 
 # this maps the indices to consecutive integers starting at 1
-function compressIndices!(curIJVind::Vector{IJVind}, rim::reusableIntMap)
+function compressIndices!(curIJVind::Array{IJVind,1}, rim::reusableIntMap)
     nverts = 1
 
     #println("comp in ")
@@ -681,7 +681,7 @@ end
     
 
 
-struct HeapEntry
+immutable HeapEntry
     node::Int64
     edge::Int64
     dist::Float64
@@ -700,7 +700,7 @@ function dijkstraFromSeed(ijvGraph::IJVindGraph, seed::Int, ncomps::Int, comp,
     bdry = 0
     vol = 0
 
-    heap = Vector{HeapEntry}(0)
+    heap = Array(HeapEntry, 0)
 
     comp[seed] = ncomps
 
@@ -709,7 +709,7 @@ function dijkstraFromSeed(ijvGraph::IJVindGraph, seed::Int, ncomps::Int, comp,
         if comp[nbr] == 0
 
             wt = ijvGraph[ind].v
-            DataStructures.heappush!(heap, HeapEntry(nbr, ijvGraph[ind].ind, 1/wt))
+            Collections.heappush!(heap, HeapEntry(nbr, ijvGraph[ind].ind, 1/wt))
             bdry += wt
             vol += wt
         end
@@ -718,7 +718,7 @@ function dijkstraFromSeed(ijvGraph::IJVindGraph, seed::Int, ncomps::Int, comp,
 
     while (bdry > xfac*vol) && (length(heap) > 0)
 
-        he = DataStructures.heappop!(heap)
+        he = Collections.heappop!(heap)
 
         node = he.node
         
@@ -748,7 +748,7 @@ function dijkstraFromSeed(ijvGraph::IJVindGraph, seed::Int, ncomps::Int, comp,
                     bdry += wt
                     vol += wt
 
-                    DataStructures.heappush!(heap, HeapEntry(nbr, ijvGraph[ind].ind, newdist))
+                    Collections.heappush!(heap, HeapEntry(nbr, ijvGraph[ind].ind, newdist))
                 end
             end
         end
@@ -777,7 +777,7 @@ function akpwSub2(graph)
     (ai,aj,av) = findnz(graph)
     m = length(ai)
     
-    origList = Vector{IJVind}(m)
+    origList = Array(IJVind,m)
     for i in 1:m
         origList[i] = IJVind(ai[i],aj[i],av[i],i)
     end
@@ -892,7 +892,7 @@ end
 
 # question is how to combine.  right now use max of wts, but sum might be reasonable too
 # it carries around with it aind--which is a map on edges
-function combineMultiG{Ti,Tv}(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  aind::Vector{Ti})
+function combineMultiG{Ti,Tv}(ai::Array{Ti,1}, aj::Array{Ti,1}, av::Array{Tv,1},  aind::Array{Ti,1})
 
     numnz = length(ai)
 
@@ -905,9 +905,9 @@ function combineMultiG{Ti,Tv}(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  a
         deg[ai[k]] += 1
     end
 
-    I1 = Vector{Ti}(numnz)
-    J1 = Vector{Ti}(numnz)
-    aind1 = Vector{Ti}(numnz)
+    I1 = Array(Ti, numnz)
+    J1 = Array(Ti, numnz)
+    aind1 = Array(Ti, numnz)
     V1 = zeros(Tv, numnz)
 
     cumdeg = cumsum(deg)
@@ -926,10 +926,10 @@ function combineMultiG{Ti,Tv}(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  a
 
 
     
-    I2 = Vector{Ti}(numnz)
-    J2 = Vector{Ti}(numnz)
-    aind2 = Vector{Ti}(numnz)
-    V2 = Vector{Tv}(numnz)
+    I2 = Array(Ti, numnz)
+    J2 = Array(Ti, numnz)
+    aind2 = Array(Ti, numnz)
+    V2 = Array(Tv, numnz)
 
     for i in numnz:-1:1
         ptr = cumdeg[J1[i]]
@@ -943,10 +943,10 @@ function combineMultiG{Ti,Tv}(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  a
     # now, the list is sorted by J, and within that by i
     # so compress it
     
-    I3 = Vector{Ti}(numnz)
-    J3 = Vector{Ti}(numnz)
-    aind3 = Vector{Ti}(numnz)
-    V3 = Vector{Tv}(numnz)
+    I3 = Array(Ti, numnz)
+    J3 = Array(Ti, numnz)
+    aind3 = Array(Ti, numnz)
+    V3 = Array(Tv, numnz)
     
     ptr = 0
     i2old = I2[1]
@@ -1001,7 +1001,7 @@ end
 
    Unused Code
 
-
+=#
 
 using Base.Order
 # This was an attempt to improve on sortIJVind by sorting in place
@@ -1053,4 +1053,3 @@ function sortIJVind3(inList::Array{IJVind,1})
     return list1
 
 end
-=#

@@ -10,7 +10,7 @@
         - we hold a queue of free blocks to reuse memory
 =#
 
-struct element{Tv,Ti}
+immutable element{Tv,Ti}
     # values stored in the linked list relating to the samplingSolver algorithm
 	edgeWeight::Tv
 	edgeCount::Tv
@@ -28,7 +28,7 @@ end
     The linked list starts out with a small size, say close to 1000. At each step we increase its size
     by sizeIncrease. We hold blockSize consecutive elements in memory for every 
 =#
-mutable struct LinkedListStorage{Tv,Ti}
+type LinkedListStorage{Tv,Ti}
 	val::Array{element{Tv,Ti},1}		# a big block of memory storing the values from the linked lists
 
 	free::Array{Ti,1}					# a circular array storing all the starting positions of blocks of free memory in [left, right)

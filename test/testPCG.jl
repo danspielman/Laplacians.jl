@@ -32,8 +32,6 @@ bbig = convert(Array{BigFloat,1},b);
 f = cgSolver(la)
 x = f(bbig);
 
-x = pcg(la,bbig,pre,maxits=200,maxtime=1,verbose=true);
-x = cg(la,bbig,maxits=200,maxtime=1,verbose=true);
 
 
 n = 100

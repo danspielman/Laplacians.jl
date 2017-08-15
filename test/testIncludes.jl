@@ -4,10 +4,7 @@
 #============================================================#
 # Test Lex by running code from its notebook
 
-include("$(@__DIR__)/../src/lex.jl")
-
-
-setLexDebugFlag(true)
+include("$(Pkg.dir("Laplacians"))/src/lex.jl")
 
 n = 10
 Pn = pathGraph(n)
@@ -58,7 +55,7 @@ simIterLexTest()
 #============================================================#
 # test isotonicIPM
 
-include("$(@__DIR__)/../src/isotonicIPM.jl")
+include("$(Pkg.dir("Laplacians"))/src/isotonicIPM.jl")
 
 n = 100;
 A = grid2(10,10)

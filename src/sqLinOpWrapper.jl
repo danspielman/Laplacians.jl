@@ -1,17 +1,18 @@
 import Base.*
 import Base.size
 import Base.eltype
+import Base.issym
 import Base.issymmetric
 
 import Base.LinAlg.A_mul_B!
 
-struct SqLinOp{Tv,Ti}
+immutable SqLinOp{Tv,Ti}
     issym::Bool
     value::Tv
     n::Ti
     multFn::Function #this is bad in terms of types?
    
-    SqLinOp{Tv,Ti}(issym,value,n,multFn) where {Tv,Ti} = new(issym,value,n,multFn)
+    SqLinOp(issym,value,n,multFn) = new(issym,value,n,multFn)
 end
 
 SqLinOp{Tv,Ti}(issym,value::Tv,index::Ti,multFn) = SqLinOp{Tv,Ti}(issym,value,index,multFn)
@@ -22,6 +23,7 @@ size{Tv,Ti}(A::SqLinOp{Tv,Ti}, d::Ti) = A.n
 
 size{Tv,Ti}(A::SqLinOp{Tv,Ti}) = (A.n,A.n)
 
+issym{Tv,Ti}(A::SqLinOp{Tv,Ti}) = A.issym
 issymmetric{Tv,Ti}(A::SqLinOp{Tv,Ti}) = A.issym
 
 function *{Tv,Ti}(A::SqLinOp{Tv,Ti}, b)
