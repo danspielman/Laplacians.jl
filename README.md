@@ -19,7 +19,7 @@ To get the current version of the master branch, run `Pkg.checkout("Laplacians")
 
 ## Version 0.2.0, July 17, 2017
 
-This version is compatabile with Julia 0.6.  It will not work with
+This version is compatible with Julia 0.6.  It will not work with
 Julia 0.5.X.
 
 Changes:
@@ -75,3 +75,8 @@ It was captured right before the upgrade to Julia 0.5
 
 
 
+# Acknowledgements
+
+The development of this package has been supported in part by the
+National Science Foundation Award CCF-1562041  and by the Office of Naval
+Research Award N00014-16-1-2374.
