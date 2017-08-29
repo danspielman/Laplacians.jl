@@ -141,8 +141,10 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     #laInv = lapSolver((Adj+Adj')/2);
     L = lap((Adj+Adj')/2);
     SDD = L + speye(n)*reg_d;
-    laInv = SDD;
-    
+    #laInv = SDD;
+    @printf("Time taken to build is : \n")
+    @time laInv = lapSolver(SDD)
+    #save("/tmp/badLap.jld","SDD",SDD)
     # residuals for affine direction.
     r_p_tilde = r_p - reg_d*(y - y_old);
     r_d_tilde = r_d + reg_p*(x - x_old);
@@ -166,7 +168,8 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
         # Compute refined affine direction.
         rhs_normal = res_p_saddle + Bt*(res_d_saddle.*d);
         #dy = laInv(rhs_normal);
-        dy_a_ref = laInv\rhs_normal;
+        # dy_a_ref = laInv\rhs_normal;
+        dy_a_ref = laInv(rhs_normal);
         dx_a_ref = -(B*dy_a_ref).*d + res_d_saddle.*d;
 
         @printf("normal eq. residual =%e\n",norm(SDD*dy_a_ref - rhs_normal));  
@@ -254,7 +257,8 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
         # Compute refined corrector direction.
         rhs_normal = res_p_saddle + Bt*(res_d_saddle.*d);
         #dy = laInv(rhs_normal);
-        dy_ref = laInv\rhs_normal;
+        #dy_ref = laInv\rhs_normal;
+        dy_ref = laInv(rhs_normal);
         dx_ref = -(B*dy_ref).*d + res_d_saddle.*d;
 
         @printf("normal eq. residual =%e\n",norm(SDD*dy_ref - rhs_normal));  
@@ -315,8 +319,9 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   D = spdiagm(d);
 
   rhs_normal = rhs_p + Bt*(rhs_d_saddle.*d);
-  #dy = laInv(rhs_normal);
-  dy = laInv\rhs_normal;
+  @printf("Time taken to solve is : \n")
+  @time dy = laInv(rhs_normal);
+  #dy = laInv\rhs_normal;
   dx = -(B*dy).*d + rhs_d_saddle.*d;
   ds = -d1.*dx - rhs_g1./x;
   dz = d2.*dx - rhs_g2./(u-x);
