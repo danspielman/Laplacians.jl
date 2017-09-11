@@ -30,7 +30,7 @@ function reportMCFresults(mcfp, flow)
     B = sparse(collect(1:m), edge_list[:,1], 1.0, m, n) -
     sparse(collect(1:m), edge_list[:,2], 1.0, m, n)
 
-    println("Error on demands: ", sum(abs(B'*flow- mcfp.demands)))
+    println("Error on demands: ", sum(abs.(B'*flow- mcfp.demands)))
 end
 
 
