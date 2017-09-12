@@ -64,14 +64,14 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   tol_gap  = tol;
     
   # Parameters for gap, residuals and Mehrotra's correction.
-  eta   = 0;
-  gamma = 1;
-  beta  = 1;
-  beta2 = 1;
-  alpha = 1;
+  eta   = 0.0;
+  gamma = 1.0;
+  beta  = 1.0;
+  beta2 = 1.0;
+  alpha = 1.0;
 
   # Compute initial point.
-  (x,y,s,z) = ipm_min_cost_flow_initial_point(B,c,b,u,m,n,sddmSolver=cholSDDM);
+  (x,y,s,z) = ipm_min_cost_flow_initial_point(B,c,b,u,m,n,sddmSolver=approxCholSddm);
     
   # Dummy arrays
   ons = ones(m);
@@ -88,12 +88,12 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     mu  = (x'*s + (u-x)'*z)/(2*m);
     rel_gap = mu/(1 + abs(c'*x))
         
-    max_x_s = maximum(x.*s);
-    min_x_s = minimum(x.*s);
+    min_x_s, max_x_s = minmax_a_times_b(x,s);
     @printf("maximum x.*s =%e, minimum x.*s=%e, mu=%e\n",max_x_s,min_x_s,mu[1]);  
         
-    max_x_z = maximum((u-x).*z);
-    min_x_z = minimum((u-x).*z);
+    # max_x_z = maximum((u-x).*z);
+    # min_x_z = minimum((u-x).*z);
+    min_x_z, max_x_z = minmax_a_minus_b_times_c(u,x,z)
     @printf("maximum (u-x).*z =%e, minimum (u-x).*z=%e, mu=%e\n",max_x_z,min_x_z,mu[1]);  
 
     # Check for termination.
@@ -138,8 +138,11 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 
     # Compute adjacency and set lap solver.
     Adj = makeAdj(Bt,d);
-    #laInv = lapSolver((Adj+Adj')/2);
-    L = lap((Adj+Adj')/2);
+    #laInv = lapSolver((Adj+Adj')
+      
+    # L = lap((Adj+Adj')/2);
+    L = lap(Adj); # DAS the above should be redundant with makeAdj
+
     SDD = L + speye(n)*reg_d;
     #laInv = SDD;
     @printf("Time taken to build is : \n")
@@ -204,7 +207,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     r_d_a = c + B*y_a - s_a + z_a;   
         
     rho   = (x_a'*s_a + (u - x_a)'*z_a)/(x'*s + (u-x)'*z);
-    sigma = (max(0,min(1,rho)))^3;
+    sigma = (max(0.0,min(1.0,rho)))^3;
     mu_target = sigma*mu;
     #eta = 1 - sigma;
         
@@ -235,8 +238,8 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     rhs_g2 = (u-x).*(z_a - z) - z.*(x_a - x) + (u-x).*z - mu_target.*ons - (x_a - x).*(z_a - z);
 
     # residuals for saddle point for corrector direction.
-    r_p_tilde = (1-eta[1]).*r_p_a - reg_d*(y - y_old);
-    r_d_tilde = (1-eta[1]).*r_d_a + reg_p*(x - x_old);
+    r_p_tilde = (1.0-eta[1]).*r_p_a - reg_d*(y - y_old);
+    r_d_tilde = (1.0-eta[1]).*r_d_a + reg_p*(x - x_old);
         
     rhs_d_saddle = -r_d_tilde - rhs_g1./x + rhs_g2./(u-x);
         
@@ -416,4 +419,72 @@ function makeAdj(Bt,w)
     bj = Bt.rowval[Bt.nzval.==-1];
     a = sparse([bj;bi],[bi;bj],[w;w],n,n)
     return a
+end
+
+function min_a_times_b(a,b)
+    n = length(a)
+    @assert length(b) == n
+    mi = Inf
+    @inbounds for i in 1:n
+        mi = min(mi,a[i]*b[i])
+    end
+    return mi
+end
+
+function max_a_times_b(a,b)
+    n = length(a)
+    @assert length(b) == n
+    mx = -Inf
+    @inbounds for i in 1:n
+        mx = max(mi,a[i]*b[i])
+    end
+    return mx
+end
+
+function minmax_a_times_b(a,b)
+    n = length(a)
+    @assert length(b) == n
+    mi = Inf
+    mx = -Inf
+    @inbounds for i in 1:n
+        mi = min(mi,a[i]*b[i])
+        mx = max(mi,a[i]*b[i])
+    end
+    return mi, mx
+end
+
+
+function min_a_minus_b_times_c(a,b,c)
+    n = length(a)
+    @assert length(b) == n
+    @assert length(c) == n
+    mi = Inf
+    @inbounds for i in 1:n
+        mi = min(mi,(a[i]-b[i])*c[i])
+    end
+    return mi
+end
+
+function max_a_minus_b_times_c(a,b,c)
+    n = length(a)
+    @assert length(b) == n
+    @assert length(c) == n
+    mx = -Inf
+    @inbounds for i in 1:n
+        mx = max(mx,(a[i]-b[i])*c[i])
+    end
+    return mx
+end
+
+function minmax_a_minus_b_times_c(a,b,c)
+    n = length(a)
+    @assert length(b) == n
+    @assert length(c) == n
+    mx = -Inf
+    mi = Inf
+    @inbounds for i in 1:n
+        mi = min(mi,(a[i]-b[i])*c[i])
+        mx = max(mx,(a[i]-b[i])*c[i])
+    end
+    return mi, mx
 end
