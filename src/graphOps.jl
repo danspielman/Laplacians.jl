@@ -40,6 +40,34 @@ function adj{Tv}(sddm::Array{Tv,2})
     return adj(sparse(sddm))
 end
 
+
+"""
+Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight.
+"""
+function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, d::Array{Tv,1})
+
+    @assert size(a,1) == length(d)
+
+    if sum(abs.(d)) == 0
+        return a
+    end
+    
+    dpos = d.*(d.>0)
+
+    n = length(d)
+    
+    ai,aj,av=findnz(a)
+    
+    ai2 = [ai;1:n;(n+1)*ones(Int,n)]
+    aj2 = [aj;(n+1)*ones(Int,n);1:n]
+    av2 = [av;dpos;dpos]
+    a2 = sparse(ai2,aj2,av2)
+    
+    return a2
+    
+end
+
+
 """
     wt1 = unweight(a)
 
