@@ -74,20 +74,61 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   (x,y,s,z) = ipm_min_cost_flow_initial_point(B,c,b,u,m,n,sddmSolver=approxCholSddm);
     
   # Dummy arrays
-  ons = ones(m);
-  zrs_m = zeros(m);
-  zrs_n = zeros(n);
-  x_old = x;
-  y_old = y;
+  ons = ones(m)
+  zrs_m = zeros(m)
+  zrs_n = zeros(n)
+  x_old = copy(x)  # DAS
+  y_old = copy(y)  # DAS
+
+  # DAS: preallocate some memory to speed things up.
+  r_p = zeros(length(b))    
+  r_d = zeros(length(s))
+
+  dx = zeros(length(x))
+  dy = zeros(length(y))
+  rhs_g1 = zeros(length(x))
+  rhs_g2 = zeros(length(z))
+
+  d1 = zeros(length(x))
+  d2 = zeros(length(x))
+
+  r_p_tilde = zeros(length(y))
+  r_d_tilde = zeros(length(x))
+  rhs_d_saddle = zeros(length(x))
+
+  res_p_saddle = zeros(length(y))
+  res_d_saddle = zeros(length(x))
+  rhs_normal = zeros(length(y))
+  dx_a_ref = zeros(length(x))
+
+  dx_a = zeros(length(x))
+  dy_a = zeros(length(y))
+
+  ds_a = zeros(length(x))
+  dz_a = zeros(length(x))  
+
+  x_a = zeros(length(x))
+  y_a = zeros(length(y))
+  s_a = zeros(length(x))
+  z_a = zeros(length(x))
+  
 
   for k = 1:max_iter+1
 
     # Compute feasibility residuals and paramete mu.
-    r_p = Bt*x - b;
-    r_d = c + B*y - s + z;
-    mu  = (x'*s + (u-x)'*z)/(2*m);
+    r_p .= (Bt*x) .- b;
+    r_d .= c .+ (B*y) .- s .+ z;
+      
+    #    mu  = (x'*s + (u-x)'*z)/(2*m);
+    mu = 0
+    for i in 1:length(x)
+        mu += x[i]*s[i] + (u[i]-x[i])*z[i]
+    end
+    mu = mu / (2*m);
+
     rel_gap = mu/(1 + abs(c'*x))
-        
+
+    # max_x_s = maximum(x.*s);  
     min_x_s, max_x_s = minmax_a_times_b(x,s);
     @printf("maximum x.*s =%e, minimum x.*s=%e, mu=%e\n",max_x_s,min_x_s,mu[1]);  
         
@@ -114,12 +155,12 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     end
 
     # Affine direction.
-    rhs_g1 = x.*s;
-    rhs_g2 = (u-x).*z;
+    rhs_g1 .= x.*s;
+    rhs_g2 .= (u.-x).*z;
         
     # Solve saddle point system to compute directions dx,ds,dy.        
-    d1 = s./x;
-    d2 = z./(u-x);
+    d1 .= s./x;
+    d2 .= z./(u.-x);
     theta = d1 + d2 + reg_p*ons;
     d  = 1./theta;
     D = spdiagm(d);     
@@ -149,18 +190,18 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     @time laInv = lapSolver(SDD)
     #save("/tmp/badLap.jld","SDD",SDD)
     # residuals for affine direction.
-    r_p_tilde = r_p - reg_d*(y - y_old);
-    r_d_tilde = r_d + reg_p*(x - x_old);
+    r_p_tilde .= r_p .- reg_d.*(y .- y_old);
+    r_d_tilde .= r_d .+ reg_p.*(x .- x_old);
         
-    rhs_d_saddle = -r_d_tilde - rhs_g1./x + rhs_g2./(u-x);
+    rhs_d_saddle .= -r_d_tilde .- rhs_g1./x .+ rhs_g2./(u.-x);
         
     # Compute affine direction.
     (dx_a,dy_a,ds_a,dz_a) = ipm_directions_min_cost_flow(B,Bt,d,d1,d2,theta,
                 reg_p,reg_d,r_p_tilde,rhs_d_saddle,rhs_g1,rhs_g2,x,x_old,y,y_old,u,n,laInv);
         
     # Compute residuals for saddle point system of affine direction.
-    res_p_saddle = Bt*dx_a - reg_d*dy_a + r_p_tilde;
-    res_d_saddle = theta.*dx_a + B*dy_a - rhs_d_saddle;
+    res_p_saddle .= (Bt*dx_a) .- reg_d.*dy_a .+ r_p_tilde;
+    res_d_saddle .= theta.*dx_a .+ (B*dy_a) .- rhs_d_saddle;
         
     @printf("pred. norm(res_p_saddle_1) =%e, norm(res_d_saddle_1)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
@@ -169,26 +210,26 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     if (norm(res_p_saddle) > tol_ref) || (norm(res_d_saddle) > tol_ref)          
             
         # Compute refined affine direction.
-        rhs_normal = res_p_saddle + Bt*(res_d_saddle.*d);
+        rhs_normal .= res_p_saddle .+ Bt*(res_d_saddle.*d);
         #dy = laInv(rhs_normal);
         # dy_a_ref = laInv\rhs_normal;
         dy_a_ref = laInv(rhs_normal);
-        dx_a_ref = -(B*dy_a_ref).*d + res_d_saddle.*d;
+        dx_a_ref .= -(B*dy_a_ref).*d .+ res_d_saddle.*d;
 
         @printf("normal eq. residual =%e\n",norm(SDD*dy_a_ref - rhs_normal));  
             
-        dx_a = dx_a + dx_a_ref;
-        dy_a = dy_a + dy_a_ref;
+        dx_a .= dx_a .+ dx_a_ref;
+        dy_a .= dy_a .+ dy_a_ref;
             
         # Compute residuals for saddle point system of refined direction.
-        res_p_saddle = Bt*dx_a - reg_d*dy_a + r_p_tilde;
-        res_d_saddle = theta.*dx_a + B*dy_a - rhs_d_saddle;
+        res_p_saddle .= (Bt*dx_a) .- reg_d.*dy_a .+ r_p_tilde;
+        res_d_saddle .= theta.*dx_a .+ (B*dy_a) .- rhs_d_saddle;
             
         @printf("pred. norm(res_p_saddle_2) =%e, norm(res_d_saddle_2)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
             
-        ds_a = -d1.*dx_a - rhs_g1./x;
-        dz_a = d2.*dx_a - rhs_g2./(u-x);
+        ds_a .= -d1.*dx_a .- rhs_g1./x;
+        dz_a .= d2.*dx_a .- rhs_g2./(u.-x);
     end
         
     alpha_x_a = calstepsize(x,dx_a);
@@ -197,10 +238,10 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     alpha_z_a = calstepsize(z,dz_a);
     alpha_a = 0.99*minimum([alpha_x_a;alpha_x_up_a;alpha_s_a;alpha_z_a]);        
         
-    x_a = x + alpha_a.*dx_a;
-    y_a = y + alpha_a.*dy_a;
-    s_a = s + alpha_a.*ds_a;
-    z_a = z + alpha_a.*dz_a;  
+    x_a .= x .+ alpha_a.*dx_a;
+    y_a .= y .+ alpha_a.*dy_a;
+    s_a .= s .+ alpha_a.*ds_a;
+    z_a .= z .+ alpha_a.*dz_a;  
         
     # Compute residual for affine solutions.
     r_p_a = Bt*x_a - b;
@@ -402,7 +443,24 @@ function ipm_min_cost_flow_initial_point{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 end
 
 # Calculate step-size for positive orthant.
-function calstepsize{Tv}(x::Array{Tv,1},dx::Array{Tv,1},maxstepsize::Float64 = 0.99)
+function calstepsize{Tv}(x::Array{Tv,1},dx::Array{Tv,1};maxstepsize::Float64 = 0.99)
+
+    n = length(x)
+    @assert length(dx) == n
+    
+    mx = maxstepsize / 0.999
+    
+    for i in 1:n
+        w = -x[i]/dx[i]
+        if w > 0
+            mx = min(mx,w)
+        end
+    end
+    
+    return 0.999*mx
+    
+  #= original code, 
+
   stepsizes = -x./dx;
 
   idx_pos = find(stepsizes .> 0);
@@ -411,6 +469,8 @@ function calstepsize{Tv}(x::Array{Tv,1},dx::Array{Tv,1},maxstepsize::Float64 = 0
   else
       return minimum([0.999*stepsizes[idx_pos]; maxstepsize]);
   end
+  =#
+
 end
 
 function makeAdj(Bt,w)
