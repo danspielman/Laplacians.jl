@@ -112,29 +112,48 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   s_a = zeros(length(x))
   z_a = zeros(length(x))
   
+  theta = zeros(length(x))
+  d = zeros(length(x))
+
+  r_p_a = zeros(length(y))
+  r_d_a = zeros(length(x))
+
+  dx_ref = zeros(length(x))
+
+  ds = zeros(length(x))
+  dz = zeros(length(x))  
 
   for k = 1:max_iter+1
 
     # Compute feasibility residuals and paramete mu.
-    r_p .= (Bt*x) .- b;
-    r_d .= c .+ (B*y) .- s .+ z;
+    A_mul_B!(r_p, Bt, x)  
+    r_p .-=  b;
+    
+    A_mul_B!(r_d, B, y)  
+    r_d .+= c .- s .+ z;
+
+    # @assert r_p == Bt*x - b;
+    # @assert norm(r_d - (c + B*y - s + z)) < norm(c + B*y - s + z)*1e-8;
       
-    #    mu  = (x'*s + (u-x)'*z)/(2*m);
-    mu = 0
-    for i in 1:length(x)
-        mu += x[i]*s[i] + (u[i]-x[i])*z[i]
-    end
-    mu = mu / (2*m);
+      # DAS: reason for the following is that the compiler will optimize
+      # the computation, but only if it is its own function
+      
+    mu = mu_xsuz(x,s,u,z) / (2*m);
+    # muOld = (x'*s + (u-x)'*z)/(2*m);
+    # @assert abs(mu - muOld) < abs(mu)*1e-8
 
     rel_gap = mu/(1 + abs(c'*x))
 
-    # max_x_s = maximum(x.*s);  
     min_x_s, max_x_s = minmax_a_times_b(x,s);
+
+    # @assert min_x_s ==  minimum(x.*s)
+    # @assert max_x_s ==  maximum(x.*s)
+      
     @printf("maximum x.*s =%e, minimum x.*s=%e, mu=%e\n",max_x_s,min_x_s,mu[1]);  
         
-    # max_x_z = maximum((u-x).*z);
-    # min_x_z = minimum((u-x).*z);
     min_x_z, max_x_z = minmax_a_minus_b_times_c(u,x,z)
+    # @assert max_x_z == maximum((u-x).*z);
+    # @assert min_x_z == minimum((u-x).*z);
     @printf("maximum (u-x).*z =%e, minimum (u-x).*z=%e, mu=%e\n",max_x_z,min_x_z,mu[1]);  
 
     # Check for termination.
@@ -157,13 +176,25 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     # Affine direction.
     rhs_g1 .= x.*s;
     rhs_g2 .= (u.-x).*z;
-        
+
+    # @assert rhs_g1 == x.*s;
+    # @assert rhs_g2 == (u-x).*z;
+      
     # Solve saddle point system to compute directions dx,ds,dy.        
     d1 .= s./x;
     d2 .= z./(u.-x);
-    theta = d1 + d2 + reg_p*ons;
-    d  = 1./theta;
-    D = spdiagm(d);     
+    theta .= d1 .+ d2 .+ reg_p*ons;
+    d .= 1./theta;
+
+    # DAS: I don't think we use this.
+    # D = spdiagm(d);     
+
+    # @assert d1 == s./x
+    # @assert d2 == z./(u-x)
+
+    # @assert theta == d1 + d2 + reg_p*ons;
+    # @assert d == 1./theta;
+
         
     max_theta = maximum(theta);
     min_theta = minimum(theta);
@@ -192,17 +223,27 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     # residuals for affine direction.
     r_p_tilde .= r_p .- reg_d.*(y .- y_old);
     r_d_tilde .= r_d .+ reg_p.*(x .- x_old);
-        
+
+    # @assert r_p_tilde == r_p - reg_d*(y - y_old);
+    # @assert r_d_tilde == r_d + reg_p*(x - x_old);
+
     rhs_d_saddle .= -r_d_tilde .- rhs_g1./x .+ rhs_g2./(u.-x);
+    # @assert rhs_d_saddle == -r_d_tilde - rhs_g1./x + rhs_g2./(u-x);        
         
     # Compute affine direction.
     (dx_a,dy_a,ds_a,dz_a) = ipm_directions_min_cost_flow(B,Bt,d,d1,d2,theta,
                 reg_p,reg_d,r_p_tilde,rhs_d_saddle,rhs_g1,rhs_g2,x,x_old,y,y_old,u,n,laInv);
         
     # Compute residuals for saddle point system of affine direction.
-    res_p_saddle .= (Bt*dx_a) .- reg_d.*dy_a .+ r_p_tilde;
-    res_d_saddle .= theta.*dx_a .+ (B*dy_a) .- rhs_d_saddle;
-        
+    A_mul_B!(res_p_saddle, Bt, dx_a)
+    res_p_saddle .+= - reg_d.*dy_a .+ r_p_tilde;
+      
+    A_mul_B!(res_d_saddle, B, dy_a)
+    res_d_saddle .+= theta.*dx_a .- rhs_d_saddle;
+
+    # @assert norm(res_p_saddle - (Bt*dx_a - reg_d*dy_a + r_p_tilde)) < 1e-8
+    # @assert norm(res_d_saddle - (theta.*dx_a + B*dy_a - rhs_d_saddle)) < 1e-8
+      
     @printf("pred. norm(res_p_saddle_1) =%e, norm(res_d_saddle_1)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
 
@@ -211,25 +252,47 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
             
         # Compute refined affine direction.
         rhs_normal .= res_p_saddle .+ Bt*(res_d_saddle.*d);
+        # @assert rhs_normal == res_p_saddle + Bt*(res_d_saddle.*d);
+        
         #dy = laInv(rhs_normal);
         # dy_a_ref = laInv\rhs_normal;
         dy_a_ref = laInv(rhs_normal);
-        dx_a_ref .= -(B*dy_a_ref).*d .+ res_d_saddle.*d;
+        A_mul_B!(dx_a_ref, B, dy_a_ref)
+        dx_a_ref .= -dx_a_ref.*d .+ res_d_saddle.*d;
+
+        # @assert dx_a_ref == -(B*dy_a_ref).*d + res_d_saddle.*d;
 
         @printf("normal eq. residual =%e\n",norm(SDD*dy_a_ref - rhs_normal));  
             
+        # dx_a = dx_a + dx_a_ref;
+        # dy_a = dy_a + dy_a_ref;
+
         dx_a .= dx_a .+ dx_a_ref;
         dy_a .= dy_a .+ dy_a_ref;
+
+        
+
             
         # Compute residuals for saddle point system of refined direction.
-        res_p_saddle .= (Bt*dx_a) .- reg_d.*dy_a .+ r_p_tilde;
-        res_d_saddle .= theta.*dx_a .+ (B*dy_a) .- rhs_d_saddle;
+        A_mul_B!(res_p_saddle, Bt, dx_a)
+        res_p_saddle .+= -reg_d.*dy_a .+ r_p_tilde;
+
+        A_mul_B!(res_d_saddle, B, dy_a)
+        res_d_saddle .+= theta.*dx_a .- rhs_d_saddle;
+
+        # @assert norm(res_p_saddle - (Bt*dx_a - reg_d*dy_a + r_p_tilde)) < 1e-8
+        # @assert norm(res_d_saddle - (theta.*dx_a + B*dy_a - rhs_d_saddle)) < 1e-8
+
             
         @printf("pred. norm(res_p_saddle_2) =%e, norm(res_d_saddle_2)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
             
         ds_a .= -d1.*dx_a .- rhs_g1./x;
         dz_a .= d2.*dx_a .- rhs_g2./(u.-x);
+
+        # @assert ds_a == -d1.*dx_a - rhs_g1./x;
+        # @assert dz_a == d2.*dx_a - rhs_g2./(u-x);
+
     end
         
     alpha_x_a = calstepsize(x,dx_a);
@@ -243,9 +306,18 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     s_a .= s .+ alpha_a.*ds_a;
     z_a .= z .+ alpha_a.*dz_a;  
         
+    # @assert x_a == x + alpha_a.*dx_a;
+    # @assert     y_a == y + alpha_a.*dy_a;
+    # @assert     s_a == s + alpha_a.*ds_a;
+    # @assert     z_a == z + alpha_a.*dz_a;  
+
+
     # Compute residual for affine solutions.
-    r_p_a = Bt*x_a - b;
-    r_d_a = c + B*y_a - s_a + z_a;   
+    r_p_a .= (Bt*x_a) .- b;
+    r_d_a .= c .+ (B*y_a) .- s_a .+ z_a;   
+
+    # @assert r_p_a == Bt*x_a - b;
+    # @assert r_d_a == c + B*y_a - s_a + z_a;   
         
     rho   = (x_a'*s_a + (u - x_a)'*z_a)/(x'*s + (u-x)'*z);
     sigma = (max(0.0,min(1.0,rho)))^3;
@@ -275,22 +347,37 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     #rhs_g2[idx_x_a_z_a_large] = x_a_z_a[idx_x_a_z_a_large] - (mu_target[1]/beta);
     #rhs_g2[idx_x_a_z_a_rest]  = (x_a_z_a[idx_x_a_z_a_rest] - mu_target[1]).*beta2;
            
-    rhs_g1 = x.*(s_a - s) + s.*(x_a - x) + x.*s - mu_target.*ons + (x_a - x).*(s_a - s);
-    rhs_g2 = (u-x).*(z_a - z) - z.*(x_a - x) + (u-x).*z - mu_target.*ons - (x_a - x).*(z_a - z);
+    rhs_g1 .= x.*(s_a .- s) .+ s.*(x_a .- x) .+ x.*s .- mu_target.*ons .+ (x_a .- x).*(s_a .- s);
+    rhs_g2 .= (u.-x).*(z_a .- z) .- z.*(x_a .- x) .+ (u.-x).*z .- mu_target.*ons .- (x_a .- x).*(z_a .- z);
+
+    #    @assert rhs_g1 == x.*(s_a - s) + s.*(x_a - x) + x.*s - mu_target.*ons + (x_a - x).*(s_a - s);
+    # @assert rhs_g2 == (u-x).*(z_a - z) - z.*(x_a - x) + (u-x).*z - mu_target.*ons - (x_a - x).*(z_a - z);
 
     # residuals for saddle point for corrector direction.
-    r_p_tilde = (1.0-eta[1]).*r_p_a - reg_d*(y - y_old);
-    r_d_tilde = (1.0-eta[1]).*r_d_a + reg_p*(x - x_old);
+    r_p_tilde .= (1.0-eta[1]).*r_p_a .- reg_d*(y .- y_old);
+    r_d_tilde .= (1.0-eta[1]).*r_d_a .+ reg_p*(x .- x_old);
         
-    rhs_d_saddle = -r_d_tilde - rhs_g1./x + rhs_g2./(u-x);
+    # @assert r_p_tilde == (1.0-eta[1]).*r_p_a - reg_d*(y - y_old);
+    # @assert r_d_tilde == (1.0-eta[1]).*r_d_a + reg_p*(x - x_old);
+        
+    rhs_d_saddle .= -r_d_tilde .- rhs_g1./x .+ rhs_g2./(u.-x);
+    # @assert rhs_d_saddle == -r_d_tilde - rhs_g1./x + rhs_g2./(u-x);
         
     # Compute corrector direction.
     (dx,dy,ds,dz) = ipm_directions_min_cost_flow(B,Bt,d,d1,d2,theta,
                 reg_p,reg_d,r_p_tilde,rhs_d_saddle,rhs_g1,rhs_g2,x,x_old,y,y_old,u,n,laInv);
         
     # Compute residuals for saddle point system of corrector direction.
-    res_p_saddle = Bt*dx - reg_d*dy + r_p_tilde;
-    res_d_saddle = theta.*dx + B*dy - rhs_d_saddle;
+
+    A_mul_B!(res_p_saddle, Bt, dx)
+    res_p_saddle .+= - reg_d.*dy .+ r_p_tilde;
+      
+    A_mul_B!(res_d_saddle, B, dy)
+    res_d_saddle .+= theta.*dx .- rhs_d_saddle;
+
+    # @assert norm(res_p_saddle - (Bt*dx - reg_d*dy + r_p_tilde)) < norm(res_p_saddle)*1e-8
+
+    # @assert norm(res_d_saddle - (theta.*dx + B*dy - rhs_d_saddle)) < 1e-10
         
     @printf("corr. norm(res_p_saddle_1) =%e, norm(res_d_saddle_1)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
@@ -303,22 +390,32 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
         #dy = laInv(rhs_normal);
         #dy_ref = laInv\rhs_normal;
         dy_ref = laInv(rhs_normal);
-        dx_ref = -(B*dy_ref).*d + res_d_saddle.*d;
+        dx_ref .= -(B*dy_ref).*d .+ res_d_saddle.*d;
+
+        # @assert dx_ref == -(B*dy_ref).*d + res_d_saddle.*d;
 
         @printf("normal eq. residual =%e\n",norm(SDD*dy_ref - rhs_normal));  
             
-        dx = dx + dx_ref;
-        dy = dy + dy_ref;
+        dx .+= dx_ref;
+        dy .+= dy_ref;
             
         # Compute residuals for saddle point system of refined direction.
-        res_p_saddle = Bt*dx - reg_d*dy + r_p_tilde;
-        res_d_saddle = theta.*dx + B*dy - rhs_d_saddle;
+        res_p_saddle .= (Bt*dx) .- reg_d*dy .+ r_p_tilde;
+        res_d_saddle = theta.*dx .+ (B*dy) .- rhs_d_saddle;
+        
+        # @assert res_p_saddle == Bt*dx - reg_d*dy + r_p_tilde;
+        # @assert res_d_saddle == theta.*dx + B*dy - rhs_d_saddle;
             
         @printf("corr. norm(res_p_saddle_2) =%e, norm(res_d_saddle_2)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
             
-        ds = -d1.*dx - rhs_g1./x;
-        dz = d2.*dx - rhs_g2./(u-x);
+        ds .= -d1.*dx .- rhs_g1./x;
+        dz .= d2.*dx .- rhs_g2./(u.-x);
+
+        # @assert ds == -d1.*dx - rhs_g1./x;
+        # @assert dz == d2.*dx - rhs_g2./(u-x);
+
+        
     end       
         
     dx = dx + gamma.*dx_a  
@@ -360,7 +457,8 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                                              laInv
     )
 
-  D = spdiagm(d);
+  # DAS: we don't need this
+  # D = spdiagm(d);
 
   rhs_normal = rhs_p + Bt*(rhs_d_saddle.*d);
   @printf("Time taken to solve is : \n")
@@ -370,8 +468,9 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
   ds = -d1.*dx - rhs_g1./x;
   dz = d2.*dx - rhs_g2./(u-x);
     
-  # XXX comment this out after testing.  
-  @printf("normal eq. residual =%e\n",norm(B'*(D*(B*dy)) + reg_d*dy - rhs_normal));
+  # XXX comment this out after testing.
+  normal_eq_res = norm(B'*(d.*(B*dy)) + reg_d*dy - rhs_normal)
+  @printf("normal eq. residual =%e\n",normal_eq_res);
 
   return (dx,dy,ds,dz);
 end
@@ -456,10 +555,18 @@ function calstepsize{Tv}(x::Array{Tv,1},dx::Array{Tv,1};maxstepsize::Float64 = 0
             mx = min(mx,w)
         end
     end
+
+    mx = 0.999*mx
+
+    # @assert mx == calstepsizeOld(x,dx);
     
-    return 0.999*mx
+    return mx
     
-  #= original code, 
+end
+
+# Calculate step-size for positive orthant.
+function calstepsizeOld{Tv}(x::Array{Tv,1},dx::Array{Tv,1};maxstepsize::Float64 = 0.99)
+
 
   stepsizes = -x./dx;
 
@@ -469,9 +576,9 @@ function calstepsize{Tv}(x::Array{Tv,1},dx::Array{Tv,1};maxstepsize::Float64 = 0
   else
       return minimum([0.999*stepsizes[idx_pos]; maxstepsize]);
   end
-  =#
 
 end
+
 
 function makeAdj(Bt,w)
     n,m = size(Bt)
@@ -507,8 +614,9 @@ function minmax_a_times_b(a,b)
     mi = Inf
     mx = -Inf
     @inbounds for i in 1:n
-        mi = min(mi,a[i]*b[i])
-        mx = max(mi,a[i]*b[i])
+        z = a[i]*b[i]
+        mi = min(mi,z)
+        mx = max(mx,z)
     end
     return mi, mx
 end
@@ -542,9 +650,20 @@ function minmax_a_minus_b_times_c(a,b,c)
     @assert length(c) == n
     mx = -Inf
     mi = Inf
+    z = 0.0
     @inbounds for i in 1:n
-        mi = min(mi,(a[i]-b[i])*c[i])
-        mx = max(mx,(a[i]-b[i])*c[i])
+        z = (a[i]-b[i])*c[i]
+        mi = min(mi,z)
+        mx = max(mx,z)
     end
     return mi, mx
+end
+
+function mu_xsuz(x,s,u,z)
+    mu = 0.0
+    n = length(x)
+    for i in 1:n
+        mu = mu + x[i]*s[i] + (u[i]-x[i])*z[i]
+    end
+    return mu
 end
