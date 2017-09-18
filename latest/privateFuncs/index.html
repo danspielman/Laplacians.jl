@@ -224,8 +224,8 @@
 <li><a href="index.html#Laplacians.ldli2Chol-Tuple{Any}"><code>Laplacians.ldli2Chol</code></a></li>
 <li><a href="index.html#Laplacians.localBlockFlow-Tuple{Array{Array{Tuple{Int64,Float64},1},1},Int64,Int64}"><code>Laplacians.localBlockFlow</code></a></li>
 <li><a href="index.html#Laplacians.localFlow-Union{Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64,Any}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>Laplacians.localFlow</code></a></li>
-<li><a href="index.html#Laplacians.print_ll_col-Tuple{Laplacians.LLMatOrd,Int64}"><code>Laplacians.print_ll_col</code></a></li>
 <li><a href="index.html#Laplacians.print_ll_col-Tuple{Laplacians.LLmatp,Int64}"><code>Laplacians.print_ll_col</code></a></li>
+<li><a href="index.html#Laplacians.print_ll_col-Tuple{Laplacians.LLMatOrd,Int64}"><code>Laplacians.print_ll_col</code></a></li>
 <li><a href="index.html#Laplacians.pushSpeedResult!-Tuple{Any,Any,Any}"><code>Laplacians.pushSpeedResult!</code></a></li>
 <li><a href="index.html#Laplacians.sampleByWeight-Tuple{Any}"><code>Laplacians.sampleByWeight</code></a></li>
 <li><a href="index.html#Laplacians.sddmWrapLap-Tuple{Any,AbstractArray}"><code>Laplacians.sddmWrapLap</code></a></li>
@@ -238,142 +238,143 @@
 <p><a id='Laplacians.ApproxCholPQ' href='#Laplacians.ApproxCholPQ'>#</a>
 <strong><code>Laplacians.ApproxCholPQ</code></strong> &mdash; <em>Type</em>.</p>
 <p>An approximate priority queue.   Items are bundled together into doubly-linked lists with all approximately the same key.   minlist is the min list we know to be non-empty.   It should always be a lower bound.   keyMap maps keys to lists</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxCholTypes.jl#L94-L100' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxCholTypes.jl#L94-L100' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.LDLinv' href='#Laplacians.LDLinv'>#</a>
 <strong><code>Laplacians.LDLinv</code></strong> &mdash; <em>Type</em>.</p>
 <p>LDLinv contains the information needed to solve the Laplacian systems.   It does it by applying Linv, then Dinv, then Linv (transpose).   But, it is specially constructed for this particular solver.   It does not explicitly make the matrix triangular.   Rather, col[i] is the name of the ith col to be eliminated</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxCholTypes.jl#L66-L72' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxCholTypes.jl#L66-L72' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.LLmatp' href='#Laplacians.LLmatp'>#</a>
 <strong><code>Laplacians.LLmatp</code></strong> &mdash; <em>Type</em>.</p>
 <p>LLmatp is the data structure used to maintain the matrix during elimination.   It stores the elements in each column in a singly linked list (only next ptrs)   Each element is an LLp (linked list pointer).   The head of each column is pointed to by cols.</p>
 <p>We probably can get rid of degs - as it is only used to store initial degrees.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxCholTypes.jl#L26-L33' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxCholTypes.jl#L26-L33' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.LLp' href='#Laplacians.LLp'>#</a>
 <strong><code>Laplacians.LLp</code></strong> &mdash; <em>Type</em>.</p>
 <p>LLp elements are all in the same column.   row tells us the row, and val is the entry.   val is set to zero for some edges that we should remove.   next gives the next in the column.  It points to itself to terminate.   reverse is the index into lles of the other copy of this edge,   since every edge is stored twice as we do not know the order of elimination in advance.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxCholTypes.jl#L6-L13' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxCholTypes.jl#L6-L13' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.addToGPrime-Union{Tuple{SparseMatrixCSC{Tv,Ti},Array{Array{Tuple{Int64,Float64},1},1},Dict{Int64,Int64},Dict{Int64,Int64},Int64,Int64,Float64,Float64,Int64}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.addToGPrime-Union{Tuple{SparseMatrixCSC{Tv,Ti},Array{Array{Tuple{Int64,Float64},1},1},Dict{Int64,Int64},Dict{Int64,Int64},Int64,Int64,Float64,Float64,Int64}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.addToGPrime</code></strong> &mdash; <em>Method</em>.</p>
 <p>Add a new vertex to GPrime </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/localClustering.jl#L191' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/localClustering.jl#L191' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.approxCholLapChol-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.approxCholLapChol-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.approxCholLapChol</code></strong> &mdash; <em>Method</em>.</p>
 <p>This variation of approxChol creates a cholesky factor to do the elimination. It has not yet been optimized, and does not yet make the cholesky factor lower triangular</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxChol.jl#L1110-L1113' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxChol.jl#L1110-L1113' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.approxCholPQDec!-Union{Tuple{Laplacians.ApproxCholPQ{Tind},Any}, Tuple{Tind}} where Tind' href='#Laplacians.approxCholPQDec!-Union{Tuple{Laplacians.ApproxCholPQ{Tind},Any}, Tuple{Tind}} where Tind'>#</a>
 <strong><code>Laplacians.approxCholPQDec!</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>Decrement the key of element i
 This could crash if i exceeds the maxkey
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxChol.jl#L1240-L1243' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxChol.jl#L1240-L1243' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.approxCholPQInc!-Union{Tuple{Laplacians.ApproxCholPQ{Tind},Any}, Tuple{Tind}} where Tind' href='#Laplacians.approxCholPQInc!-Union{Tuple{Laplacians.ApproxCholPQ{Tind},Any}, Tuple{Tind}} where Tind'>#</a>
 <strong><code>Laplacians.approxCholPQInc!</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>Increment the key of element i
 This could crash if i exceeds the maxkey
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxChol.jl#L1265-L1268' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxChol.jl#L1265-L1268' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.augmentTreeOpt-Union{Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.augmentTreeOpt-Union{Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.augmentTreeOpt</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>B = augmentTreeOpt{Tv,Ti}(tree, A, params)
 </code></pre>
 
 <p>Takes as input a tree and an adjacency matrix of a graph. It then computes the stretch of every edge of the graph wrt the tree.  It uses cholmod to decide how many edge to add back, shooting for nnzL_fac times n entries in the factored augmented tree, with a number of flops to factor equal to nnz(a)*flops_fac. The edges to add back are then choen at random.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/augTreeSolver.jl#L85-L95' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/augTreeSolver.jl#L85-L95' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.blockSolver-Tuple{Any,Any}' href='#Laplacians.blockSolver-Tuple{Any,Any}'>#</a>
 <strong><code>Laplacians.blockSolver</code></strong> &mdash; <em>Method</em>.</p>
 <p>Apply the ith solver on the ith component</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/solverInterface.jl#L150' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/solverInterface.jl#L150' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.extendMatrix-Union{Tuple{SparseMatrixCSC{Tv,Ti},Array{Tv,1}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.extendMatrix-Union{Tuple{SparseMatrixCSC{Tv,Ti},Array{Tv,1}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.extendMatrix</code></strong> &mdash; <em>Method</em>.</p>
 <p>Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/graphOps.jl#L44-L46' class='documenter-source'>source</a><br></p>
+<p>This is an efficient way of writing [a d; d' 0]</p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/graphOps.jl#L44-L48' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.forceLap-Tuple{AbstractArray}' href='#Laplacians.forceLap-Tuple{AbstractArray}'>#</a>
 <strong><code>Laplacians.forceLap</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>la = forceLap(a)
 </code></pre>
 
 <p>Create a Laplacian matrix from an adjacency matrix. If the input looks like a Laplacian, throw a warning and convert it.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/solverInterface.jl#L82-L87' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/solverInterface.jl#L82-L87' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.getCutSet-Tuple{Array{Array{Tuple{Int64,Float64},1},1},Int64,Int64}' href='#Laplacians.getCutSet-Tuple{Array{Array{Tuple{Int64,Float64},1},1},Int64,Int64}'>#</a>
 <strong><code>Laplacians.getCutSet</code></strong> &mdash; <em>Method</em>.</p>
 <p>Get the min cut from the source - return all vertices in the cut besides the source </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/localClustering.jl#L323' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/localClustering.jl#L323' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.initDictCol!-Tuple{Any,Any,Any}' href='#Laplacians.initDictCol!-Tuple{Any,Any,Any}'>#</a>
 <strong><code>Laplacians.initDictCol!</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>initDictCol!(dic, name, typ)
 </code></pre>
 
 <p>For a dictionary in which each key indexes an array. If dic does not contain an entry of <code>name</code>, create with set to <code>Array(typ,0)</code>.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/compare_solvers.jl#L25-L30' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/compare_solvers.jl#L25-L30' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.initGPrime-Union{Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Dict{Int64,Int64},Dict{Int64,Int64},Float64,Int64}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.initGPrime-Union{Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Dict{Int64,Int64},Dict{Int64,Int64},Float64,Int64}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.initGPrime</code></strong> &mdash; <em>Method</em>.</p>
 <p>Initialize GPrime with the set A and edges of type s-&gt;u</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/localClustering.jl#L163' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/localClustering.jl#L163' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.lapWrapComponents-Tuple{Any,AbstractArray}' href='#Laplacians.lapWrapComponents-Tuple{Any,AbstractArray}'>#</a>
 <strong><code>Laplacians.lapWrapComponents</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>f = lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
 </code></pre>
 
 <p>Applies a Laplacian <code>solver</code> that satisfies our interface to each connected component of the graph with adjacency matrix <code>a</code>. Passes kwargs on the solver.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/solverInterface.jl#L188-L193' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/solverInterface.jl#L188-L193' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.lapWrapConnected-Tuple{Any,AbstractArray{T,2} where T}' href='#Laplacians.lapWrapConnected-Tuple{Any,AbstractArray{T,2} where T}'>#</a>
 <strong><code>Laplacians.lapWrapConnected</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>f = lapWrapConnected(sddmSolver, a::AbstractMatrix; kwargs...)
 </code></pre>
 
 <p>Applies a <code>sddmSolver</code> to the Laplacian of the adjacency matrix <code>a</code> of a connected graph. Passes on kwargs to the solver. <code>sddmSolver</code> should be a solver that obeys the interface.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/solverInterface.jl#L105-L111' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/solverInterface.jl#L105-L111' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.ldli2Chol-Tuple{Any}' href='#Laplacians.ldli2Chol-Tuple{Any}'>#</a>
 <strong><code>Laplacians.ldli2Chol</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>L = ldli2Chol(ldli)
 </code></pre>
 
 <p>This produces a matrix L so that L L^T approximate the original Laplacians. It is not quite a Cholesky factor, because it is off by a perm (and the all-1s vector orthogonality.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxChol.jl#L1027-L1032' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxChol.jl#L1027-L1032' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.localBlockFlow-Tuple{Array{Array{Tuple{Int64,Float64},1},1},Int64,Int64}' href='#Laplacians.localBlockFlow-Tuple{Array{Array{Tuple{Int64,Float64},1},1},Int64,Int64}'>#</a>
 <strong><code>Laplacians.localBlockFlow</code></strong> &mdash; <em>Method</em>.</p>
 <p>Compute block flow between s and t</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/localClustering.jl#L217' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/localClustering.jl#L217' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.localFlow-Union{Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64,Any}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.localFlow-Union{Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64,Any}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.localFlow</code></strong> &mdash; <em>Method</em>.</p>
 <p>The LocalFlow function, from the Orecchia-Zhu paper </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/localClustering.jl#L72' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/localClustering.jl#L72' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.print_ll_col-Tuple{Laplacians.LLMatOrd,Int64}' href='#Laplacians.print_ll_col-Tuple{Laplacians.LLMatOrd,Int64}'>#</a>
 <strong><code>Laplacians.print_ll_col</code></strong> &mdash; <em>Method</em>.</p>
 <p>Print a column in an LLMatOrd matrix.   This is here for diagnostics.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxChol.jl#L172-L175' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxChol.jl#L172-L175' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.print_ll_col-Tuple{Laplacians.LLmatp,Int64}' href='#Laplacians.print_ll_col-Tuple{Laplacians.LLmatp,Int64}'>#</a>
 <strong><code>Laplacians.print_ll_col</code></strong> &mdash; <em>Method</em>.</p>
 <p>Print a column in an LLmatp matrix.   This is here for diagnostics.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/approxChol.jl#L97-L100' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/approxChol.jl#L97-L100' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.pushSpeedResult!-Tuple{Any,Any,Any}' href='#Laplacians.pushSpeedResult!-Tuple{Any,Any,Any}'>#</a>
 <strong><code>Laplacians.pushSpeedResult!</code></strong> &mdash; <em>Method</em>.</p>
 <p><code>ret</code> is the answer returned by a speed test. This pushed it into the dictionary on which we are storing the tests.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/compare_solvers.jl#L39-L42' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/compare_solvers.jl#L39-L42' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.sampleByWeight-Tuple{Any}' href='#Laplacians.sampleByWeight-Tuple{Any}'>#</a>
 <strong><code>Laplacians.sampleByWeight</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>ind = sampleByWeight(wt)
 </code></pre>
 
 <p>sample an index with probability proportional to its weight given here</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/graphGenerators.jl#L516-L520' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/graphGenerators.jl#L516-L520' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.sddmWrapLap-Tuple{Any,AbstractArray}' href='#Laplacians.sddmWrapLap-Tuple{Any,AbstractArray}'>#</a>
 <strong><code>Laplacians.sddmWrapLap</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>f = sddmWrapLap(lapSolver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
 </code></pre>
 
 <p>Uses a <code>lapSolver</code> to solve systems of linear equations in sddm matrices.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/solverInterface.jl#L285-L289' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/solverInterface.jl#L285-L289' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.sortSet-Union{Tuple{Array{Ti,1},Ti}, Tuple{Ti}} where Ti' href='#Laplacians.sortSet-Union{Tuple{Array{Ti,1},Ti}, Tuple{Ti}} where Ti'>#</a>
 <strong><code>Laplacians.sortSet</code></strong> &mdash; <em>Method</em>.</p>
 <p>Given a set of integers, <code>set</code> between 1 and n, return a sorted version of them</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/fastCSC.jl#L98' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/fastCSC.jl#L98' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.treeDepthDFS-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.treeDepthDFS-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.treeDepthDFS</code></strong> &mdash; <em>Method</em>.</p>
 <p>Compute the vector of depths in a tree that is in DFS order, <em>with the root at the first position, and the leaves at the end</em></p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/treeAlgs.jl#L391-L394' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/treeAlgs.jl#L391-L394' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.wrapCapture-Tuple{Function,Any,Any}' href='#Laplacians.wrapCapture-Tuple{Function,Any,Any}'>#</a>
 <strong><code>Laplacians.wrapCapture</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>f = wrapCapture(solver::Function, mats, rhss; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
@@ -394,7 +395,7 @@ julia&gt; rhss
  [0.404962,-0.827718,0.704616,-0.403223,0.204891,-0.505589,0.907015,1.90266,-0.438115,0.0464351]
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/solverInterface.jl#L358-L379' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/solverInterface.jl#L358-L379' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.wrapCaptureRhs-Tuple{Function,Any}' href='#Laplacians.wrapCaptureRhs-Tuple{Function,Any}'>#</a>
 <strong><code>Laplacians.wrapCaptureRhs</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>f = wrapCaptureRhs(sola::Function, rhss; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
@@ -415,7 +416,7 @@ julia&gt; length(rhss[1])
 100
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/solverInterface.jl#L322-L343' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/solverInterface.jl#L322-L343' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.wrapInterface-Tuple{Function,AbstractArray{T,2} where T}' href='#Laplacians.wrapInterface-Tuple{Function,AbstractArray{T,2} where T}'>#</a>
 <strong><code>Laplacians.wrapInterface</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>solveA = wrapInterface(solver::Function, A::AbstractMatrix; tol, maxits, maxtime, verbose, pcgIts=Int[],params...)
@@ -437,7 +438,7 @@ julia&gt; norm(a*solvea(b, verbose=false, maxtime = 10)-b)
 1.575705319704736e-14
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/2902a2d6c0860f7e98f0860705c99e4c3d0ad932/src/solverInterface.jl#L10-L33' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/e5a0e021f904f926aa85c441d7750e2b500f2d1a/src/solverInterface.jl#L10-L33' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
