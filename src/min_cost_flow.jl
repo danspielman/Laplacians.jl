@@ -19,7 +19,8 @@ function min_cost_flow{Tv,Ti}(mcfp::MCFproblem{Tv,Ti};
                               tol::Real=1e-6,
                               reg_p::Real=1e-10,
                               reg_d::Real=1e-10,
-                              tol_ref = 1.0e-8)
+                              tol_ref = 1.0e-8,
+                              verbose = false)
 
     edge_list = mcfp.edge_list
     m = size(edge_list,1)
@@ -35,7 +36,8 @@ function min_cost_flow{Tv,Ti}(mcfp::MCFproblem{Tv,Ti};
                          tol = tol,
                          reg_p = reg_p,
                          reg_d = reg_d,
-                         tol_ref = tol_ref)
+                         tol_ref = tol_ref,
+                         verbose=verbose)
 end
 
 
@@ -47,7 +49,8 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                               tol::Real=1e-6,
                               reg_p::Real=1e-10,
                               reg_d::Real=1e-10,
-                              tol_ref = 1.0e-8)
+                              tol_ref = 1.0e-8,
+                              verbose = false)
   # Problem dimensions.
   m = size(B)[1];
   n = size(B)[2];
@@ -148,20 +151,29 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 
     # @assert min_x_s ==  minimum(x.*s)
     # @assert max_x_s ==  maximum(x.*s)
-      
-    @printf("maximum x.*s =%e, minimum x.*s=%e, mu=%e\n",max_x_s,min_x_s,mu[1]);  
-        
+
+    if verbose
+        @printf("maximum x.*s =%e, minimum x.*s=%e, mu=%e\n",max_x_s,min_x_s,mu[1]);  
+    end
+
     min_x_z, max_x_z = minmax_a_minus_b_times_c(u,x,z)
     # @assert max_x_z == maximum((u-x).*z);
-    # @assert min_x_z == minimum((u-x).*z);
-    @printf("maximum (u-x).*z =%e, minimum (u-x).*z=%e, mu=%e\n",max_x_z,min_x_z,mu[1]);  
+      # @assert min_x_z == minimum((u-x).*z);
+
+      if verbose
+          @printf("maximum (u-x).*z =%e, minimum (u-x).*z=%e, mu=%e\n",max_x_z,min_x_z,mu[1]);
+      end
+      
 
     # Check for termination.
     norm_r_p = norm(r_p)/(1 + norm(b));
     norm_r_d = norm(r_d)/(1 + norm(c));
 
+      if verbose
     @printf("\nIteration %d, ||r_p||/||b||=%e, ||r_d||/||c||=%e, rel. gap=%e, alpha=%e\n", k, 
             norm_r_p, norm_r_d, rel_gap[1],alpha);
+      end
+      
 
     if norm_r_p <= tol_p && norm_r_d <= tol_d && rel_gap[1] <= tol_gap
       println("Termination tolerance reached.");
@@ -198,15 +210,21 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
         
     max_theta = maximum(theta);
     min_theta = minimum(theta);
-    cond_theta = max_theta/min_theta;
+      cond_theta = max_theta/min_theta;
+      if verbose
     @printf("maximum theta =%e, minimum theta=%e, cond theta=%e\n", 
             max_theta,min_theta,cond_theta);
-        
+          end
+
     max_theta_inv = maximum(d);
     min_theta_inv = minimum(d);
-    cond_theta_inv = max_theta_inv/min_theta_inv;
+      cond_theta_inv = max_theta_inv/min_theta_inv;
+
+      if verbose
     @printf("maximum theta inverse =%e, minimum theta inverse =%e, cond theta inverse=%e\n", 
             max_theta_inv,min_theta_inv,cond_theta_inv);
+      end
+      
 
     # Compute adjacency and set lap solver.
     Adj = makeAdj(Bt,d);
@@ -216,9 +234,15 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     L = lap(Adj); # DAS the above should be redundant with makeAdj
 
     SDD = L + speye(n)*reg_d;
-    #laInv = SDD;
-    @printf("Time taken to build is : \n")
-    @time laInv = lapSolver(SDD)
+      #laInv = SDD;
+      if verbose
+          @printf("Time taken to build is : \n")
+          @time laInv = lapSolver(SDD)
+      else
+          laInv = lapSolver(SDD)
+      end
+      
+      
     #save("/tmp/badLap.jld","SDD",SDD)
     # residuals for affine direction.
     r_p_tilde .= r_p .- reg_d.*(y .- y_old);
@@ -232,7 +256,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
         
     # Compute affine direction.
     (dx_a,dy_a,ds_a,dz_a) = ipm_directions_min_cost_flow(B,Bt,d,d1,d2,theta,
-                reg_p,reg_d,r_p_tilde,rhs_d_saddle,rhs_g1,rhs_g2,x,x_old,y,y_old,u,n,laInv);
+                reg_p,reg_d,r_p_tilde,rhs_d_saddle,rhs_g1,rhs_g2,x,x_old,y,y_old,u,n,laInv, verbose=verbose);
         
     # Compute residuals for saddle point system of affine direction.
     A_mul_B!(res_p_saddle, Bt, dx_a)
@@ -243,9 +267,11 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 
     # @assert norm(res_p_saddle - (Bt*dx_a - reg_d*dy_a + r_p_tilde)) < 1e-8
     # @assert norm(res_d_saddle - (theta.*dx_a + B*dy_a - rhs_d_saddle)) < 1e-8
-      
+
+      if verbose
     @printf("pred. norm(res_p_saddle_1) =%e, norm(res_d_saddle_1)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
+      end
 
     # Check if refinement is needed for affine direction and refine.
     if (norm(res_p_saddle) > tol_ref) || (norm(res_d_saddle) > tol_ref)          
@@ -262,8 +288,10 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 
         # @assert dx_a_ref == -(B*dy_a_ref).*d + res_d_saddle.*d;
 
+        if verbose
         @printf("normal eq. residual =%e\n",norm(SDD*dy_a_ref - rhs_normal));  
-            
+            end
+
         # dx_a = dx_a + dx_a_ref;
         # dy_a = dy_a + dy_a_ref;
 
@@ -283,10 +311,11 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
         # @assert norm(res_p_saddle - (Bt*dx_a - reg_d*dy_a + r_p_tilde)) < 1e-8
         # @assert norm(res_d_saddle - (theta.*dx_a + B*dy_a - rhs_d_saddle)) < 1e-8
 
-            
+        if verbose
         @printf("pred. norm(res_p_saddle_2) =%e, norm(res_d_saddle_2)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
-            
+        end
+
         ds_a .= -d1.*dx_a .- rhs_g1./x;
         dz_a .= d2.*dx_a .- rhs_g2./(u.-x);
 
@@ -365,7 +394,7 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
         
     # Compute corrector direction.
     (dx,dy,ds,dz) = ipm_directions_min_cost_flow(B,Bt,d,d1,d2,theta,
-                reg_p,reg_d,r_p_tilde,rhs_d_saddle,rhs_g1,rhs_g2,x,x_old,y,y_old,u,n,laInv);
+                reg_p,reg_d,r_p_tilde,rhs_d_saddle,rhs_g1,rhs_g2,x,x_old,y,y_old,u,n,laInv, verbose=verbose);
         
     # Compute residuals for saddle point system of corrector direction.
 
@@ -378,9 +407,11 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     # @assert norm(res_p_saddle - (Bt*dx - reg_d*dy + r_p_tilde)) < norm(res_p_saddle)*1e-8
 
     # @assert norm(res_d_saddle - (theta.*dx + B*dy - rhs_d_saddle)) < 1e-10
-        
+
+    if verbose
     @printf("corr. norm(res_p_saddle_1) =%e, norm(res_d_saddle_1)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
+    end
 
     # Check if refinement is needed for corrector direction and refine.
     if (norm(res_p_saddle) > tol_ref) || (norm(res_d_saddle) > tol_ref)
@@ -390,12 +421,15 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
         #dy = laInv(rhs_normal);
         #dy_ref = laInv\rhs_normal;
         dy_ref = laInv(rhs_normal);
+
         dx_ref .= -(B*dy_ref).*d .+ res_d_saddle.*d;
 
         # @assert dx_ref == -(B*dy_ref).*d + res_d_saddle.*d;
 
+        if verbose
         @printf("normal eq. residual =%e\n",norm(SDD*dy_ref - rhs_normal));  
-            
+        end
+
         dx .+= dx_ref;
         dy .+= dy_ref;
             
@@ -405,10 +439,12 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
         
         # @assert res_p_saddle == Bt*dx - reg_d*dy + r_p_tilde;
         # @assert res_d_saddle == theta.*dx + B*dy - rhs_d_saddle;
-            
+
+        if verbose
         @printf("corr. norm(res_p_saddle_2) =%e, norm(res_d_saddle_2)=%e\n", 
             norm(res_p_saddle),norm(res_d_saddle));
-            
+        end
+
         ds .= -d1.*dx .- rhs_g1./x;
         dz .= d2.*dx .- rhs_g2./(u.-x);
 
@@ -454,15 +490,21 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                                              y_old::Array{Tv,1},
                                              u::Array{Tv,1},
                                              m::Integer,
-                                             laInv
+    laInv;
+    verbose=false
     )
 
   # DAS: we don't need this
   # D = spdiagm(d);
 
   rhs_normal = rhs_p + Bt*(rhs_d_saddle.*d);
-  @printf("Time taken to solve is : \n")
-  @time dy = laInv(rhs_normal);
+  if verbose
+      @printf("Time taken to solve is : \n")
+      @time dy = laInv(rhs_normal);
+  else
+      dy = laInv(rhs_normal);
+  end
+    
   #dy = laInv\rhs_normal;
   dx = -(B*dy).*d + rhs_d_saddle.*d;
   ds = -d1.*dx - rhs_g1./x;
@@ -470,8 +512,10 @@ function ipm_directions_min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
     
   # XXX comment this out after testing.
   normal_eq_res = norm(B'*(d.*(B*dy)) + reg_d*dy - rhs_normal)
+  if verbose
   @printf("normal eq. residual =%e\n",normal_eq_res);
-
+  end
+    
   return (dx,dy,ds,dz);
 end
 
@@ -495,7 +539,7 @@ function ipm_min_cost_flow_initial_point{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
                                                 u::Array{Tv,1},
                                                 m::Integer,
                                                 n::Integer;
-                                                sddmSolver = cholSDDM
+                                                sddmSolver = approxCholSddm
 )
   # Solve the optimization problem.
   L = B'*B + speye(n);
