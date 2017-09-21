@@ -122,8 +122,24 @@ Call Goldberg's GOTO generator with m = 8*n, as per ...,
 Set seed_base to 0 if you want to set the seed to goto exactly.
 """
 function goto8_gen(n, seed; maxcost = 1000, maxcap = 1000, seed_base = 24369)
+    goto_gen(n, 8*n, seed, maxcost=maxcost, maxcap=maxcap, seed_base=seed_base)
+end
 
-    m = 8*n
+
+"""
+    goto_gen(n, m, seed; maxcost = 1000, maxcap = 1000)
+
+Call Goldberg's GOTO generator 
+Set seed_base to 0 if you want to set the seed to goto exactly.
+"""
+function goto_gen(n, m, seed; maxcost = 1000, maxcap = 1000, seed_base = 24369)
+
+    @assert n >= 15
+    @assert m >= 6*n
+    @assert m <= n^(5/3)
+    @assert maxcap >= 8
+    @assert maxcost >= 8
+
     fh = open("params.txt","w")
     write(fh,"$(n) $(m) $(maxcap) $(maxcost) $(seed+seed_base)")
     close(fh)
@@ -133,6 +149,7 @@ function goto8_gen(n, seed; maxcost = 1000, maxcap = 1000, seed_base = 24369)
 
     return fn
 end
+
 
 """
     runtime, cost = call_cs2(fn)
