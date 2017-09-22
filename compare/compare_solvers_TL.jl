@@ -272,6 +272,16 @@ function testVMatlabLap(solvers::Array, dic::Dict, maker::Function; testName="")
 end
 
 
+function testVMatlabSddm{Tv,Ti}(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti};
+  tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
+                                test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10)
+    return b->testVMatlabSddm(solvers, dic, sdd, b;
+  tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, testName=testName,
+                                     test_icc=test_icc, test_cmg=test_cmg, test_lamg=test_lamg, tl_fac=tl_fac)
+end
+
+
+
 function testVMatlabSddm{Tv,Ti}(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
   test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10)
