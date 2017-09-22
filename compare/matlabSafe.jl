@@ -20,7 +20,7 @@ function timeLimitCmg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
     fn = "$(Pkg.dir("Laplacians"))/matlab/timeCmg.m"
     mat = ENV["MATLAB_HOME"]
     matlab = "$(mat)/bin/matlab"
-    cmd = `gtimeout $(limit) $(matlab) -nojvm < $(fn)`
+    cmd = `gtimeout $(limit) $(matlab) -nojvm \< $(fn)`
 
     t0 = now()
 
@@ -57,7 +57,7 @@ function timeLimitCmg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
       println("Iterations: ", iter)
       println("error: ", err)
       d1 = DateTime(start,"d-u-yyyy H:M:S")
-      println("Time to load and start Matlab: ", Int(d1-DateTime(t0))/1000)
+      println("Time to load and start Matlab: $(d1-DateTime(t0))/1000)")
     end
 
 
@@ -77,7 +77,7 @@ function timeLimitIcc(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
     fn = "$(Pkg.dir("Laplacians"))/matlab/timeIccLap.m"
     mat = ENV["MATLAB_HOME"]
     matlab = "$(mat)/bin/matlab"
-    cmd = `gtimeout $(limit) $(matlab) -nojvm < $(fn)`
+    cmd = `gtimeout $(limit) $(matlab) -nojvm \< $(fn)`
 
     t0 = now()
 
@@ -114,7 +114,7 @@ function timeLimitIcc(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
       println("Iterations: ", iter)
       println("error: ", err)
       d1 = DateTime(start,"d-u-yyyy H:M:S")
-      println("Time to load and start Matlab: ", Int(d1-DateTime(t0))/1000)
+      println("Time to load and start Matlab: $(d1-DateTime(t0))/1000)")
     end
 
 
@@ -134,7 +134,7 @@ function timeLimitLamg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
     fn = "$(Pkg.dir("Laplacians"))/matlab/timeLamg.m"
     mat = ENV["MATLAB_HOME"]
     matlab = "$(mat)/bin/matlab"
-    cmd = `gtimeout $(limit) $(matlab) -nojvm < $(fn)`
+    cmd = `gtimeout $(limit) $(matlab) -nojvm \< $(fn)`
 
     t0 = now()
 
@@ -171,7 +171,7 @@ function timeLimitLamg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
       println("Iterations: ", iter)
       println("error: ", err)
       d1 = DateTime(start,"d-u-yyyy H:M:S")
-      println("Time to load and start Matlab: ", Int(d1-DateTime(t0))/1000)
+      println("Time to load and start Matlab: $(d1-DateTime(t0))/1000)")
     end
 
 

@@ -151,7 +151,7 @@ Also compares them against the solvers we have in matlab, with a time limit of 1
 """
 function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
-  test_icc=true, test_cmg=true, test_lamg=true)
+  test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10)
 
     b = b - mean(b)
 
@@ -171,7 +171,7 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
     itscol(name) = "$(name)_its"
     errcol(name) = "$(name)_err"
 
-    dic["names"] = Array(String,0)
+    dic["names"] = Array{String}(0)
     for t in solvers
         push!(dic["names"], t.name)
     end
@@ -219,7 +219,7 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
 
         if i == 1
             x = ret[5]
-            tl = round(Int,30 + 10*(ret[1]+ret[2]))
+            tl = round(Int,30 + tl_fac*(ret[1]+ret[2]))
         end
 
 
