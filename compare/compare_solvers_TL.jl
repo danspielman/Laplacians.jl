@@ -372,7 +372,7 @@ function testVMatlabSddm{Tv,Ti}(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti},
       if verbose
           println("lamg")
       end
-      ret = timeLimitLamg(tl, sdd, b,verbose = true);
+      ret = timeLimitLamgSddm(tl, sdd, b,verbose = true);
       pushSpeedResult!(dic, "lamg", ret)
     end
 
