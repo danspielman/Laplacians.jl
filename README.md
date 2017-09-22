@@ -17,6 +17,10 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
+## Version 0.2.1, September 18, 2017
+
+Fixed a bug in `approxCholSddm` that caused it to be slow.
+
 ## Version 0.2.0, July 17, 2017
 
 This version is compatible with Julia 0.6.  It will not work with

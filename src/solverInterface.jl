@@ -183,6 +183,20 @@ function blockSolver(comps, solvers; tol::Real=1e-6, maxits=Inf, maxtime=Inf, ve
 
 end
 
+"""
+    testZeroDiag(a)
+
+Returns true if `a` has zero diagonal, false otherwise
+"""
+function testZeroDiag(a)
+    n = size(a,1)
+    for i in 1:n
+        if a[i,i] != 0.0
+            return false
+        end
+    end
+    return true
+end
 
 
 """
@@ -195,6 +209,11 @@ function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf,
 
     t1 = time()
 
+    if !testZeroDiag(a)
+        warn("The matrix should not have any nonzero diagonal entries.")
+        a = a - spdiagm(diag(a))
+    end
+    
     co = components(a)
 
     if maximum(co) == 1
