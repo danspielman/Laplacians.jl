@@ -2,24 +2,118 @@ using Plots
 plotlyjs()
 
 
-function total_time(dic; names = dic["names"])
-  plt = Plots.plot(title = "Total Time Distribution")
-  for name in names
-      Plots.plot!(sort(dic["$(name)_tot"]), label=name)
+function total_time(dic; names = dic["names"], labels = dic["names"])
+    plt = Plots.plot(title = "Seconds Distribution")
+    for i in 1:length(names)
+        name = names[i]
+        Plots.plot!(sort(dic["$(name)_tot"]), label=labels[i], linewidth=3)
+    end
+    display(plt)
+    return plt
+end
+
+function total_time_relative(dic; names = dic["names"], labels=names, cols=distinguishable_colors(length(names)))
+
+    if isa(cols,Dict)
+        cols = [cols[x] for x in names];
+    end
+
+  plt = Plots.plot(title = "(Time / Time for $(labels[1])), Distribution")
+  rel = dic["$(names[1])_tot"]
+
+  mn = 1
+  mx = 1
+    
+    for i in 2:length(names)
+        name = names[i]
+      y = sort(min.(dic["$(name)_tot"] ./ rel, 10))
+      mn = min(mn,minimum(y))
+      mx = max(mx,maximum(y))
+      Plots.plot!(y, label=labels[i], linewidth=3, color=cols[i])
   end
+  Plots.plot!(ylimits=(0:10),yticks=[0;round(mn,2);1:10])
+
+  plot!(ytickfont = font(16))
+  plot!(legendfont = font(16))
+  plot!(guidefont = font(16))
+    plot!(xticks=[])
+
+
   display(plt)
   return plt
 end
 
-function total_time_nnz(dic; names = dic["names"])
-  plt = Plots.plot(title = "(Total Time / Edges) Distribution")
-  for name in names
-      Plots.plot!(sort(dic["$(name)_tot"] ./ dic["ne"]), label=name)
+
+
+function total_time_nnz(dic; names = dic["names"],
+                        labels = names,
+                        cols=distinguishable_colors(length(names)),
+                        ref=[])
+    if isa(cols,Dict)
+        cols = [cols[x] for x in names];
+    end
+
+    if ~isempty(ref)
+        yref = 10*dic["$(ref)_tot"] ./ dic["ne"]
+    end
+    
+    plt = Plots.plot()
+    mn = Inf
+    mx = 0
+    for name in names
+        y = dic["$(name)_tot"] ./ dic["ne"]
+        if ~isempty(ref)
+            y = min.(y, yref)
+        end
+            
+        mn = min(mn,minimum(y))
+        mx = max(mx,maximum(y[y .< Inf]))
+    end
+    b = floor(log(mx)/log(10))
+    for i in 1:length(names)
+        name = names[i]
+               y = dic["$(name)_tot"] ./ dic["ne"]
+        if ~isempty(ref)
+            y = min.(y, yref)
+        end
+      y = sort(y)
+      y[y .== Inf] = mx
+      y = y * 10^(-b)  
+      Plots.plot!(y, label=labels[i], linewidth=3, color=cols[i])
+    end
+  plot!(ytickfont = font(12))
+  plot!(legendfont = font(16))
+  plot!(guidefont = font(16))
+    plot!(xticks=[])
+  title!("$(10.0^(round.(Int,b))) Seconds / Edge, Distribution")
+  display(plt)
+  return mn, mx
+end
+
+
+
+
+
+
+function time_vs_n(dic; names = dic["names"], labels=names, cols=distinguishable_colors(length(names)))
+    if isa(cols,Dict)
+        cols = [cols[x] for x in names];
+    end
+    
+    plt = Plots.plot()
+    for i in 1:length(names)
+        name = names[i]
+      Plots.plot!(dic["nv"],dic["$(name)_tot"], label=labels[i], linewidth=3, color=cols[i])
   end
+    Plots.plot!(xaxis=(:log), yaxis=(:log))
+    Plots.plot!(xlabel="Number Vertices",ylabel="Seconds")
+      plot!(ytickfont = font(12))
+      plot!(xtickfont = font(12))
+  plot!(legendfont = font(16))
+  plot!(guidefont = font(16))
   display(plt)
   return plt
 end
-
 
 
 """
@@ -58,7 +152,7 @@ function vec_stats(v)
     v = sort(v)
     n = length(v)
     print("mean: ",round(mean(v),3))
-    pts = round(Int, [1, n/4, n/2, 3n/4, n])
+    pts = round.(Int, [1, n/4, n/2, 3n/4, n])
     print(" quarts: ", v[pts])
     println()
 end
@@ -66,11 +160,11 @@ end
 function vec_stats(v,cnt)
     v = sort(v)
     n = length(v)
-    print("mean: ",round(mean(v),3))
-    pts = round(Int, [1, n/4, n/2, 3n/4, n])
+    print("mean: ",round.(mean(v),3))
+    pts = round.(Int, [1, n/4, n/2, 3n/4, n])
     print(" quarts: ", v[pts])
 
-    print("  (Inf: ",sum(isinf(cnt)), ")")
+    print("  (Inf: ",sum(isinf.(cnt)), ")")
 
     println()
 end
@@ -98,7 +192,7 @@ function plots_and_stats_raw(dic,str,title)
     for name in dic["names"]
         key = "$(name)_$(str)"
         thisrow = dic[key][p]
-        threshrow = min(thisrow, 10*baserow)
+        threshrow = min.(thisrow, 10*baserow)
         Plots.plot!(threshrow, label=name)
 
         print(key, " ")
@@ -122,7 +216,7 @@ function plot_relative(dic,str,title)
         rowname = "$name / $(sol1)"
         key = "$(name)_$(str)"
         thisrow = dic[key]
-        threshrow = min(thisrow, 10*baserow) ./ baserow
+        threshrow = min.(thisrow, 10*baserow) ./ baserow
         Plots.plot!(sort(threshrow), label=rowname)
 
         print(str, " " ,rowname, " ")
@@ -164,7 +258,7 @@ end
 
 For example:
 ```
-mask = mask = mcf["nv"] .> 20000
+mask = mcf["nv"] .> 20000
 @show sum(mask)
 sd = mask_dict(mcf,mask)
 ```

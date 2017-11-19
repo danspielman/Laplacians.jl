@@ -151,7 +151,7 @@ Also compares them against the solvers we have in matlab, with a time limit of 1
 """
 function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
-  test_icc=true, test_cmg=true, test_lamg=true)
+  test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10)
 
     b = b - mean(b)
 
@@ -171,7 +171,7 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
     itscol(name) = "$(name)_its"
     errcol(name) = "$(name)_err"
 
-    dic["names"] = Array(String,0)
+    dic["names"] = Array{String}(0)
     for t in solvers
         push!(dic["names"], t.name)
     end
@@ -219,7 +219,7 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
 
         if i == 1
             x = ret[5]
-            tl = round(Int,30 + 10*(ret[1]+ret[2]))
+            tl = round(Int,30 + tl_fac*(ret[1]+ret[2]))
         end
 
 
@@ -260,6 +260,8 @@ function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b:
 
 end
 
+
+
 function testVMatlabLap(solvers::Array, dic::Dict, maker::Function; testName="")
     println(testName)
     a = maker()
@@ -267,4 +269,123 @@ function testVMatlabLap(solvers::Array, dic::Dict, maker::Function; testName="")
     b = randn(n);
     b = b - mean(b);
     testVMatlabLap(solvers, dic, a, b, testName=testName, verbose=true)
+end
+
+
+function testVMatlabSddm{Tv,Ti}(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti};
+  tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
+                                test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10)
+    return b->testVMatlabSddm(solvers, dic, sdd, b;
+  tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, testName=testName,
+                                     test_icc=test_icc, test_cmg=test_cmg, test_lamg=test_lamg, tl_fac=tl_fac)
+end
+
+
+
+function testVMatlabSddm{Tv,Ti}(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
+  tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
+  test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10)
+
+
+    it = Int[1]
+
+    # init the dict, if it is the first time
+    initDictCol!(dic, "nv", Int)
+    initDictCol!(dic, "ne", Int)
+    initDictCol!(dic, "hash_a", UInt64)
+    initDictCol!(dic, "testName", String)
+
+    solvecol(name) = "$(name)_solve"
+    buildcol(name) = "$(name)_build"
+    totcol(name) = "$(name)_tot"
+    itscol(name) = "$(name)_its"
+    errcol(name) = "$(name)_err"
+
+    dic["names"] = Array{String}(0)
+    for t in solvers
+        push!(dic["names"], t.name)
+    end
+
+    if test_cmg
+      push!(dic["names"], "cmg")
+    end
+    if test_icc
+      push!(dic["names"], "icc")
+    end
+    if test_lamg
+      push!(dic["names"], "lamg")
+    end
+
+    for name in dic["names"]
+        initDictCol!(dic, solvecol(name), Float64)
+        initDictCol!(dic, buildcol(name), Float64)
+        initDictCol!(dic, totcol(name), Float64)
+        initDictCol!(dic, itscol(name), Float64)
+        initDictCol!(dic, errcol(name), Float64)
+    end
+
+    nv = size(sdd,1)
+    ne = nnz(sdd)
+    hash_a = hash(sdd)
+
+    push!(dic["nv"],nv)
+    push!(dic["ne"],ne)
+    push!(dic["hash_a"],hash_a)
+    push!(dic["testName"],testName)
+
+    x = []
+
+    tl = 0
+
+    for i in 1:length(solvers)
+        solverTest = solvers[i]
+
+        if verbose
+            println()
+            println(solverTest.name)
+        end
+
+        ret = testSolver(solverTest.solver, sdd, b, tol, maxits, verbose)
+
+        if i == 1
+            x = ret[5]
+            tl = round(Int,30 + tl_fac*(ret[1]+ret[2]))
+        end
+
+
+        pushSpeedResult!(dic, solverTest.name, ret)
+
+    end
+
+    if tl == 0
+        error("tl is zero")
+    end
+
+    if test_cmg
+      if verbose
+          println("cmg")
+      end
+
+      ret = timeLimitCmg(tl, sdd, b,verbose = true);
+      pushSpeedResult!(dic, "cmg", ret)
+    end
+
+    if test_icc
+      if verbose
+          println("icc")
+      end
+      ret = timeLimitIcc(tl, sdd, b,verbose = true);
+      pushSpeedResult!(dic, "icc", ret)
+    end
+
+    if test_lamg
+      if verbose
+          println("lamg")
+      end
+      ret = timeLimitLamgSddm(tl, sdd, b,verbose = true);
+      pushSpeedResult!(dic, "lamg", ret)
+    end
+
+    return x
+
 end

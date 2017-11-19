@@ -43,6 +43,8 @@ end
 
 """
 Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight.
+
+This is an efficient way of writing [a d; d' 0]
 """
 function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, d::Array{Tv,1})
 
