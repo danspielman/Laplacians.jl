@@ -67,7 +67,7 @@ function eyeFlowGraph1(k)
     n0 = size(a0)[1]
 
     
-    bundle = sparse(diagm((ones(k*(k-1))),k))
+    bundle = spdiagm((ones(k*(k-1))),k,k^2,k^2)
     bundle = bundle + bundle'
     
 
@@ -98,6 +98,44 @@ function eyeFlowGraph1(k)
     a[sb2+collect(1:k),[4]] = 1
     a[[2],sb2+nb-k+collect(1:k)] = 1
     a[sb2+nb-k+collect(1:k), [2]] = 1
+
+    return sparse(a)
+
+end
+
+
+function ckmstMaxFlow(k)
+
+    a = []
+   
+
+    
+    bundle = spdiagm((ones(k*(k-1))),k,k^2,k^2)
+    bundle = bundle + bundle'
+    
+
+    nb = size(bundle)[1]
+    
+    #a1 = [a0 spzeros(n0,2*nb); spzeros(nb,n0) bundle spzeros(nb,nb); spzeros(nb,n0+nb) bundle]
+
+    n1 = size(bundle)[1]
+
+    a = [spzeros(2,n1+2); spzeros(n1,2) bundle]
+    #display(size(a1))
+
+    sb1 = 2
+    sb2 = 2+nb
+
+    a[1,2] = 1
+    a[2,1] = 1
+
+    a[1,sb1+collect(1:k)] = 1
+    a[sb1+collect(1:k),1] = 1
+
+    a[2,sb2-k+collect(1:k)] = 1
+    a[sb2-k+collect(1:k),2] = 1
+
+    
 
     return sparse(a)
 
