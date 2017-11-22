@@ -177,12 +177,12 @@ function min_cost_flow{Tv,Ti}(B::SparseMatrixCSC{Tv,Ti},
 
     if norm_r_p <= tol_p && norm_r_d <= tol_d && rel_gap[1] <= tol_gap
       println("Termination tolerance reached.");
-      return (x,s,y);
+      return (x,y,s,z);
     end
 
     if k > max_iter
       println("Maximum number of iteration reached.");
-      return (x,s,y);
+      return (x,y,s,z);
     end
 
     # Affine direction.

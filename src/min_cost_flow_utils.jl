@@ -3,29 +3,28 @@
 Find the the inactive edges based on the complementarity conditions. The exact procedure is 
 descriped in the pdnet paper.
 =#
-# function find_inactive_edges(x,s,z,zeta0)
-# m = size(x)[1]
-# xT = zeros(size(x))
-# sT = zeros(size(s))
-# zT = zeros(size(z))
-# inact_edges = zeros(m)
+function find_inactive_edges(x,s,z,zeta0)
+  m = size(x)[1]
+  xT = zeros(size(x))
+  inact_edges = zeros(m)
 
-# for i in 1:m
+  for i in 1:m
 
-#   if x[i]/s[i] < zeta0  && (u[i]-x[i])/z[i] > 1/zeta0
-#     xT[i] = 0
-#     inact_edges[i] = -1
-#   elseif x[i]/s[i] > 1/zeta0 && (u[i]-x[i])/z[i] < zeta0
-#     xT[i] = u[i]
-#     inact_edges[i] = 1
+    if x[i]/s[i] < zeta0  && (u[i]-x[i])/z[i] > 1/zeta0
+      xT[i] = 0
+      inact_edges[i] = -1
+    elseif x[i]/s[i] > 1/zeta0 && (u[i]-x[i])/z[i] < zeta0
+      xT[i] = u[i]
+      inact_edges[i] = 1
 
-# end
+    end
 
-# zeta0 = zeta0 * 0.95
+  end
+      zeta0 = zeta0 * 0.95
 
-# return (xT,sT,zT,zeta0,inact_edges)
+  return (xT,zeta0,inact_edges)
 
-# end
+end
 
 #=   
 Computes the maximum weight forest restricted to inact_edges. This implements Kruskal's algoirthm.
@@ -41,9 +40,9 @@ function max_wt_tree_opt_face(mat,d,inact_edges)
 
   for i in ord
         if  (abs(inact_edges[i])< 0.5) && !DataStructures.in_same_set(comps,ai[i],aj[i])
-      numintree = numintree+1
-      treeinds[numintree] = i
-      DataStructures.union!(comps,ai[i],aj[i])
+          numintree = numintree+1
+          treeinds[numintree] = i
+          DataStructures.union!(comps,ai[i],aj[i])
     end
   end
 
@@ -55,7 +54,7 @@ function max_wt_tree_opt_face(mat,d,inact_edges)
   comp_ind = unique(vert_ind)
   treeinds = treeinds[1:end-length(comp_ind)+1]
   forest = sparse(ai[treeinds],aj[treeinds],av[treeinds],n,n)
-  forest = tree + tree'
+  forest = forest + forest'
 
     return (comp_ind, vert_ind,forest)
 end
@@ -69,21 +68,48 @@ Given a forest F, this computes arg_min_y ||y - y0||^2  s.t. B_F*y = c_F.
 
 # end
 
-# function y_opt_face()
 
-# end
 
-# function build_max_flow_instance(B,b,xu,xl)
+# Computes the optimal face based on y values and rounds the flow accordingly. 
+function y_opt_face(B,c,u,y)
+    m = size(c)[1]
+    epstol = 1e-8
+    opt_face_ind = find(abs.(c - B*y) .<= epstol)
+    xT = zeros(m)
+    for i in range(1,m)
+        if (c[i]-BLAS.dot(B[i,:],y)) < -epstol
+            xT[i] = 0
+            elseif (c[i]-BLAS.dot(B[i,:],y)) > epstol
+            xT[i] = u[i]
+        end
+    end
+    
+  
+ return (opt_face_ind,xT)
+end
 
-#   bnew = b - B*xu
-#   #dadf
-
-# end
+# Given an optimal face, and partially rounded flows, computes if there is a feasible flow. Existence of 
+#feasible flow implies that the computed flow is an optimal min cost flow.
+function compute_flows(Bt,opt_face_ind,xT,caps)
+    n,m = size(Bt)
+    bi = Bt.rowval[Bt.nzval .== 1]
+    bj = Bt.rowval[Bt.nzval .== -1]
+    edges = [bi bj]
+    
+    if length(opt_face_ind) ==0
+        return xT
+    end 
+    x_res = zeros(length(opt_face))
+    edges_res = edges[opt_face_ind,:]
+    
+    caps_res = caps[opt_face_ind,:]
+    dems_res = dems - Bt*xT
+    return check_flow_feasibility(edges,caps,dems)
+end
 
 #= Checks for feasibiligy of B^Tx = b, x>=0, u>=x.
 We do this using maxflow
 =#
-
 function check_flow_feasibility(edges,caps,dems)
 
 n = size(dems,1)
