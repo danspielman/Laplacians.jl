@@ -311,7 +311,7 @@ function sddmWrapLap(lapSolver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf,
     # Make a new adj matrix, a1, with an extra entry at the end.
     a, d = adj(sddm)
     a1 = extendMatrix(a,d)
-    F = lapSolver(a1, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params...)
+    F = lapSolver(a1; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params...)
 
     # make a function that solves the extended system, modulo the last entry
     tol_=tol
@@ -321,7 +321,7 @@ function sddmWrapLap(lapSolver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf,
     pcgIts_=pcgIts
 
     f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
-        @time xaug = F([b; -sum(b)], tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+        xaug = F([b; -sum(b)], tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
         xaug = xaug - xaug[end]
         return xaug[1:a.n]
     end

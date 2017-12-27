@@ -725,6 +725,7 @@ end
 
 
 """
+    solver = approxCholLap(a); x = solver(b);
     solver = approxCholLap(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
 
 A heuristic by Daniel Spielman inspired by the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.  Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
@@ -734,8 +735,7 @@ The `ApproxCholParams` let you choose one of three orderings to perform the elim
     This is the fastest for construction the preconditioner, but the slowest solve.
 * ApproxCholParams(:deg) - always eliminate the node of lowest degree.
     This is the slowest build, but the fastest solve.
-* ApproxCholParams(:wdeg) - go by a perturbed order of wted degree.
-    This is the sweet spot in between.
+* ApproxCholParams(:wdeg) - go by a perturbed order of wted degree.  
 """
 function approxCholLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
@@ -873,7 +873,7 @@ function approxCholLapWdeg(a::SparseMatrixCSC;
   end
 
 
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
 
 end
 
@@ -931,7 +931,8 @@ function approxCholLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 end
 
 """
-    solver = approxCholSddm(sddm; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
+    solver = approxCholSddm(sddm); x = solver(b);
+    solver = approxCholSddm(sddm; tol=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
 
 Solves sddm systems by wrapping approxCholLap.
 Not yet optimized directly for sddm.
