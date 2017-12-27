@@ -76,13 +76,19 @@ A random generalized ring graph of degree k.
 Gens always contains 1, and the other k-1 edge types
 are chosen from an exponential distribution
 """
-function randGenRing(n::Int64, k::Integer)
+function randGenRing(n::Int64, k::Integer; verbose=false)
     # if any of n, 2n, 3n etc. is in gens we will have self loops
     gens = [0]
     while 0 in (gens .% n)
         gens = [1; 1 + ceil.(Integer,exp.(rand(k-1)*log(n-1)))]
     end
 
+    if verbose
+        println("gens: $(gens)")
+    end
+    
+        
+    
     return generalizedRing(n, gens)
 end
 
@@ -480,7 +486,7 @@ function pureRandomGraph(n::Integer; verbose=false, prefix="")
     push!(wt,6)
 
     if n >= 4
-        push!(gr,:(randGenRing($n,4)))
+        push!(gr,:(randGenRing($n,4,verbose=$(verbose))))
         push!(wt,6)
     end
 
