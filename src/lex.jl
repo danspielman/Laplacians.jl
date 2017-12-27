@@ -309,7 +309,7 @@ function termFreeShortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv, Ti},
       if !visited[nbr]
         newdist = dv + 1.0 / mat.nzval[ind]
         if newdist < dists[nbr]
-          dists[nbr] = newdist
+          #dists[nbr] = newdist
           intHeapAdd!(nh,nbr,newdist)
           pArray[nbr] = v
         end # if
