@@ -6,7 +6,35 @@ The main purpose of this package is to experiment with the implementation of alg
 
 At present, the fastest solver in this package for Laplacians is
 [`approxCholLap`](@ref).
-For SDDM systems, one should use [`approxCholSddm`](@ref).
+For SDDM systems, one should use [`approxCholSddm`](@ref).  Here is a quick demo.  Read more for other solvers and other options you can pass to the solvers.
+
+~~~julia
+julia> a = grid3(50); # an adjacency matrix
+julia> la = lap(a); # it's Laplacian
+julia> sol = approxCholLap(a); # a solver for la
+julia> b = randn(size(la,1)); b = b - mean(b); # a right-hand-side
+julia> x = sol(b); # the solution
+julia> norm(la*x-b) / norm(b)
+5.911931368666469e-7
+julia> x = sol(b, tol=1e-12); # a higher accuracy solution
+julia> norm(la*x-b) / norm(b)
+7.555529748070115e-11
+julia> x = sol(b, tol=1e-1, verbose=true); # faster, lower accuracy, with info
+PCG stopped after: 0.022 seconds and 3 iterations with relative error 0.07929402690389374.
+
+julia> sddm = copy(la); # doing it with a SDDM matrix
+julia> sddm[1,1] += 1;
+julia> sol = approxCholSddm(sddm, verbose=true); # solver, with output
+Using greedy degree ordering. Factorization time: 0.7143130302429199
+Ratio of operator edges to original edges: 2.1120548223350255
+ratio of max to min diagonal of laplacian : 6.0
+Solver build time: 0.747 seconds.
+
+julia> x = sol(b, verbose=false); # a solve, supressing output
+julia> norm(sddm*x - b) / norm(b)
+8.739618692868002e-7
+~~~
+
 
 We recall that a matrix $ L $ is a _Laplacian_ matrix if:
 
