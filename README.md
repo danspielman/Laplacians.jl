@@ -17,6 +17,10 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
+## Version 0.2.2, December 28, 2017
+
+Fixed two bugs: one in shortestPaths, and one that prevented passing some parameters to approxCholSddm.  Improved the documentation for solving linear equations.
+
 ## Version 0.2.1, September 18, 2017
 
 Fixed a bug in `approxCholSddm` that caused it to be slow.
