@@ -14,7 +14,7 @@ julia:
 
 script:  
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'Pkg.clone(pwd()); Pkg.build("PyPlot"); Pkg.build("Laplacians"); Pkg.test("Laplacians"; coverage=true)'
+  - julia -e 'Pkg.clone(pwd()); Pkg.build("Laplacians"); Pkg.test("Laplacians"; coverage=true)'
   
 after_success:
   - julia -e 'cd(Pkg.dir("Laplacians")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
