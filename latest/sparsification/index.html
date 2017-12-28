@@ -215,7 +215,7 @@
 </code></pre>
 
 <p>Apply Spielman-Srivastava sparsification: sampling by effective resistances. <code>ep</code> should be less than 1.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/088b64af2fbe7fd1e436fae35474904309a06c30/src/sparsify.jl#L9-L14' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/4d73aa7682621d4e418a7614e05147e0bd263b15/src/sparsify.jl#L9-L14' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.approxQual-Tuple{Any,Any}' href='#Laplacians.approxQual-Tuple{Any,Any}'>#</a>
 <strong><code>Laplacians.approxQual</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>eps = approxQual(graph1, graph2; tol=1e-5, verbose=false)
@@ -223,7 +223,7 @@
 
 <p>Computes the eps for which graph1 and graph2 are eps approximations of each other. That is, L1 &lt;= (1+eps) L2, and vice versa.</p>
 <p>It is randomized, so you might want to run it again if you don't trust the answers.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/088b64af2fbe7fd1e436fae35474904309a06c30/src/conditionNumber.jl#L37-L44' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/4d73aa7682621d4e418a7614e05147e0bd263b15/src/conditionNumber.jl#L37-L44' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.conditionNumber-Tuple{SparseMatrixCSC,Function}' href='#Laplacians.conditionNumber-Tuple{SparseMatrixCSC,Function}'>#</a>
 <strong><code>Laplacians.conditionNumber</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>kappa = conditionNumber(graph, precon; tol=1e-5, verbose=false)
@@ -231,7 +231,7 @@
 
 <p>Computes the relative condition number of graph and a preconditioning function.</p>
 <p>It is randomized, so you might want to run it again if you don't trust the answers.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/088b64af2fbe7fd1e436fae35474904309a06c30/src/conditionNumber.jl#L72-L78' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/4d73aa7682621d4e418a7614e05147e0bd263b15/src/conditionNumber.jl#L72-L78' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.conditionNumber-Tuple{SparseMatrixCSC,SparseMatrixCSC}' href='#Laplacians.conditionNumber-Tuple{SparseMatrixCSC,SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.conditionNumber</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>kapps = conditionNumber(graph1, graph2; tol=1e-5, verbose=false)
@@ -239,14 +239,14 @@
 
 <p>Computes the relative condition number of graph1 and graph2.</p>
 <p>It is randomized, so you might want to run it again if you don't trust the answers.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/088b64af2fbe7fd1e436fae35474904309a06c30/src/conditionNumber.jl#L55-L61' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/4d73aa7682621d4e418a7614e05147e0bd263b15/src/conditionNumber.jl#L55-L61' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.support-Tuple{Any,Any}' href='#Laplacians.support-Tuple{Any,Any}'>#</a>
 <strong><code>Laplacians.support</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>sup12, sup21 = support(graph1, graph2; tol=1e-5)
 </code></pre>
 
 <p>Computes the support of graph1 wrt graph2, and the other way around. It is randomized, so you might want to run it again if you don't trust the answers.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/tree/088b64af2fbe7fd1e436fae35474904309a06c30/src/conditionNumber.jl#L8-L13' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/4d73aa7682621d4e418a7614e05147e0bd263b15/src/conditionNumber.jl#L8-L13' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
@@ -271,18 +271,18 @@
 
   Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
-	  
+      
         </div>
       </div>
 
     </section>
-    
+
   </div>
 
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/danspielman/Laplacians.jl" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/danspielman/Laplacians.jl/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../solvers/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
@@ -292,9 +292,12 @@
       
     </span>
 </div>
+    <script>var base_url = '..';</script>
     <script src="../js/theme.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
       <script src="../assets/mathjaxhelper.js"></script>
+      <script src="../search/require.js"></script>
+      <script src="../search/search.js"></script>
 
 </body>
 </html>
