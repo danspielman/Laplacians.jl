@@ -5,6 +5,8 @@ This algorithm is an implementation of an approximate edge-by-edge elimination
 algorithm inspired by the Approximate Gaussian Elimination algorithm of
 Kyng and Sachdeva.
 
+For usage exaples, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html
+
 There are two versions of this solver:
 one that fixes the order of elimination beforehand,
 and one that adapts the order to eliminate verties of low degree.
@@ -736,6 +738,8 @@ The `ApproxCholParams` let you choose one of three orderings to perform the elim
 * ApproxCholParams(:deg) - always eliminate the node of lowest degree.
     This is the slowest build, but the fastest solve.
 * ApproxCholParams(:wdeg) - go by a perturbed order of wted degree.  
+
+For more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html
 """
 function approxCholLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
@@ -936,6 +940,8 @@ end
 
 Solves sddm systems by wrapping approxCholLap.
 Not yet optimized directly for sddm.
+
+For more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html 
 """
 approxCholSddm = sddmWrapLap(approxCholLap)
 
