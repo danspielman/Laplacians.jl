@@ -6,9 +6,12 @@ module Laplacians
 
 
   function __init__()
+
+    #=
     if !isdefined(Main, :LAPLACIANS_NOPLOT) & !haskey(ENV,"LAPLACIANS_NOPLOT")
         eval(Expr(:using, :PyPlot))
     end
+    =#
 
     if isdefined(Main, :LAPLACIANS_AMG)
         eval(Expr(:using, :PyAMG))
