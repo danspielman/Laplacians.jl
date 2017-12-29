@@ -239,6 +239,10 @@ julia&gt; using IJulia
 <pre><code>jupyter notebook
 </code></pre>
 
+<p>Most users will also want to install PyPlot, if you did not already. To do that, type</p>
+<pre><code class="julia">Pkg.add(&quot;PyPlot&quot;)
+</code></pre>
+
 <p><a id='Laplacians-1'></a></p>
 <h2 id="laplacians">Laplacians</h2>
 <p>In theory, all you need to do now is type either</p>
@@ -249,8 +253,12 @@ julia&gt; using IJulia
 <pre><code class="julia">julia&gt; using Laplacians
 </code></pre>
 
-<p>This should add all the packages upon which Laplacians explicitly depends. </p>
-<p>Laplacians might add some packages that you do not want, or which might not be available on your system.  If you do not want to load PyPlot, then set </p>
+<p>The one catch is with the functions for drawing graphs.  These require PyPlot.  If you did not install it before typing <code>Pkg.add("PyPlot")</code>, then you can either install it now or disable the plotting routines in Laplacians.</p>
+<p>If you do not want to load PyPlot, then either set the environment variable <code>LAPLACIANS_NOPLOT</code> to <code>true</code> in bash, like</p>
+<pre><code>$ export LAPLACIANS_NOPLOT=true
+</code></pre>
+
+<p>or, set the variable inside Julia, like </p>
 <pre><code class="julia">julia&gt; LAPLACIANS_NOPLOT = true
 </code></pre>
 
@@ -258,7 +266,7 @@ julia&gt; using IJulia
 <pre><code class="julia">julia&gt; LAPLACIANS_NOAMG = true
 </code></pre>
 
-<p>Actually, defining these variables to anything will have the same effect.  So, setting them to false has the same effect as setting them to true.</p>
+<p>(note that these are not the same variable: the environment variable in Julia is available as <code>ENV["LAPLACIANS_NOPLOT"]</code>. Actually, defining these variables to anything will have the same effect.  So, setting them to false has the same effect as setting them to true.</p>
 <p>To see if Laplacians is working, try typing</p>
 <pre><code class="julia">a = chimera(100,6)
 spectralDrawing(a)
