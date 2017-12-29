@@ -41,6 +41,13 @@ This will install the package, and put the current julia kernel into [jupyter](h
 jupyter notebook
 ~~~
 
+Most users will also want to install PyPlot, if you did not already.
+To do that, type
+
+~~~julia
+Pkg.add("PyPlot")
+~~~
+
 ## Laplacians
 
 In theory, all you need to do now is type either
@@ -55,12 +62,15 @@ To use the package, you then type
 julia> using Laplacians
 ~~~
 
+The one catch is with the functions for drawing graphs.  These require PyPlot.  If you did not install it before typing `Pkg.add("PyPlot")`, then you can either install it now or disable the plotting routines in Laplacians.
 
-This should add all the packages upon which Laplacians explicitly depends. 
+If you do not want to load PyPlot, then either set the environment variable `LAPLACIANS_NOPLOT` to `true` in bash, like
 
-Laplacians might add some packages that you do not want, or which
-might not be available on your system.  If you do not want to load
-PyPlot, then set 
+~~~
+$ export LAPLACIANS_NOPLOT=true
+~~~
+
+or, set the variable inside Julia, like 
 
 ~~~julia
 julia> LAPLACIANS_NOPLOT = true
@@ -73,6 +83,7 @@ Similarly, you can avoid loading PyAmg by setting
 julia> LAPLACIANS_NOAMG = true
 ~~~
 
+(note that these are not the same variable: the environment variable in Julia is available as `ENV["LAPLACIANS_NOPLOT"]`.
 Actually, defining these variables to anything will have the same
 effect.  So, setting them to false has the same effect as setting them
 to true.
