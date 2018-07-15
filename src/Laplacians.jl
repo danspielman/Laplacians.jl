@@ -18,7 +18,6 @@ module Laplacians
 
   using DataStructures
   using SparseArrays
-  using Random
 
   include("fastCSC.jl")
   export symPermuteCSC
