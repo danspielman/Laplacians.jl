@@ -17,7 +17,7 @@ module Laplacians
   end
 
   using DataStructures
-
+  using SparseArrays
 
   include("fastCSC.jl")
   export symPermuteCSC
