@@ -1,5 +1,5 @@
-""" 
-  localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)
+"""
+    localImprove{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, A::Array{Int64,1}; epsSigma=-1.0, err=1e-10, maxSize = max(G.n, G.m)
 
 The LocalImprove function, from the Orrechia-Zhu paper. Given a graph and an initial set, finds a set of smaller conductance
 based on the starting set using a localized version of max-flow.
@@ -10,7 +10,7 @@ it might be the case that this new conductance will always be worse than what we
 our initial conductance might be the best solution we can raech.
 
 * G is the given graph, A is the initial set 
-* epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(V\A)
+* epsSigma is a measure of the quality of the returning set (the smaller the better). It's defaulted to volume(A) / volume(V - A)
 * err is the numerical error considered throughout the algorithm. It's defaulted to 1e-10
 * maxSize is the maximum allowed size for the flow graph at any iteration of the algorithm. It's defaulted to |V|
 """
