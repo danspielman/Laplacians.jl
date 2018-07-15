@@ -13,7 +13,7 @@ routine in Julia.  It basically does a radix sort on rows than columns. It does 
 to be symmetrix.  But, the same ideas could probably speed up many sparse matrix routines.
 `sympermute(a, perm)` is the same as `a[perm,perm]`.
 """
-function symPermuteCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, perm::Vector{Ti})
+function symPermuteCSC(a::SparseMatrixCSC{Tv, Ti}, perm::Vector{Ti}) where {Tv,Ti}
 
     numnz = nnz(a)
 
@@ -75,7 +75,7 @@ end
 
 
 """Compute the transpose of a matrix with symmetric nonzero structure"""
-function symTransposeCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti})
+function symTransposeCSC(a::SparseMatrixCSC{Tv, Ti}) where {Tv,Ti}
 
     numnz = nnz(a)
 
@@ -96,7 +96,7 @@ function symTransposeCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti})
 end
 
 """Given a set of integers, `set` between 1 and n, return a sorted version of them"""
-function sortSet{Ti}(set::Vector{Ti},n::Ti)
+function sortSet(set::Vector{Ti},n::Ti) where Ti
     v = zeros(Bool,n)
     for i in set
         v[i] = true
@@ -120,7 +120,7 @@ This is equivalent to
 sparse(ai[list],aj[list],av[list],a.m,a.n)
 ~~~
 """
-function submatrixCSC{Tv,Ti}(a::SparseMatrixCSC{Tv, Ti}, list::Vector{Ti})
+function submatrixCSC(a::SparseMatrixCSC{Tv, Ti}, list::Vector{Ti}) where {Tv,Ti}
 
     list = sortSet(list,nnz(a))
 

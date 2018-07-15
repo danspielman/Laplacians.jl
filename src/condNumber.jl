@@ -5,7 +5,7 @@ Generally more useful routines are in conditionNumber.
 Compute the condition number given the initial graph and the preconditioner.
 Uses cholfact, so, if the initial graph is not sdd or if inverse has a lot of nonzeros this fails. 
 =#
-function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, prec::SparseMatrixCSC{Tv,Ti}; tol = 1e-5)
+function condNumber(la::SparseMatrixCSC{Tv,Ti}, prec::SparseMatrixCSC{Tv,Ti}; tol = 1e-5) where {Tv,Ti}
 	# cf = cholfact(prec)
 	n = la.n
 	ldl = ldltfact(prec)
@@ -15,16 +15,16 @@ function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, prec::SparseMatrixCSC{Tv,
 end
 
 # M = Ut * d * U
-function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, d::Array{Tv,1}; tol = 1e-5)
+function condNumber(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}, d::Array{Tv,1}; tol = 1e-5) where {Tv,Ti}
 	return computeCN(la, U, d, tol=tol)
 end
 
 # M = Ut * U
-function condNumber{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}; tol = 1e-5)
+function condNumber(la::SparseMatrixCSC{Tv,Ti}, U::UpperTriangular{Tv,SparseMatrixCSC{Tv,Ti}}; tol = 1e-5) where {Tv,Ti}
 	return computeCN(la, U, ones(a.n), tol=tol)
 end
 
-function computeCN{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti}, U, d::Array{Tv,1}; tol=1e-5)
+function computeCN(la::SparseMatrixCSC{Tv,Ti}, U, d::Array{Tv,1}; tol=1e-5) where {Tv,Ti}
 
 	n = la.n
 

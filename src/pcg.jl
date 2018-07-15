@@ -144,8 +144,8 @@ function pcgLapSolver(A::AbstractMatrix, B::AbstractMatrix; tol::Real=1e-6, maxi
 
 end
 
-function cg{Tval}(mat, b::Vector{Tval};
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+function cg(mat, b::Vector{Tval};
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[]) where Tval
 
     local al::Tval
 
@@ -252,9 +252,9 @@ function cg{Tval}(mat, b::Vector{Tval};
     return bestx
 end
 
-function pcg{Tval}(mat, b::Vector{Tval}, pre::Function;
+function pcg(mat, b::Vector{Tval}, pre::Function;
         tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],
-        stag_test::Integer=0)
+        stag_test::Integer=0) where Tval
 
     local al::Tval
 
@@ -567,8 +567,8 @@ end
 
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar paramaters
-function cgBLAS{Tval}(mat, b::Vector{Tval};
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+function cgBLAS(mat, b::Vector{Tval};
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[]) where Tval
 
     n = size(mat,2)
 
@@ -635,8 +635,8 @@ end
 
 # For when you can't use BLAS.
 # set to use similar paramaters similar to MATLAB
-function cgSlow{Tval}(mat, b::Vector{Tval};
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+function cgSlow(mat, b::Vector{Tval};
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[]) where Tval
 
     n = size(mat,2)
 
@@ -714,8 +714,8 @@ end
 
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar parameters "
-function pcgBLAS{Tval}(mat, b::Vector{Tval}, pre;
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+function pcgBLAS(mat, b::Vector{Tval}, pre;
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[]) where Tval
 
     n = size(mat,2)
 
@@ -790,8 +790,8 @@ function pcgBLAS{Tval}(mat, b::Vector{Tval}, pre;
     return x
 end
 
-function pcgSlow{Tval}(mat, b::Vector{Tval}, pre;
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
+function pcgSlow(mat, b::Vector{Tval}, pre;
+        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[]) where Tval
 
 
     n = size(mat,2)

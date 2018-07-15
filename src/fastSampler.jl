@@ -8,7 +8,7 @@ struct FastSampler{Tv,Ti}
 end
 
 # sample a random number
-function sample{Tv,Ti}(s::FastSampler{Tv,Ti})
+function sample(s::FastSampler{Tv,Ti}) where {Tv,Ti}
     #i = rand(1:s.n)
     i = ceil(Ti,rand(s.rng)*s.n)
     f = rand(s.rng)
@@ -20,7 +20,7 @@ function sample{Tv,Ti}(s::FastSampler{Tv,Ti})
 end
 
 # sample a random number
-function sampleMany{Tv,Ti}(s::FastSampler{Tv,Ti},sampCount::Ti)
+function sampleMany(s::FastSampler{Tv,Ti},sampCount::Ti) where {Tv,Ti}
     #i = rand(1:s.n)
     samples = Array{Ti,1}(sampCount)
     for j = 1:sampCount
@@ -38,7 +38,7 @@ end
 """
     s = FastSampler(p)
 """
-function FastSampler{Tv}(p::Array{Tv,1}; residual::Bool = false, rng::AbstractRNG=Base.Random.GLOBAL_RNG)
+function FastSampler(p::Array{Tv,1}; residual::Bool = false, rng::AbstractRNG=Base.Random.GLOBAL_RNG) where Tv
 
     @assert(minimum(p) > 0, "The probability vector has a negative entry")
 

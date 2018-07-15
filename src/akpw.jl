@@ -596,7 +596,7 @@ end
 
 
 # convert (ai,aj,av) to an array of IJVind entries
-function IJVindList{Tv,Ti}(ai::Vector{Ti},aj::Vector{Ti},av::Vector{Tv})
+function IJVindList(ai::Vector{Ti},aj::Vector{Ti},av::Vector{Tv}) where {Tv,Ti}
 
     m = length(ai)
     origList = Vector{IJVind}(m)
@@ -892,7 +892,7 @@ end
 
 # question is how to combine.  right now use max of wts, but sum might be reasonable too
 # it carries around with it aind--which is a map on edges
-function combineMultiG{Ti,Tv}(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  aind::Vector{Ti})
+function combineMultiG(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  aind::Vector{Ti}) where {Ti,Tv}
 
     numnz = length(ai)
 

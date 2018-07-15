@@ -4,7 +4,7 @@
 	the vertex that has the maximum value of (Deg_external - Deg_Internal).
 	Each vertex can be added in/removed only once.
 """
-function refineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+function refineCut(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}) where {Tv,Ti}
 
 	n = max(G.n, G.m)
 
@@ -101,7 +101,7 @@ end
 	Modify a cluster by passing through all the vertices exactly once and 
 	adding/removing them based on the value of (Deg_external - Deg_Internal).
 """
-function dumbRefineCut{Tv,Ti}(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1})
+function dumbRefineCut(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}) where {Tv,Ti}
 
 	n = max(G.n, G.m)
 

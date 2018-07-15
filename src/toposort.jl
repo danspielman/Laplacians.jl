@@ -8,7 +8,7 @@ compute a topological sorting of the vertices, s.t.
 Please check that the edge direction agrees with what you want before usage!
 =#
 
-function toposort{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
+function toposort(mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
     # each COL i gives the outgoing edges of vertex i
     n = mat.n
     colptr::Array{Ti,1} = mat.colptr

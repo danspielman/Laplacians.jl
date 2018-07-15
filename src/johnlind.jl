@@ -8,10 +8,10 @@ of the actual bounds.
 ~~~
 """
 
-function johnlind{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-						eps::Tv = 0.5,
-						solver=approxCholLap,
-						retXhat::Bool = false)
+function johnlind(a::SparseMatrixCSC{Tv,Ti};
+ 				eps::Tv = 0.5,
+ 				solver=approxCholLap,
+ 				retXhat::Bool = false) where {Tv,Ti}
 
 	n = a.n
 	m = length(a.nzval)

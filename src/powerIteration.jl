@@ -1,5 +1,5 @@
 # get the max eigenvalue using the power method
-function powerIteration{Tv,Ti}(op::SqLinOp{Tv,Ti}; tol=1e-3, maxit = Inf, verbose=false)
+function powerIteration(op::SqLinOp{Tv,Ti}; tol=1e-3, maxit = Inf, verbose=false) where {Tv,Ti}
 
 	n = op.n
 

@@ -17,10 +17,10 @@ On input ‘A’ and ‘v’, the code computes a vector ‘x’ of same length 
 """Compute isotonic regression of v with constraints given by A,
 and multiplicative error param eps,
 using a PD SDD linear system solver, given by argument *solver*."""
-function isotonicIPMrelEps{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
-                                  v::Array{Tv,1},
-                                  eps::Real=0.1,
-                                  solver=(H -> augTreeSddm(H,tol=1e-1,maxits=1000)))
+function isotonicIPMrelEps(A::SparseMatrixCSC{Tv,Ti},
+                           v::Array{Tv,1},
+                           eps::Real=0.1,
+                           solver=(H -> augTreeSddm(H,tol=1e-1,maxits=1000))) where {Tv,Ti}
     return isotonicIPM(A,v,eps,solver,true)
 end
 
@@ -28,11 +28,11 @@ end
 and additive error param eps,
 using a PD SDD linear system solver, given by argument *solver*.
 Setting relGapTermination=true means the IPM continues until a multiplicative error of eps is reached."""
-function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
-                            v::Array{Tv,1},
-                            eps::Tv=0.1,
-                            solver=(H -> augTreeSddm(H,tol=1e-1,maxits=1000)),
-                            relGapTermination::Bool=false)
+function isotonicIPM(A::SparseMatrixCSC{Tv,Ti},
+                     v::Array{Tv,1},
+                     eps::Tv=0.1,
+                     solver=(H -> augTreeSddm(H,tol=1e-1,maxits=1000)),
+                     relGapTermination::Bool=false) where {Tv,Ti}
     n = size(A)[1]
     topoOrder = toposort(A)
     permMat = (speye(n))[1:n,topoOrder]
@@ -130,11 +130,11 @@ function isotonicIPM{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti},
     return (x,relGap,i)
 end
         
-function l2NewtonStep{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
-                              x::Array{Tv,1},
-                              v::Array{Tv,1},
-                              mu0::Real,
-                              solver )
+function l2NewtonStep( Bt::SparseMatrixCSC{Tv,Ti},
+                       x::Array{Tv,1},
+                       v::Array{Tv,1},
+                       mu0::Real,
+                       solver ) where {Tv,Ti}
     m = size(Bt)[1]
     n = size(Bt)[2]
     d1 = 2 * mu0 * speye(n)
@@ -155,21 +155,21 @@ function l2NewtonStep{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
     return (H,xNewton)
 end
 
-function dualVal{Tv,Ti}( Bt::SparseMatrixCSC{Tv,Ti},
-                         x::Array{Tv,1},
-                         v::Array{Tv,1},
-                         mu0::Real)
+function dualVal( Bt::SparseMatrixCSC{Tv,Ti},
+                  x::Array{Tv,1},
+                  v::Array{Tv,1},
+                  mu0::Real) where {Tv,Ti}
     s = Bt*x # all pos entries
     f = 1/mu0 * 1./s 
     dval = (-1/4 * sum((Bt'*f).^2) - f'*Bt*v)[1]
     return dval
 end
 
-function backtrackLineSearch{Tv,Ti}(F,
-                             gradF::Array{Tv,1},
-                             Bt::SparseMatrixCSC{Tv,Ti},
-                             xNewton::Array{Tv,1},
-                             x::Array{Tv,1})
+function backtrackLineSearch(F,
+                      gradF::Array{Tv,1},
+                      Bt::SparseMatrixCSC{Tv,Ti},
+                      xNewton::Array{Tv,1},
+                      x::Array{Tv,1}) where {Tv,Ti}
     #track line search as in Boyd's book
     A0 = 0.01;
     B0 = 0.5;
@@ -191,7 +191,7 @@ function backtrackLineSearch{Tv,Ti}(F,
     return xt
 end
 
-function notFeasible{Tv,Ti}(x::Array{Tv,1},
-                     Bt::SparseMatrixCSC{Tv,Ti})
+function notFeasible(x::Array{Tv,1},
+              Bt::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
     return minimum(Bt * x) <= 0 #not feasible if some entry is non-positive
 end

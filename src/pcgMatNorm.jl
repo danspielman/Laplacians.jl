@@ -18,7 +18,7 @@ Contributors: Serban Stan
 `lhs` defaults to the all zeros vector
 """
 
-function pcgMatNorm{Tv}(mat, b::Array{Tv,1}, pre::Function, lhs::Array{Tv,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+function pcgMatNorm(mat, b::Array{Tv,1}, pre::Function, lhs::Array{Tv,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false) where Tv
     return pcgBLASMatNorm(mat, b, pre, lhs, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose)
 end
 
@@ -30,7 +30,7 @@ end
 
 # uses BLAS.  As fast as Matlab's pcg.
 # set to use similar paramaters
-function pcgBLASMatNorm{Tval}(mat, b::Array{Tval,1}, pre, lhs::Array{Tval,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false)
+function pcgBLASMatNorm(mat, b::Array{Tval,1}, pre, lhs::Array{Tval,1}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false) where Tval
 
     n = size(mat,2)
     

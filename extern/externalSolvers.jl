@@ -5,7 +5,7 @@ A wrapper for the PyAMG solver.
  amgSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, pcgIts=Int[], verbose=false)
 ~~~
 """
-function AMGSolver{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, pcgIts=Int[], verbose=false)
+function AMGSolver(ddmat::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, pcgIts=Int[], verbose=false) where {Tv,Ti}
 
   amg = PyAMG.RugeStubenSolver(ddmat);
   M = PyAMG.aspreconditioner(amg);
@@ -34,7 +34,7 @@ A wrapper for the PyAMG solver. In line with our other solvers, takes in an adja
  amgSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, pcgIts=Int[], verbose=false)
 ~~~
 """
-function AMGLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, pcgIts=Int[], verbose=false)
+function AMGLapSolver(a::SparseMatrixCSC{Tv,Ti}; tol::Float64=1e-6, maxits=Inf, maxtime=Inf, pcgIts=Int[], verbose=false) where {Tv,Ti}
 
   la = lap(a)
 

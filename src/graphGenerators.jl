@@ -184,7 +184,7 @@ grid2(n::Int64) = grid2(n,n)
 
 An n1-by-n2-by-n3 grid graph.
 """
-function grid3{Ti}(n1::Ti, n2::Ti, n3::Ti)
+function grid3(n1::Ti, n2::Ti, n3::Ti) where Ti
     a = productGraph(pathGraph(n1), productGraph(pathGraph(n2), pathGraph(n3)))
     return a
 end

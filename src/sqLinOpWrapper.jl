@@ -14,21 +14,21 @@ struct SqLinOp{Tv,Ti}
     SqLinOp{Tv,Ti}(issym,value,n,multFn) where {Tv,Ti} = new(issym,value,n,multFn)
 end
 
-SqLinOp{Tv,Ti}(issym,value::Tv,index::Ti,multFn) = SqLinOp{Tv,Ti}(issym,value,index,multFn)
+SqLinOp(issym,value::Tv,index::Ti,multFn) where {Tv,Ti} = SqLinOp{Tv,Ti}(issym,value,index,multFn)
 
-eltype{Tv,Ti}(A::SqLinOp{Tv,Ti}) = Tv
+eltype(A::SqLinOp{Tv,Ti}) where {Tv,Ti} = Tv
 
-size{Tv,Ti}(A::SqLinOp{Tv,Ti}, d::Ti) = A.n
+size(A::SqLinOp{Tv,Ti}, d::Ti) where {Tv,Ti} = A.n
 
-size{Tv,Ti}(A::SqLinOp{Tv,Ti}) = (A.n,A.n)
+size(A::SqLinOp{Tv,Ti}) where {Tv,Ti} = (A.n,A.n)
 
-issymmetric{Tv,Ti}(A::SqLinOp{Tv,Ti}) = A.issym
+issymmetric(A::SqLinOp{Tv,Ti}) where {Tv,Ti} = A.issym
 
-function *{Tv,Ti}(A::SqLinOp{Tv,Ti}, b)
+function *(A::SqLinOp{Tv,Ti}, b) where {Tv,Ti}
     return A.multFn(b)
 end
 
-function A_mul_B!{Tv,Ti}(Y, A::SqLinOp{Tv,Ti}, B) 
+function A_mul_B!(Y, A::SqLinOp{Tv,Ti}, B) where {Tv,Ti} 
     Y1 = A*B
     for i in 1:A.n
         Y[i] = Y1[i]
@@ -36,7 +36,7 @@ function A_mul_B!{Tv,Ti}(Y, A::SqLinOp{Tv,Ti}, B)
 end
 
 
-function testId{Ti}(n::Ti)
+function testId(n::Ti) where Ti
     return M = SqLinOp{Float64,Int64}(true,1.0,n,x -> x)
 end
 
