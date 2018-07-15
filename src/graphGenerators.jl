@@ -688,7 +688,7 @@ function randWeightSub(a)
         # mult by matrix ?
         if (rand() < .5)
 
-            invdeg = spdiagm(1./(a*ones(size(a)[1])))
+            invdeg = spdiagm(1 ./(a*ones(size(a)[1])))
             if (rand() < .5)
                 for i in 1:10
                     v = a * (invdeg * v)
@@ -712,7 +712,7 @@ function randWeightSub(a)
     w[isnan.(w)] = 1
 
     if (rand() < .5)
-        w = 1./w
+        w = 1 ./w
     end
 
     w = w / mean(w)
