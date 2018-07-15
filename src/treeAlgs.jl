@@ -29,9 +29,9 @@ weights(tr::RootedTree, i) = tr.weights[tr.kidsPtr[i]:(tr.kidsPtr[i]+tr.numKids[
 # matToTree takes a weighted tree in mat format, and produces
 # a RootedTree from it
 
-matToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}) = matToTree(mat, 1::Ti)
+matToTree(mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti} = matToTree(mat, 1::Ti)
 
-function matToTree{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)
+function matToTree(mat::SparseMatrixCSC{Tv,Ti}, root::Ti) where {Tv,Ti}
 
   n = mat.n
   visited = zeros(Bool,n)
@@ -95,9 +95,9 @@ end
 # create a rooted tree structure, and compute the depth as we go
 # this is faster than doing it independently
 
-matToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}) = matToTreeDepth(mat, 1::Ti)
+matToTreeDepth(mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti} = matToTreeDepth(mat, 1::Ti)
 
-function matToTreeDepth{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, root::Ti)
+function matToTreeDepth(mat::SparseMatrixCSC{Tv,Ti}, root::Ti) where {Tv,Ti}
 
   n = mat.n
   visited = zeros(Bool,n)
@@ -198,7 +198,7 @@ end
 # and each subtree is completed before a parallel subtree
 #
 # this matrix should be the adj matrix of a tree
-function dfsOrder{Tv,Ti}(t::SparseMatrixCSC{Tv,Ti}; start::Ti = 1)
+function dfsOrder(t::SparseMatrixCSC{Tv,Ti}; start::Ti = 1) where {Tv,Ti}
 
     n = size(t,1)
     seen = zeros(Bool,n)
@@ -263,7 +263,7 @@ end
 =#
 
 # this is intended to be used with a tree
-function bfsOrder{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
+function bfsOrder(mat::SparseMatrixCSC{Tv,Ti}, start::Ti) where {Tv,Ti}
   n = mat.n
   visited = zeros(Bool,n)
 
@@ -313,7 +313,7 @@ end # bfsOrder
 # and, when I just run that without the rest, it is most of the time.
 # this will save time by computing stretch directly,
 # by using the depth
-function tarjanStretch{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, depth::Array{Tv,1})
+function tarjanStretch(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, depth::Array{Tv,1}) where {Tv,Ti}
     n = length(t.parent)
     su = IntDisjointSets(n)
 
@@ -335,8 +335,8 @@ function tarjanStretch{Tv,Ti}(t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti},
 
 end # tarjanStretch
 
-function tarjanStretchSub{Tv,Ti}(u::Ti, t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, ancestor::Array{Ti,1},
-                                 answer::Array{Tv,1}, seen::Array{Bool,1}, su::IntDisjointSets, depth::Array{Tv,1})    
+function tarjanStretchSub(u::Ti, t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}, ancestor::Array{Ti,1},
+                          answer::Array{Tv,1}, seen::Array{Bool,1}, su::IntDisjointSets, depth::Array{Tv,1}) where {Tv,Ti}    
 
     ord = dfsOrder(t)
 
@@ -378,7 +378,7 @@ end # TarjanStretchSub
 Returns the answer as a sparse matrix with the same nonzero structure as `mat`.
 Assumes that `mat` is symmetric.
 `tree` should be the adjacency matrix of a spanning tree."""
-function compStretches{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti})
+function compStretches(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
 
     t, depth = matToTreeDepth(tree)
 
@@ -391,7 +391,7 @@ end # compStretches
 """Compute the vector of depths in a tree that is in DFS order,
 *with the root at the first position, and the leaves at the end*
 """
-function treeDepthDFS{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti})
+function treeDepthDFS(tree::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
     n = tree.n
 
     depth = zeros(Tv,n)

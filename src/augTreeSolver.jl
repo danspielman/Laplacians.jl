@@ -38,7 +38,7 @@ and k edges sampled according to stretch.
 
 This is the old alg.  We now recommend using augmentTreeOpt.
 """
-function augmentTree{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}, k::Ti)
+function augmentTree(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}, k::Ti) where {Tv,Ti}
 
     st = compStretches(tree, A)
 
@@ -93,7 +93,7 @@ shooting for nnzL_fac times n entries in the factored augmented tree,
 with a number of flops to factor equal to nnz(a)*flops_fac.
 The edges to add back are then choen at random.
 """
-function augmentTreeOpt{Tv,Ti}(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}; params=AugTreeParams())
+function augmentTreeOpt(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}; params=AugTreeParams()) where {Tv,Ti}
 
     Aminus = A - tree
     
@@ -193,7 +193,7 @@ It adds back 2sqrt(n) edges via augmentTree: the sqrt(n) of highest stretch
 and another sqrt(n) sampled according to stretch.
 For most purposes, one should directly call `augTreeSolver`.
 """
-function augTreePrecon{Tv,Ti}(ddmat::SparseMatrixCSC{Tv,Ti};  params=AugTreeParams())
+function augTreePrecon(ddmat::SparseMatrixCSC{Tv,Ti};  params=AugTreeParams()) where {Tv,Ti}
 
   adjmat = -triu(ddmat,1)
   adjmat = adjmat + adjmat'
@@ -228,7 +228,7 @@ An "augmented spanning tree" solver for positive definite diagonally dominant ma
 * `params.treeAlg` default to `akpw`
 * `params.opt` if true, it interacts with cholmod to choose a good number of edges to add back.  If false, it adds back 2*sqrt(n).
 """
-function augTreeSddm{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],  params=AugTreeParams())
+function augTreeSddm(sddm::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],  params=AugTreeParams()) where {Tv,Ti}
 
     t1 = time()
     
@@ -257,7 +257,7 @@ It takes as optional input a tree growing algorithm.
 It adds back 2sqrt(n) edges via `augmentTree`: the sqrt(n) of highest stretch
 and another sqrt(n) sampled according to stretch.
 For most purposes, one should directly call `augTreeLapSolver`."""
-function augTreeLapPrecon{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; params=AugTreeParams())
+function augTreeLapPrecon(a::SparseMatrixCSC{Tv,Ti}; params=AugTreeParams()) where {Tv,Ti}
 
     tree = params.treeAlg(a)
 
@@ -288,14 +288,14 @@ An "augmented spanning tree" solver for Laplacians.  It works by adding edges to
 * `params.treeAlg` default to `akpw`
 * `params.opt` if true, it interacts with cholmod to choose a good number of edges to add back.  If false, it adds back 2*sqrt(n).
 """
-function augTreeLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params=AugTreeParams())
+function augTreeLap(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params=AugTreeParams()) where {Tv,Ti}
 
     return lapWrapComponents(augTreeLap1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, params=params)
 
 
 end
      
-function augTreeLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params=AugTreeParams())
+function augTreeLap1(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params=AugTreeParams()) where {Tv,Ti}
 
   F = augTreeLapPrecon(a, params=params)
 

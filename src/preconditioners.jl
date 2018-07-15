@@ -1,6 +1,6 @@
 
 # applies the jacobi preconditioner of the laplacian (diagonal entries)
-function jacobi{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
+function jacobi(la::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
 	
 	d = diag(la)
 
@@ -17,7 +17,7 @@ function jacobi{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
 end
 
 # applies the gauss siedel preconditioner. precond = (D + L) * D^-1 * (D + U)
-function gs{Tv,Ti}(la::SparseMatrixCSC{Tv,Ti})
+function gs(la::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
 
 	m1 = LowerTriangular(la)
 	m2 = 1 ./ diag(la)

@@ -61,7 +61,7 @@ c = components(gr)
 ~~~
 
 """
-function components{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti})
+function components(mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
   n = mat.n
 
   order = Array{Ti}(n)
@@ -132,7 +132,7 @@ comps = vecToComps(c)
 ~~~
 
 """
-function vecToComps{Ti}(compvec::Vector{Ti})
+function vecToComps(compvec::Vector{Ti}) where Ti
     nc = maximum(compvec)
     comps = Vector{Vector{Ti}}(nc)
 
@@ -171,7 +171,7 @@ in the shortest path tree.
 This algorithm treats edge weights as reciprocals of distances.
 DOC BETTER
 """
-function shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
+function shortestPaths(mat::SparseMatrixCSC{Tv,Ti}, start::Ti) where {Tv,Ti}
   n = mat.n
   visited = zeros(Bool,n)
 
@@ -208,7 +208,7 @@ function shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}, start::Ti)
 
 end # shortestPaths
 
-shortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}) = shortestPaths(mat, one(Ti))
+shortestPaths(mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti} = shortestPaths(mat, one(Ti))
 
 # computes the path from vertex y to start based on parents array
 function pathFromParents(parents, y)
@@ -254,7 +254,7 @@ end #intHeap
 intHeap(n::Int64) = intHeap(Inf*ones(Float64,n),-ones(Int64,n),zeros(Int64,n),0)
 intHeap(n::Int32) = intHeap(Inf*ones(Float32,n),-ones(Int32,n),zeros(Int32,n),0)
 
-function intHeapAdd!{Tkey,Tind}(nh::intHeap, node::Tind, key::Tkey)
+function intHeapAdd!(nh::intHeap, node::Tind, key::Tkey) where {Tkey,Tind}
   if nh.index[node] > 0 # if already in the heap
     if key < nh.keys[node]
       intHeapSet!(nh, node, key)
@@ -274,7 +274,7 @@ function intHeapAdd!{Tkey,Tind}(nh::intHeap, node::Tind, key::Tkey)
   end
 end # intHeapAdd!
 
-function intHeapDown!{Tind}(nh::intHeap, node::Tind)
+function intHeapDown!(nh::intHeap, node::Tind) where Tind
   pos = nh.index[node]
   key = nh.keys[node]
   leftPos = pos*2
@@ -334,7 +334,7 @@ function intHeapPop!(nh::intHeap)
   return minNode
 end # intHeapPop!
 
-function intHeapUp!{Tind}(nh::intHeap, node::Tind)
+function intHeapUp!(nh::intHeap, node::Tind) where Tind
   pos = nh.index[node]
   moved = true
 
@@ -389,7 +389,7 @@ function intHeapSort(nh::intHeap)
 
 end # intHeapSort
 
-function intHeapSet!{Tkey,Tind}(nh::intHeap, node::Tind, key::Tkey)
+function intHeapSet!(nh::intHeap, node::Tind, key::Tkey) where {Tkey,Tind}
   oldKey = nh.keys[node]
   nh.keys[node] = key
 
@@ -404,7 +404,7 @@ end # intHeapSet!
 Uses Kruskal's algorithm to compute a minimum (or maximum) spanning tree.
 Set kind=:min if you want the min spanning tree.
 It returns it a a graph"""
-function kruskal{Tv,Ti}(mat::SparseMatrixCSC{Tv,Ti}; kind=:max)
+function kruskal(mat::SparseMatrixCSC{Tv,Ti}; kind=:max) where {Tv,Ti}
   n = size(mat)[1]
   (ai,aj,av) = findnz(triu(mat))
   if (kind == :min)

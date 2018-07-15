@@ -43,7 +43,7 @@ end
 
 A heuristic for computing low-stretch spanning trees.  Where Prim's MST algorithm grows a cluster by always adding the edge on the boundary of maximum weight, this algorithm adds a boundary edge with probability proportional to its weight.
 """
-function randishPrim{Tval,Tind}(mat::SparseMatrixCSC{Tval,Tind})
+function randishPrim(mat::SparseMatrixCSC{Tval,Tind}) where {Tval,Tind}
 
   n = mat.n
   m = nnz(mat)

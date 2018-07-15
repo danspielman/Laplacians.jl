@@ -30,10 +30,10 @@ initVal: array[n] of initial voltage assignments;
 =#
 
 
-function simIterLexUnwtd{Tv, Ti}(numIter::Int64,
-                                 A::SparseMatrixCSC{Tv, Ti},
-                                 isTerm::Vector{Bool},
-                                 initVal::Vector{Float64}, )
+function simIterLexUnwtd(numIter::Int64,
+                         A::SparseMatrixCSC{Tv, Ti},
+                         isTerm::Vector{Bool},
+                         initVal::Vector{Float64}, ) where {Tv, Ti}
   n = A.n
   val = copy(initVal)
   nextVal = zeros(Float64, n)
@@ -70,10 +70,10 @@ function simIterLexUnwtd{Tv, Ti}(numIter::Int64,
 end
 
 
-function simIterLex{Tv<:Float64, Ti}(numIter::Int64,
-                                     A::SparseMatrixCSC{Tv, Ti},
-                                     isTerm::Vector{Bool},
-                                     initVal::Vector{Float64} )
+function simIterLex(numIter::Int64,
+                    A::SparseMatrixCSC{Tv, Ti},
+                    isTerm::Vector{Bool},
+                    initVal::Vector{Float64} ) where {Tv<:Float64, Ti}
   n = A.n
   val = copy(initVal)
   nextVal = zeros(Float64, n)
@@ -176,12 +176,12 @@ eps: absolute error tolerance;
 fatal: if true, throws error and halt; if false, return false;
 
 =#
-function checkLex{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti},
-                          isTerm::Vector{Bool},
-                          initVal::Vector{Float64},
-                          lex::Vector{Float64};
-                          eps::Float64 = LEX_EPS,
-                          fatal::Bool = true)
+function checkLex(A::SparseMatrixCSC{Tv, Ti},
+                  isTerm::Vector{Bool},
+                  initVal::Vector{Float64},
+                  lex::Vector{Float64};
+                  eps::Float64 = LEX_EPS,
+                  fatal::Bool = true) where {Tv, Ti}
   n = A.n
 
   for i in 1:n
@@ -282,9 +282,9 @@ end
 
 # Shortest Paths _without_ going past terminals.
 # Treat weights as reciprocals of distances.
-function termFreeShortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv, Ti},
-                                      start::Ti,
-                                      isTerm = zeros(Bool, mat.n), )
+function termFreeShortestPaths(mat::SparseMatrixCSC{Tv, Ti},
+                               start::Ti,
+                               isTerm = zeros(Bool, mat.n), ) where {Tv,Ti}
   n = mat.n
   visited = zeros(Bool,n)
 
@@ -320,10 +320,10 @@ function termFreeShortestPaths{Tv,Ti}(mat::SparseMatrixCSC{Tv, Ti},
   return copy(dists), pArray
 end # termFreeShortestPaths
 
-function ModDijkstra{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                             isTerm::Vector{Bool},
-                             initVal::Vector{Float64},
-                             alpha::Float64, )
+function ModDijkstra(G::SparseMatrixCSC{Tv, Ti},
+                     isTerm::Vector{Bool},
+                     initVal::Vector{Float64},
+                     alpha::Float64, ) where {Tv, Ti}
   n = G.n
   finished = zeros(Bool, n)
 
@@ -359,17 +359,17 @@ function ModDijkstra{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
   return val, parent
 end
 
-function CompVLow{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                          isTerm::Vector{Bool},
-                          initVal::Vector{Float64},
-                          alpha::Float64)
+function CompVLow(G::SparseMatrixCSC{Tv, Ti},
+                  isTerm::Vector{Bool},
+                  initVal::Vector{Float64},
+                  alpha::Float64) where {Tv, Ti}
   return ModDijkstra(G, isTerm, initVal, alpha)
 end
 
-function CompVHigh{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                           isTerm::Vector{Bool},
-                           initVal::Vector{Float64},
-                           alpha::Float64)
+function CompVHigh(G::SparseMatrixCSC{Tv, Ti},
+                   isTerm::Vector{Bool},
+                   initVal::Vector{Float64},
+                   alpha::Float64) where {Tv, Ti}
   newInitVal = -copy(initVal)
   temp, parent = ModDijkstra(G, isTerm, newInitVal, alpha)
   return -temp, parent
@@ -494,7 +494,7 @@ function StarSteepestPath(T, v, d)
     return (T[1], T[1])
   end
   if (numT == 2)
-    return (v[1] > v[2])? (T[1],T[2]) : (T[2], T[1])
+    return (v[1] > v[2]) ? (T[1],T[2]) : (T[2], T[1])
   end
 
   i = rand(1:length(T))
@@ -526,7 +526,7 @@ function StarSteepestPath(T, v, d)
     end
   end
   if (findfirst(T2, true) == 0 || vLow >= vHigh)
-    return (v[i] > v[i2])? (T[i],T[i2]) : (T[i2], T[i])
+    return (v[i] > v[i2]) ? (T[i],T[i2]) : (T[i2], T[i])
   else
     if (findfirst(T2, false) == 0)
       println(T, v, d)
@@ -696,9 +696,9 @@ end # SteepestPath
 
 # remove (x,y) in E(G) such that both x and y are terminals;
 # returns max_{x,y} grad[x,y]
-function removeTerm2TermEdges!{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                                       isTerm::Vector{Bool},
-                                       val::Vector{Float64} )
+function removeTerm2TermEdges!(G::SparseMatrixCSC{Tv, Ti},
+                               isTerm::Vector{Bool},
+                               val::Vector{Float64} ) where {Tv, Ti}
   n = G.n
   terms = find(isTerm)
   alpha = -Inf
@@ -721,9 +721,9 @@ end
 
 # G may change (terminal to terminal edges will be removed)
 # returns a new assignment
-function CompInfMin{Tv, Ti}(G::SparseMatrixCSC{Tv, Ti},
-                            isTerm::Vector{Bool},
-                            val::Vector{Float64} )
+function CompInfMin(G::SparseMatrixCSC{Tv, Ti},
+                    isTerm::Vector{Bool},
+                    val::Vector{Float64} ) where {Tv, Ti}
   alpha = removeTerm2TermEdges!(G, isTerm, val)
 
   cpnts = components(G)

@@ -50,17 +50,17 @@ end
 ApproxCholParams() = ApproxCholParams(:deg, 5)
 ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5)
 
-LDLinv{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}) =
+LDLinv(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval} =
   LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array{Tind}(0),Array{Tval}(0),zeros(Tval,a.n))
 
-LDLinv{Tind,Tval}(a::LLMatOrd{Tind,Tval}) =
+LDLinv(a::LLMatOrd{Tind,Tval}) where {Tind,Tval} =
   LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array{Tind}(0),Array{Tval}(0),zeros(Tval,a.n))
 
-LDLinv{Tind,Tval}(a::LLmatp{Tind,Tval}) =
+LDLinv(a::LLmatp{Tind,Tval}) where {Tind,Tval} =
   LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array{Tind}(0),Array{Tval}(0),zeros(Tval,a.n))
 
 
-function LLmatp{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
+function LLmatp(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
     n = size(a,1)
     m = nnz(a)
 
@@ -110,7 +110,7 @@ function print_ll_col(llmat::LLmatp, i::Int)
     end
 end
 
-function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
+function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
     n = size(a,1)
     m = nnz(a)
 
@@ -139,7 +139,7 @@ function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind})
     return LLMatOrd{Tind,Tval}(n, cols, llelems)
 end
 
-function LLMatOrd{Tind,Tval}(a::SparseMatrixCSC{Tval,Tind}, perm::Array)
+function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, perm::Array) where {Tind,Tval}
     n = size(a,1)
     m = nnz(a)
 
@@ -193,9 +193,9 @@ The approximate factorization
 
 =============================================================#
 
-function get_ll_col{Tind,Tval}(llmat::LLmatp{Tind,Tval},
+function get_ll_col(llmat::LLmatp{Tind,Tval},
   i,
-  colspace::Vector{LLp{Tind,Tval}})
+  colspace::Vector{LLp{Tind,Tval}}) where {Tind,Tval}
 
 
     ll = llmat.cols[i]
@@ -226,9 +226,9 @@ function get_ll_col{Tind,Tval}(llmat::LLmatp{Tind,Tval},
     return len
 end
 
-function get_ll_col{Tind,Tval}(llmat::LLMatOrd{Tind,Tval},
+function get_ll_col(llmat::LLMatOrd{Tind,Tval},
   i,
-  colspace::Vector{LLcol{Tind,Tval}})
+  colspace::Vector{LLcol{Tind,Tval}}) where {Tind,Tval}
 
     ptr = llmat.cols[i]
     len = 0
@@ -254,10 +254,10 @@ end
 
 
 
-function compressCol!{Tind,Tval}(a::LLmatp{Tind,Tval},
+function compressCol!(a::LLmatp{Tind,Tval},
   colspace::Vector{LLp{Tind,Tval}},
   len::Int,
-  pq::ApproxCholPQ{Tind})
+  pq::ApproxCholPQ{Tind}) where {Tind,Tval}
 
     o = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
 
@@ -290,10 +290,10 @@ function compressCol!{Tind,Tval}(a::LLmatp{Tind,Tval},
     return ptr
 end
 
-function compressCol!{Tind,Tval}(
+function compressCol!(
   colspace::Vector{LLcol{Tind,Tval}},
   len::Int
-  )
+  ) where {Tind,Tval}
 
     o = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
 
@@ -337,7 +337,7 @@ function compressCol!{Tind,Tval}(
 end
 
 
-function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
+function approxChol(a::LLMatOrd{Tind,Tval}) where {Tind,Tval}
     n = a.n
 
     # need to make custom one without col info later.
@@ -443,7 +443,7 @@ function approxChol{Tind,Tval}(a::LLMatOrd{Tind,Tval})
 end
 
 # this one is greedy on the degree - also a big win
-function approxChol{Tind,Tval}(a::LLmatp{Tind,Tval})
+function approxChol(a::LLmatp{Tind,Tval}) where {Tind,Tval}
     n = a.n
 
     ldli = LDLinv(a)
@@ -588,7 +588,7 @@ function LDLsolver(ldli::LDLinv, b::Vector)
 end
 
 
-function forward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y::Vector)
+function forward!(ldli::LDLinv{Tind,Tval}, y::Vector) where {Tind,Tval}
 
     @inbounds for ii in 1:length(ldli.col)
         i = ldli.col[ii]
@@ -609,7 +609,7 @@ function forward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y::Vector)
     end
 end
 
-function backward!{Tind,Tval}(ldli::LDLinv{Tind,Tval}, y::Vector)
+function backward!(ldli::LDLinv{Tind,Tval}, y::Vector) where {Tind,Tval}
     o = one(Tind)
     @inbounds for ii in length(ldli.col):-1:1
         i = ldli.col[ii]
@@ -741,13 +741,13 @@ The `ApproxCholParams` let you choose one of three orderings to perform the elim
 
 For more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html
 """
-function approxCholLap{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
+function approxCholLap(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
   verbose=false,
   pcgIts=Int[],
-  params=ApproxCholParams())
+  params=ApproxCholParams()) where {Tv,Ti}
 
     return Laplacians.lapWrapComponents(approxCholLap1, a,
     verbose=verbose,
@@ -883,13 +883,13 @@ end
 
 
 
-function approxCholLap1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
+function approxCholLap1(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
   verbose=false,
   pcgIts=Int[],
-  params=ApproxCholParams())
+  params=ApproxCholParams()) where {Tv,Ti}
 
     tol_ =tol
     maxits_ =maxits
@@ -1118,7 +1118,7 @@ end
 This variation of approxChol creates a cholesky factor to do the elimination.
 It has not yet been optimized, and does not yet make the cholesky factor lower triangular
 """
-function approxCholLapChol{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[])
+function approxCholLapChol(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[]) where {Tv,Ti}
 
     tol_ =tol
     maxits_ =maxits
@@ -1169,7 +1169,7 @@ function keyMap(x, n)
     return x <= n ? x : n + div(x,n)
 end
 
-function ApproxCholPQ{Tind}(a::Vector{Tind})
+function ApproxCholPQ(a::Vector{Tind}) where Tind
 
     n = length(a)
     elems = Array{ApproxCholPQElem{Tind}}(n)
@@ -1195,7 +1195,7 @@ function ApproxCholPQ{Tind}(a::Vector{Tind})
     return ApproxCholPQ(elems, lists, minlist, n, n)
 end
 
-function approxCholPQPop!{Tind}(pq::ApproxCholPQ{Tind})
+function approxCholPQPop!(pq::ApproxCholPQ{Tind}) where Tind
     if pq.nitems == 0
         error("ApproxPQ is empty")
     end
@@ -1216,7 +1216,7 @@ function approxCholPQPop!{Tind}(pq::ApproxCholPQ{Tind})
     return i
 end
 
-function approxCholPQMove!{Tind}(pq::ApproxCholPQ{Tind}, i, newkey, oldlist, newlist)
+function approxCholPQMove!(pq::ApproxCholPQ{Tind}, i, newkey, oldlist, newlist) where Tind
 
     prev = pq.elems[i].prev
     next = pq.elems[i].next
@@ -1248,7 +1248,7 @@ end
     Decrement the key of element i
     This could crash if i exceeds the maxkey
 """
-function approxCholPQDec!{Tind}(pq::ApproxCholPQ{Tind}, i)
+function approxCholPQDec!(pq::ApproxCholPQ{Tind}, i) where Tind
 
     oldlist = keyMap(pq.elems[i].key, pq.n)
     newlist = keyMap(pq.elems[i].key - one(Tind), pq.n)
@@ -1273,7 +1273,7 @@ end
     Increment the key of element i
     This could crash if i exceeds the maxkey
 """
-function approxCholPQInc!{Tind}(pq::ApproxCholPQ{Tind}, i)
+function approxCholPQInc!(pq::ApproxCholPQ{Tind}, i) where Tind
 
     oldlist = keyMap(pq.elems[i].key, pq.n)
     newlist = keyMap(pq.elems[i].key + one(Tind), pq.n)

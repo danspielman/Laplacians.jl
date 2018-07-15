@@ -30,13 +30,13 @@ lap(a) = spdiagm(a*ones(size(a)[1])) - a
 Create an adjacency matrix and a diagonal vector from an SDD M-matrix.
 That is, from a Laplacian with added diagonal weights
 """
-function adj{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti})
+function adj(sddm::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
     a = spdiagm(diag(sddm)) - sddm
     d = sddm*ones(size(sddm,1))
     return a,d
 end
 
-function adj{Tv}(sddm::Array{Tv,2})
+function adj(sddm::Array{Tv,2}) where Tv
     return adj(sparse(sddm))
 end
 
@@ -46,7 +46,7 @@ Add a new vertex to a with weights to the other vertices corresponding to diagon
 
 This is an efficient way of writing [a d; d' 0]
 """
-function extendMatrix{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, d::Array{Tv,1})
+function extendMatrix(a::SparseMatrixCSC{Tv,Ti}, d::Array{Tv,1}) where {Tv,Ti}
 
     @assert size(a,1) == length(d)
 
@@ -75,7 +75,7 @@ end
 
 Create a new graph in that is the same as the original, but with all edge weights 1
 """
-function unweight{Tval,Tind}(ain::SparseMatrixCSC{Tval,Tind})
+function unweight(ain::SparseMatrixCSC{Tval,Tind}) where {Tval,Tind}
     a = copy(ain)
     m = length(a.nzval)
     for i in 1:m
@@ -89,7 +89,7 @@ end # unweight
 
 Change the weight of every edge in a to 1
 """
-function unweight!{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind})
+function unweight!(a::SparseMatrixCSC{Tval,Tind}) where {Tval,Tind}
     m = length(a.nzval)
     for i in 1:m
         a.nzval[i] = one(Tval)
@@ -102,7 +102,7 @@ end # unweight
 
 Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write.
 """
-function mapweight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind},f)
+function mapweight(a::SparseMatrixCSC{Tval,Tind},f) where {Tval,Tind}
     b = triu(a,1)
     for i in 1:length(b.nzval)
         b.nzval[i] = f(b.nzval[i])
@@ -117,7 +117,7 @@ end # mapweight
     wted = uniformWeight(unwted)
 
 Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight."""
-uniformWeight{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}) = mapweight(a,x->rand(1)[1])
+uniformWeight(a::SparseMatrixCSC{Tval,Tind}) where {Tval,Tind} = mapweight(a,x->rand(1)[1])
 
 """
     uniformWeight!(a)
@@ -245,7 +245,7 @@ resulting new graph will be constructed by expanding each vertex in H to an
 instance of A. k random edges will be generated between components. Thus, the
 resulting graph may have weighted edges.
 """
-function generalizedNecklace{Tv, Ti}(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64)
+function generalizedNecklace(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64) where {Tv, Ti}
   a = findnz(A)
   h = findnz(H)
 
@@ -362,7 +362,7 @@ twoLift(a, k::Integer) = twoLift(a,randperm(div(nnz(a),2)) .> k)
  Create a disjoint union of graphs a and b,
  and then put k random edges between them
 """
-function joinGraphs{Tval,Tind}(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer)
+function joinGraphs(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer) where {Tval,Tind}
     na = size(a)[1]
     nb = size(b)[1]
 
@@ -482,7 +482,7 @@ end # toUnitVector
 
 Returns the diagonal weighted degree matrix(as a sparse matrix) of a graph
 """
-function diagmat{Tv, Ti}(a::SparseMatrixCSC{Tv, Ti})
+function diagmat(a::SparseMatrixCSC{Tv, Ti}) where {Tv, Ti}
 
   return spdiagm(vec(sum(a,1)))
 

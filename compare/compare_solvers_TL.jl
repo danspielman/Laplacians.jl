@@ -25,7 +25,7 @@ Runs many Laplacians solvers.  Puts the build and solve time results into a dict
 
 Uses threads to time limit all solvers after the first to at most 10x the time.
 """
-function speedTestLapTL{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=10000, maxtime=1000, verbose=false, testName="")
+function speedTestLapTL(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=10000, maxtime=1000, verbose=false, testName="") where {Tv,Ti}
 
     b = b - mean(b)
 
@@ -149,9 +149,9 @@ Runs many Laplacians solvers.  Puts the build and solve time results into a dict
 
 Also compares them against the solvers we have in matlab, with a time limit of 10x the first solver here.
 """
-function testVMatlabLap{Tv,Ti}(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
+function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
-  test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10)
+  test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10) where {Tv,Ti}
 
     b = b - mean(b)
 

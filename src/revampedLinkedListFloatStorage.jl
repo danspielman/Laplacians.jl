@@ -43,7 +43,7 @@ mutable struct LinkedListStorage{Tv,Ti}
 	blockSize::Ti 						# size of individual blocks of memory
 end
 
-function llsInit{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; startingSize::Ti = 1000, blockSize::Ti = 20)
+function llsInit(a::SparseMatrixCSC{Tv,Ti}; startingSize::Ti = 1000, blockSize::Ti = 20) where {Tv,Ti}
 
 	n = a.n
 	startingSize::Ti = max(blockSize, startingSize - startingSize % blockSize)
@@ -62,7 +62,7 @@ function llsInit{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; startingSize::Ti = 1000, bloc
 
 end
 
-function llsAdd{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, v::Ti, t::Tuple{Tv,Tv,Ti})
+function llsAdd(lls::LinkedListStorage{Tv,Ti}, v::Ti, t::Tuple{Tv,Tv,Ti}) where {Tv,Ti}
 
 	@assert(v < t[3], "Adding $(t[3]) to $v's linked list")
 
@@ -115,8 +115,8 @@ function llsAdd{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, v::Ti, t::Tuple{Tv,Tv,Ti})
 
 end
 
-function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{Tv,1}, auxMult::Array{Tv,1},
-	weight::Array{Tv,1}, mult::Array{Tv,1}, ind::Array{Ti,1}; capEdge::Bool=false, rho::Tv=0.0, xhat::Array{Tv,2}=zeros(1,1))
+function llsPurge(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{Tv,1}, auxMult::Array{Tv,1},
+	weight::Array{Tv,1}, mult::Array{Tv,1}, ind::Array{Ti,1}; capEdge::Bool=false, rho::Tv=0.0, xhat::Array{Tv,2}=zeros(1,1)) where {Tv,Ti}
 
  	multSum::Tv = 0
  	diag::Tv = 0
@@ -190,7 +190,7 @@ function llsPurge{Tv,Ti}(lls::LinkedListStorage{Tv,Ti}, pos::Ti, auxVal::Array{T
 end
 
 # increase the size of a lls structure
-function incSize{Tv,Ti}(lls::LinkedListStorage{Tv,Ti})
+function incSize(lls::LinkedListStorage{Tv,Ti}) where {Tv,Ti}
 
 	#=
     	we know that if we are increasing the size of the structure, we are out of free blocks
@@ -211,6 +211,6 @@ function incSize{Tv,Ti}(lls::LinkedListStorage{Tv,Ti})
 
 end
 
-function moduloNext{Ti}(i::Ti, maxSize::Ti)
+function moduloNext(i::Ti, maxSize::Ti) where Ti
 	return i < maxSize ? i + 1 : 1
 end
