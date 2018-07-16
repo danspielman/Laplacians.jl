@@ -1,4 +1,4 @@
-using Base.Test
+using Test
 using Laplacians
 
 include("testByFile.jl")

@@ -23,6 +23,7 @@ module Laplacians
   using SparseArrays
   using Random
   using LinearAlgebra
+  using Statistics
 
   include("fastCSC.jl")
   export symPermuteCSC

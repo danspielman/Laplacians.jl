@@ -90,15 +90,15 @@ function forceLap(a::AbstractArray)
     if minimum(a) < 0
         warn("The input should be an adjacency matrix, whereas this one has negative entries.")
         af = abs.(a)
-        af = af - spdiagm(diag(af))
+        af = af - sparse(Diagonal(diag(af)))
     elseif sum(abs.(diag(a))) > 0
         warn("The input should be an adjacency matrix, whereas this one has diagonal entries.")
-        af = a - spdiagm(diag(a))
+        af = a - sparse(Diagonal(diag(a)))
     else
         af = a
     end
 
-    return spdiagm(vec(sum(af,1))) - af
+    return sparse(Diagonal(vec(sum(af,dims=1)))) - af
 end
 
 
@@ -211,7 +211,7 @@ function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf,
 
     if !testZeroDiag(a)
         warn("The matrix should not have any nonzero diagonal entries.")
-        a = a - spdiagm(diag(a))
+        a = a - sparse(Diagonal(diag(a)))
     end
     
     co = components(a)

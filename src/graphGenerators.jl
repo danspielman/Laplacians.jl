@@ -32,7 +32,7 @@ end # completeGraph
 The simple ring on n vertices
 """
 function ringGraph(n::Int64)
-    a = spdiagm(ones(n-1),1,n,n)
+    a = spdiagm(1=>ones(n-1))
     a[1,n] = 1.0
     a = a + a'
 end
@@ -176,8 +176,8 @@ end
 An n-by-m grid graph.  iostropy is the weighting on edges in one direction.
 """
 function grid2(n::Int64, m::Int64; isotropy=1)
-  a = kron(speye(n),spdiagm(ones(m-1),1,m,m))
-  a = a + isotropy*kron(spdiagm(ones(n-1),1,n,n), speye(m))
+  a = kron(speye(n),spdiagm(1=>ones(m-1),1))
+  a = a + isotropy*kron(spdiagm(1=>ones(n-1)), speye(m))
   a = a + a'
   return a
 end # grid2
@@ -526,7 +526,7 @@ sample an index with probability proportional to its weight given here
 """
 function sampleByWeight(wt)
     r = rand(1)*sum(wt)
-    find(cumsum(wt) .> r)[1]
+    findall(cumsum(wt) .> r)[1]
 end
 
 """
@@ -694,7 +694,7 @@ function randWeightSub(a)
         # mult by matrix ?
         if (rand() < .5)
 
-            invdeg = spdiagm(1 ./(a*ones(size(a)[1])))
+            invdeg = sparse(Diagonal(1 ./(a*ones(size(a)[1]))))
             if (rand() < .5)
                 for i in 1:10
                     v = a * (invdeg * v)
