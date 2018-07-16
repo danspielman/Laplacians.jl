@@ -210,9 +210,9 @@ function augTreePrecon(ddmat::SparseMatrixCSC{Tv,Ti};  params=AugTreeParams()) w
   end
     
 
-  Dx = spdiagm(ddmat*ones(n))
+  Dx = sparse(Diagonal(ddmat*ones(n)))
 
-  augDD = Dx + spdiagm(augtree*ones(n)) - augtree
+  augDD = Dx + sparse(Diagonal(augtree*ones(n))) - augtree
 
   F = cholfact(augDD)
 
@@ -242,7 +242,7 @@ function augTreeSddm(sddm::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, m
     f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_,pcgIts=pcgIts_) = pcg(sddm, b, F, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
     if verbose
-        println("Solver build time: ", round((time() - t1),3), " seconds.")
+        println("Solver build time: ", round((time() - t1),digits=3), " seconds.")
     end
   
     return f

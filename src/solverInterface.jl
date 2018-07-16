@@ -35,7 +35,7 @@ function wrapInterface(solver::Function, a::AbstractMatrix; tol=0, maxits=Inf, m
     t1 = time()
     sol = solver(a)
     if verbose
-        println("Solver build time: ", round((time() - t1),3), " seconds.")
+        println("Solver build time: ", round((time() - t1),digits=3), " seconds.")
     end
 
     f = function(b; verbose=false, jnkargs...)
@@ -51,7 +51,7 @@ function wrapInterface(solver::Function, a::AbstractMatrix; tol=0, maxits=Inf, m
         end
 
         if verbose
-            println("Solve time: ", round((time() - t1),3), " seconds.")
+            println("Solve time: ", round((time() - t1),digits=3), " seconds.")
         end
 
         return x
@@ -88,11 +88,11 @@ If the input looks like a Laplacian, throw a warning and convert it.
 function forceLap(a::AbstractArray)
 
     if minimum(a) < 0
-        warn("The input should be an adjacency matrix, whereas this one has negative entries.")
+        @warn "The input should be an adjacency matrix, whereas this one has negative entries."
         af = abs.(a)
         af = af - sparse(Diagonal(diag(af)))
     elseif sum(abs.(diag(a))) > 0
-        warn("The input should be an adjacency matrix, whereas this one has diagonal entries.")
+        @warn "The input should be an adjacency matrix, whereas this one has diagonal entries."
         af = a - sparse(Diagonal(diag(a)))
     else
         af = a
@@ -210,7 +210,7 @@ function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf,
     t1 = time()
 
     if !testZeroDiag(a)
-        warn("The matrix should not have any nonzero diagonal entries.")
+        @warn "The matrix should not have any nonzero diagonal entries."
         a = a - sparse(Diagonal(diag(a)))
     end
     
@@ -220,7 +220,7 @@ function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf,
 
         s = solver(a; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params... )
         if verbose
-            println("Solver build time: ", round((time() - t1),3), " seconds.")
+            println("Solver build time: ", round((time() - t1),digits=3), " seconds.")
         end
 
         # f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =
@@ -251,7 +251,7 @@ function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf,
         end
 
         if verbose
-            println("Solver build time: ", round((time() - t1),3), " seconds.")
+            println("Solver build time: ", round((time() - t1),digits=3), " seconds.")
         end
 
         return blockSolver(comps,solvers; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)

@@ -49,7 +49,7 @@ backind = fl[10] = 4
 function flipIndex(a::SparseMatrixCSC{Tval,Tind}) where {Tval,Tind}
 
   b = SparseMatrixCSC(a.m, a.n, copy(a.colptr), copy(a.rowval), collect(UnitRange{Tind}(1,nnz(a))) );
-  bakMat = b';
+  bakMat = sparse(b');
   return bakMat.nzval
 
 end

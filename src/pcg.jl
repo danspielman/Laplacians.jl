@@ -241,7 +241,7 @@ function cg(mat, b::Vector{Tval};
     end
 
     if verbose
-        println("CG stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("CG stopped after: ", round((time() - t1),digits=3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0
@@ -392,7 +392,7 @@ function pcg(mat, b::Vector{Tval}, pre::Function;
     end
 
     if verbose
-        println("PCG stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("PCG stopped after: ", round((time() - t1),digits=3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0
@@ -622,7 +622,7 @@ function cgBLAS(mat, b::Vector{Tval};
       end
 
     if verbose
-        println("CG BLAS stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("CG BLAS stopped after: ", round((time() - t1),digits=3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
 
     end
 
@@ -697,7 +697,7 @@ function cgSlow(mat, b::Vector{Tval};
       end
 
     if verbose
-        println("CG Slow stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("CG Slow stopped after: ", round((time() - t1),digits=3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0
@@ -779,7 +779,7 @@ function pcgBLAS(mat, b::Vector{Tval}, pre;
       end
 
     if verbose
-        println("PCG BLAS stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("PCG BLAS stopped after: ", round((time() - t1),digits=3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0
@@ -856,7 +856,7 @@ function pcgSlow(mat, b::Vector{Tval}, pre;
     end
 
     if verbose
-        println("PCG Slow stopped after: ", round((time() - t1),3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+        println("PCG Slow stopped after: ", round((time() - t1),digits=3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
     end
 
     if length(pcgIts) > 0

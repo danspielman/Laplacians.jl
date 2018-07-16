@@ -51,13 +51,13 @@ ApproxCholParams() = ApproxCholParams(:deg, 5)
 ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5)
 
 LDLinv(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval} =
-  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array{Tind}(0),Array{Tval}(0),zeros(Tval,a.n))
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Vector{Tind},Vector{Tval},zeros(Tval,a.n))
 
 LDLinv(a::LLMatOrd{Tind,Tval}) where {Tind,Tval} =
-  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array{Tind}(0),Array{Tval}(0),zeros(Tval,a.n))
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Vector{Tind},Vector{Tval},zeros(Tval,a.n))
 
 LDLinv(a::LLmatp{Tind,Tval}) where {Tind,Tval} =
-  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Array{Tind}(0),Array{Tval}(0),zeros(Tval,a.n))
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Vector{Tind},Vector{Tval},zeros(Tval,a.n))
 
 
 function LLmatp(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
@@ -68,8 +68,8 @@ function LLmatp(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
 
     flips = flipIndex(a)
 
-    cols = Array{LLp{Tind,Tval}}(n)
-    llelems = Array{LLp{Tind,Tval}}(m)
+    cols = Array{LLp{Tind,Tval}}(undef, n)
+    llelems = Array{LLp{Tind,Tval}}(undef, m)
 
     @inbounds for i in 1:n
         degs[i] = a.colptr[i+1] - a.colptr[i]
@@ -455,9 +455,9 @@ function approxChol(a::LLmatp{Tind,Tval}) where {Tind,Tval}
 
     it = 1
 
-    colspace = Array{LLp{Tind,Tval}}(n)
-    cumspace = Array{Tval}(n)
-    vals = Array{Tval}(n) # will be able to delete this
+    colspace = Array{LLp{Tind,Tval}}(undef, n)
+    cumspace = Array{Tval}(undef, n)
+    vals = Array{Tval}(undef, n) # will be able to delete this
 
     o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
 
@@ -1172,7 +1172,7 @@ end
 function ApproxCholPQ(a::Vector{Tind}) where Tind
 
     n = length(a)
-    elems = Array{ApproxCholPQElem{Tind}}(n)
+    elems = Array{ApproxCholPQElem{Tind}}(undef, n)
     lists = zeros(Tind, 2*n+1)
     minlist = one(n)
 
@@ -1241,7 +1241,7 @@ function approxCholPQMove!(pq::ApproxCholPQ{Tind}, i, newkey, oldlist, newlist) 
 
     pq.elems[i] = ApproxCholPQElem{Tind}(zero(Tind), head, newkey)
 
-    return Void
+    return nothing
 end
 
 """
@@ -1266,7 +1266,7 @@ function approxCholPQDec!(pq::ApproxCholPQ{Tind}, i) where Tind
     end
 
 
-    return Void
+    return nothing
 end
 
 """
@@ -1286,5 +1286,5 @@ function approxCholPQInc!(pq::ApproxCholPQ{Tind}, i) where Tind
         pq.elems[i] = ApproxCholPQElem{Tind}(pq.elems[i].prev, pq.elems[i].next, pq.elems[i].key + one(Tind))
     end
 
-    return Void
+    return nothing
 end

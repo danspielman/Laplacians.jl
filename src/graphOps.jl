@@ -22,7 +22,7 @@ floatGraph(a::SparseMatrixCSC) = SparseMatrixCSC{Float64,Int64}(a.m, a.n, a.colp
 
 Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry
 """
-lap(a) = spdiagm(a*ones(size(a)[1])) - a
+lap(a) = sparse(Diagonal(a*ones(size(a)[1]))) - a
 
 """
     a,d = adj(sddm)
@@ -31,7 +31,7 @@ Create an adjacency matrix and a diagonal vector from an SDD M-matrix.
 That is, from a Laplacian with added diagonal weights
 """
 function adj(sddm::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
-    a = spdiagm(diag(sddm)) - sddm
+    a = sparse(Diagonal(diag(sddm))) - sddm
     d = sddm*ones(size(sddm,1))
     return a,d
 end
@@ -149,7 +149,7 @@ Returns the kth power of a.
 """
 function power(a::SparseMatrixCSC, k::Int)
   ap = a^k
-  ap = ap - spdiagm(diag(ap))
+  ap = ap - sparse(Diagonal(diag(ap)))
 end
 
 
@@ -484,6 +484,6 @@ Returns the diagonal weighted degree matrix(as a sparse matrix) of a graph
 """
 function diagmat(a::SparseMatrixCSC{Tv, Ti}) where {Tv, Ti}
 
-  return spdiagm(vec(sum(a,1)))
+  return sparse(Diagonal(vec(sum(a,1))))
 
 end # diagmat
