@@ -19,11 +19,13 @@ module Laplacians
     end
   end
 
+  using Arpack
   using DataStructures
   using SparseArrays
   using Random
   using LinearAlgebra
   using Statistics
+
 
   include("fastCSC.jl")
   export symPermuteCSC

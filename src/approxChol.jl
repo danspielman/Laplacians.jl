@@ -51,13 +51,13 @@ ApproxCholParams() = ApproxCholParams(:deg, 5)
 ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5)
 
 LDLinv(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval} =
-  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Vector{Tind},Vector{Tval},zeros(Tval,a.n))
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Tind[],Tval[],zeros(Tval,a.n))
 
 LDLinv(a::LLMatOrd{Tind,Tval}) where {Tind,Tval} =
-  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Vector{Tind},Vector{Tval},zeros(Tval,a.n))
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Tind[],Tval[],zeros(Tval,a.n))
 
 LDLinv(a::LLmatp{Tind,Tval}) where {Tind,Tval} =
-  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Vector{Tind},Vector{Tval},zeros(Tval,a.n))
+  LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Tind[],Tval[],zeros(Tval,a.n))
 
 
 function LLmatp(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
@@ -792,7 +792,7 @@ function approxCholLapGreedy(a::SparseMatrixCSC;
   end
 
 
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b .- mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
 
 end
 
