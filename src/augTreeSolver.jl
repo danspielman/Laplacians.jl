@@ -70,7 +70,7 @@ function augmentTree(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}, k:
     augm = length(augi)
     augv = zeros(Tv, augm)
     for i in 1:augm,
-        augv = A[augi[i],augj[i]]
+        augv[i] = A[augi[i],augj[i]]
     end
 
     n = size(A)[1]

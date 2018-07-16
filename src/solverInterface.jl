@@ -396,7 +396,6 @@ julia> rhss
  [0.404962,-0.827718,0.704616,-0.403223,0.204891,-0.505589,0.907015,1.90266,-0.438115,0.0464351]
 ```
 """
-
 function wrapCapture(solver::Function, mats, rhss)
     f = function(a::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
         tol_=tol

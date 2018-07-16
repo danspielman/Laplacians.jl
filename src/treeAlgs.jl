@@ -128,7 +128,7 @@ function matToTreeDepth(mat::SparseMatrixCSC{Tv,Ti}, root::Ti) where {Tv,Ti}
 
   parent[kids] = root
   visited[kids] = true
-  depth[kids] = 1./wts
+  depth[kids] = 1 ./wts
 
   ptr = 2
     
@@ -398,7 +398,7 @@ function treeDepthDFS(tree::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
     root = 1
     kids = tree.rowval[tree.colptr[root]:(tree.colptr[root+1]-1)]
     wts =  tree.nzval[tree.colptr[root]:(tree.colptr[root+1]-1)]    
-    depth[kids] = 1./wts
+    depth[kids] = 1 ./wts
 
     for v in 2:n
 

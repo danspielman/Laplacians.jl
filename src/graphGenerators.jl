@@ -1,6 +1,6 @@
 
 
-import Base.randperm
+import Random.randperm
 
 
 """

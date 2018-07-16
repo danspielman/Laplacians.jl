@@ -1,9 +1,9 @@
 import Base.*
 import Base.size
 import Base.eltype
-import Base.issymmetric
+import LinearAlgebra.issymmetric
 
-import Base.LinAlg.A_mul_B!
+import LinearAlgebra.A_mul_B!
 
 struct SqLinOp{Tv,Ti}
     issym::Bool

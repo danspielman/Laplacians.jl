@@ -7,7 +7,6 @@ of the actual bounds.
 	johnlind(a::SparseMatrixCSC{Tv,Ti}; eps::Tv = 0.5, solver=(la -> augTreeSddm(la,tol=1e-1,maxits=1000,maxtime=10)), retXhat::Bool = false)
 ~~~
 """
-
 function johnlind(a::SparseMatrixCSC{Tv,Ti};
  				eps::Tv = 0.5,
  				solver=approxCholLap,

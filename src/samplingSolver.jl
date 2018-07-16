@@ -45,7 +45,12 @@ treeSamplingParams(rho,n) =
 
 An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl 
 """
-function samplingSDDMSolver{Tv,Ti}(sddm::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams)
+function samplingSDDMSolver(sddm::SparseMatrixCSC{Tv,Ti}; 
+    tol::Tv=1e-6, 
+    maxits=1000, maxtime=Inf, 
+    verbose=false, 
+    pcgIts=Int[], 
+    params::samplingParams{Tv,Ti}=defaultSamplingParams) where {Tv,Ti}
 
     # srand(1234)
 
@@ -102,7 +107,7 @@ end
 
 An implementation of the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. In addition to the setup in the paper, we also use a low stretch tree to approximate effective resistances on edges. To perform well cache wise, we implement a cache friendly list of linked lists - found in revampedLinkedListFloatStorage.jl 
 """
-function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams)
+function samplingLapSolver(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams) where {Tv,Ti}
 
     return lapWrapComponents(samplingLapSolver1, a, verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, params=params)
 
@@ -110,7 +115,7 @@ function samplingLapSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, max
 end
 
 
-function samplingLapSolver1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams)
+function samplingLapSolver1(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params::samplingParams{Tv,Ti}=defaultSamplingParams) where {Tv,Ti}
 
     # srand(1234)
 
@@ -145,8 +150,8 @@ function samplingLapSolver1{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}; tol::Tv=1e-6, maxi
 end
 
 
-function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
-                            params::samplingParams{Tv,Ti}=defaultSamplingParams)
+function buildSolver(a::SparseMatrixCSC{Tv,Ti};
+                            params::samplingParams{Tv,Ti}=defaultSamplingParams) where {Tv,Ti}
 
     # compute rho
     n = a.n;
@@ -297,8 +302,8 @@ function buildSolver{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti};
 end
 
 # a is an adjacency matrix
-function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
-    startingSize::Ti, blockSize::Ti, verbose::Bool=false)
+function samplingLDL(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
+    startingSize::Ti, blockSize::Ti, verbose::Bool=false) where {Tv,Ti}
 
     n = a.n
 
@@ -395,8 +400,8 @@ function samplingLDL{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{
     return constructLowerTriangularMat(ut), d
 end
 
-function samplingLDL2{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
-    startingSize::Ti, blockSize::Ti, verbose::Bool=false)
+function samplingLDL2(a::SparseMatrixCSC{Tv,Ti}, tree::SparseMatrixCSC{Tv,Ti}, stretch::SparseMatrixCSC{Tv,Ti}, rho::Tv,
+    startingSize::Ti, blockSize::Ti, verbose::Bool=false) where {Tv,Ti}
 
     print("fixing tree")
 
@@ -525,7 +530,7 @@ end
 
 # u is an array of arrays of tuples. to be useful, we need to convert it to a lowerTriangular matrix
 # looks like 10% of the construction time, and could be sped up a lot
-function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
+function constructLowerTriangularMat(u::Array{Array{Tuple{Tv,Ti},1},1}) where {Tv,Ti}
     n = length(u)
 
     nnz = 0
@@ -569,6 +574,6 @@ function constructLowerTriangularMat{Tv,Ti}(u::Array{Array{Tuple{Tv,Ti},1},1})
     return LowerTriangular(SparseMatrixCSC(n, n, colptr, rowval, nzval))
 end
 
-function checkError{Tv,Ti}(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0)
+function checkError(gOp::SqLinOp{Tv,Ti}; tol::Float64 = 0.0) where {Tv,Ti}
     return eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
 end
