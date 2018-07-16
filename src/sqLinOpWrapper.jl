@@ -4,6 +4,8 @@ import Base.eltype
 import LinearAlgebra.issymmetric
 
 import LinearAlgebra.A_mul_B!
+import LinearAlgebra.mul!
+
 
 struct SqLinOp{Tv,Ti}
     issym::Bool
@@ -35,6 +37,13 @@ function A_mul_B!(Y, A::SqLinOp{Tv,Ti}, B) where {Tv,Ti}
     end
 end
 
+# put in for compat with Arpack in Julia v0.7
+function mul!(Y, A::SqLinOp{Tv,Ti}, B) where {Tv,Ti} 
+    Y1 = A*B
+    for i in 1:A.n
+        Y[i] = Y1[i]
+    end
+end
 
 function testId(n::Ti) where Ti
     return M = SqLinOp{Float64,Int64}(true,1.0,n,x -> x)

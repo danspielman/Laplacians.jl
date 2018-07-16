@@ -20,12 +20,12 @@ and passes whatever `params` are left to the solver.
 ```julia
 julia> a = randn(5,5);
 julia> a = a * a';
-julia> solvea = wrapInterface(cholfact, a, maxits=100, verbose=true);
+julia> solvea = wrapInterface(X->cholesky(X,Val(true)), a, maxits=100, verbose=true);
 julia> b = randn(5,1);
 julia> norm(a*solvea(b, verbose=false)-b)
 1.575705319704736e-14
 
-julia> f = wrapInterface(cholfact)
+julia> f = wrapInterface(X->cholesky(X,Val(true)))
 julia> solvea = f(a, maxits=1000, maxtime = 1)
 julia> norm(a*solvea(b, verbose=false, maxtime = 10)-b)
 1.575705319704736e-14
@@ -76,7 +76,7 @@ end
 This functions wraps cholfact so that it satsfies our interface.
 It ignores all the keyword arguments.
 """
-cholSDDM = wrapInterface(cholfact)
+cholSDDM = wrapInterface(X->cholesky(X))
 
 
 """
@@ -322,7 +322,7 @@ function sddmWrapLap(lapSolver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf,
 
     f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
         xaug = F([b; -sum(b)], tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
-        xaug = xaug - xaug[end]
+        xaug = xaug .- xaug[end]
         return xaug[1:a.n]
     end
 
