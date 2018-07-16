@@ -65,7 +65,7 @@ function generalizedRing(n::Int64, gens)
             ind = ind + 1
         end
     end
-    return sparse(1+ai,1+aj,ones(m),n,n)
+    return sparse(1 .+ ai,1 .+ aj,ones(m),n,n)
     #return ai, aj
 end
 
@@ -80,7 +80,7 @@ function randGenRing(n::Int64, k::Integer; verbose=false)
     # if any of n, 2n, 3n etc. is in gens we will have self loops
     gens = [0]
     while 0 in (gens .% n)
-        gens = [1; 1 + ceil.(Integer,exp.(rand(k-1)*log(n-1)))]
+        gens = [1; 1 .+ ceil.(Integer,exp.(rand(k-1)*log(n-1)))]
     end
 
     if verbose
@@ -104,7 +104,7 @@ function hyperCube(d::Int64)
 
   for i = 1:(d-1)
     k = 2^i
-    D = speye(k)
+    D = sparse(I, k, k)
     a = [a D; D a]
   end
 
@@ -119,7 +119,7 @@ The complete binary tree on n vertices
 function completeBinaryTree(n::Int64)
 
   k = div(n-1,2)
-  a = sparse(collect(1:k),2*collect(1:k),1.0,n,n) + sparse(collect(1:k),2*collect(1:k)+1,1.0,n,n)
+  a = sparse(collect(1:k),2*collect(1:k),1.0,n,n) + sparse(collect(1:k),2*collect(1:k) .+ 1,1.0,n,n)
 
   if 2*k+1 < n
     a[n-1,n] = 1.0
@@ -156,8 +156,8 @@ An n^3 grid with random weights. User can specify the weighting scheme.
 function wGrid3(n::Int64; weightGen::Function=rand)
     gr3 = grid3(n);
 
-    a = kron(speye(n), gr3);
-    b = kron(gr3, speye(n));
+    a = kron(sparse(I, n, n), gr3);
+    b = kron(gr3, sparse(I, n, n));
 
     gr3 = sparse(a + b);
     for i in 1:nnz(gr3)
@@ -176,8 +176,8 @@ end
 An n-by-m grid graph.  iostropy is the weighting on edges in one direction.
 """
 function grid2(n::Int64, m::Int64; isotropy=1)
-  a = kron(speye(n),spdiagm(1=>ones(m-1),1))
-  a = a + isotropy*kron(spdiagm(1=>ones(n-1)), speye(m))
+  a = kron(sparse(I, n, n),spdiagm(1=>ones(m-1)))
+  a = a + isotropy*kron(spdiagm(1=>ones(n-1)), sparse(I, m, m))
   a = a + a'
   return a
 end # grid2
@@ -698,24 +698,24 @@ function randWeightSub(a)
             if (rand() < .5)
                 for i in 1:10
                     v = a * (invdeg * v)
-                    v = v - mean(v)
+                    v = v .- mean(v)
                 end
             else
                 for i in 1:10
                     v = v - a * (invdeg * v)
-                    v = v - mean(v)
+                    v = v .- mean(v)
                 end
             end
         end
 
-        w = abs.(v[ai]-v[aj])
+        w = abs.(v[ai] - v[aj])
 
     end
 
     # reciprocate or not?
 
-    w[w.==0] = 1
-    w[isnan.(w)] = 1
+    w[w.==0] .= 1
+    w[isnan.(w)] .= 1
 
     if (rand() < .5)
         w = 1 ./w

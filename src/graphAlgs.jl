@@ -64,7 +64,7 @@ c = components(gr)
 function components(mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
   n = mat.n
 
-  order = Array{Ti}(n)
+  order = Array{Ti}(undef, n)
   comp = zeros(Ti,n)
 
   # note that all of this casting is unnecessary.
@@ -134,7 +134,7 @@ comps = vecToComps(c)
 """
 function vecToComps(compvec::Vector{Ti}) where Ti
     nc = maximum(compvec)
-    comps = Vector{Vector{Ti}}(nc)
+    comps = Vector{Vector{Ti}}(undef, nc)
 
     sizes = zeros(Ti,nc)
     for i in compvec

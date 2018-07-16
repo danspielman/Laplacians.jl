@@ -138,7 +138,7 @@ The Cartesian product of two graphs.  When applied to two paths, it gives a grid
 function productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
   n0 = size(a0)[1]
   n1 = size(a1)[1]
-  a = kron(speye(n0),a1) + kron(a0,speye(n1));
+  a = kron(sparse(I,n0,n0),a1) + kron(a0,sparse(I, n1, n1));
 
 end # productGraph
 
@@ -259,8 +259,8 @@ function generalizedNecklace(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::
 
   # duplicate the vertices in A so that each vertex in H corresponds to a copy of A
   for i in 1:m
-    newI = append!(newI, a[1] + n * (i - 1))
-    newJ = append!(newJ, a[2] + n * (i - 1))
+    newI = append!(newI, a[1] .+ n * (i - 1))
+    newJ = append!(newJ, a[2] .+ n * (i - 1))
     newW = append!(newW, a[3])
   end
 
@@ -368,11 +368,11 @@ function joinGraphs(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}
 
     (ai,aj,av) = findnz(a)
     (bi,bj,bv) = findnz(b)
-    bi = bi + na
-    bj = bj + na
+    bi = bi .+ na
+    bj = bj .+ na
 
     ji = rand(1:na,k)
-    jj = rand(1:nb,k)+na
+    jj = rand(1:nb,k) .+ na
 
     ab = sparse([ai;bi;ji;jj],[aj;bj;jj;ji],[av;bv;ones(Tval,2*k)],na+nb,na+nb)
 end
