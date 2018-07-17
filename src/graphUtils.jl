@@ -189,7 +189,7 @@ end # getVolume
 " Computes the number of edges leaving s "
 function getObound(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}) where {Tv,Ti}
 
-  sets = IntSet(s)
+  sets = BitSet(s)
 
   obound = 0
   for u in s

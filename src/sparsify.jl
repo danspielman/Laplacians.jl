@@ -34,7 +34,7 @@ function sparsify(a; ep=0.3, matrixConcConst=4.0, JLfac=4.0)
   end
 
   (ai,aj,av) = findnz(triu(a))
-  prs = zeros(av)
+  prs = zeros(size(av))
   for h in 1:length(av)
       i = ai[h]
       j = aj[h]

@@ -69,7 +69,7 @@ function johnlind(a::SparseMatrixCSC{Tv,Ti};
 	xhat = zeros(n, dhat)
 	for i in 1:dhat
 		b = reshape(bs[i,:], n)
-		b = b - mean(b)
+		b = b .- mean(b)
 		xhat[:,i] = f(b)
 	end
 

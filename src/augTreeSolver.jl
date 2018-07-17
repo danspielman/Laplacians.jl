@@ -214,7 +214,7 @@ function augTreePrecon(ddmat::SparseMatrixCSC{Tv,Ti};  params=AugTreeParams()) w
 
   augDD = Dx + sparse(Diagonal(augtree*ones(n))) - augtree
 
-  F = cholfact(augDD)
+  F = cholesky(augDD)
 
   return x -> (F\x)
 
@@ -331,8 +331,8 @@ function augTreeFactor(a, tree; verbose=false,
     (aminusi, aminusj, aminusv) = findnz(Aminus)
 
     marked = ones(Int64,n)
-    marked[aminusi] = 0
-    marked[aminusj] = 0
+    marked[aminusi] .= 0
+    marked[aminusj] .= 0
 
     if (nnz(a) == 2*(n - 1))
         if verbose

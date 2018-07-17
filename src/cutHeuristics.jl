@@ -105,7 +105,7 @@ function dumbRefineCut(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}) where {Tv,T
 
 	n = max(G.n, G.m)
 
-	news = IntSet(s)
+	news = BitSet(s)
 
 	for v in 1:n
 		nrbsA = 0

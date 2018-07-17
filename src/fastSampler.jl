@@ -45,9 +45,9 @@ function FastSampler(p::Array{Tv,1}; residual::Bool = false, rng::AbstractRNG=Ba
     n = length(p)
 
     # generate the Sampler
-    F = Array{Tv}(n)
-    A = Array{Int64}(n)
-    V = Array{Int64}(n)
+    F = Array{Tv}(undef, n)
+    A = Array{Int64}(undef, n)
+    V = Array{Int64}(undef, n)
     
     # generate a normalized p, so that it sums up to n
     newp = n * copy(p) / sum(p)

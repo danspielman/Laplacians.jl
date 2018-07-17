@@ -169,12 +169,12 @@ for i in 1:50
     testSolvers(gr)
 
     gru = unweight(gr)
-    t = akpwU(gru)
+    _ = akpwU(gru)
 end
 
 a = wtedChimera(1234,1);
 for i in 2:5
-    a = disjoin(a,wtedChimera(1234,i))
+    global a = disjoin(a,wtedChimera(1234,i))
 end
 n = size(a,1)
 b = randn(n)
@@ -190,10 +190,10 @@ end
 ee3 = function(a; verbose=false, args...)
     approxCholLap(a; params=ApproxCholParams(:given), verbose=verbose, args...)
 end
-for solver in [augTreeLap, KMPLapSolver, cgLapSolver, ee1, ee2, ee3]
-    f = solver(a, tol=1e-6, maxtime=5);
-    x = f(b);
-    @test norm(la*x - b)/norm(b) <= 1e-1
+for sol in [augTreeLap, KMPLapSolver, cgLapSolver, ee1, ee2, ee3]
+    fx1 = sol(a, tol=1e-6, maxtime=5);
+    xx1 = fx1(b);
+    @test norm(la*xx1 - b)/norm(b) <= 1e-1
 end
 
 

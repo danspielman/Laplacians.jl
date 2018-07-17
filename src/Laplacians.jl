@@ -26,7 +26,9 @@ module Laplacians
   using Random
   using LinearAlgebra
   using Statistics
+  using Printf
 
+  using DelimitedFiles
 
   include("fastCSC.jl")
   export symPermuteCSC

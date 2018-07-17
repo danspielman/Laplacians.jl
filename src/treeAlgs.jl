@@ -50,13 +50,13 @@ function matToTree(mat::SparseMatrixCSC{Tv,Ti}, root::Ti) where {Tv,Ti}
   degRoot = deg(mat,root)
   numKids[root] = degRoot
 
-  children[1 + collect(1:degRoot)] = mat.rowval[mat.colptr[root]:(mat.colptr[root+1]-1)]
-  weights[1 + collect(1:degRoot)] = mat.nzval[mat.colptr[root]:(mat.colptr[root+1]-1)]
+  children[1 .+ collect(1:degRoot)] = mat.rowval[mat.colptr[root]:(mat.colptr[root+1]-1)]
+  weights[1 .+ collect(1:degRoot)] = mat.nzval[mat.colptr[root]:(mat.colptr[root+1]-1)]
    
   numIn = 1+degRoot
 
-  parent[mat.rowval[mat.colptr[root]:(mat.colptr[root+1]-1)]] = root
-  visited[mat.rowval[mat.colptr[root]:(mat.colptr[root+1]-1)]] = true
+  parent[mat.rowval[mat.colptr[root]:(mat.colptr[root+1]-1)]] .= root
+  visited[mat.rowval[mat.colptr[root]:(mat.colptr[root+1]-1)]] .= true
 
   ptr = 2
     
@@ -121,14 +121,14 @@ function matToTreeDepth(mat::SparseMatrixCSC{Tv,Ti}, root::Ti) where {Tv,Ti}
   kids = mat.rowval[mat.colptr[root]:(mat.colptr[root+1]-1)]
   wts =  mat.nzval[mat.colptr[root]:(mat.colptr[root+1]-1)]    
 
-  children[1 + collect(1:degRoot)] = kids
-  weights[1 + collect(1:degRoot)] = wts
+  children[1 .+ collect(1:degRoot)] .= kids
+  weights[1 .+ collect(1:degRoot)] .= wts
    
   numIn = 1+degRoot
 
-  parent[kids] = root
-  visited[kids] = true
-  depth[kids] = 1 ./wts
+  parent[kids] .= root
+  visited[kids] .= true
+  depth[kids] = 1 ./ wts
 
   ptr = 2
     
@@ -176,8 +176,8 @@ import Base.pop!
 #
 # we need this for the non-recursive tarjanLCA
 function dfsOrder(tr::RootedTree)
-    ord = Array{Int64}(0)
-    stk = Array{Int64}(0)
+    ord = Int64[]
+    stk = Int64[]
     push!(stk,tr.root)
     while ~isempty(stk)
         u = pop!(stk)
@@ -202,8 +202,8 @@ function dfsOrder(t::SparseMatrixCSC{Tv,Ti}; start::Ti = 1) where {Tv,Ti}
 
     n = size(t,1)
     seen = zeros(Bool,n)
-    ord = Array{Int64}(0)
-    stk = Array{Int64}(0)
+    ord = Int64[]
+    stk = Int64[]
     push!(stk,start)
     while ~isempty(stk)
         u = pop!(stk)

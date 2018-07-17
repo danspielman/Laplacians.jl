@@ -98,7 +98,7 @@ end # unweight
 
 
 """
-    b = mapweight(a, x->rand(1)[1])
+    b = mapweight(a, x->rand())
 
 Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write.
 """
@@ -117,7 +117,7 @@ end # mapweight
     wted = uniformWeight(unwted)
 
 Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight."""
-uniformWeight(a::SparseMatrixCSC{Tval,Tind}) where {Tval,Tind} = mapweight(a,x->rand(1)[1])
+uniformWeight(a::SparseMatrixCSC{Tval,Tind}) where {Tval,Tind} = mapweight(a,x->rand())
 
 """
     uniformWeight!(a)
@@ -126,7 +126,7 @@ Set the weight of every edge to random uniform [0,1]
 """
 function uniformWeight!(mat::SparseMatrixCSC)
     for i in 1:length(mat.nzval)
-        mat.nzval[i] = rand(1)[1]
+        mat.nzval[i] = rand()
     end
 end
 
@@ -484,6 +484,6 @@ Returns the diagonal weighted degree matrix(as a sparse matrix) of a graph
 """
 function diagmat(a::SparseMatrixCSC{Tv, Ti}) where {Tv, Ti}
 
-  return sparse(Diagonal(vec(sum(a,1))))
+  return sparse(Diagonal(vec(sum(a,dims=1))))
 
 end # diagmat

@@ -22,7 +22,7 @@ end # pathGraph
 The complete graph
 """
 function completeGraph(n::Int64)
-  return sparse(ones(n,n) - eye(n))
+  return sparse(ones(n,n) - Matrix(I,n,n))
 end # completeGraph
 
 
@@ -297,13 +297,13 @@ function grownGraphD(n::Int64, k::Int64)
 
     for i in (k+2):n
         nb = randSet(i-1,k)
-        u[(i-k-2)*k .+ collect(1:k)] = i
-        v[(i-k-2)*k .+ collect(1:k)] = nb
+        u[(i-k-2)*k .+ collect(1:k)] .= i
+        v[(i-k-2)*k .+ collect(1:k)] .= nb
     end
 
     a = sparse(u,v,1.0,n,n)
 
-    (ai,aj) = findnz(triu(ones(k+1,k+1),1))
+    (ai,aj) = findnz(sparse(triu(ones(k+1,k+1),1)))
     a = a + sparse(ai,aj,1.0,n,n)
     a = a + a'
 
@@ -319,7 +319,7 @@ It begins with a k-clique on the first k+1 vertices.
 """
 function prefAttach(n::Int64, k::Int64, p::Float64)
     if n == (k+1)
-        return sparse(ones(Float64,n,n) - eye(Float64,n))
+        return sparse(ones(Float64,n,n) - sparse(1.0I,n,n))
     elseif n <= k
         error("n must be more than k")
     else
@@ -374,7 +374,7 @@ function prefAttach(n::Int64, k::Int64, p::Float64)
 
         w = ones(Float64,n*k)
 
-        w[1:(k*(k+1))] = 1/2
+        w[1:(k*(k+1))] .= 0.5
 
 
         a = sparse(u,v,w,n,n)

@@ -21,12 +21,12 @@ function symPermuteCSC(a::SparseMatrixCSC{Tv, Ti}, perm::Vector{Ti}) where {Tv,T
     Tv1 = Tv
 
     
-    permi = Vector{Ti1}(a.n)
+    permi = Vector{Ti1}(undef, a.n)
     permi[perm] = collect(1:a.n)
     
-    J = Vector{Ti1}(numnz)
+    J = Vector{Ti1}(undef, numnz)
 
-    deg = Vector{Ti1}(a.n)
+    deg = Vector{Ti1}(undef, a.n)
 
     ptr = 1
     for col = 1:a.n
@@ -40,12 +40,12 @@ function symPermuteCSC(a::SparseMatrixCSC{Tv, Ti}, perm::Vector{Ti}) where {Tv,T
     I = permi[a.rowval];
 
     
-    I1 = Vector{Ti1}(numnz)
-    J1 = Vector{Ti1}(numnz)
-    V1 = Vector{Tv1}(numnz)
+    I1 = Vector{Ti1}(undef, numnz)
+    J1 = Vector{Ti1}(undef, numnz)
+    V1 = Vector{Tv1}(undef, numnz)
 
     cumdeg = cumsum(deg)
-    col = [1;cumdeg+1]
+    col = [1;cumdeg .+ 1]
 
     cumdeg1 = copy(cumdeg)
     
@@ -57,8 +57,8 @@ function symPermuteCSC(a::SparseMatrixCSC{Tv, Ti}, perm::Vector{Ti}) where {Tv,T
         V1[ptr] = a.nzval[i]
     end
 
-    I2 = Vector{Ti1}(numnz)
-    V2 = Vector{Tv1}(numnz)
+    I2 = Vector{Ti1}(undef, numnz)
+    V2 = Vector{Tv1}(undef, numnz)
 
     for i in numnz:-1:1
         ptr = cumdeg[J1[i]]
@@ -79,11 +79,11 @@ function symTransposeCSC(a::SparseMatrixCSC{Tv, Ti}) where {Tv,Ti}
 
     numnz = nnz(a)
 
-    cumdeg = a.colptr[2:end]-1
+    cumdeg = a.colptr[2:end] .- 1
     
     I = a.rowval;
 
-    V1 = Vector{Tv}(numnz)
+    V1 = Vector{Tv}(undef,numnz)
 
     for i in numnz:-1:1
         ptr = cumdeg[I[i]]
@@ -101,7 +101,7 @@ function sortSet(set::Vector{Ti},n::Ti) where Ti
     for i in set
         v[i] = true
     end
-    out = Vector{Ti}(length(set))
+    out = Vector{Ti}(undef, length(set))
     ptr = 1
     for i in 1:n
         if v[i]
@@ -124,13 +124,13 @@ function submatrixCSC(a::SparseMatrixCSC{Tv, Ti}, list::Vector{Ti}) where {Tv,Ti
 
     list = sortSet(list,nnz(a))
 
-    colptr = Vector{Ti}(1+a.n)
+    colptr = Vector{Ti}(undef, 1 .+ a.n)
     colptr[1] = 1
 
     numnz = length(list)
 
-    rowval = Vector{Ti}(numnz)
-    nzval = Vector{Tv}(numnz)
+    rowval = Vector{Ti}(undef, numnz)
+    nzval = Vector{Tv}(undef, numnz)
 
     ptr = 1
     col = 1
@@ -148,7 +148,7 @@ function submatrixCSC(a::SparseMatrixCSC{Tv, Ti}, list::Vector{Ti}) where {Tv,Ti
         
     end
 
-    colptr[(col+1):end] = ptr
+    colptr[(col+1):end] .= ptr
     
     return SparseMatrixCSC(a.m, a.n, colptr, rowval, nzval)
 end

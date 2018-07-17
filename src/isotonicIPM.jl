@@ -140,7 +140,7 @@ function l2NewtonStep( Bt::SparseMatrixCSC{Tv,Ti},
     d1 = 2 * mu0 * sparse(I,n,n)
     s = Bt * x
     d2 = sparse(1:m, 1:m, s .^ -2, m, m)
-    grad = 2 * mu0 * (x - v) - Bt'*(1./s)
+    grad = 2 * mu0 * (x - v) - Bt'*(1 ./ s)
     H1 = sparse(Bt'*d2*Bt)
 
     H = H1 + d1

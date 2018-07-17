@@ -30,7 +30,7 @@ If dic does not contain an entry of `name`, create with set to `Array(typ,0)`.
 """
 function initDictCol!(dic, name, typ)
     if ~haskey(dic,name)
-        dic[name] = Array{typ}(0)
+        dic[name] = typ[]
     end
 end
 
@@ -123,18 +123,19 @@ function testSolver(solver, a, b, tol, maxits, verbose)
 
   try
 
-    gc()
-    tic()
+    GC.gc()
+    t0 = time()
     f = solver(a, tol=tol, maxits=maxits, verbose=verbose)
-    build_time = toq()
+    build_time = time() - t0
 
     it = [0]
-    gc()
-    tic()
+    GC.gc()
+    
+    t0 = time()
     x = f(b, pcgIts = it, tol=tol, maxits=maxits, verbose=verbose)
-    solve_time = toq()
+    solve_time = time() - t0
 
-    err = norm(lap(a) * x - b) / norm(b)
+    err = norm(lap(a) * x .- b) / norm(b)
 
     ret = (solve_time, build_time, it[1], err, x)
     if verbose

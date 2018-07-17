@@ -35,13 +35,13 @@ z = 0
 w = 0
 for i in 1:n
     for j in 1:deg(a,i)
-        x += weighti(a,i,j)
-        y += a[i,nbri(a,i,j)]
+        global x += weighti(a,i,j)
+        global y += a[i,nbri(a,i,j)]
     end
     for j in nbrs(a,i)
-        z += a[i,j]
+        global z += a[i,j]
     end
-    w += wdeg(a,i)
+    global w += wdeg(a,i)
 end
 @test isapprox(x,y)
 @test isapprox(x,z)
@@ -155,7 +155,7 @@ a2 = ErdosRenyiClusterFix(100,4)
 # export wtedChimera, semiWtedChimera
 
 for i in 1:5
-    a2 = semiWtedChimera(10000,i)
+    semiWtedChimera(10000,i)
 end
 
 
@@ -310,7 +310,7 @@ dic = Dict()
 n = 1000
 a = chimera(n)
 b = randn(n)
-b = b - mean(b)
+b = b .- mean(b)
 x = speedTestLapSolvers(solvers, dic, a, b, tol=1e-2, verbose=true)
 
 f = Laplacians.augTreeFactor(a, akpw(a));

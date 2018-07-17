@@ -479,7 +479,7 @@ function IJVindGraph(inList::Vector{IJVind})
     list1 = Vector{IJVind}(undef, numnz)
     
     cumdeg = cumsum(deg)
-    colptr = [1;cumdeg+1]
+    colptr = [1;cumdeg .+ 1]
 
     cumdeg1 = copy(cumdeg)
 
@@ -876,7 +876,7 @@ function compGraph(graph, comp)
         end
     end
 
-    ind = find(aind)
+    ind = findall(aind)
     aic = aic[ind]
     ajc = ajc[ind]
     av = av[ind]
@@ -911,7 +911,7 @@ function combineMultiG(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  aind::Ve
     V1 = zeros(Tv, numnz)
 
     cumdeg = cumsum(deg)
-    col = [1;cumdeg+1]
+    col = [1;cumdeg .+ 1]
 
     cumdeg1 = copy(cumdeg)
     

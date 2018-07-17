@@ -526,10 +526,10 @@ function StarSteepestPath(T, v, d)
       T2[j] = true
     end
   end
-  if (findfirst(T2, true) == 0 || vLow >= vHigh)
+  if (isempty(findfirst(T2 .== true)) || vLow >= vHigh)
     return (v[i] > v[i2]) ? (T[i],T[i2]) : (T[i2], T[i])
   else
-    if (findfirst(T2, false) == 0)
+    if isempty(findfirst(T2 .== false))
       println(T, v, d)
       error("Infinite recursion!")
     end
@@ -754,7 +754,7 @@ function CompLexMin(A, isTerm, initVal)
   val = copy(initVal)
 
   # we keep going until every vertex has an assignment
-  while (findfirst(visited, false) != 0)
+  while !isempty(findfirst(visited .== false))
     # remove terminal to terminal edges
     removeTerm2TermEdges!(B, visited, val)
 

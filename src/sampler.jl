@@ -53,7 +53,7 @@ end
 
 function sample(s::Sampler)
 
-    r = rand(1)[1]*s.sums[1]
+    r = rand()*s.sums[1]
     i = 1
     
     # move through sums
