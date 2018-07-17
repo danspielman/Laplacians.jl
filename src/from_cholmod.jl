@@ -17,12 +17,14 @@ Does this through a call to the analyze routine of cholmod.
 Note that this is much faster than actually computing the factorization
 """
 function ask_cholmod(sdd)
-    ba = Base.SparseArrays.CHOLMOD
-    cm = ba.common()
+    ba = SuiteSparse.CHOLMOD
+    #cm = ba.common()
+    cm = ba.defaults(ba.common_struct)
 
     anal = ba.analyze(ba.Sparse(lap(sdd)), cm);
 
-    s_anal = unsafe_load(get(anal.p))
+    # s_anal = unsafe_load(get(anal.p))
+    s_anal = unsafe_load(pointer(anal))
 
     n = Int(s_anal.n)
     
@@ -45,12 +47,14 @@ end
 Return the permutation that cholmod would apply.
 """
 function cholmod_perm(sdd)
-    ba = Base.SparseArrays.CHOLMOD
-    cm = ba.common()
+    ba = SuiteSparse.CHOLMOD
+    #cm = ba.common()
+    cm = ba.defaults(ba.common_struct)
 
     anal = ba.analyze(ba.Sparse(lap(sdd)), cm);
 
-    s_anal = unsafe_load(get(anal.p))
+    #s_anal = unsafe_load(get(anal.p))
+    s_anal = unsafe_load(pointer(anal))
 
     n = Int(s_anal.n)
 
