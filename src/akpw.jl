@@ -399,7 +399,7 @@ function akpwSub5(graph)
         # and, find the max wt edge between clusters
         # remove self loops as go
 
-        newIJVind = Vector{IJVind}(0)
+        newIJVind = IJVind[]
         maxv = 0
         for i in 1:length(curIJVind)
             ijv = curIJVind[i]
@@ -476,7 +476,7 @@ function IJVindGraph(inList::Vector{IJVind})
     end
 
 
-    list1 = Vector{IJVind}(numnz)
+    list1 = Vector{IJVind}(undef, numnz)
     
     cumdeg = cumsum(deg)
     colptr = [1;cumdeg+1]
@@ -492,7 +492,7 @@ function IJVindGraph(inList::Vector{IJVind})
 
     cumdeg1 = copy(cumdeg)
 
-    list2 = Vector{IJVind}(numnz)
+    list2 = Vector{IJVind}(undef, numnz)
 
     for i in numnz:-1:1
         thisj = list1[i].j
@@ -529,7 +529,7 @@ function sortIJVind(inList::Vector{IJVind})
     end
 
 
-    list1 = Vector{IJVind}(numnz)
+    list1 = Vector{IJVind}(undef, numnz)
     
     cumdeg = cumsum(deg)
     cumdeg1 = copy(cumdeg)
@@ -599,7 +599,7 @@ end
 function IJVindList(ai::Vector{Ti},aj::Vector{Ti},av::Vector{Tv}) where {Tv,Ti}
 
     m = length(ai)
-    origList = Vector{IJVind}(m)
+    origList = Vector{IJVind}(undef, m)
     for i in 1:m
         origList[i] = IJVind(ai[i],aj[i],av[i],i)
     end
@@ -700,7 +700,7 @@ function dijkstraFromSeed(ijvGraph::IJVindGraph, seed::Int, ncomps::Int, comp,
     bdry = 0
     vol = 0
 
-    heap = Vector{HeapEntry}(0)
+    heap = HeapEntry[]
 
     comp[seed] = ncomps
 
@@ -777,7 +777,7 @@ function akpwSub2(graph)
     (ai,aj,av) = findnz(graph)
     m = length(ai)
     
-    origList = Vector{IJVind}(m)
+    origList = Vector{IJVind}(undef, m)
     for i in 1:m
         origList[i] = IJVind(ai[i],aj[i],av[i],i)
     end
@@ -905,9 +905,9 @@ function combineMultiG(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  aind::Ve
         deg[ai[k]] += 1
     end
 
-    I1 = Vector{Ti}(numnz)
-    J1 = Vector{Ti}(numnz)
-    aind1 = Vector{Ti}(numnz)
+    I1 = Vector{Ti}(undef, numnz)
+    J1 = Vector{Ti}(undef, numnz)
+    aind1 = Vector{Ti}(undef, numnz)
     V1 = zeros(Tv, numnz)
 
     cumdeg = cumsum(deg)
@@ -926,10 +926,10 @@ function combineMultiG(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  aind::Ve
 
 
     
-    I2 = Vector{Ti}(numnz)
-    J2 = Vector{Ti}(numnz)
-    aind2 = Vector{Ti}(numnz)
-    V2 = Vector{Tv}(numnz)
+    I2 = Vector{Ti}(undef, numnz)
+    J2 = Vector{Ti}(undef, numnz)
+    aind2 = Vector{Ti}(undef, numnz)
+    V2 = Vector{Tv}(undef, numnz)
 
     for i in numnz:-1:1
         ptr = cumdeg[J1[i]]
@@ -943,10 +943,10 @@ function combineMultiG(ai::Vector{Ti}, aj::Vector{Ti}, av::Vector{Tv},  aind::Ve
     # now, the list is sorted by J, and within that by i
     # so compress it
     
-    I3 = Vector{Ti}(numnz)
-    J3 = Vector{Ti}(numnz)
-    aind3 = Vector{Ti}(numnz)
-    V3 = Vector{Tv}(numnz)
+    I3 = Vector{Ti}(undef,numnz)
+    J3 = Vector{Ti}(undef,numnz)
+    aind3 = Vector{Ti}(undef,numnz)
+    V3 = Vector{Tv}(undef,numnz)
     
     ptr = 0
     i2old = I2[1]
