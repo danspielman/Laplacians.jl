@@ -49,10 +49,10 @@ norm(la*x-b)
 x = f(b,maxits=15,verbose=true, maxtime=1)
 
 d = Diagonal(1 ./ diag(la))
-pre = x -> d*x
+pre = x -> Array(d*x)
 
 x = pcg(la, b, sparse(Diagonal(diag(la))),maxits=10)
-x = pcg(la, b, pre,maxits=10,verbose=true)
+x = pcg(la, b, pre, maxits=10, verbose=true)
 f = pcgSolver(la, spdiagm(0=>diag(la)) ,maxits=10,verbose=true)
 x = f(b)
 f = pcgSolver(la,pre,maxits=10,verbose=false)
