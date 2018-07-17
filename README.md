@@ -18,7 +18,14 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
-## Version 0.2.2, December 28, 2017
+## Version 0.3.0, July 2018 
+
+This is the first version that is compatible with Julia 0.7.  Other changes:
+
+* Dropped support for samplingSDDM and samplingLap solvers.
+* The behavior of rand in Julia 0.7 is different, and this has changed the behavior of chimera.
+
+## Version 0.2.2, December 28, 2017 
 
 Fixed two bugs: one in shortestPaths, and one that prevented passing some parameters to approxCholSddm.  Improved the documentation for solving linear equations.
 

@@ -5,7 +5,7 @@
 n = 100;
 a = wtedChimera(100,1);
 b = randn(n);
-b = b - mean(b);
+b = b .- mean(b);
 la = Laplacians.forceLap(a);
 sdd = copy(la)
 sdd[1,1] += 1;
@@ -120,19 +120,21 @@ function testSolvers(a;maxtime=5)
     excess = zeros(n); excess[1] = excess[n] = 0.1;
     la = lap(a);
     sddm = la + spdiagm(excess);
-    b = rand(n); b = b - mean(b);
+    b = rand(n); b = b .- mean(b);
 
     its = Int[0]
 
 
 
     for solver in SDDMSolvers
+        println(solver)
         f = solver(sddm, tol=1e-6, maxtime=maxtime,verbose=true);
         x = f(b,tol=1e-6,maxits=maxits,verbose=true,pcgIts=its);
         @test ((its[1] == maxits) | (norm(sddm*x - b)/norm(b) <= 1e-1))
     end
 
     for solver in LapSolvers
+        println(solver)
         f = solver(a, tol=1e-6, maxtime=maxtime,verbose=true);
         x = f(b,tol=1e-6,maxits=maxits,verbose=true,pcgIts=its);
         @test ((its[1] == maxits) | (norm(la*x - b)/norm(b) <= 1e-1))
@@ -146,6 +148,7 @@ n = 1000
 tol = 1e-11
 
 for i in 1:50
+    println()
     println("wtedChimera($n, $i)")
     if isodd(i)
         gr = wtedChimera(n,i,verbose=true)
@@ -175,7 +178,7 @@ for i in 2:5
 end
 n = size(a,1)
 b = randn(n)
-b = b - mean(b)
+b = b .- mean(b)
 la = lap(a)
 ee1 = function(a; verbose=false, args...)
     approxCholLap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
@@ -220,7 +223,7 @@ testSolvers(gr,maxtime=10)
 n = 100000
 i = 1
 b = randn(n)
-b = b - mean(b)
+b = b .- mean(b)
 println("wtedChimera($n, $i)")
 gr = wtedChimera(n,i)
 f = KMPLapSolver(gr,tol=1e-1,verbose=true)
@@ -236,8 +239,8 @@ gr1 = wtedChimera(n,1)
 gr2 = wtedChimera(n,2)
 gr = disjoin(gr1,gr2)
 
-b1 = rand(n); b1 = b1 - mean(b1)
-b2 = rand(n); b2 = b2 - mean(b2)
+b1 = rand(n); b1 = b1 .- mean(b1)
+b2 = rand(n); b2 = b2 .- mean(b2)
 b = [b1;b2]
 f = KMPLapSolver(gr,tol=1e-6)
 x = f(b)
@@ -263,7 +266,7 @@ sp.verboseSS = true
 n = 100
 a = wtedChimera(n,1)
 b = randn(n)
-b = b - mean(b)
+b = b .- mean(b)
 la = lap(a)
 
 f = samplingLapSolver(a,tol=1e-6)
@@ -288,7 +291,7 @@ la = lap(a)
 sdd = copy(la)
 sdd[1,1] += 1
 b = randn(a.n)
-b = b - mean(b)
+b = b .- mean(b)
 @time fn = augTreeLap(a,params=AugTreeParams())
 @time fold = augTreeLap(a,params=AugTreeParamsOld())
 @time gn = augTreeSddm(sdd)

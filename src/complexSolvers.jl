@@ -7,10 +7,12 @@ export llsPurge
 include("sqLinOpWrapper.jl")
 export SqLinOp
 
+#=
 include("samplingSolver.jl")
 export samplingSDDMSolver
 export samplingLapSolver
 export samplingParams
+=#
 
 ### KMP
 # included in Laplacians.jl
@@ -25,7 +27,7 @@ include("powerIteration.jl")
 export powerIteration
 
 """A list containing SDDM linear system solvers. They take in a SDDM matrix plus tol, maxits and maxtime parameters."""
-SDDMSolvers = [augTreeSddm, KMPSDDMSolver, samplingSDDMSolver, approxCholSddm]
+SDDMSolvers = [augTreeSddm, KMPSDDMSolver, approxCholSddm]
 
 """A list containing Laplacian linear system solvers. They take in an adjacency matrix plus tol, maxits and maxtime parameters."""
-LapSolvers = [approxCholLap, augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver]
+LapSolvers = [approxCholLap, augTreeLap, KMPLapSolver, cgLapSolver]
