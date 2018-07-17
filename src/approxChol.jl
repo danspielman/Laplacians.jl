@@ -146,7 +146,7 @@ function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, perm::Array) where {Tind,Tval}
     invp = invperm(perm)
 
     cols = zeros(Tind, n)
-    llelems = Array{LLord{Tind,Tval}}(m)
+    llelems = Array{LLord{Tind,Tval}}(undef, m)
 
     ptr = one(Tind)
 
@@ -850,8 +850,8 @@ function approxCholLapWdeg(a::SparseMatrixCSC;
 
   la = lap(a)
 
-  v = vec(sum(a,1))
-  v = v .* (1+ rand(length(v)))
+  v = vec(sum(a,dims=1))
+  v = v .* (1 .+ rand(length(v)))
   p = sortperm(v)
 
   llmat = LLMatOrd(a,p)
@@ -1147,7 +1147,7 @@ function approxCholLapChol(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=100
     end
 
 
-    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
+    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b .- mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
 
     return f
 end

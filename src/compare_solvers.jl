@@ -56,7 +56,7 @@ Runs many Laplacians solvers.  Puts the build and solve time results into a dict
 """
 function speedTestLapSolvers(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=10000, maxtime=1000, verbose=false, testName="") where {Tv,Ti}
 
-    b = b - mean(b)
+    b = b .- mean(b)
 
     la = lap(a)
 

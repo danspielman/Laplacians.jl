@@ -307,7 +307,7 @@ function augTreeLap1(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=Inf, maxt
 
   la = lap(a)
 
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b .- mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose)
     
   return f
 
@@ -393,7 +393,7 @@ function augTreeFactor(a, tree; verbose=false,
         #xord = pcg(laord, bord, f1, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
         x = zeros(Float64,n)
-        x[ord] = xord - mean(xord)
+        x[ord] = xord .- mean(xord)
 
         return x
     end

@@ -5,11 +5,11 @@ function jacobi(la::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
 	d = diag(la)
 
 	f = function(b::Array{Float64,1})
-		res = copy(b) - mean(b)
+		res = copy(b) .- mean(b)
 
 		res = res ./ d
 
-		return res - mean(res)
+		return res .- mean(res)
 	end
 
 	return f
@@ -24,13 +24,13 @@ function gs(la::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
 	m3 = UpperTriangular(la)
 
 	f = function(b::Array{Float64,1})
-		res = copy(b) - mean(b)
+		res = copy(b) .- mean(b)
 
 		res = m3 \ res
 		res = res ./ m2
 		res = m1 \ res
 
-		return res - mean(res)
+		return res .- mean(res)
 	end
 
 	return f
