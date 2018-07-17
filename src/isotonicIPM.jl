@@ -35,7 +35,7 @@ function isotonicIPM(A::SparseMatrixCSC{Tv,Ti},
                      relGapTermination::Bool=false) where {Tv,Ti}
     n = size(A)[1]
     topoOrder = toposort(A)
-    permMat = (speye(n))[1:n,topoOrder]
+    permMat = (sparse(I,n,n))[1:n,topoOrder]
     Bt = -dirEdgeVertexMat(A) #sign convention implies all edges should get positive values
     m = size(Bt)[1]
     
@@ -43,14 +43,14 @@ function isotonicIPM(A::SparseMatrixCSC{Tv,Ti},
     eps0 = eps
     beta2 = 10.0
 
-    x = 0.0+collect(1:n) # our initial guess
+    x = collect(1.0:n) # our initial guess
     x = permMat*x #this seems to be the right direction for permMat
     
     if notFeasible(x, Bt)
         error("Input graph is not a DAG!")
     end
 
-    eTaStartFn(y) = ( (y-v)'*Bt'*(1./(Bt*y))/norm(y-v)^2 )[1]
+    eTaStartFn(y) = ( (y-v)'*Bt'*(1 ./ (Bt*y))/norm(y-v)^2 )[1]
     #This seems to be the formula for the minimizer?
 
     #TODO
@@ -95,7 +95,7 @@ function isotonicIPM(A::SparseMatrixCSC{Tv,Ti},
             (H,xNewton) = l2NewtonStep( Bt,x,v,mu0, solver )
             
             s = Bt*x
-            gradF = 2*mu0*(x-v) - Bt'*(1./s)
+            gradF = 2*mu0*(x-v) - Bt'*(1 ./ s)
             x = backtrackLineSearch(F,gradF,Bt,xNewton,x)
             centMeasure = (xNewton'*H*xNewton)[1]
             centered = centMeasure < 10.0^-2
@@ -137,7 +137,7 @@ function l2NewtonStep( Bt::SparseMatrixCSC{Tv,Ti},
                        solver ) where {Tv,Ti}
     m = size(Bt)[1]
     n = size(Bt)[2]
-    d1 = 2 * mu0 * speye(n)
+    d1 = 2 * mu0 * sparse(I,n,n)
     s = Bt * x
     d2 = sparse(1:m, 1:m, s .^ -2, m, m)
     grad = 2 * mu0 * (x - v) - Bt'*(1./s)
@@ -160,7 +160,7 @@ function dualVal( Bt::SparseMatrixCSC{Tv,Ti},
                   v::Array{Tv,1},
                   mu0::Real) where {Tv,Ti}
     s = Bt*x # all pos entries
-    f = 1/mu0 * 1./s 
+    f = 1/mu0 * 1 ./ s 
     dval = (-1/4 * sum((Bt'*f).^2) - f'*Bt*v)[1]
     return dval
 end

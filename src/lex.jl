@@ -48,7 +48,8 @@ function simIterLexUnwtd(numIter::Int64,
         maxNeighbor = maximum(val[nbrs])
         minNeighbor = minimum(val[nbrs])
         nextVal[u] = minNeighbor + (maxNeighbor - minNeighbor) / 2.0
-        if (bits(val[u]) != bits(nextVal[u]))
+        #if (bits(val[u]) != bits(nextVal[u]))
+        if val[u] != nextVal[u]
           progress = true
         end
       else
@@ -106,7 +107,7 @@ function simIterLex(numIter::Int64,
         wj = w[maxJ]
         vj = val[nbrs[maxJ]]
         nextVal[u] = (wi * vi + wj * vj) / (wi + wj)
-        if (bits(val[u]) != bits(nextVal[u]))
+        if val[u] != nextVal[u]
           progress = true
         end
       else
@@ -380,7 +381,7 @@ function CompHighPressGraph(G, isTerm, initVal, alpha)
   vLow, LParent = CompVLow(G, isTerm, initVal, alpha)
   vHigh, HParent = CompVHigh(G, isTerm, initVal, alpha)
 
-  find(vHigh .> vLow * (1 + LEX_EPS))
+  findall(vHigh .> vLow * (1 + LEX_EPS))
 end
 
 
@@ -397,8 +398,8 @@ function fixPath!(A, isTerm, val, path)
     error(@sprintf("Value of vertex %d is not set!", path[l]))
   end
 
-  dist = Array{Float64}(l-1)
-  cdist = Array{Float64}(l-1)
+  dist = Array{Float64}(undef, l-1)
+  cdist = Array{Float64}(undef, l-1)
   for i in 1:l-1
     if (A[path[i], path[i+1]] == 0)
       error(@sprintf("No edge between vertices %d and %d!", path[i], path[i+1]))
@@ -570,16 +571,16 @@ function VertexSteepestPath(A, cpnts, isTerm, val, x)
   else
     # filter out terminals in other components
     filter = copy(isTerm)
-    for i in find(isTerm)
+    for i in findall(isTerm)
       if (d[i] == Inf)
         filter[i] = false
       end
     end
     if (LEX_DEBUG)
-      println(x, "; filter = ", find(filter))
+      println(x, "; filter = ", findall(filter))
     end
 
-    t1, t2 = StarSteepestPath(find(filter), val[filter], d[filter])
+    t1, t2 = StarSteepestPath(findall(filter), val[filter], d[filter])
     p1 = pathFromParents(parents, t1)
     p2 = pathFromParents(parents, t2)
     if (LEX_DEBUG)
@@ -677,7 +678,7 @@ function SteepestPath(A, cpnts, isTerm, val, vert=collect(1:n))
   # TODO: make this cleaner and much faster, preferably without copying
   # by using a filter or something.
   t = copy(isTerm)
-  t[hPresSet] = true
+  t[hPresSet] .= true
   newA = copy(A)
   for i = 1:n
     for j = 1:n
@@ -689,7 +690,7 @@ function SteepestPath(A, cpnts, isTerm, val, vert=collect(1:n))
 
   newCpnts = components(newA)
   newVertices = []
-  append!(newVertices, find(isTerm))
+  append!(newVertices, findall(isTerm))
   append!(newVertices, hPresSet)
   return SteepestPath(newA, newCpnts, isTerm, val, newVertices)
 end # SteepestPath
@@ -700,7 +701,7 @@ function removeTerm2TermEdges!(G::SparseMatrixCSC{Tv, Ti},
                                isTerm::Vector{Bool},
                                val::Vector{Float64} ) where {Tv, Ti}
   n = G.n
-  terms = find(isTerm)
+  terms = findall(isTerm)
   alpha = -Inf
 
   for u in terms

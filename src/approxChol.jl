@@ -115,7 +115,7 @@ function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
     m = nnz(a)
 
     cols = zeros(Tind, n)
-    llelems = Array{LLord{Tind,Tval}}(m)
+    llelems = Array{LLord{Tind,Tval}}(undef, m)
 
     ptr = one(Tind)
 

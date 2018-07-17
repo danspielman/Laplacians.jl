@@ -8,10 +8,10 @@ Uses cholfact, so, if the initial graph is not sdd or if inverse has a lot of no
 function condNumber(la::SparseMatrixCSC{Tv,Ti}, prec::SparseMatrixCSC{Tv,Ti}; tol = 1e-5) where {Tv,Ti}
 	# cf = cholfact(prec)
 	n = la.n
-	ldl = ldltfact(prec)
-	diag = 1 ./ (ldl[:D] \ ones(n))
+	ldl = ldlt(prec)
+	diag = 1 ./ (ldl.D \ ones(n))
 
-	return computeCN(la, ldl[:UP], diag, tol=tol)
+	return computeCN(la, ldl.UP , diag, tol=tol)
 end
 
 # M = Ut * d * U
