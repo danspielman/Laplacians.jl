@@ -96,7 +96,7 @@ function cgLapSolver1(A::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf
     pcgIts_=pcgIts
 
     f(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) =
-        cg(la, b-mean(b), tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+        cg(la, b .- mean(b), tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
 end
 

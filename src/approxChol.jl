@@ -828,7 +828,7 @@ function approxCholLapGiven(a::SparseMatrixCSC;
   end
 
 
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b .- mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
 
 end
 
@@ -877,7 +877,7 @@ function approxCholLapWdeg(a::SparseMatrixCSC;
   end
 
 
-  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b-mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
+  f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b .- mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
 
 end
 
@@ -1059,7 +1059,7 @@ function ldli2Chol(ldli)
         i = ldli.col[ii]
         j0 = ldli.colptr[ii]
         j1 = ldli.colptr[ii+1]-1
-        scales[i] = prod(1.0-ldli.fval[j0:(j1-1)])
+        scales[i] = prod(1.0 .- ldli.fval[j0:(j1-1)])
     end
 
     for ii in 1:(n-1)
@@ -1110,7 +1110,7 @@ end
 
 function LDLsolver(L::SparseMatrixCSC, b::Array)
     y = x6 = L \ (L' \ b)
-    return y - mean(y)
+    return y .- mean(y)
 end
 
 

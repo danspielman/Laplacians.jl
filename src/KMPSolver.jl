@@ -55,12 +55,12 @@ function elimDeg12(t, marked)
 
     n = size(t,1)
 
-    deg = Array{Int64}(n)
+    deg = Vector{Int64}(undef, n)
     for v in 1:n
         deg[v] = t.colptr[v+1] - t.colptr[v]
     end
 
-    elims1 = Array{elimLeafNode}(0)
+    elims1 = elimLeafNode[]
 
     for v in n:-1:2
 
@@ -75,7 +75,7 @@ function elimDeg12(t, marked)
         end
     end
 
-    elims2 = Array{elimDeg2Node}(0)
+    elims2 = elimDeg2Node[]
 
     subt = triu(t)
 
@@ -128,7 +128,7 @@ function elimDeg12(t, marked)
 
     subt = subt + subt'
 
-    ind = find(marked.<2)
+    ind = findall(marked.<2)
     subt = subt[ind,ind]
     
     return elims1, elims2, ind, subt
@@ -222,7 +222,7 @@ function KMPSDDMSolver(mat; verbose=false,
 
         b1 = [-sum(b);b]
         x1 = f1(b1; verbose=verbose, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts)
-        x = x1[2:end] - x1[1]
+        x = x1[2:end] .- x1[1]
         
         return x
         
@@ -312,7 +312,7 @@ function KMPLapSolver1(a; verbose=false,
 
     f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
 
-        bord = b[ord] - mean(b)
+        bord = b[ord] .- mean(b)
         
         xord = pcg(la, bord, fsub, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
@@ -467,10 +467,10 @@ This will mostly be the "uniform sampling" envisioned by KMP.
 =#
 function stretchSample(ijvs::IJVS,stretchTarget::Float64,frac::Float64)
 
-    sampi = Array{Int64}(0)
-    sampj = Array{Int64}(0)
-    sampv = Array{Float64}(0)
-    samps = Array{Float64}(0)
+    sampi = Int64[]
+    sampj = Int64[]
+    sampv = Float64[]
+    samps = Float64[]
 
     m = size(ijvs.i,1)
 

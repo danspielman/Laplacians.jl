@@ -127,13 +127,13 @@ function lapWrapConnected(solver, a::AbstractMatrix; tol::Real=1e-6, maxits=Inf,
 
     f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
 
-        bs = b[leave] - mean(b)
+        bs = b[leave] .- mean(b)
 
         xs = subSolver(bs, tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 
-        x = zeros(b)
+        x = zeros(size(b))
         x[leave] = xs
-        x = x - mean(x)
+        x = x .- mean(x)
         return x
     end
 

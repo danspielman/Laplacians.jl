@@ -20,6 +20,7 @@ module Laplacians
   end
 
   using Arpack
+  using SuiteSparse
   using DataStructures
   using SparseArrays
   using Random

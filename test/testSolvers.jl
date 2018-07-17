@@ -28,8 +28,8 @@ a2 = disjoin(chimera(100,2),wtedChimera(200,3))
 la2 = lap(a2)
 n = size(a2,1)
 b2 = randn(n);
-b2[1:100] = b2[1:100] - mean(b2[1:100]);
-b2[101:300] = b2[101:300] - mean(b2[101:300]);
+b2[1:100] = b2[1:100] .- mean(b2[1:100]);
+b2[101:300] = b2[101:300] .- mean(b2[101:300]);
 
 f = Laplacians.lapWrapComponents(conSolve, a2)
 
