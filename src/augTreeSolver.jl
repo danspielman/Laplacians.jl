@@ -62,8 +62,8 @@ function augmentTree(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}, k:
 
     s = sum(av[ord[(k+1):end]])
     probs = av * k / s
-    probs[ord[1:k]] = 0
-    edgeinds[rand(length(av)) .< probs] = true
+    probs[ord[1:k]] .= 0
+    edgeinds[rand(length(av)) .< probs] .= true
 
     augi = ai[edgeinds]
     augj = aj[edgeinds]

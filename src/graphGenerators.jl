@@ -297,8 +297,8 @@ function grownGraphD(n::Int64, k::Int64)
 
     for i in (k+2):n
         nb = randSet(i-1,k)
-        u[(i-k-2)*k + collect(1:k)] = i
-        v[(i-k-2)*k + collect(1:k)] = nb
+        u[(i-k-2)*k .+ collect(1:k)] = i
+        v[(i-k-2)*k .+ collect(1:k)] = nb
     end
 
     a = sparse(u,v,1.0,n,n)

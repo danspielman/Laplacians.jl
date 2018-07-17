@@ -103,7 +103,7 @@ end
 
 
 function pcg(mat, b, pre::Union{AbstractArray,Matrix}; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
-    fact = cholfact(pre)
+    fact = cholesky(pre)
     F = x->(fact \ x)
     pcg(mat, b, F; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
 end

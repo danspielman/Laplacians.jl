@@ -543,7 +543,7 @@ function sortIJVind(inList::Vector{IJVind})
 
     cumdeg1 = copy(cumdeg)
 
-    list2 = Vector{IJVind}(numnz)
+    list2 = Vector{IJVind}(undef, numnz)
 
     for i in numnz:-1:1
         thisj = list1[i].j
@@ -561,7 +561,7 @@ end
 # must be sorted for this to work
 function compress(inList::Vector{IJVind})
 
-    outlist = Vector{IJVind}(0)
+    outlist = IJVind[]
 
     ijv = inList[1]
 
@@ -648,7 +648,7 @@ function cluster!(curIJVind, treeEdges, xf)
         deg[ijv.j] += 1
     end
     cumdeg = cumsum(deg)
-    colptr = [1;cumdeg+1]
+    colptr = [1;cumdeg .+ 1]
 
 
     ijvGraph = IJVindGraph(curIJVind, colptr) 

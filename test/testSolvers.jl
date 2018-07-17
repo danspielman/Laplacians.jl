@@ -119,7 +119,7 @@ function testSolvers(a;maxtime=5)
     n = a.n
     excess = zeros(n); excess[1] = excess[n] = 0.1;
     la = lap(a);
-    sddm = la + spdiagm(excess);
+    sddm = la + sparse(Diagonal(excess));
     b = rand(n); b = b .- mean(b);
 
     its = Int[0]
@@ -180,6 +180,7 @@ n = size(a,1)
 b = randn(n)
 b = b .- mean(b)
 la = lap(a)
+
 ee1 = function(a; verbose=false, args...)
     approxCholLap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
 end
@@ -200,7 +201,7 @@ end
 n = 10
 a = rand(n,n)
 a = a + a'
-a = a - sparse(Diagonal(diag(a)))
+a = a - Diagonal(diag(a))
 a = sparse(a)
 println("rand complete graph")
 testSolvers(a,maxtime=10)
@@ -208,7 +209,7 @@ testSolvers(a,maxtime=10)
 n = 100
 a = rand(n,n)
 a = a + a'
-a = a - diagm(diag(a))
+a = a - Diagonal(diag(a))
 a = sparse(a)
 println("rand complete graph")
 testSolvers(a,maxtime=10)
@@ -258,6 +259,7 @@ la[1,1] += 1
 lt[1,1] += 1
 condNumber(la,lt)
 
+#=
 sp = Laplacians.defaultSamplingParams
 
 sp.verboseSS = true
@@ -269,7 +271,6 @@ b = randn(n)
 b = b .- mean(b)
 la = lap(a)
 
-#=
 f = samplingLapSolver(a,tol=1e-6)
 x = f(b)
 

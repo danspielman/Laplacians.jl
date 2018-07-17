@@ -346,8 +346,8 @@ function approxChol(a::LLMatOrd{Tind,Tval}) where {Tind,Tval}
 
     d = zeros(Tval,n)
 
-    colspace = Array{LLcol{Tind,Tval}}(n)
-    cumspace = Array{Tval}(n)
+    colspace = Array{LLcol{Tind,Tval}}(undef, n)
+    cumspace = Array{Tval}(undef, n)
     #vals = Array(Tval,n) # will be able to delete this
 
     o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
@@ -861,7 +861,7 @@ function approxCholLapWdeg(a::SparseMatrixCSC;
   ldlip = LDLinv(p[ldli.col], ldli.colptr, p[ldli.rowval], ldli.fval, ldli.d[ip]);
 
   F = function(b)
-    x = zeros(b)
+    x = zeros(size(b))
     x = LDLsolver(ldlip, b)
     #x[p] = LDLsolver(ldli, b[p])
     return x

@@ -408,8 +408,8 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Real, level::Int, para
     else
 
         marked = ones(Int64,n)
-        marked[ijvs1.i] = 0
-        marked[ijvs1.j] = 0
+        marked[ijvs1.i] .= 0
+        marked[ijvs1.j] .= 0
 
         elims1, elims2, ind::Array{Int64,1}, subtree = elimDeg12(tree, marked)
 
