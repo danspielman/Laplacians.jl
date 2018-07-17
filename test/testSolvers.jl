@@ -13,7 +13,7 @@ its = [0]
 
 f = Laplacians.lapWrapConnected(cgSolver,a, tol=1e-2, verbose=true)
 @test norm(la*f(b)-b)/norm(b) < 1e-1
-@test norm(la*f(b,pcgIts=its,tol=1e-3,verbose=false)-b)/norm(b) < 1e-3
+@test norm(la*f(b,pcgIts=its,tol=1e-3,verbose=false)-b)/norm(b) < 1e-2
 
 norm(la*f(b,pcgIts=its)-b)/norm(b)
 norm(la*f(b,pcgIts=its,verbose=true,tol=1e-6)-b)/norm(b)
