@@ -189,7 +189,7 @@ end
 ee3 = function(a; verbose=false, args...)
     approxCholLap(a; params=ApproxCholParams(:given), verbose=verbose, args...)
 end
-for solver in [augTreeLap, KMPLapSolver, samplingLapSolver, cgLapSolver, ee1, ee2, ee3]
+for solver in [augTreeLap, KMPLapSolver, cgLapSolver, ee1, ee2, ee3]
     f = solver(a, tol=1e-6, maxtime=5);
     x = f(b);
     @test norm(la*x - b)/norm(b) <= 1e-1
@@ -200,7 +200,7 @@ end
 n = 10
 a = rand(n,n)
 a = a + a'
-a = a - diagm(diag(a))
+a = a - sparse(Diagonal(diag(a)))
 a = sparse(a)
 println("rand complete graph")
 testSolvers(a,maxtime=10)
@@ -269,6 +269,7 @@ b = randn(n)
 b = b .- mean(b)
 la = lap(a)
 
+#=
 f = samplingLapSolver(a,tol=1e-6)
 x = f(b)
 
@@ -278,7 +279,7 @@ params.returnCN = true
 params.fixTree = true
 f = samplingLapSolver(a,tol=1e-6,params=params)
 x = f(b)
-
+=#
 
 
 
