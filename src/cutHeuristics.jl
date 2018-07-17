@@ -16,8 +16,8 @@ function refineCut(G::SparseMatrixCSC{Tv,Ti}, s::Array{Int64,1}) where {Tv,Ti}
 
 	# pq_in - costs are maintained to add elements to the set
 	# pq_out - costs are maintained to remove elements from the set
-	pq_in = DataStructures.PriorityQueue{Int64,Int64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}(Base.Order.Reverse) 
-	pq_out = DataStructures.PriorityQueue{Int64,Int64,Base.Order.ForwardOrdering}()
+	pq_in = DataStructures.PriorityQueue(Base.Order.Reverse)
+	pq_out = DataStructures.PriorityQueue(Base.Order.Forward)
 
 	for u in 1:n
 		cost = 0
