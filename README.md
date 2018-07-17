@@ -18,12 +18,12 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
-## Version 0.3.0, July 2018 
+## Version 0.3.0, July 18 (or so), 2017 
 
 This is the first version that is compatible with Julia 0.7.  Other changes:
 
 * Dropped support for samplingSDDM and samplingLap solvers.
-* The behavior of rand in Julia 0.7 is different, and this has changed the behavior of chimera.
+* The behavior of rand in Julia 0.7 is different, and this has changed the behavior of chimera.  So, the chimera graphs generated in Version 0.3.0 and beyond will be different from those before.
 
 ## Version 0.2.2, December 28, 2017 
 
