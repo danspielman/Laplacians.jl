@@ -2,43 +2,69 @@
 
 import Random.randperm
 
+"""
+    ijv = empty_graph_ijv(n)
+"""
+empty_graph_ijv(n::Integer) = IJV{Float64,Int64}(Int64(n),0,[],[],[])
 
 """
-    graph = pathGraph(n::Int64)
-
-The path graph on n vertices
+    ijv = empty_graph(n)
 """
-function pathGraph(n::Int64)
-  x = append!(collect(1:(n-1)), collect(2:n))
-  y = append!(collect(2:n), collect(1:(n-1)))
-  w = ones(2 * (n - 1))
-  return sparse(x, y, w)
-end # pathGraph
+empty_graph(n::Integer) = sparse(empty_graph_ijv(n))
 
 
 """
-    graph = completeGraph(n::Int64)
-
-The complete graph
+    graph = path_graph(n)
 """
-function completeGraph(n::Int64)
-  return sparse(ones(n,n) - Matrix(I,n,n))
-end # completeGraph
-
+path_graph(n) = sparse(path_graph_ijv(n))
 
 """
-    graph = ringGraph(n::Int64)
-
-The simple ring on n vertices
+    ijv = path_graph_ijv(n::Int64)
 """
-function ringGraph(n::Int64)
-    a = spdiagm(1=>ones(n-1))
-    a[1,n] = 1.0
-    a = a + a'
+function path_graph_ijv(n::Integer)
+    IJV(n, 2*(n-1),
+        [collect(1:(n-1)) ; collect(2:n)], 
+        [collect(2:n); collect(1:(n-1))], 
+        ones(2*(n-1)))
 end
 
+
 """
-    graph = generalizedRing(n::Int64, gens)
+    graph = complete_graph(n)
+"""
+function complete_graph(n::Integer)
+  return sparse(ones(n,n) - Matrix(I,n,n))
+end 
+
+"""
+    ijv = complete_graph_ijv(n)
+"""
+complete_graph_ijv(n::Integer) = IJV(complete_graph(n))
+
+
+"""
+    graph = ring_graph(n)
+"""
+ring_graph(n) = sparse(ring_graph_ijv(n))
+
+
+"""
+    ijv = ring_graph_ijv(n)
+"""
+function ring_graph_ijv(n::Integer)
+    if n == 1
+        return empty_graph_ijv(1)
+    else
+        return IJV(n, 2*n,
+        [collect(1:(n-1)) ; collect(2:n); 1; n], 
+        [collect(2:n); collect(1:(n-1)); n; 1], 
+        ones(2*n))
+    end
+end    
+
+
+"""
+    graph = generalized_ring(n, gens)
 
 A generalization of a ring graph.
 The vertices are integers modulo n.
@@ -46,10 +72,18 @@ Two are connected if their difference is in gens.
 For example,
 
 ```
-generalizedRing(17, [1 5])
+generalized_ring(17, [1 5])
 ```
 """
-function generalizedRing(n::Int64, gens)
+generalized_ring(n::T, gens::Array{T}) where T <: Integer = 
+    sparse(generalized_ring_ijv(n, gens))
+
+function generalized_ring_ijv(n::T, gens::Array{T}) where T <: Integer
+    gens = gens[mod.(gens, n) .> 0]
+    if isempty(gens)
+        return empty_graph_ijv(n)
+    end
+
     k = length(gens)
     m = 2*n*k
     ai = zeros(Int64,m)
@@ -65,18 +99,21 @@ function generalizedRing(n::Int64, gens)
             ind = ind + 1
         end
     end
-    return sparse(1 .+ ai,1 .+ aj,ones(m),n,n)
-    #return ai, aj
+    return IJV(n, m, 1 .+ ai,1 .+ aj,ones(m))
 end
 
 """
-    graph = randGenRing(n::Int64, k::Integer)
+    graph = rand_gen_ring(n, k)
 
 A random generalized ring graph of degree k.
 Gens always contains 1, and the other k-1 edge types
 are chosen from an exponential distribution
 """
-function randGenRing(n::Int64, k::Integer; verbose=false)
+rand_gen_ring(n::Integer, k::Integer; verbose=false) =
+    sparse(rand_gen_ring_ijv(n,k,verbose=verbose))
+
+function rand_gen_ring_ijv(n::Integer, k::Integer; verbose=false)
+
     # if any of n, 2n, 3n etc. is in gens we will have self loops
     gens = [0]
     while 0 in (gens .% n)
@@ -85,11 +122,8 @@ function randGenRing(n::Int64, k::Integer; verbose=false)
 
     if verbose
         println("gens: $(gens)")
-    end
-    
-        
-    
-    return generalizedRing(n, gens)
+    end            
+    return generalized_ring_ijv(n, gens)
 end
 
 
@@ -97,77 +131,55 @@ end
 """
     graph = hyperCube(d::Int64)
 
-The d dimensional hypercube.  Has 2^d vertices
+The d dimensional hypercube.  Has 2^d vertices and d*2^(d-1) edges.
 """
-function hyperCube(d::Int64)
-  a = sparse([0 1; 1 0])
+hypercube(d::Integer) = sparse(hypercube_ijv(d))
 
-  for i = 1:(d-1)
-    k = 2^i
-    D = sparse(I, k, k)
-    a = [a D; D a]
-  end
+function hypercube_ijv(d::Integer)
+    @assert d >= 0
 
-  return a
-end # hyperCube
+    if d == 0
+        return empty_graph_ijv(1)
+    end
+
+    ijvm = hypercube_ijv(d-1)
+
+    ijv = disjoin(ijvm, ijvm)
+    append!(ijv.i, [collect(1:2^(d-1)); 2^(d-1) .+ collect(1:2^(d-1))]  )
+    append!(ijv.j, [2^(d-1) .+ collect(1:2^(d-1)); collect(1:2^(d-1))] )
+    append!(ijv.v, ones(2^d))
+    ijv.nnz += 2^d
+
+    return ijv
+
+end
+
 
 """
     graph = completeBinaryTree(n::Int64)
 
 The complete binary tree on n vertices
 """
-function completeBinaryTree(n::Int64)
+complete_binary_tree(n::Integer) = sparse(cbt_ijv(n))
 
-  k = div(n-1,2)
-  a = sparse(collect(1:k),2*collect(1:k),1.0,n,n) + sparse(collect(1:k),2*collect(1:k) .+ 1,1.0,n,n)
+function cbt_ijv(n::Integer)
+    
+    k = div(n-1,2)
 
-  if 2*k+1 < n
-    a[n-1,n] = 1.0
-  end
-
-  a = a + a'
-
-  return a
-end # completeBinaryTree
-
-"""
-    graph = wGrid2(n::Int64; weightGen::Function=rand)
-
-An n by n grid with random weights. User can specify the weighting scheme.
-"""
-function wGrid2(n::Int64; weightGen::Function=rand)
-    gr2 = sparse(grid2(n));
-
-    for i in 1:nnz(gr2)
-        gr2.nzval[i] = weightGen()
+    if 2*k+1 < n
+        ii0 = Int[n-1]
+        jj0 = Int[n]
+    else
+        ii0 = Int[]
+        jj0 = Int[]
     end
 
-    # symmetrize
-    gr2 = tril(gr2) + tril(gr2)'
+    ii = [collect(1:k); collect(1:k); ii0]
+    jj = [2*collect(1:k); 2*collect(1:k) .+ 1; jj0]
 
-    return gr2
-end
+    return IJV(n, 2*(n-1),
+        [ii;jj], [jj;ii], ones(2*length(ii)))
 
-"""
-    graph = wGrid3(n::Int64; weightGen::Function=rand)
-
-An n^3 grid with random weights. User can specify the weighting scheme.
-"""
-function wGrid3(n::Int64; weightGen::Function=rand)
-    gr3 = grid3(n);
-
-    a = kron(sparse(I, n, n), gr3);
-    b = kron(gr3, sparse(I, n, n));
-
-    gr3 = sparse(a + b);
-    for i in 1:nnz(gr3)
-        gr3.nzval[i] = weightGen()
-    end
-
-    # symmetrize
-    gr3 = tril(gr3) + tril(gr3)'
-
-    return gr3
 end
 
 """
@@ -175,27 +187,53 @@ end
 
 An n-by-m grid graph.  iostropy is the weighting on edges in one direction.
 """
-function grid2(n::Int64, m::Int64; isotropy=1)
-  a = kron(sparse(I, n, n),spdiagm(1=>ones(m-1)))
-  a = a + isotropy*kron(spdiagm(1=>ones(n-1)), sparse(I, m, m))
-  a = a + a'
-  return a
-end # grid2
+grid2(n::Integer, m::Integer; isotropy=1.0) = 
+    sparse(grid2_ijv(n, m; isotropy=isotropy))
 
-grid2(n::Int64) = grid2(n,n)
+grid2_ijv(n::Integer, m::Integer; isotropy=1.0) =
+    product_graph(isotropy*path_graph_ijv(n), path_graph_ijv(m))
+
+grid2(n::Integer) = grid2(n,n)
+grid2_ijv(n::Integer) = grid2_ijv(n,n)
 
 """
-    graph = grid3{Ti}(n1::Ti, n2::Ti, n3::Ti)
+    graph = grid3(n1, n2, n3)
     graph = grid3(n)
 
 An n1-by-n2-by-n3 grid graph.
 """
-function grid3(n1::Ti, n2::Ti, n3::Ti) where Ti
-    a = productGraph(pathGraph(n1), productGraph(pathGraph(n2), pathGraph(n3)))
-    return a
-end
+grid3(n1::Integer, n2::Integer, n3::Integer) = 
+    sparse(grid3_ijv(n1, n2, n3))
+
+grid3_ijv(n1::Integer, n2::Integer, n3::Integer) =
+    product_graph(path_graph(n1), product_graph(path_graph(n2), path_graph(n3)))
 
 grid3(n) = grid3(n,n,n)
+grid3_ijv(n) = grid3_ijv(n,n,n)
+
+"""
+    graph = wGrid2(n::Integer; weightGen::Function=rand)
+
+An n by n grid with random weights. User can specify the weighting scheme.
+"""
+wgrid2(n::Integer; weightGen::Function=rand) = 
+    sparse(wgrid2_ijv(n, weightGen = weightGen))
+
+function wgrid2_ijv(n::Integer; weightGen::Function=rand)
+    gr2 = compress(grid2_ijv(n))
+
+    # inefficient for backwards compatibility
+    for i in 1:gr2.nnz
+        gr2.v[i] = weightGen()
+        if gr2.i[i] < gr2.j[i]
+            gr2.v[i] = 0
+        end
+    end
+
+    return compress(gr2 + gr2')
+
+end
+
 
 """
     graph = grid2coords(n::Int64, m::Int64)
@@ -213,54 +251,80 @@ grid2coords(n) = grid2coords(n, n)
 
 
 """
-    graph = randMatching(n::Int64)
+    graph = randMatching(n::Integer)
 
 A random matching on n vertices
 """
-function randMatching(n::Int64)
+rand_matching(n::Integer) = sparse(rand_matching_ijv(n))
+
+function rand_matching_ijv(n::Integer)
 
   p = randperm(n)
   n1 = convert(Int64,floor(n/2))
   n2 = 2*n1
-  a = sparse(p[1:n1],p[(n1+1):n2],ones(n1),n,n)
 
-  a = a + a'
+  ii = p[1:n1] 
+  jj = p[(n1+1):n2]
 
-  return a
+  return IJV(n, n2, 
+    [ii;jj], [jj; ii], ones(n2))
 
-end # randMatching
+end 
 
 """
-    graph = randRegular(n::Int64, k::Int64)
+    graph = randRegular(n, k)
 
 A sum of k random matchings on n vertices
 """
-function randRegular(n::Int64, k::Int64)
-  a = randMatching(n)
-  for i in 2:k
-    a = a + randMatching(n)
-  end
+rand_regular(n::Integer, k::Integer) = sparse(rand_regular_ijv(n, k))
 
-  return a
-end # randRegular
+function rand_regular_ijv(n::Integer, k::Integer)
+
+    n1 = convert(Int64,floor(n/2))
+    n2 = 2*n1
+
+    ii = Array{Int64}(undef, n1*k)
+    jj = Array{Int64}(undef, n1*k)
+
+    ind = 0
+    for i in 1:k
+        p = randperm(n)   
+        for j in 1:n1
+            ind += 1
+            ii[ind] = p[j]
+            jj[ind] = p[n1+j]
+        end
+    end
+
+    return IJV(n, k*n2,
+        [ii;jj], [jj;ii], ones(k*n2))
+
+end 
 
 
 """
-    graph = grownGraph(n::Int64, k::Int64)
+    graph = grown_graph(n, k)
 
 Create a graph on n vertices.
 For each vertex, give it k edges to randomly chosen prior
 vertices.
 This is a variety of a preferential attachment graph.
 """
-function grownGraph(n::Int64, k::Int64)
-  a = spzeros(n,n)
+grown_graph(n::Integer, k::Integer) = sparse(grown_graph_ijv(n,k))
 
-  for i = 1:k
-    a = a + sparse(2:n,ceil.(Integer,collect(1:n-1).*rand(n-1)),1.0,n,n)
-  end
 
-  a = a + a'
+function grown_graph_ijv(n::Integer, k::Integer)
+    ii = Int[]
+    jj = Int[]
+
+    for i = 1:k
+        append!(ii, collect(2:n))
+        append!(jj, ceil.(Integer,collect(1:n-1).*rand(n-1)))
+    end
+
+    return IJV(n, 2*k*(n-1),
+        [ii;jj], [jj;ii], ones(2*k*(n-1)))
+    
 end # grownGraph
 
 # used in grownGraphD
@@ -284,13 +348,15 @@ function randSet(n::Integer,k::Integer)
 end
 
 """
-    graph = grownGraphD(n::Int64, k::Int64)
+    graph = grown_graph_d(n::Integer, k::Integer)
 
 Like a grownGraph, but it forces the edges to all be distinct.
 It starts out with a k+1 clique on the first k vertices
 """
-function grownGraphD(n::Int64, k::Int64)
-    a = spzeros(n,n)
+grown_graph_d(n::Integer, k::Integer) = sparse(grown_graph_d_ijv(n::Integer, k::Integer))
+
+function grown_graph_d_ijv(n::Integer, k::Integer)
+    @assert n > k > 1
 
     u = zeros(Int64, k*(n-k-1))
     v = zeros(Int64, k*(n-k-1))
@@ -301,86 +367,86 @@ function grownGraphD(n::Int64, k::Int64)
         v[(i-k-2)*k .+ collect(1:k)] .= nb
     end
 
-    a = sparse(u,v,1.0,n,n)
+    ijv = IJV(n, 2*length(u),
+        [u;v], [v;u], ones(2*length(u)))
 
-    (ai,aj) = findnz(sparse(triu(ones(k+1,k+1),1)))
-    a = a + sparse(ai,aj,1.0,n,n)
-    a = a + a'
+    clique = complete_graph_ijv(k+1)
+    clique.n = n
 
-end # grownGraphD
+    return ijv + clique
+end 
 
 """
-    graph = prefAttach(n::Int64, k::Int64, p::Float64)
+    graph = pref_attach(n::Int64, k::Int64, p::Float64)
 
 A preferential attachment graph in which each vertex has k edges to those
 that come before.  These are chosen with probability p to be from a random vertex,
 and with probability 1-p to come from the endpoint of a random edge.
 It begins with a k-clique on the first k+1 vertices.
 """
-function prefAttach(n::Int64, k::Int64, p::Float64)
+pref_attach(n::Integer, k::Integer, p::Float64) = sparse(pref_attach_ijv(n,k,p))
+
+function pref_attach_ijv(n::Integer, k::Integer, p::Float64)
+    @assert n > k
     if n == (k+1)
-        return sparse(ones(Float64,n,n) - sparse(1.0I,n,n))
-    elseif n <= k
-        error("n must be more than k")
-    else
+        return complete_graph_ijv(n)
+    end
 
-        u = zeros(Int64,n*k)
-        v = zeros(Int64,n*k)
+    u = zeros(Int64,n*k)
+    v = zeros(Int64,n*k)
 
 
-        # fill in the initial clique
-        # this will accidentally double every edge in the clique
-        # we clean it up at the end
-        ind = 1
-        for i in 1:(k+1)
-            for j in 1:(k+1)
-                if i != j
-                    u[ind] = i
-                    v[ind] = j
-                    ind += 1
-                end
-            end
-        end
-
-        s = zeros(Int64,k)
-        for i in (k+2):n
-            distinct = false
-            while distinct == false
-                for j in 1:k
-                    if rand(Float64) < p
-                        s[j] = rand(1:(i-1))
-                    else
-                        s[j] = v[rand(1:(k*(i-1)))]
-                    end
-                end
-                s = sort(s)
-                distinct = true
-                for ii in 1:(k-1)
-                    if s[ii] == s[ii+1]
-                        distinct = false
-                    end
-                end
-                # distinct = (minimum(s[2:end]-s[1:(end-1)]) > 0)
-
-            end
-
-            for j in 1:k
+    # fill in the initial clique
+    # this will accidentally double every edge in the clique
+    # we clean it up at the end
+    ind = 1
+    for i in 1:(k+1)
+        for j in 1:(k+1)
+            if i != j
                 u[ind] = i
-                v[ind] = s[j]
+                v[ind] = j
                 ind += 1
             end
-
-        end # for i
-
-        w = ones(Float64,n*k)
-
-        w[1:(k*(k+1))] .= 0.5
-
-
-        a = sparse(u,v,w,n,n)
-        a = a + a'
-        return a
+        end
     end
+
+    s = zeros(Int64,k)
+    for i in (k+2):n
+        distinct = false
+        while distinct == false
+            for j in 1:k
+                if rand(Float64) < p
+                    s[j] = rand(1:(i-1))
+                else
+                    s[j] = v[rand(1:(k*(i-1)))]
+                end
+            end
+            s = sort(s)
+            distinct = true
+            for ii in 1:(k-1)
+                if s[ii] == s[ii+1]
+                    distinct = false
+                end
+            end
+            # distinct = (minimum(s[2:end]-s[1:(end-1)]) > 0)
+
+        end
+
+        for j in 1:k
+            u[ind] = i
+            v[ind] = s[j]
+            ind += 1
+        end
+
+    end # for i
+
+    w = ones(Float64,n*k)
+
+    w[1:(k*(k+1))] .= 0.5
+
+    return IJV(n, length(w),
+        [u;v], [v;u], [w;w])
+
 end
 
 
@@ -394,6 +460,12 @@ function randperm(mat::AbstractMatrix)
     perm = randperm(mat.n)
     return mat[perm,perm]
 end
+
+function randperm(a::IJV)
+    perm = randperm(a.n)
+    return IJV(a.n, a.nnz,
+        a.i[perm], a.j[perm], a.v[perm])
+end   
 
 randperm(f::Expr) = randperm(eval(f))
 
@@ -409,11 +481,15 @@ function ErdosRenyi(n::Integer, m::Integer)
     ai = rand(1:n, m)
     aj = rand(1:n, m)
     ind = (ai .!= aj)
+
     mat = sparse(ai[ind],aj[ind],1.0,n,n)
     mat = mat + mat'
     unweight!(mat)
     return mat
 end
+
+ErdosRenyi_ijv(n::Integer, m::Integer) = IJV(ErdosRenyi(n::Integer, m::Integer))
+
 
 """
     graph = ErdosRenyiCluster(n::Integer, k::Integer)
@@ -435,6 +511,8 @@ function ErdosRenyiCluster(n::Integer, k::Integer)
     return biggestComp(mat)
 end
 
+ErdosRenyiCluster_ijv(n::Integer, k::Integer) = IJV(ErdosRenyiCluster(n, k))
+
 """
     graph = ErdosRenyiClusterFix(n::Integer, k::Integer)
 
@@ -452,7 +530,17 @@ function ErdosRenyiClusterFix(n::Integer, k::Integer)
     end
 end
 
+function ErdosRenyiClusterFix_ijv(n::Integer, k::Integer)
+    m1 = ErdosRenyiCluster_ijv(n, k)
+    n2 = n - m1.n
+    if (n2 > 0)
+        m2 = cbt_ijv(n2)
+        join_graphs!(m1,m2,1)
+    end
 
+    return m1
+
+end
 
 """
     graph = pureRandomGraph(n::Integer; verbose=false)
@@ -516,6 +604,63 @@ function pureRandomGraph(n::Integer; verbose=false, prefix="")
 
 
     return floatGraph(mat)
+
+end
+
+pure_random_graph(n::Integer; verbose=false, prefix="") = 
+    sparse(pure_random_ijv(n; verbose=verbose, prefix=prefix))
+
+function pure_random_ijv(n::Integer; verbose=false, prefix="")
+
+    gr = []
+    wt = []
+
+    push!(gr,:(path_graph_ijv($n)))
+    push!(wt,1)
+
+    push!(gr,:(ring_graph_ijv($n)))
+    push!(wt,3)
+
+    push!(gr,:(cbt_ijv($n)))
+    push!(wt,3)
+
+    push!(gr,:(grown_graph_ijv($n,2)))
+    push!(wt,6)
+
+    push!(gr,:(firstn(grid2_ijv(ceil(Integer,sqrt($n))), $n)))
+    push!(wt,6)
+
+    push!(gr,:(rand_regular_ijv($n,3)))
+    push!(wt,6)
+
+    push!(gr,:(ErdosRenyiClusterFix_ijv($n,2)))
+    push!(wt,6)
+
+    if n >= 4
+        push!(gr,:(rand_gen_ring($n,4,verbose=$(verbose))))
+        push!(wt,6)
+    end
+
+    i = sampleByWeight(wt)
+
+    # make sure get a connected graph - will want to remove.
+    if verbose
+        println(prefix, gr[i])
+    end
+    ijv = eval(gr[i])
+
+    its = 0
+    while (~isConnected(sparse(ijv))) && (its < 100)
+        i = sampleByWeight(wt)
+
+        ijv = eval(gr[i])
+        its += 1
+    end
+    if its == 100
+        error("Getting a disconnected graph from $(gr[i])")
+    end
+
+    return ijv
 
 end
 

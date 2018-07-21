@@ -135,12 +135,33 @@ end
 
 The Cartesian product of two graphs.  When applied to two paths, it gives a grid.
 """
-function productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
+function product_graph(a0::SparseMatrixCSC, a1::SparseMatrixCSC)
   n0 = size(a0)[1]
   n1 = size(a1)[1]
   a = kron(sparse(I,n0,n0),a1) + kron(a0,sparse(I, n1, n1));
 
 end # productGraph
+
+function product_graph(b::IJV{Tva,Tia}, a::IJV{Tvb,Tib}) where {Tva, Tvb, Tia, Tib}
+
+    Ti = promote_type(Tia, Tib)
+
+    n = a.n * b.n
+
+    a_edge_from = kron(ones(Ti, a.nnz), a.n*collect(0:(b.n-1)))
+    ai = a_edge_from + kron(a.i, ones(Ti, b.n))
+    aj = a_edge_from + kron(a.j, ones(Ti, b.n))
+    av = kron(a.v, ones(b.n))
+
+    b_edge_from = kron(collect(1:a.n), ones(Ti, b.nnz))
+    bi = b_edge_from + kron(ones(Ti, a.n), (b.i .- 1) .* a.n)
+    bj = b_edge_from + kron(ones(Ti, a.n), (b.j .- 1) .* a.n)
+    bv = kron(ones(a.n), b.v)
+
+    return IJV(n, length(av)+length(bv),
+        [ai; bi], [aj; bj], [av; bv])
+end
+
 
 """
     ap = power(a::SparseMatrixCSC, k::Int)
@@ -378,6 +399,37 @@ function joinGraphs(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}
 end
 
 
+function join_graphs(a::IJV, b::IJV, k::Integer) 
+
+    ji = rand(1:a.n,k)
+    jj = rand(1:b.n,k) .+ a.n
+
+    gi = [a.i; b.i .+ a.n ; ji ; jj] 
+    gj = [a.j; b.j .+ a.n ; jj; ji]
+    gv = [a.v ; b.v ; ones(2*k)]
+
+    return IJV(a.n + b.n, a.nnz + b.nnz + 2*k, gi, gj, gv)
+end
+
+"""
+    graph = join_graphs!(a::IJV, b::IJV, k::Integer)
+
+ Create a disjoint union of graphs a and b,
+ and then put k random edges between them, merging b into a.
+"""
+function join_graphs!(a::IJV, b::IJV, k::Integer) 
+
+    ji = rand(1:a.n,k)
+    jj = rand(1:b.n,k) .+ a.n
+
+    append!(a.i, [b.i .+ a.n ; ji ; jj] )
+    append!(a.j, [b.j .+ a.n ; jj; ji])
+    append!(a.v, [b.v ; ones(2*k)])
+    a.n += b.n
+    a.nnz += b.nnz + 2*k
+
+end
+
 """
     graph = disjoin(a,b)
 
@@ -385,6 +437,31 @@ end
   with no edges between them.
 """
 disjoin(a,b) = joinGraphs(a,b,0)
+
+disjoin(a::IJV, b::IJV) = IJV(a.n+b.n, a.nnz + b.nnz, 
+        [a.i ; b.i .+ a.n],
+        [a.j ; b.j .+ a.n],
+        [a.v;b.v])
+
+function disjoin!(a::IJV, b::IJV) 
+    append!(a.i, b.i .+ a.n )
+    append!(a.j, b.j .+ a.n )
+    append!(a.v, b.v)
+    a.n += b.n
+    a.nnz += b.nnz
+end
+
+"""
+    b = firstn(a::IJV, n::Integer)
+
+Only keep the first n vertices of a.
+"""
+function firstn(a::IJV, n::Integer) 
+    mask = (a.i .<= n) .& (a.j .<= n)
+    return IJV(n, sum(mask), a.i[mask], a.j[mask], a.v[mask])
+end
+
+
 
 
 

@@ -18,6 +18,17 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
 
+
+
+# Verson 0.3.1
+
+Changes:
+
+* dropped wGrid3, as it produced a 4d grid so probably wasn't being used anyway.
+* Changed the names of many functions to bring closer to the Julia standard naming scheme.  New names are empty_graph, path_graph, ring_graph, complete_graph, generalized_ring, rand_gen_ring, product_graph, wgrid2, 
+
+
+
 ## Version 0.3.0, July 18 (or so), 2017 
 
 This is the first version that is compatible with Julia 0.7.  Other changes:
