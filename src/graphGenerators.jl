@@ -610,7 +610,7 @@ end
 pure_random_graph(n::Integer; verbose=false, prefix="") = 
     sparse(pure_random_ijv(n; verbose=verbose, prefix=prefix))
 
-function pure_random_ijv(n::Integer; verbose=false, prefix="")
+function pure_random_ijv_v6(n::Integer; verbose=false, prefix="")
 
     gr = []
     wt = []
@@ -658,6 +658,58 @@ function pure_random_ijv(n::Integer; verbose=false, prefix="")
     end
     if its == 100
         error("Getting a disconnected graph from $(gr[i])")
+    end
+
+    return ijv
+
+end
+
+"""
+    a = pure_random_ijv(n::Integer; verbose=false, prefix="")
+
+Chooses among path_graph, ring_graph, grid_graph, complete_binary_tree, rand_gen_ring, grown_graph and ErdosRenyiClusterFix.
+It can produce a disconnected graph.
+For code that always produces a connected graph (and is the same as with Julia v0.6, use pure_random_ijv_v6)
+"""
+function pure_random_ijv(n::Integer; verbose=false, prefix="")
+
+    n >= 4 ? rmax = 37 : rmax = 31
+
+    r = rmax*rand()
+
+    if r <= 1
+        ijv = path_graph_ijv(n)
+        verbose && println("$(prefix) path_graph($(n))")
+
+    elseif r <= 4
+        ijv = ring_graph_ijv(n)
+        verbose && println("$(prefix) ring_graph($(n))")
+
+    elseif r <= 7
+        ijv = cbt_ijv(n)
+        verbose && println("$(prefix) complete_binary_tree($(n))")
+
+    elseif r <= 13
+        ijv = grown_graph_ijv(n,2)
+        verbose && println("$(prefix) grown_graph($(n))")
+
+    elseif r <= 19
+        ijv = firstn(grid2_ijv(ceil(Integer,sqrt(n))), n)
+        verbose && println("$(prefix) firstn_grid2($(n))")
+
+    elseif r <= 25
+        ijv = rand_regular_ijv(n,3)
+        verbose && println("$(prefix) rand_regular_ijv($(n),3)")
+
+    elseif r <= 31
+        ijv = ErdosRenyiClusterFix_ijv(n,2)
+        verbose && println("$(prefix) ErdosRenyiClusterFix_ijv($n,2)")
+
+    else
+        ijv = rand_gen_ring(n,4, verbose=verbose)   
+        verbose && println("$(prefix) rand_gen_ring($(n), 4)")   
+                
+
     end
 
     return ijv
