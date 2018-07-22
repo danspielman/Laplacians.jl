@@ -97,6 +97,11 @@ function unweight!(a::SparseMatrixCSC{Tval,Tind}) where {Tval,Tind}
 end # unweight
 
 
+function unweight!(ijv::IJV)
+    ijv.v .= 1.0
+end
+
+
 """
     b = mapweight(a, x->rand())
 
@@ -306,7 +311,42 @@ function generalizedNecklace(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::
   return sparse(newI, newJ, newW)
 end # generalizedNecklace
 
+function generalized_necklace(A::IJV, H::IJV, k::Integer) 
+  
+    # FOR BACKWARDS COMPAT -- REMOVE LATER DAS
+    H = IJV(sparse(H))
 
+    # these are square matrices
+    n = A.n
+    m = H.n
+  
+    # duplicate the vertices in A so that each vertex in H corresponds to a copy of A
+    newW = kron(ones(m), A.v)
+    newI = kron(ones(Int, m), A.i) + kron(n * collect(0:(m-1)), ones(Int, A.nnz) )
+    newJ = kron(ones(Int, m), A.j) + kron(n * collect(0:(m-1)), ones(Int, A.nnz) )
+  
+    # for each edge in H, add k random edges between two corresponding components
+    # multiedges will be concatenated to a single edge with higher cost
+    for i in 1:H.nnz
+      u = H.i[i]
+      v = H.j[i] 
+  
+      if (u < v)
+        #component x is from 1 + (x - 1) * n to n + (x - 1) * n
+        for edgeToAdd in 1:k
+          newU = rand(1:n) + n * (u - 1)
+          newV = rand(1:n) + n * (v - 1)
+          append!(newI, [newU, newV])
+          append!(newJ, [newV, newU])
+          append!(newW, [1, 1])
+        end
+      end
+    end
+  
+    return IJV(n*m, length(newI), newI, newJ, newW)
+
+  end # generalizedNecklace
+  
 
 
 """

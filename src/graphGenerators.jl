@@ -462,9 +462,9 @@ function randperm(mat::AbstractMatrix)
 end
 
 function randperm(a::IJV)
-    perm = randperm(a.n)
+    perm = invperm(randperm(a.n))  # FOR BACKWARDS COMPAT - CAN SPEED UP BY REMOVING
     return IJV(a.n, a.nnz,
-        a.i[perm], a.j[perm], a.v[perm])
+        perm[a.i], perm[a.j], a.v)
 end   
 
 randperm(f::Expr) = randperm(eval(f))
@@ -732,17 +732,20 @@ end
 A Chimera graph with some weights.  The weights just appear when graphs are combined.
 For more interesting weights, use `wtedChimera`
 """
-function semiWtedChimera(n::Integer; verbose=false, prefix="")
+semi_wted_chimera(n::Integer; verbose=false, prefix="") = 
+    sparse(semi_wted_chimera_ijv(n, verbose=verbose, prefix = prefix))
+
+function semi_wted_chimera_ijv(n::Integer; verbose=false, prefix="")
 
     if (n < 2)
-        return spzeros(1,1)
+        return empty_graph_ijv(1)
     end
 
     r = rand()^2
 
     if (n < 30) || (rand() < .2)
 
-        gr = pureRandomGraph(n, verbose=verbose, prefix=prefix)
+        gr = pure_rando_graph_ijv(n, verbose=verbose, prefix=prefix)
 
         return randperm(gr)
     end
@@ -759,8 +762,8 @@ function semiWtedChimera(n::Integer; verbose=false, prefix="")
         end
 
         pr = string(" ",prefix)
-        gr = joinGraphs(r*chimera(n1;verbose=verbose,prefix=pr),
-          chimera(n2;verbose=verbose,prefix=pr),k)
+        gr = join_graphs(r*chimera_ijv(n1;verbose=verbose,prefix=pr),
+          chimera_ijv(n2;verbose=verbose,prefix=pr),k)
 
         return randperm(gr)
     end
@@ -778,8 +781,8 @@ function semiWtedChimera(n::Integer; verbose=false, prefix="")
         end
 
         pr = string(" ",prefix)
-        gr = joinGraphs(r*chimera(n1;verbose=verbose,prefix=pr),
-          chimera(n2;verbose=verbose,prefix=pr),k)
+        gr = join_graphs(r*chimera_ijv(n1;verbose=verbose,prefix=pr),
+          chimera_ijv(n2;verbose=verbose,prefix=pr),k)
 
         return randperm(gr)
 
@@ -794,10 +797,12 @@ function semiWtedChimera(n::Integer; verbose=false, prefix="")
                 println(prefix,"productGraph($(r)*chimera($(n1)),chimera($(n2)))")
             end
             pr = string(" ",prefix)
-            gr = productGraph(r*chimera(n1;verbose=verbose,prefix=pr),
-              chimera(n2;verbose=verbose,prefix=pr))
+            gr = product_graph(r*chimera_ijv(n1;verbose=verbose,prefix=pr),
+              chimera_ijv(n2;verbose=verbose,prefix=pr))
 
         else
+
+            # to here
 
             k = floor(Integer,1+exp(rand()*log(min(n1,n2)/10)))
 
@@ -844,6 +849,16 @@ function chimera(n::Integer; verbose=false, prefix="")
     return gr
 
 end
+
+function chimera_ijv(n::Integer; verbose=false, prefix="")
+
+    gr = semi_wted_chimera_ijv(n; verbose=verbose, prefix=prefix)
+    unweight!(gr)
+
+    return gr
+
+end
+
 
 """
     graph = chimera(n::Integer, k::Integer; verbose=false)
