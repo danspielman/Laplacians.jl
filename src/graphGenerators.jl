@@ -561,67 +561,6 @@ function ErdosRenyiClusterFix_ijv(n::Integer, k::Integer; ver=Vcur)
 
 end
 
-#=
-function pureRandomGraph(n::Integer; verbose=false, prefix="", ver=Vcur)
-
-    gr = []
-    wt = []
-
-    push!(gr,:(pathGraph($n)))
-    push!(wt,1)
-
-    push!(gr,:(ringGraph($n)))
-    push!(wt,3)
-
-    push!(gr,:(completeBinaryTree($n)))
-    push!(wt,3)
-
-    push!(gr,:(grownGraph($n,2, ver=$(ver))))
-    push!(wt,6)
-
-    push!(gr,:(grid2(ceil(Integer,sqrt($n)))[1:$n,1:$n]))
-    push!(wt,6)
-
-    push!(gr,:(randRegular($n,3, ver=$(ver))))
-    push!(wt,6)
-
-    push!(gr,:(ErdosRenyiClusterFix($n,2, ver=$(ver))))
-    push!(wt,6)
-
-    if n >= 4
-        push!(gr,:(randGenRing($n,4,verbose=$(verbose), ver=$(ver))))
-        push!(wt,6)
-    end
-
-    i = sampleByWeight(wt, ver=ver)
-
-    # make sure get a connected graph
-    its = 0
-    mat = eval(gr[i])
-    if verbose
-        println(prefix, gr[i])
-    end
-
-
-    while (~isConnected(mat)) && (its < 100)
-        i = sampleByWeight(wt, ver=ver)
-
-        mat = eval(gr[i])
-        its += 1
-    end
-    if its == 100
-        error("Getting a disconnected graph from $(gr[i])")
-    end
-
-    if (sum(diag(mat)) > 0)
-        error("nonzero diag from $(gr[i])")
-    end
-
-
-    return floatGraph(mat)
-
-end
-=#
 
 """
     graph = pure_random_graph(n::Integer; verbose=false, ver=Vcur)
@@ -757,103 +696,6 @@ function sampleByWeight(wt; ver=Vcur)
     findall(cumsum(wt) .> r)[1]
 end
 
-
-#=
-function semiWtedChimera(n::Integer; verbose=false, prefix="", ver=Vcur)
-
-    if (n < 2)
-        return spzeros(1,1)
-    end
-
-    r = rand_ver(ver)^2
-
-    if (n < 30) || (rand_ver(ver) < .2)
-
-        gr = pureRandomGraph(n, verbose=verbose, prefix=prefix, ver=ver)
-
-        return randperm_ver(ver, gr)
-    end
-
-    if (n < 200)
-        # just join disjoint copies of graphs
-
-        n1 = 10 + floor(Integer,(n-20)*rand_ver(ver))
-        n2 = n - n1
-        k = ceil(Integer,exp(rand_ver(ver)*log(min(n1,n2)/2)))
-
-        if verbose
-            println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
-        end
-
-        pr = string(" ",prefix)
-        gr = joinGraphs(r*chimera(n1;verbose=verbose,prefix=pr, ver=ver),
-          chimera(n2;verbose=verbose,prefix=pr, ver=ver),
-          k, ver=ver)
-
-        return randperm_ver(ver, gr)
-    end
-
-    # split with probability .7
-
-    if (rand_ver(ver) < .7)
-        n1 = ceil(Integer,10*exp(rand_ver(ver)*log(n/20)))
-
-        n2 = n - n1
-        k = floor(Integer,1+exp(rand_ver(ver)*log(min(n1,n2)/2)))
-
-        if verbose
-            println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
-        end
-
-        pr = string(" ",prefix)
-        gr = joinGraphs(r*chimera(n1;verbose=verbose,prefix=pr, ver=ver),
-          chimera(n2;verbose=verbose,prefix=pr, ver=ver),
-          k, ver=ver)
-
-        return randperm_ver(ver, gr)
-
-    else
-        n1 = floor(Integer,10*exp(rand_ver(ver)*log(n/100)))
-
-        n2 = floor(Integer, n / n1)
-
-        if (rand_ver(ver) < .5)
-
-            if verbose
-                println(prefix,"productGraph($(r)*chimera($(n1)),chimera($(n2)))")
-            end
-            pr = string(" ",prefix)
-            gr = productGraph(r*chimera(n1;verbose=verbose,prefix=pr, ver=ver),
-              chimera(n2;verbose=verbose,prefix=pr, ver=ver))
-        else
-
-            k = floor(Integer,1+exp(rand_ver(ver)*log(min(n1,n2)/10)))
-
-            if verbose
-                println(prefix, "generalizedNecklace($(r)*chimera($(n1)),chimera($(n2)),$(k))")
-            end
-            pr = string(" ",prefix)
-            gr = generalizedNecklace(r*chimera(n1;verbose=verbose,prefix=pr, ver=ver),
-              chimera(n2;verbose=verbose,prefix=pr, ver=ver),k)
-        end
-
-        n3 = n - size(gr)[1]
-        if (n3 > 0)
-
-            if verbose
-                println(prefix, "joinGraphs(gr,chimera($(n3)),2)")
-            end
-
-            pr = string(" ",prefix)
-            gr = joinGraphs(gr,chimera(n3;verbose=verbose,prefix=pr, ver=ver),2, ver=ver)
-        end
-
-        return randperm_ver(ver, gr)
-
-    end
-end
-=#
-
 """
     graph = semiwted_chimera(n::Integer; verbose=false, ver=Vcur)
 
@@ -986,17 +828,6 @@ connected by joinGraphs, productGraph and generalizedNecklace
 chimera(n::Integer; verbose=false, prefix="", ver=Vcur) = 
     sparse(chimera_ijv(n, verbose=verbose, prefix=prefix, ver=ver))
 
-    #=
-function chimera(n::Integer; verbose=false, prefix="", ver=Vcur)
-
-
-    gr = semiwted_chimera(n; verbose=verbose, prefix=prefix, ver=ver)
-    unweight!(gr)
-
-    return gr
-
-end
-=#
 
 
 function chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
@@ -1117,17 +948,6 @@ function wted_chimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
     return g
 end
 
-#=
-function semiWtedChimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
-    if ver == V06
-        srand_ver(ver, 100*n+k)
-    else
-        srand_ver(ver, hash(n, hash(k)))
-    end
-    g = semiWtedChimera(n; verbose=verbose, prefix=prefix, ver=ver)
-    return g
-end
-=#
 
 """
     graph = wted_chimera(n::Integer)

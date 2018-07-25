@@ -586,29 +586,6 @@ function spectralCoords(a)
 
 end # spectralCoords
 
-#=
-"""Creates a unit vector of length n from a given set of integers, with weights based on the number of occurences"""
-function toUnitVector(a::Array{Int64,1}, n)
-
-  v = zeros(n)
-
-  for i in a
-    v[i] = v[i] + 1
-  end
-
-  sum = 0
-  for i in 1:length(v)
-    sum = sum + v[i] * v[i]
-  end
-
-  for i in 1:length(v)
-    v[i] = v[i] / sqrt(sum)
-  end
-
-  return v
-
-end # toUnitVector
-=#
 
 """
     d = diagmat(a)
