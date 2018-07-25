@@ -438,7 +438,7 @@ twoLift(a, k::Integer; ver=Vcur) = twoLift(a,randperm_ver(ver, div(nnz(a),2)) .>
  Create a disjoint union of graphs a and b,
  and then put k random edges between them
 """
-function joinGraphs(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer; ver=Vcur) where {Tval,Tind}
+function join_graphs(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer; ver=Vcur) where {Tval,Tind}
     na = size(a)[1]
     nb = size(b)[1]
 

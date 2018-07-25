@@ -58,35 +58,35 @@ module Laplacians
 
   include("graphGenerators.jl")
   export readIJ
-  export ringGraph
-  export generalizedRing
-  export randMatching
-  export randRegular
-  export grownGraph
-  export grownGraphD
-  export prefAttach
-  export hyperCube
-  export completeBinaryTree
-  export completeGraph
-  export pathGraph
+  export ring_graph
+  export generalized_ring
+  export rand_matching
+  export rand_regular
+  export grown_graph
+  export grown_graph_d
+  export pref_attach
+  export hypercube
+  export complete_binary_tree
+  export complete_graph
+  export empty_graph
+  export path_graph
 
-  export wGrid2
-  export wGrid3
+  export wgrid2
 
   export grid2
   export grid2coords
   export grid3
 
-  export randGenRing
+  export rand_gen_ring
   export randperm
   export ErdosRenyi
   export ErdosRenyiCluster
   export ErdosRenyiClusterFix
-  export pureRandomGraph
+  export pure_random_graph
 
   export chimera
-  export randWeight
-  export wtedChimera, semiWtedChimera
+  export rand_weight
+  export wted_chimera, semiwted_chimera
 
   include("IO.jl")
   export readIJ, readIJV, writeIJV
@@ -101,12 +101,12 @@ module Laplacians
 
   export power, thicken_once, thicken
 
-  export productGraph
-  export generalizedNecklace
+  export product_graph
+  export generalized_necklace
   export subsampleEdges
 
   export twoLift
-  export joinGraphs, disjoin
+  export join_graphs, join_graphs!, disjoin
 
   export plotGraph
 

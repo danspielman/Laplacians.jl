@@ -862,14 +862,13 @@ For more interesting weights, use `wtedChimera`
 semiwted_chimera(n::Integer; verbose=false, prefix="", ver=Vcur) = 
     sparse(semiwted_chimera_ijv(n, verbose=verbose, prefix = prefix, ver=ver))
 
-
 function semiwted_chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
 
     if (n < 2)
         return empty_graph_ijv(1)
     end
 
-    @show r = rand_ver(ver)^2
+    r = rand_ver(ver)^2
 
     if (n < 30) || (rand_ver(ver) < .2)
 
@@ -972,6 +971,10 @@ Builds a chimeric graph on n vertices.
 The components come from pureRandomGraph,
 connected by joinGraphs, productGraph and generalizedNecklace
 """
+chimera(n::Integer; verbose=false, prefix="", ver=Vcur) = 
+    sparse(chimera_ijv(n, verbose=verbose, prefix=prefix, ver=ver))
+
+    #=
 function chimera(n::Integer; verbose=false, prefix="", ver=Vcur)
 
 
@@ -981,13 +984,20 @@ function chimera(n::Integer; verbose=false, prefix="", ver=Vcur)
     return gr
 
 end
+=#
+
 
 function chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
 
-    gr = semiwted_chimera_ijv(n; verbose=verbose, prefix=prefix, ver=ver)
-    unweight!(gr)
+    ijv = semiwted_chimera_ijv(n; verbose=verbose, prefix=prefix, ver=ver)
 
-    return gr
+    if ver == V06
+        gr = sparse(ijv)
+        unweight!(gr)
+        ijv = IJV(gr)
+    end
+
+    return ijv
 
 end
 
@@ -1016,17 +1026,17 @@ end
 
 Applies one of a number of random weighting schemes to the edges of the graph
 """
-function randWeight(a; ver=Vcur)
+function rand_weight(a; ver=Vcur)
 
     if (rand_ver(ver) < .2)
         return a
     else
-        return randWeightSub(a, ver=ver)
+        return rand_weight_sub(a, ver=ver)
     end
 end
 
 
-function randWeightSub(a; ver=Vcur)
+function rand_weight_sub(a; ver=Vcur)
 
     n = a.n
     (ai,aj) = findnz(a)
@@ -1078,20 +1088,20 @@ function randWeightSub(a; ver=Vcur)
 end
 
 """
-    graph = wtedChimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
+    graph = wted_chimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
 
 Builds the kth wted chimeric graph on n vertices.
 It does this by resetting the random number generator seed.
 It should captute the state of the generator before that and then
 return it, but it does not yet.
 """
-function wtedChimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
+function wted_chimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
     if ver == V06
         srand_ver(ver, 100*n+k)
     else
         srand_ver(ver, hash(n, hash(k)))
     end
-    g = wtedChimera(n; verbose=verbose, ver=ver)
+    g = wted_chimera(n; verbose=verbose, ver=ver)
     return g
 end
 
@@ -1108,10 +1118,10 @@ end
 =#
 
 """
-    graph = wtedChimera(n::Integer)
+    graph = wted_chimera(n::Integer)
 
 Generate a chimera, and then apply a random weighting scheme
 """
-function wtedChimera(n::Integer; verbose=false, ver=Vcur)
-    return randWeight(semiWtedChimera(n; verbose=verbose, ver=ver), ver=ver)
+function wted_chimera(n::Integer; verbose=false, ver=Vcur)
+    return rand_weight(semiwted_chimera(n; verbose=verbose, ver=ver), ver=ver)
 end

@@ -15,3 +15,10 @@
 @deprecate grownGraph(n::Integer, k::Integer) grown_graph(n, k)
 @deprecate grownGraphD(n::Integer, k::Integer) grown_graph_d(n, k)
 @deprecate prefAttach(n::Integer, k::Integer, p::Float64) pref_attach(n, k, p)
+
+@deprecate randWeight(a) rand_weight(a)
+@deprecate randWeightSub(a) rand_weight_sub(a)
+@deprecate wtedChimera(n::Integer, k::Integer; verbose=false) wted_chimera(n, k, verbose=verbose)
+@deprecate wtedChimera(n::Integer; verbose=false) wted_chimera(n, verbose=verbose)
+@deprecate semiWtedChimera(n::Integer; verbose=false, prefix="") semi_wted_chimera(n, verbose=verbose, prefix=prefix)
+    
