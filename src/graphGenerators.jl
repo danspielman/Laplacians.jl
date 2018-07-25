@@ -1,6 +1,8 @@
 
 
 import Random.randperm
+import RandomV06.randperm_ver
+
 
 """
     ijv = empty_graph_ijv(n)
@@ -103,21 +105,21 @@ function generalized_ring_ijv(n::T, gens::Array{T}) where T <: Integer
 end
 
 """
-    graph = rand_gen_ring(n, k)
+    graph = rand_gen_ring(n, k; verbose = false, ver=Vcur)
 
 A random generalized ring graph of degree k.
 Gens always contains 1, and the other k-1 edge types
 are chosen from an exponential distribution
 """
-rand_gen_ring(n::Integer, k::Integer; verbose=false) =
-    sparse(rand_gen_ring_ijv(n,k,verbose=verbose))
+rand_gen_ring(n::Integer, k::Integer; verbose=false, ver=Vcur) =
+    sparse(rand_gen_ring_ijv(n,k,verbose=verbose, ver=ver))
 
-function rand_gen_ring_ijv(n::Integer, k::Integer; verbose=false)
+function rand_gen_ring_ijv(n::Integer, k::Integer; verbose=false, ver=Vcur)
 
     # if any of n, 2n, 3n etc. is in gens we will have self loops
     gens = [0]
     while 0 in (gens .% n)
-        gens = [1; 1 .+ ceil.(Integer,exp.(rand(k-1)*log(n-1)))]
+        gens = [1; 1 .+ ceil.(Integer,exp.(rand_ver(ver, k-1)*log(n-1)))]
     end
 
     if verbose
@@ -251,15 +253,15 @@ grid2coords(n) = grid2coords(n, n)
 
 
 """
-    graph = randMatching(n::Integer)
+    graph = rand_matching(n::Integer; ver=Vcur)
 
 A random matching on n vertices
 """
-rand_matching(n::Integer) = sparse(rand_matching_ijv(n))
+rand_matching(n::Integer; ver=Vcur) = sparse(rand_matching_ijv(n, ver=ver))
 
-function rand_matching_ijv(n::Integer)
+function rand_matching_ijv(n::Integer; ver=Vcur)
 
-  p = randperm(n)
+  p = randperm_ver(ver,n)
   n1 = convert(Int64,floor(n/2))
   n2 = 2*n1
 
@@ -272,13 +274,13 @@ function rand_matching_ijv(n::Integer)
 end 
 
 """
-    graph = randRegular(n, k)
+    graph = rand_regular(n, k; ver=Vcur)
 
 A sum of k random matchings on n vertices
 """
-rand_regular(n::Integer, k::Integer) = sparse(rand_regular_ijv(n, k))
+rand_regular(n::Integer, k::Integer; ver=Vcur) = sparse(rand_regular_ijv(n, k, ver=ver))
 
-function rand_regular_ijv(n::Integer, k::Integer)
+function rand_regular_ijv(n::Integer, k::Integer; ver=Vcur)
 
     n1 = convert(Int64,floor(n/2))
     n2 = 2*n1
@@ -288,7 +290,7 @@ function rand_regular_ijv(n::Integer, k::Integer)
 
     ind = 0
     for i in 1:k
-        p = randperm(n)   
+        p = randperm_ver(ver, n)   
         for j in 1:n1
             ind += 1
             ii[ind] = p[j]
@@ -303,23 +305,23 @@ end
 
 
 """
-    graph = grown_graph(n, k)
+    graph = grown_graph(n, k; ver=Vcur)
 
 Create a graph on n vertices.
 For each vertex, give it k edges to randomly chosen prior
 vertices.
 This is a variety of a preferential attachment graph.
 """
-grown_graph(n::Integer, k::Integer) = sparse(grown_graph_ijv(n,k))
+grown_graph(n::Integer, k::Integer; ver=Vcur) = sparse(grown_graph_ijv(n,k, ver=ver))
 
 
-function grown_graph_ijv(n::Integer, k::Integer)
+function grown_graph_ijv(n::Integer, k::Integer; ver=Vcur)
     ii = Int[]
     jj = Int[]
 
     for i = 1:k
         append!(ii, collect(2:n))
-        append!(jj, ceil.(Integer,collect(1:n-1).*rand(n-1)))
+        append!(jj, ceil.(Integer,collect(1:n-1).*rand_ver(ver, n-1)))
     end
 
     return IJV(n, 2*k*(n-1),
@@ -328,17 +330,17 @@ function grown_graph_ijv(n::Integer, k::Integer)
 end # grownGraph
 
 # used in grownGraphD
-function randSet(n::Integer,k::Integer)
+function randSet(n::Integer,k::Integer; ver=Vcur)
     if n == k
         return collect(1:n)
     elseif n < k
         error("n must be at least k")
     else
 
-        s = sort(ceil.(Integer,n*rand(k)))
+        s = sort(ceil.(Integer,n*rand_ver(ver, k)))
         good = (minimum(s[2:end]-s[1:(end-1)]) > 0)
         while good == false
-            s = sort(ceil.(Integer,n*rand(k)))
+            s = sort(ceil.(Integer,n*rand_ver(ver, k)))
             good = (minimum(s[2:end]-s[1:(end-1)]) > 0)
         end
 
@@ -348,21 +350,22 @@ function randSet(n::Integer,k::Integer)
 end
 
 """
-    graph = grown_graph_d(n::Integer, k::Integer)
+    graph = grown_graph_d(n::Integer, k::Integer; ver=Vcur)
 
 Like a grownGraph, but it forces the edges to all be distinct.
 It starts out with a k+1 clique on the first k vertices
 """
-grown_graph_d(n::Integer, k::Integer) = sparse(grown_graph_d_ijv(n::Integer, k::Integer))
+grown_graph_d(n::Integer, k::Integer; ver=Vcur) = 
+    sparse(grown_graph_d_ijv(n::Integer, k::Integer, ver=ver))
 
-function grown_graph_d_ijv(n::Integer, k::Integer)
+function grown_graph_d_ijv(n::Integer, k::Integer; ver=Vcur)
     @assert n > k > 1
 
     u = zeros(Int64, k*(n-k-1))
     v = zeros(Int64, k*(n-k-1))
 
     for i in (k+2):n
-        nb = randSet(i-1,k)
+        nb = randSet(i-1,k; ver=ver)
         u[(i-k-2)*k .+ collect(1:k)] .= i
         v[(i-k-2)*k .+ collect(1:k)] .= nb
     end
@@ -377,16 +380,16 @@ function grown_graph_d_ijv(n::Integer, k::Integer)
 end 
 
 """
-    graph = pref_attach(n::Int64, k::Int64, p::Float64)
+    graph = pref_attach(n::Int64, k::Int64, p::Float64; ver=Vcur)
 
 A preferential attachment graph in which each vertex has k edges to those
 that come before.  These are chosen with probability p to be from a random vertex,
 and with probability 1-p to come from the endpoint of a random edge.
 It begins with a k-clique on the first k+1 vertices.
 """
-pref_attach(n::Integer, k::Integer, p::Float64) = sparse(pref_attach_ijv(n,k,p))
+pref_attach(n::Integer, k::Integer, p::Float64; ver=Vcur) = sparse(pref_attach_ijv(n,k,p,ver=ver))
 
-function pref_attach_ijv(n::Integer, k::Integer, p::Float64)
+function pref_attach_ijv(n::Integer, k::Integer, p::Float64; ver=Vcur)
     @assert n > k
     if n == (k+1)
         return complete_graph_ijv(n)
@@ -415,10 +418,10 @@ function pref_attach_ijv(n::Integer, k::Integer, p::Float64)
         distinct = false
         while distinct == false
             for j in 1:k
-                if rand(Float64) < p
-                    s[j] = rand(1:(i-1))
+                if rand_ver(ver) < p
+                    s[j] = rand_ver(ver,1:(i-1))
                 else
-                    s[j] = v[rand(1:(k*(i-1)))]
+                    s[j] = v[rand_ver(ver,1:(k*(i-1)))]
                 end
             end
             s = sort(s)
@@ -456,30 +459,45 @@ end
 
 Randomly permutes the vertex indices
 """
-function randperm(mat::AbstractMatrix)
-    perm = randperm(mat.n)
+randperm(mat::AbstractMatrix) = randperm_ver(Vcur, mat)
+
+function randperm_ver(::Type{V06}, mat::AbstractMatrix)
+    perm = randperm_ver(V06, mat.n)
     return mat[perm,perm]
 end
 
-function randperm(a::IJV)
-    perm = invperm(randperm(a.n))  # FOR BACKWARDS COMPAT - CAN SPEED UP BY REMOVING
+function randperm_ver(::Type{Vcur}, mat::AbstractMatrix)
+    perm = randperm_ver(Vcur, mat.n)
+    return mat[perm,perm]
+end
+
+randperm(f::Expr; ver=Vcur) = randperm(eval(f), ver=ver)
+
+function randperm_ver(::Type{V06}, a::IJV)
+    perm = invperm(randperm_ver(V06, a.n))  # invperm is for V06 complete_binary_tree
     return IJV(a.n, a.nnz,
         perm[a.i], perm[a.j], a.v)
 end   
 
-randperm(f::Expr) = randperm(eval(f))
+function randperm_ver(::Type{Vcur}, a::IJV)
+    perm = randperm_ver(Vcur, a.n)  
+    return IJV(a.n, a.nnz,
+        perm[a.i], perm[a.j], a.v)
+end   
 
+randperm(a::IJV) = randperm_ver(Vcur, a)
+  
 
 """
-    graph = ErdosRenyi(n::Integer, m::Integer)
+    graph = ErdosRenyi(n::Integer, m::Integer; ver=Vcur)
 
 Generate a random graph on n vertices with m edges.
 The actual number of edges will probably be smaller, as we sample
 with replacement
 """
-function ErdosRenyi(n::Integer, m::Integer)
-    ai = rand(1:n, m)
-    aj = rand(1:n, m)
+function ErdosRenyi(n::Integer, m::Integer; ver=Vcur)
+    ai = rand_ver(ver, 1:n, m)
+    aj = rand_ver(ver, 1:n, m)
     ind = (ai .!= aj)
 
     mat = sparse(ai[ind],aj[ind],1.0,n,n)
@@ -488,11 +506,11 @@ function ErdosRenyi(n::Integer, m::Integer)
     return mat
 end
 
-ErdosRenyi_ijv(n::Integer, m::Integer) = IJV(ErdosRenyi(n::Integer, m::Integer))
+ErdosRenyi_ijv(n::Integer, m::Integer; ver=Vcur) = IJV(ErdosRenyi(n::Integer, m::Integer, ver=ver))
 
 
 """
-    graph = ErdosRenyiCluster(n::Integer, k::Integer)
+    graph = ErdosRenyiCluster(n::Integer, k::Integer; ver=Vcur)
 
 Generate an ER graph with average degree k,
 and then return the largest component.
@@ -500,10 +518,10 @@ Will probably have fewer than n vertices.
 If you want to add a tree to bring it back to n,
 try ErdosRenyiClusterFix.
 """
-function ErdosRenyiCluster(n::Integer, k::Integer)
+function ErdosRenyiCluster(n::Integer, k::Integer; ver=Vcur)
     m = ceil(Integer,n*k/2)
-    ai = rand(1:n, m)
-    aj = rand(1:n, m)
+    ai = rand_ver(ver, 1:n, m)
+    aj = rand_ver(ver, 1:n, m)
     ind = (ai .!= aj)
     mat = sparse(ai[ind],aj[ind],1.0,n,n)
     mat = mat + mat'
@@ -511,43 +529,39 @@ function ErdosRenyiCluster(n::Integer, k::Integer)
     return biggestComp(mat)
 end
 
-ErdosRenyiCluster_ijv(n::Integer, k::Integer) = IJV(ErdosRenyiCluster(n, k))
+ErdosRenyiCluster_ijv(n::Integer, k::Integer; ver=Vcur) = IJV(ErdosRenyiCluster(n, k, ver=ver))
 
 """
-    graph = ErdosRenyiClusterFix(n::Integer, k::Integer)
+    graph = ErdosRenyiClusterFix(n::Integer, k::Integer; ver=Vcur)
 
 Like an Erdos-Renyi cluster, but add back a tree so
 it has n vertices
 """
-function ErdosRenyiClusterFix(n::Integer, k::Integer)
+function ErdosRenyiClusterFix(n::Integer, k::Integer; ver=Vcur)
     m1 = ErdosRenyiCluster(n, k)
     n2 = n - size(m1)[1]
     if (n2 > 0)
-        m2 = completeBinaryTree(n2)
-        return joinGraphs(m1,m2,1)
+        m2 = complete_binary_tree(n2)
+        return join_graphs(m1,m2,1,ver=ver)
     else
         return m1
     end
 end
 
-function ErdosRenyiClusterFix_ijv(n::Integer, k::Integer)
-    m1 = ErdosRenyiCluster_ijv(n, k)
+function ErdosRenyiClusterFix_ijv(n::Integer, k::Integer; ver=Vcur)
+    m1 = ErdosRenyiCluster_ijv(n, k, ver=ver)
     n2 = n - m1.n
     if (n2 > 0)
         m2 = cbt_ijv(n2)
-        join_graphs!(m1,m2,1)
+        join_graphs!(m1,m2,1,ver=ver)
     end
 
     return m1
 
 end
 
-"""
-    graph = pureRandomGraph(n::Integer; verbose=false)
-
-Generate a random graph with n vertices from one of our natural distributions
-"""
-function pureRandomGraph(n::Integer; verbose=false, prefix="")
+#=
+function pureRandomGraph(n::Integer; verbose=false, prefix="", ver=Vcur)
 
     gr = []
     wt = []
@@ -561,24 +575,24 @@ function pureRandomGraph(n::Integer; verbose=false, prefix="")
     push!(gr,:(completeBinaryTree($n)))
     push!(wt,3)
 
-    push!(gr,:(grownGraph($n,2)))
+    push!(gr,:(grownGraph($n,2, ver=$(ver))))
     push!(wt,6)
 
     push!(gr,:(grid2(ceil(Integer,sqrt($n)))[1:$n,1:$n]))
     push!(wt,6)
 
-    push!(gr,:(randRegular($n,3)))
+    push!(gr,:(randRegular($n,3, ver=$(ver))))
     push!(wt,6)
 
-    push!(gr,:(ErdosRenyiClusterFix($n,2)))
+    push!(gr,:(ErdosRenyiClusterFix($n,2, ver=$(ver))))
     push!(wt,6)
 
     if n >= 4
-        push!(gr,:(randGenRing($n,4,verbose=$(verbose))))
+        push!(gr,:(randGenRing($n,4,verbose=$(verbose), ver=$(ver))))
         push!(wt,6)
     end
 
-    i = sampleByWeight(wt)
+    i = sampleByWeight(wt, ver=ver)
 
     # make sure get a connected graph
     its = 0
@@ -589,7 +603,7 @@ function pureRandomGraph(n::Integer; verbose=false, prefix="")
 
 
     while (~isConnected(mat)) && (its < 100)
-        i = sampleByWeight(wt)
+        i = sampleByWeight(wt, ver=ver)
 
         mat = eval(gr[i])
         its += 1
@@ -606,9 +620,15 @@ function pureRandomGraph(n::Integer; verbose=false, prefix="")
     return floatGraph(mat)
 
 end
+=#
 
-pure_random_graph(n::Integer; verbose=false, prefix="") = 
-    sparse(pure_random_ijv(n; verbose=verbose, prefix=prefix))
+"""
+    graph = pure_random_graph(n::Integer; verbose=false, ver=Vcur)
+
+Generate a random graph with n vertices from one of our natural distributions
+"""
+pure_random_graph(n::Integer; verbose=false, prefix="", ver=Vcur) = 
+    sparse(pure_random_ijv(n; verbose=verbose, prefix=prefix, ver=ver))
 
 function pure_random_ijv_v6(n::Integer; verbose=false, prefix="")
 
@@ -624,24 +644,24 @@ function pure_random_ijv_v6(n::Integer; verbose=false, prefix="")
     push!(gr,:(cbt_ijv($n)))
     push!(wt,3)
 
-    push!(gr,:(grown_graph_ijv($n,2)))
+    push!(gr,:(grown_graph_ijv($n,2, ver=V06)))
     push!(wt,6)
 
     push!(gr,:(firstn(grid2_ijv(ceil(Integer,sqrt($n))), $n)))
     push!(wt,6)
 
-    push!(gr,:(rand_regular_ijv($n,3)))
+    push!(gr,:(rand_regular_ijv($n,3, ver=V06)))
     push!(wt,6)
 
-    push!(gr,:(ErdosRenyiClusterFix_ijv($n,2)))
+    push!(gr,:(ErdosRenyiClusterFix_ijv($n,2, ver=V06)))
     push!(wt,6)
 
     if n >= 4
-        push!(gr,:(rand_gen_ring($n,4,verbose=$(verbose))))
+        push!(gr,:(rand_gen_ring_ijv($n,4,ver=V06, verbose=$(verbose))))
         push!(wt,6)
     end
 
-    i = sampleByWeight(wt)
+    i = sampleByWeight(wt, ver=V06)
 
     # make sure get a connected graph - will want to remove.
     if verbose
@@ -651,7 +671,7 @@ function pure_random_ijv_v6(n::Integer; verbose=false, prefix="")
 
     its = 0
     while (~isConnected(sparse(ijv))) && (its < 100)
-        i = sampleByWeight(wt)
+        i = sampleByWeight(wt, ver=V06)
 
         ijv = eval(gr[i])
         its += 1
@@ -665,17 +685,27 @@ function pure_random_ijv_v6(n::Integer; verbose=false, prefix="")
 end
 
 """
-    a = pure_random_ijv(n::Integer; verbose=false, prefix="")
+    a = pure_random_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
 
 Chooses among path_graph, ring_graph, grid_graph, complete_binary_tree, rand_gen_ring, grown_graph and ErdosRenyiClusterFix.
 It can produce a disconnected graph.
 For code that always produces a connected graph (and is the same as with Julia v0.6, use pure_random_ijv_v6)
 """
-function pure_random_ijv(n::Integer; verbose=false, prefix="")
+function pure_random_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
+    if ver == Vcur
+        pure_random_ijv_v7(n, verbose=verbose, prefix=prefix)
+    else
+        pure_random_ijv_v6(n, verbose=verbose, prefix=prefix)
+    end
+end
+
+function pure_random_ijv_v7(n::Integer; verbose=false, prefix="")
+
+    ver = Vcur
 
     n >= 4 ? rmax = 37 : rmax = 31
 
-    r = rmax*rand()
+    r = rmax*rand_ver(ver)
 
     if r <= 1
         ijv = path_graph_ijv(n)
@@ -690,7 +720,7 @@ function pure_random_ijv(n::Integer; verbose=false, prefix="")
         verbose && println("$(prefix) complete_binary_tree($(n))")
 
     elseif r <= 13
-        ijv = grown_graph_ijv(n,2)
+        ijv = grown_graph_ijv(n,2, ver=ver)
         verbose && println("$(prefix) grown_graph($(n))")
 
     elseif r <= 19
@@ -698,15 +728,15 @@ function pure_random_ijv(n::Integer; verbose=false, prefix="")
         verbose && println("$(prefix) firstn_grid2($(n))")
 
     elseif r <= 25
-        ijv = rand_regular_ijv(n,3)
+        ijv = rand_regular_ijv(n,3, ver=ver)
         verbose && println("$(prefix) rand_regular_ijv($(n),3)")
 
     elseif r <= 31
-        ijv = ErdosRenyiClusterFix_ijv(n,2)
+        ijv = ErdosRenyiClusterFix_ijv(n,2, ver=ver)
         verbose && println("$(prefix) ErdosRenyiClusterFix_ijv($n,2)")
 
     else
-        ijv = rand_gen_ring(n,4, verbose=verbose)   
+        ijv = rand_gen_ring_ijv(n,4, verbose=verbose, ver=ver)   
         verbose && println("$(prefix) rand_gen_ring($(n), 4)")   
                 
 
@@ -717,102 +747,93 @@ function pure_random_ijv(n::Integer; verbose=false, prefix="")
 end
 
 """
-    ind = sampleByWeight(wt)
+    ind = sampleByWeight(wt; ver=Vcur)
 
 sample an index with probability proportional to its weight given here
 """
-function sampleByWeight(wt)
-    r = rand(1)*sum(wt)
+function sampleByWeight(wt; ver=Vcur)
+    r = rand_ver(ver, 1)*sum(wt)
     findall(cumsum(wt) .> r)[1]
 end
 
-"""
-    graph = semiWtedChimera(n::Integer; verbose=false)
 
-A Chimera graph with some weights.  The weights just appear when graphs are combined.
-For more interesting weights, use `wtedChimera`
-"""
-semi_wted_chimera(n::Integer; verbose=false, prefix="") = 
-    sparse(semi_wted_chimera_ijv(n, verbose=verbose, prefix = prefix))
-
-function semi_wted_chimera_ijv(n::Integer; verbose=false, prefix="")
+#=
+function semiWtedChimera(n::Integer; verbose=false, prefix="", ver=Vcur)
 
     if (n < 2)
-        return empty_graph_ijv(1)
+        return spzeros(1,1)
     end
 
-    r = rand()^2
+    r = rand_ver(ver)^2
 
-    if (n < 30) || (rand() < .2)
+    if (n < 30) || (rand_ver(ver) < .2)
 
-        gr = pure_rando_graph_ijv(n, verbose=verbose, prefix=prefix)
+        gr = pureRandomGraph(n, verbose=verbose, prefix=prefix, ver=ver)
 
-        return randperm(gr)
+        return randperm_ver(ver, gr)
     end
 
     if (n < 200)
         # just join disjoint copies of graphs
 
-        n1 = 10 + floor(Integer,(n-20)*rand())
+        n1 = 10 + floor(Integer,(n-20)*rand_ver(ver))
         n2 = n - n1
-        k = ceil(Integer,exp(rand()*log(min(n1,n2)/2)))
+        k = ceil(Integer,exp(rand_ver(ver)*log(min(n1,n2)/2)))
 
         if verbose
             println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
         end
 
         pr = string(" ",prefix)
-        gr = join_graphs(r*chimera_ijv(n1;verbose=verbose,prefix=pr),
-          chimera_ijv(n2;verbose=verbose,prefix=pr),k)
+        gr = joinGraphs(r*chimera(n1;verbose=verbose,prefix=pr, ver=ver),
+          chimera(n2;verbose=verbose,prefix=pr, ver=ver),
+          k, ver=ver)
 
-        return randperm(gr)
+        return randperm_ver(ver, gr)
     end
 
     # split with probability .7
 
-    if (rand() < .7)
-        n1 = ceil(Integer,10*exp(rand()*log(n/20)))
+    if (rand_ver(ver) < .7)
+        n1 = ceil(Integer,10*exp(rand_ver(ver)*log(n/20)))
 
         n2 = n - n1
-        k = floor(Integer,1+exp(rand()*log(min(n1,n2)/2)))
+        k = floor(Integer,1+exp(rand_ver(ver)*log(min(n1,n2)/2)))
 
         if verbose
             println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
         end
 
         pr = string(" ",prefix)
-        gr = join_graphs(r*chimera_ijv(n1;verbose=verbose,prefix=pr),
-          chimera_ijv(n2;verbose=verbose,prefix=pr),k)
+        gr = joinGraphs(r*chimera(n1;verbose=verbose,prefix=pr, ver=ver),
+          chimera(n2;verbose=verbose,prefix=pr, ver=ver),
+          k, ver=ver)
 
-        return randperm(gr)
+        return randperm_ver(ver, gr)
 
     else
-        n1 = floor(Integer,10*exp(rand()*log(n/100)))
+        n1 = floor(Integer,10*exp(rand_ver(ver)*log(n/100)))
 
         n2 = floor(Integer, n / n1)
 
-        if (rand() < .5)
+        if (rand_ver(ver) < .5)
 
             if verbose
                 println(prefix,"productGraph($(r)*chimera($(n1)),chimera($(n2)))")
             end
             pr = string(" ",prefix)
-            gr = product_graph(r*chimera_ijv(n1;verbose=verbose,prefix=pr),
-              chimera_ijv(n2;verbose=verbose,prefix=pr))
-
+            gr = productGraph(r*chimera(n1;verbose=verbose,prefix=pr, ver=ver),
+              chimera(n2;verbose=verbose,prefix=pr, ver=ver))
         else
 
-            # to here
-
-            k = floor(Integer,1+exp(rand()*log(min(n1,n2)/10)))
+            k = floor(Integer,1+exp(rand_ver(ver)*log(min(n1,n2)/10)))
 
             if verbose
                 println(prefix, "generalizedNecklace($(r)*chimera($(n1)),chimera($(n2)),$(k))")
             end
             pr = string(" ",prefix)
-            gr = generalizedNecklace(r*chimera(n1;verbose=verbose,prefix=pr),
-              chimera(n2;verbose=verbose,prefix=pr),k)
-
+            gr = generalizedNecklace(r*chimera(n1;verbose=verbose,prefix=pr, ver=ver),
+              chimera(n2;verbose=verbose,prefix=pr, ver=ver),k)
         end
 
         n3 = n - size(gr)[1]
@@ -823,36 +844,147 @@ function semi_wted_chimera_ijv(n::Integer; verbose=false, prefix="")
             end
 
             pr = string(" ",prefix)
-            gr = joinGraphs(gr,chimera(n3;verbose=verbose,prefix=pr),2)
+            gr = joinGraphs(gr,chimera(n3;verbose=verbose,prefix=pr, ver=ver),2, ver=ver)
+        end
+
+        return randperm_ver(ver, gr)
+
+    end
+end
+=#
+
+"""
+    graph = semiwted_chimera(n::Integer; verbose=false, ver=Vcur)
+
+A Chimera graph with some weights.  The weights just appear when graphs are combined.
+For more interesting weights, use `wtedChimera`
+"""
+semiwted_chimera(n::Integer; verbose=false, prefix="", ver=Vcur) = 
+    sparse(semiwted_chimera_ijv(n, verbose=verbose, prefix = prefix, ver=ver))
+
+
+function semiwted_chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
+
+    if (n < 2)
+        return empty_graph_ijv(1)
+    end
+
+    @show r = rand_ver(ver)^2
+
+    if (n < 30) || (rand_ver(ver) < .2)
+
+        gr = pure_random_ijv(n, verbose=verbose, prefix=prefix, ver=ver)
+
+        return randperm_ver(ver, gr)
+    end
+
+    if (n < 200)
+        # just join disjoint copies of graphs
+
+        n1 = 10 + floor(Integer,(n-20)*rand_ver(ver))
+        n2 = n - n1
+        k = ceil(Integer,exp(rand_ver(ver)*log(min(n1,n2)/2)))
+
+        if verbose
+            println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+        end
+
+        pr = string(" ",prefix)
+        gr = join_graphs(r*chimera_ijv(n1;verbose=verbose,prefix=pr, ver=ver),
+          chimera_ijv(n2;verbose=verbose,prefix=pr, ver=ver),
+          k, ver=ver)
+
+        return randperm_ver(ver, gr)
+    end
+
+    # split with probability .7
+
+    if (rand_ver(ver) < .7)
+        n1 = ceil(Integer,10*exp(rand_ver(ver)*log(n/20)))
+
+        n2 = n - n1
+        k = floor(Integer,1+exp(rand_ver(ver)*log(min(n1,n2)/2)))
+
+        if verbose
+            println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+        end
+
+        pr = string(" ",prefix)
+        gr = join_graphs(r*chimera_ijv(n1;verbose=verbose,prefix=pr, ver=ver),
+          chimera_ijv(n2;verbose=verbose,prefix=pr, ver=ver),
+          k, ver=ver)
+
+        return randperm_ver(ver, gr)
+
+    else
+        n1 = floor(Integer,10*exp(rand_ver(ver)*log(n/100)))
+
+        n2 = floor(Integer, n / n1)
+
+        if (rand_ver(ver) < .5)
+
+            if verbose
+                println(prefix,"productGraph($(r)*chimera($(n1)),chimera($(n2)))")
+            end
+            pr = string(" ",prefix)
+            gr = product_graph(r*chimera_ijv(n1;verbose=verbose,prefix=pr, ver=ver),
+              chimera_ijv(n2;verbose=verbose,prefix=pr, ver=ver))
+        else
+
+            k = floor(Integer,1+exp(rand_ver(ver)*log(min(n1,n2)/10)))
+
+            if verbose
+                println(prefix, "generalizedNecklace($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+            end
+            pr = string(" ",prefix)
+            gr = generalized_necklace(r*chimera_ijv(n1;verbose=verbose,prefix=pr, ver=ver),
+              chimera_ijv(n2;verbose=verbose,prefix=pr, ver=ver),
+              k, ver=ver)
 
         end
 
-        return randperm(gr)
+
+        
+
+        n3 = n - gr.n
+        if (n3 > 0)
+
+            if verbose
+                println(prefix, "join_graphs!(gr($(gr.n)),chimera($(n3)),2), $(ver)")
+            end
+
+            pr = string(" ",prefix)
+            join_graphs!(gr,chimera_ijv(n3;verbose=verbose,prefix=pr, ver=ver),
+            2, ver=ver)
+
+        end
+
+        return randperm_ver(ver, gr)
 
     end
 end
 
 
 """
-    graph = chimera(n::Integer; verbose=false)
+    graph = chimera(n::Integer; verbose=false, ver=Vcur)
 
 Builds a chimeric graph on n vertices.
 The components come from pureRandomGraph,
 connected by joinGraphs, productGraph and generalizedNecklace
 """
-function chimera(n::Integer; verbose=false, prefix="")
+function chimera(n::Integer; verbose=false, prefix="", ver=Vcur)
 
 
-    gr = semiWtedChimera(n; verbose=verbose, prefix=prefix)
+    gr = semiwted_chimera(n; verbose=verbose, prefix=prefix, ver=ver)
     unweight!(gr)
 
     return gr
 
 end
 
-function chimera_ijv(n::Integer; verbose=false, prefix="")
+function chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
 
-    gr = semi_wted_chimera_ijv(n; verbose=verbose, prefix=prefix)
+    gr = semiwted_chimera_ijv(n; verbose=verbose, prefix=prefix, ver=ver)
     unweight!(gr)
 
     return gr
@@ -861,35 +993,40 @@ end
 
 
 """
-    graph = chimera(n::Integer, k::Integer; verbose=false)
+    graph = chimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
 
 Builds the kth chimeric graph on n vertices.
 It does this by resetting the random number generator seed.
 It should captute the state of the generator before that and then
 return it, but it does not yet.
 """
-function chimera(n::Integer, k::Integer; verbose=false, prefix="")
-    srand(100*n+k)
-    g = chimera(n; verbose=verbose, prefix=prefix)
+function chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
+    if ver == V06
+        srand_ver(ver, 100*n+k)
+    else
+        srand_ver(ver, hash(n, hash(k)))
+    end
+
+    g = chimera(n; verbose=verbose, prefix=prefix, ver=ver)
     return g
 end
 
 """
-    graph = randWeight(graph)
+    graph = randWeight(graph; ver=Vcur)
 
 Applies one of a number of random weighting schemes to the edges of the graph
 """
-function randWeight(a)
+function randWeight(a; ver=Vcur)
 
-    if (rand() < .2)
+    if (rand_ver(ver) < .2)
         return a
     else
-        return randWeightSub(a)
+        return randWeightSub(a, ver=ver)
     end
 end
 
 
-function randWeightSub(a)
+function randWeightSub(a; ver=Vcur)
 
     n = a.n
     (ai,aj) = findnz(a)
@@ -897,17 +1034,17 @@ function randWeightSub(a)
 
     # potentials or edge-based
 
-    if (rand() < .3)
-        w = rand(m)
+    if (rand_ver(ver) < .3)
+        w = rand_ver(ver, m)
 
     else
-        v = randn(a.n)
+        v = randn_ver(ver, a.n)
 
         # mult by matrix ?
-        if (rand() < .5)
+        if (rand_ver(ver) < .5)
 
             invdeg = sparse(Diagonal(1 ./(a*ones(size(a)[1]))))
-            if (rand() < .5)
+            if (rand_ver(ver) < .5)
                 for i in 1:10
                     v = a * (invdeg * v)
                     v = v .- mean(v)
@@ -929,7 +1066,7 @@ function randWeightSub(a)
     w[w.==0] .= 1
     w[isnan.(w)] .= 1
 
-    if (rand() < .5)
+    if (rand_ver(ver) < .5)
         w = 1 ./w
     end
 
@@ -941,31 +1078,40 @@ function randWeightSub(a)
 end
 
 """
-    graph = wtedChimera(n::Integer, k::Integer; verbose=false)
+    graph = wtedChimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
 
 Builds the kth wted chimeric graph on n vertices.
 It does this by resetting the random number generator seed.
 It should captute the state of the generator before that and then
 return it, but it does not yet.
 """
-function wtedChimera(n::Integer, k::Integer; verbose=false)
-    srand(100*n+k)
-    g = wtedChimera(n; verbose=verbose)
+function wtedChimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
+    if ver == V06
+        srand_ver(ver, 100*n+k)
+    else
+        srand_ver(ver, hash(n, hash(k)))
+    end
+    g = wtedChimera(n; verbose=verbose, ver=ver)
     return g
 end
 
-function semiWtedChimera(n::Integer, k::Integer; verbose=false, prefix="")
-    srand(100*n+k)
-    g = semiWtedChimera(n; verbose=verbose, prefix=prefix)
+#=
+function semiWtedChimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
+    if ver == V06
+        srand_ver(ver, 100*n+k)
+    else
+        srand_ver(ver, hash(n, hash(k)))
+    end
+    g = semiWtedChimera(n; verbose=verbose, prefix=prefix, ver=ver)
     return g
 end
-
+=#
 
 """
     graph = wtedChimera(n::Integer)
 
 Generate a chimera, and then apply a random weighting scheme
 """
-function wtedChimera(n::Integer; verbose=false)
-    return randWeight(semiWtedChimera(n; verbose=verbose))
+function wtedChimera(n::Integer; verbose=false, ver=Vcur)
+    return randWeight(semiWtedChimera(n; verbose=verbose, ver=ver), ver=ver)
 end

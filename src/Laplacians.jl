@@ -19,6 +19,11 @@ module Laplacians
     end
   end
 
+  using RandomV06
+  V06 = RandomV06.V06
+  V07 = RandomV06.V07
+  Vcur = RandomV06.Vcur
+
   using Arpack
   using SuiteSparse
   using DataStructures
@@ -29,6 +34,8 @@ module Laplacians
   using Printf
 
   using DelimitedFiles
+
+  include("IJV.jl")
 
   include("fastCSC.jl")
   export symPermuteCSC

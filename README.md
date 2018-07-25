@@ -22,6 +22,12 @@ To get the current version of the master branch, run `Pkg.checkout("Laplacians")
 
 # Verson 0.3.1
 
+Changes still to make:
+
+* Put lifts and thicken into the new chimera.
+
+
+
 Changes:
 
 * dropped wGrid3, as it produced a 4d grid so probably wasn't being used anyway.

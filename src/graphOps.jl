@@ -122,18 +122,23 @@ end # mapweight
     wted = uniformWeight(unwted)
 
 Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight."""
-uniformWeight(a::SparseMatrixCSC{Tval,Tind}) where {Tval,Tind} = mapweight(a,x->rand())
+uniformWeight_ver(ver, a::SparseMatrixCSC)  = mapweight(a,x->rand_ver(ver,1))
+uniformWeight(a::SparseMatrixCSC)  = uniformWeight_ver(Vcur, a::SparseMatrixCSC)
+
 
 """
     uniformWeight!(a)
 
 Set the weight of every edge to random uniform [0,1]
 """
-function uniformWeight!(mat::SparseMatrixCSC)
+uniformWeight!(mat::SparseMatrixCSC) = uniformWeight_ver!(Vcur, mat)
+
+function uniformWeight_ver!(ver, mat::SparseMatrixCSC)
     for i in 1:length(mat.nzval)
-        mat.nzval[i] = rand()
+        mat.nzval[i] = rand_ver(ver)
     end
 end
+
 
 """
     aprod = productGraph(a0, a1)
@@ -152,6 +157,8 @@ function product_graph(b::IJV{Tva,Tia}, a::IJV{Tvb,Tib}) where {Tva, Tvb, Tia, T
     Ti = promote_type(Tia, Tib)
 
     n = a.n * b.n
+
+    @assert length(a.i) == a.nnz
 
     a_edge_from = kron(ones(Ti, a.nnz), a.n*collect(0:(b.n-1)))
     ai = a_edge_from + kron(a.i, ones(Ti, b.n))
@@ -193,7 +200,7 @@ a2 = unweight(a + thicken_once(a))
 plotGraph(a2,x,y)
 ```
 """
-function thicken_once(a::SparseMatrixCSC)
+function thicken_once(a::SparseMatrixCSC; ver = Vcur)
     n = a.n
     e_new = zeros(Int,n,2)
     ptr = 0
@@ -203,8 +210,8 @@ function thicken_once(a::SparseMatrixCSC)
             nbr1 = 0
             nbr2 = 0
             while nbr1 == nbr2
-                nbr1 = rand(1:d)
-                nbr2 = rand(1:d)
+                nbr1 = rand_ver(ver, 1:d)
+                nbr2 = rand_ver(ver, 1:d)
             end
             ptr += 1
             e_new[ptr,:] = [nbri(a,i,nbr1) nbri(a,i,nbr2)]
@@ -237,7 +244,7 @@ a2 = thicken(a,3)
 plotGraph(a2,x,y)
 ```
 """
-function thicken(a::SparseMatrixCSC,k)
+function thicken(a::SparseMatrixCSC,k; ver = Vcur)
     n = a.n
 
     k = min(k, round(Int, n^2/nnz(a)/2 ))
@@ -252,7 +259,7 @@ function thicken(a::SparseMatrixCSC,k)
 
         before = nnz(a_new)/2
 
-        a_new = unweight(a_new + thicken_once(a))
+        a_new = unweight(a_new + thicken_once(a, ver))
         if nnz(a_new)/2 - before < n/4
             a = a_new
         end
@@ -261,7 +268,7 @@ function thicken(a::SparseMatrixCSC,k)
 
 end
 
-thicken(a) = unweight(a + thicken_once(a))
+thicken(a; ver=Vcur) = unweight(a + thicken_once(a, ver))
 
 """
     graph = generalizedNecklace(A, H, k::Int64)
@@ -271,7 +278,7 @@ resulting new graph will be constructed by expanding each vertex in H to an
 instance of A. k random edges will be generated between components. Thus, the
 resulting graph may have weighted edges.
 """
-function generalizedNecklace(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64) where {Tv, Ti}
+function generalizedNecklace(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::Int64; ver=Vcur) where {Tv, Ti}
   a = findnz(A)
   h = findnz(H)
 
@@ -299,8 +306,8 @@ function generalizedNecklace(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::
     if (u < v)
       #component x is from 1 + (x - 1) * n to n + (x - 1) * n
       for edgeToAdd in 1:k
-        newU = rand(1:n) + n * (u - 1)
-        newV = rand(1:n) + n * (v - 1)
+        newU = rand_ver(ver,1:n) + n * (u - 1)
+        newV = rand_ver(ver,1:n) + n * (v - 1)
         append!(newI, [newU, newV])
         append!(newJ, [newV, newU])
         append!(newW, [1, 1])
@@ -311,10 +318,11 @@ function generalizedNecklace(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::
   return sparse(newI, newJ, newW)
 end # generalizedNecklace
 
-function generalized_necklace(A::IJV, H::IJV, k::Integer) 
+function generalized_necklace(A::IJV, H::IJV, k::Integer; ver=Vcur) 
   
-    # FOR BACKWARDS COMPAT -- REMOVE LATER DAS
-    H = IJV(sparse(H))
+    if ver == V06
+        H = IJV(sparse(H))
+    end
 
     # these are square matrices
     n = A.n
@@ -326,24 +334,32 @@ function generalized_necklace(A::IJV, H::IJV, k::Integer)
     newJ = kron(ones(Int, m), A.j) + kron(n * collect(0:(m-1)), ones(Int, A.nnz) )
   
     # for each edge in H, add k random edges between two corresponding components
-    # multiedges will be concatenated to a single edge with higher cost
+    # multiedges will be concatenated to a single edge with higher weight
+
+    Hi = Array{Int}(undef, div(k*H.nnz,2))
+    Hj = Array{Int}(undef, div(k*H.nnz,2))
+    Hv = ones(div(k*H.nnz,2))
+
+    ind = 0
     for i in 1:H.nnz
       u = H.i[i]
       v = H.j[i] 
   
       if (u < v)
         #component x is from 1 + (x - 1) * n to n + (x - 1) * n
-        for edgeToAdd in 1:k
-          newU = rand(1:n) + n * (u - 1)
-          newV = rand(1:n) + n * (v - 1)
-          append!(newI, [newU, newV])
-          append!(newJ, [newV, newU])
-          append!(newW, [1, 1])
+        for j in 1:k
+          newU = rand_ver(ver, 1:n) + n * (u - 1)
+          newV = rand_ver(ver, 1:n) + n * (v - 1)
+
+          ind += 1
+          Hi[ind] = newU
+          Hj[ind] = newV
+
         end
       end
     end
   
-    return IJV(n*m, length(newI), newI, newJ, newW)
+    return IJV(n*m, length(newI) + k*H.nnz, [newI; Hi; Hj] , [newJ; Hj; Hi], [newW; Hv; Hv])
 
   end # generalizedNecklace
   
@@ -379,10 +395,10 @@ end
 
 Create a new graph from the old, but keeping edge edge with probability `p`
 """
-function subsampleEdges(a::SparseMatrixCSC, p::Float64)
+function subsampleEdges(a::SparseMatrixCSC, p::Float64; ver=Vcur)
   (ai, aj, av) = findnz(triu(a))
   n = size(a)[1]
-  mask = rand(length(ai)) .< p
+  mask = rand_ver(ver, length(ai)) .< p
   as = sparse(ai[mask],aj[mask],av[mask],n,n)
   as = as + as'
   return as
@@ -401,7 +417,6 @@ In the third version, k is the number of edges that cross.
 function twoLift(a, flip::AbstractArray{Bool,1})
     (ai,aj,av) = findnz(triu(a))
     m = length(ai)
-    #flip = rand(false:true,m)
     n = size(a)[1]
     a0 = sparse(ai[flip],aj[flip],1,n,n)
     a1 = sparse(ai[.!(flip)],aj[.!(flip)],1,n,n)
@@ -410,9 +425,9 @@ function twoLift(a, flip::AbstractArray{Bool,1})
     return [a00 a11; a11 a00]
 end
 
-twoLift(a) = twoLift(a,rand(false:true,div(nnz(a),2)))
+twoLift(a; ver=Vcur) = twoLift(a,rand_ver(ver, false:true,div(nnz(a),2)))
 
-twoLift(a, k::Integer) = twoLift(a,randperm(div(nnz(a),2)) .> k)
+twoLift(a, k::Integer; ver=Vcur) = twoLift(a,randperm_ver(ver, div(nnz(a),2)) .> k)
 
 
 
@@ -423,7 +438,7 @@ twoLift(a, k::Integer) = twoLift(a,randperm(div(nnz(a),2)) .> k)
  Create a disjoint union of graphs a and b,
  and then put k random edges between them
 """
-function joinGraphs(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer) where {Tval,Tind}
+function joinGraphs(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}, k::Integer; ver=Vcur) where {Tval,Tind}
     na = size(a)[1]
     nb = size(b)[1]
 
@@ -432,17 +447,17 @@ function joinGraphs(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind}
     bi = bi .+ na
     bj = bj .+ na
 
-    ji = rand(1:na,k)
-    jj = rand(1:nb,k) .+ na
+    ji = rand_ver(ver, 1:na,k)
+    jj = rand_ver(ver, 1:nb,k) .+ na
 
     ab = sparse([ai;bi;ji;jj],[aj;bj;jj;ji],[av;bv;ones(Tval,2*k)],na+nb,na+nb)
 end
 
 
-function join_graphs(a::IJV, b::IJV, k::Integer) 
+function join_graphs(a::IJV, b::IJV, k::Integer; ver=Vcur) 
 
-    ji = rand(1:a.n,k)
-    jj = rand(1:b.n,k) .+ a.n
+    ji = rand_ver(ver, 1:a.n,k)
+    jj = rand_ver(ver, 1:b.n,k) .+ a.n
 
     gi = [a.i; b.i .+ a.n ; ji ; jj] 
     gj = [a.j; b.j .+ a.n ; jj; ji]
@@ -457,10 +472,10 @@ end
  Create a disjoint union of graphs a and b,
  and then put k random edges between them, merging b into a.
 """
-function join_graphs!(a::IJV, b::IJV, k::Integer) 
+function join_graphs!(a::IJV, b::IJV, k::Integer; ver=Vcur) 
 
-    ji = rand(1:a.n,k)
-    jj = rand(1:b.n,k) .+ a.n
+    ji = rand_ver(ver, 1:a.n,k)
+    jj = rand_ver(ver, 1:b.n,k) .+ a.n
 
     append!(a.i, [b.i .+ a.n ; ji ; jj] )
     append!(a.j, [b.j .+ a.n ; jj; ji])
