@@ -73,6 +73,8 @@ srand(1)
 L.ErdosRenyiClusterFix_ijv(20,20)
 L.ErdosRenyiClusterFix_ijv(10,50)
 
+ErdosRenyiClusterFix(10,70)
+
 L.firstn(L.grid2_ijv(10),45)
 
 

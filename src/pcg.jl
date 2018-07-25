@@ -155,7 +155,7 @@ function cg(mat, b::Vector{Tval};
 
     # If input vector is zero, quit
     if nb == 0
-      return bestx
+      return zeros(size(b))
     end
 
     x = zeros(Tval,n)
@@ -264,7 +264,7 @@ function pcg(mat, b::Vector{Tval}, pre::Function;
 
     # If input vector is zero, quit
     if nb == 0
-      return bestx
+      return zeros(size(b))
     end
 
     x = zeros(Tval,n)

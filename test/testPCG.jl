@@ -13,14 +13,18 @@ x = Laplacians.pcgBLAS(la,b,pre,maxits=2000,maxtime=1,verbose=true);
 x = Laplacians.pcgSlow(la,b,pre,maxits=2000,maxtime=1,verbose=true);
 x = pcg(la,b,pre,maxits=2000,verbose=true);
 x = Laplacians.pcgBLAS(la,b,pre,maxits=2000,verbose=true);
+x = Laplacians.pcgBLAS(la,b,pre,maxits=2000,verbose=true,maxtime=1e-10);
 x = Laplacians.pcgSlow(la,b,pre,maxits=2000,verbose=true);
+x = Laplacians.pcgSlow(la,b,pre,maxits=2000,verbose=true,maxtime=1e-10);
 x = Laplacians.pcgBLAS(la,b,pre,tol=1e-2);
 x = Laplacians.pcgSlow(la,b,pre,tol=1e-2);
 x = pcg(la,b,pre,tol=1e-2);
 
 x = cg(la,b,verbose=true,maxtime=1,maxits=1000);
 x = Laplacians.cgBLAS(la,b,verbose=true,maxtime=1,maxits=1000);
+x = Laplacians.cgBLAS(la,b,verbose=true,maxtime=1e-10,maxits=1000);
 x = Laplacians.cgSlow(la,b,verbose=true,maxtime=1,maxits=1000);
+x = Laplacians.cgSlow(la,b,verbose=true,maxtime=1e-10,maxits=1000);
 x = cg(la,b,verbose=true,maxits=2000);
 x = Laplacians.cgBLAS(la,b,verbose=true,maxits=2000);
 x = Laplacians.cgSlow(la,b,verbose=true,maxits=2000);
@@ -46,6 +50,8 @@ b = b .- mean(b)
 x = f(b)
 norm(la*x-b)
 
+f(zeros(100))
+
 x = f(b,maxits=15,verbose=true, maxtime=1)
 
 d = Diagonal(1 ./ diag(la))
@@ -57,6 +63,8 @@ f = pcgSolver(la, spdiagm(0=>diag(la)) ,maxits=10,verbose=true)
 x = f(b)
 f = pcgSolver(la,pre,maxits=10,verbose=false)
 x = f(b,verbose=true, maxits=1000, maxtime = 2)
+
+f(zeros(100))
 
 t = akpw(a)
 lt = lap(t)

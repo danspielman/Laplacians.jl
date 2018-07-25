@@ -15,6 +15,8 @@ f = Laplacians.lapWrapConnected(cgSolver,a, tol=1e-2, verbose=true)
 @test norm(la*f(b)-b)/norm(b) < 1e-1
 @test norm(la*f(b,pcgIts=its,tol=1e-3,verbose=false)-b)/norm(b) < 1e-2
 
+f(zeros(n))
+
 norm(la*f(b,pcgIts=its)-b)/norm(b)
 norm(la*f(b,pcgIts=its,verbose=true,tol=1e-6)-b)/norm(b)
 
@@ -101,7 +103,7 @@ a = wtedChimera(1111,1);
 llp = Laplacians.LLmatp(a)
 srand(1)
 ldli = Laplacians.approxChol(llp);
-@test Laplacians.condNumber(a, ldli, verbose=true) < 10
+@test Laplacians.condNumber(a, ldli, verbose=true) < 20
 
 
 # testing by repitition
@@ -263,6 +265,12 @@ lt = lap(t)
 la[1,1] += 1
 lt[1,1] += 1
 condNumber(la,lt)
+condNumber(la,lt,tol=1)
+
+gOp = Laplacians.SqLinOp(true,1.0,100,x->la*x)
+R = powerIteration(gOp, tol=1e-8, maxit=2, verbose=true)
+R = powerIteration(gOp, tol=1e-1, maxit=100, verbose=true)
+
 
 #=
 sp = Laplacians.defaultSamplingParams

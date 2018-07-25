@@ -253,6 +253,11 @@ d2 = Laplacians.treeDepthDFS(t)
 
 Laplacians.bfsOrder(t,1)
 
+t0 = complete_binary_tree(6); t0[1,2] = 0; t0[2,1] = 0; dropzeros!(t0);
+@test_throws ErrorException Laplacians.bfsOrder(t0, 1)
+@test_throws ErrorException Laplacians.matToTree(t0)
+@test_throws ErrorException Laplacians.matToTreeDepth(t0)
+
   # export cg, cgSolver
   # export pcg, pcgSolver, pcgLapSolver
 
@@ -260,6 +265,7 @@ Laplacians.bfsOrder(t,1)
 
 for i in 1:10
     maxflow(wtedChimera(102,i),1,2)
+    maxflow(wtedChimera(102,i),1,2,justflow=false)
 end
 
   # export akpw, akpwU
