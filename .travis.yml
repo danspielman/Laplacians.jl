@@ -1,14 +1,10 @@
-# blocklist
-branches:
-  except:
-  - speed
-
 # safelist
 branches:
   only:
   - master
   - fixes07
-
+  - ijv
+  
 language: julia
 julia:
   - 0.7

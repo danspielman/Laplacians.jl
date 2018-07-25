@@ -2,8 +2,13 @@
 
 @test L.path_graph_ijv(1) == L.empty_graph_ijv(1)
 @test path_graph(1) == empty_graph(1)
-path_graph(5)
 
+@test L.hash(L.path_graph_ijv(1)) == L.hash(L.empty_graph_ijv(1))
+L.hash(L.path_graph_ijv(5), hash(1))
+
+L.transpose(L.path_graph_ijv(5))
+L.adjoint(L.path_graph_ijv(5))
+L.compress(L.path_graph_ijv(5))
 
 @test L.complete_graph_ijv(1) == L.empty_graph_ijv(1)
 @test complete_graph(1) == empty_graph(1)
@@ -70,6 +75,10 @@ L.ErdosRenyiClusterFix_ijv(10,50)
 
 L.firstn(L.grid2_ijv(10),45)
 
+
+L.randperm_ver(L.V06, path_graph(6))
+
+semiwted_chimera(10,1, ver=L.V06)
 
 ;
 
