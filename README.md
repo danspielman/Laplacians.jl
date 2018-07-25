@@ -30,8 +30,10 @@ Changes still to make:
 
 Changes:
 
-* dropped wGrid3, as it produced a 4d grid so probably wasn't being used anyway.
-* Changed the names of many functions to bring closer to the Julia standard naming scheme.  New names are empty_graph, path_graph, ring_graph, complete_graph, generalized_ring, rand_gen_ring, product_graph, wgrid2, 
+* Moved `lex.jl` to the directory `buggy`, as on further testing we found bugs in it.
+
+* dropped wGrid3, as it produced a 4d grid so probably wasn't being used anyway.  Dropped wGrid2 also.
+* Changed the names of many functions to bring closer to the Julia standard naming scheme.  New names are empty_graph, path_graph, ring_graph, complete_graph, generalized_ring, rand_gen_ring, product_graph, join_graphs, ...  Set deprecation warnings for the old names.
 
 
 

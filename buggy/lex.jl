@@ -205,6 +205,7 @@ function checkLex(A::SparseMatrixCSC{Tv, Ti},
         correct = false
       end
     end
+
     if (!correct)
       if (fatal)
         error(@sprintf("The average of the max and min neighbors is %f
@@ -498,7 +499,7 @@ function StarSteepestPath(T, v, d)
     return (v[1] > v[2]) ? (T[1],T[2]) : (T[2], T[1])
   end
 
-  i = rand(1:length(T))
+  i = rand_ver(Laplacians.V06, 1:length(T))
   alpha = -Inf
   i2 = 0
   for j in 1:length(T)
@@ -619,10 +620,10 @@ function SteepestPath(A, cpnts, isTerm, val, vert=collect(1:n))
   # do the following in each component, recurse at the same time
 
   # randomly pick an edge (x1, x2), and a vertex x3
-  ind = rand(1:A.colptr[end]-1)
+  ind = rand_ver(Laplacians.V06, 1:A.colptr[end]-1)
   x1 = findfirst(x -> x > ind, A.colptr) - 1
   x2 = A.rowval[ind]
-  x3 = rand(vert)
+  x3 = rand_ver(Laplacians.V06, vert)
 
   maxPath = VertexSteepestPath(A, cpnts, isTerm, val, x1)
   if (LEX_DEBUG)

@@ -213,12 +213,13 @@ grid3_ijv(n1::Integer, n2::Integer, n3::Integer) =
 grid3(n) = grid3(n,n,n)
 grid3_ijv(n) = grid3_ijv(n,n,n)
 
+#=
 """
     graph = wGrid2(n::Integer; weightGen::Function=rand)
 
 An n by n grid with random weights. User can specify the weighting scheme.
 """
-wgrid2(n::Integer; weightGen::Function=rand) = 
+wgrid2(n::Integer; weightGen::Function=r(x->rand(x)) = 
     sparse(wgrid2_ijv(n, weightGen = weightGen))
 
 function wgrid2_ijv(n::Integer; weightGen::Function=rand)
@@ -235,7 +236,7 @@ function wgrid2_ijv(n::Integer; weightGen::Function=rand)
     return compress(gr2 + gr2')
 
 end
-
+=#
 
 """
     graph = grid2coords(n::Int64, m::Int64)
@@ -861,6 +862,17 @@ For more interesting weights, use `wtedChimera`
 """
 semiwted_chimera(n::Integer; verbose=false, prefix="", ver=Vcur) = 
     sparse(semiwted_chimera_ijv(n, verbose=verbose, prefix = prefix, ver=ver))
+
+function semiwted_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
+    if ver == V06
+        srand_ver(ver, 100*n+k)
+    else
+        srand_ver(ver, hash(n, hash(k)))
+    end
+
+    return semiwted_chimera(n; verbose=verbose, prefix=prefix, ver=ver)
+
+end
 
 function semiwted_chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
 

@@ -71,7 +71,7 @@ module Laplacians
   export empty_graph
   export path_graph
 
-  export wgrid2
+  #export wgrid2
 
   export grid2
   export grid2coords
@@ -216,5 +216,7 @@ module Laplacians
 
   include("from_cholmod.jl")
   export cholmod_perm, ask_cholmod
+
+  include("deprecated.jl")
 
 end # module Laplacians.jl

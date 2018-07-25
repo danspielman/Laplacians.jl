@@ -151,9 +151,9 @@ for i in 1:50
     println()
     println("wtedChimera($n, $i)")
     if isodd(i)
-        gr = wtedChimera(n,i,verbose=true)
+        gr = wted_chimera(n,i,verbose=true, ver=L.V06)
     else
-        gr = wtedChimera(n,i)
+        gr = wted_chimera(n,i, ver=L.V06)
     end
     @test gr.n == n
     @test isConnected(gr)
@@ -170,6 +170,11 @@ for i in 1:50
 
     gru = unweight(gr)
     _ = akpwU(gru)
+
+end
+
+for i in 1:50
+    wted_chimera(n, i, verbose=true)
 end
 
 a = wtedChimera(1234,1);
@@ -287,7 +292,7 @@ x = f(b)
 
 # testing compare_solvers
 
-a = chimera(200,4);
+a = chimera(200,4,ver=L.V06);
 
 la = lap(a)
 sdd = copy(la)

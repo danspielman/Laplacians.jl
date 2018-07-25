@@ -9,7 +9,7 @@
 @deprecate completeBinaryTree(n::Int64) complete_binary_tree(n)
 
 @deprecate productGraph(a0::SparseMatrixCSC, a1::SparseMatrixCSC) product_graph(a0, a1)
-@deprecate wGrid2(n::Integer; weightGen::Function=rand) wgrid2(n, weightGen)
+#@deprecate wGrid2(n::Integer; weightGen::Function=rand) wgrid2(n, weightGen)
 @deprecate randMatching(n::Integer) rand_matching(n)
 @deprecate randRegular(n::Integer, k::Integer) rand_regular(n, k)
 @deprecate grownGraph(n::Integer, k::Integer) grown_graph(n, k)
@@ -21,4 +21,6 @@
 @deprecate wtedChimera(n::Integer, k::Integer; verbose=false) wted_chimera(n, k, verbose=verbose)
 @deprecate wtedChimera(n::Integer; verbose=false) wted_chimera(n, verbose=verbose)
 @deprecate semiWtedChimera(n::Integer; verbose=false, prefix="") semi_wted_chimera(n, verbose=verbose, prefix=prefix)
+@deprecate semiWtedChimera(n::Integer, k::Integer; verbose=false, prefix="") semiwted_chimera(n, k, verbose=verbose, prefix=prefix)
     
+@deprecate thickenOnce(a) thicken_once(a)

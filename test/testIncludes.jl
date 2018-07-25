@@ -3,8 +3,12 @@
 
 #============================================================#
 # Test Lex by running code from its notebook
+#=
+fn = "$(@__DIR__)/../src/lex.jl"
+println(fn)
 
-include("$(@__DIR__)/../src/lex.jl")
+
+include(fn)
 
 
 setLexDebugFlag(true)
@@ -30,7 +34,7 @@ lexMinVolt = CompLexMin(Pn, isTerm, initVal)
 println(lexMinVolt)
 
 n = 100
-G = chimera(n,1)
+G = chimera(n,1,ver=RandomV06.V06)
 isTerm = zeros(Bool, n)
 # arbitrary terminal values
 isTerm[1] = true
@@ -54,7 +58,7 @@ println(MaxEdgeGrad(G, lexMinVolt))
 println(checkLex(G, isTerm, initVal, lexMinVolt))
 
 simIterLexTest()
-
+=#
 #============================================================#
 # test isotonicIPM
 

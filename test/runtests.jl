@@ -1,5 +1,13 @@
 using Test
 using Laplacians
+using LinearAlgebra
+using Random
+using SparseArrays
+using LinearAlgebra
+
+L = Laplacians
+include("testIncludes.jl")
+include("test_graph_generators.jl")
 
 include("testByFile.jl")
 
@@ -9,5 +17,5 @@ include("testSolvers.jl")
 
 include("testPCG.jl")
 
-include("testIncludes.jl")
+
 

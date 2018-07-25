@@ -122,7 +122,8 @@ end # mapweight
     wted = uniformWeight(unwted)
 
 Put a uniform [0,1] weight on every edge.  This is an example of how to use mapweight."""
-uniformWeight_ver(ver, a::SparseMatrixCSC)  = mapweight(a,x->rand_ver(ver,1))
+uniformWeight_ver(::Type{V06}, a::SparseMatrixCSC)  = mapweight(a,x->rand_ver(V06))
+uniformWeight_ver(::Type{Vcur}, a::SparseMatrixCSC)  = mapweight(a,x->rand_ver(Vcur))
 uniformWeight(a::SparseMatrixCSC)  = uniformWeight_ver(Vcur, a::SparseMatrixCSC)
 
 
@@ -259,7 +260,7 @@ function thicken(a::SparseMatrixCSC,k; ver = Vcur)
 
         before = nnz(a_new)/2
 
-        a_new = unweight(a_new + thicken_once(a, ver))
+        a_new = unweight(a_new + thicken_once(a, ver=ver))
         if nnz(a_new)/2 - before < n/4
             a = a_new
         end
@@ -268,7 +269,7 @@ function thicken(a::SparseMatrixCSC,k; ver = Vcur)
 
 end
 
-thicken(a; ver=Vcur) = unweight(a + thicken_once(a, ver))
+thicken(a; ver=Vcur) = unweight(a + thicken_once(a, ver=ver))
 
 """
     graph = generalizedNecklace(A, H, k::Int64)
@@ -491,7 +492,7 @@ end
  Create a disjoint union of graphs a and b,
   with no edges between them.
 """
-disjoin(a,b) = joinGraphs(a,b,0)
+disjoin(a::SparseMatrixCSC,b::SparseMatrixCSC) = join_graphs(a,b,0)
 
 disjoin(a::IJV, b::IJV) = IJV(a.n+b.n, a.nnz + b.nnz, 
         [a.i ; b.i .+ a.n],

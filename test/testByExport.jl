@@ -113,14 +113,6 @@ a2 = completeGraph(7)
 
 a2 = pathGraph(7)
 
-# export wGrid2
-
-a2 = wGrid2(3)
-
-# export wGrid3
-
-a3 = wGrid3(3)
-
 # export grid2
 
 a2 = grid2(3)
