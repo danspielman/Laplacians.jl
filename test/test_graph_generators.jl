@@ -82,6 +82,31 @@ L.randperm_ver(L.V06, path_graph(6))
 
 semiwted_chimera(10,1, ver=L.V06)
 
+
+# check if still doing what V06 should do
+
+RandomV06.srand_ver(RandomV06.V06, 1); 
+v = randn_ver(Laplacians.V06, 2000);
+
+s = 0; 
+for i in 1:1000
+    global s
+    a = chimera(2000, i, ver=Laplacians.V06)
+    s += v'*a*v;
+end
+
+@test s == 2784.2498256003364
+
+
+s = 0; 
+for i in 1:1000
+    global s
+    a = wted_chimera(2000, i, ver=Laplacians.V06)
+    s += v'*a*v;
+end
+
+@test abs(s - 8649.442267154831) < 1e-5
+
 ;
 
 

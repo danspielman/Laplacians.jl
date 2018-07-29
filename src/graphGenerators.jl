@@ -717,8 +717,13 @@ end
 A Chimera graph with some weights.  The weights just appear when graphs are combined.
 For more interesting weights, use `wtedChimera`
 """
-semiwted_chimera(n::Integer; verbose=false, prefix="", ver=Vcur) = 
-    sparse(semiwted_chimera_ijv(n, verbose=verbose, prefix = prefix, ver=ver))
+function semiwted_chimera(n::Integer; verbose=false, prefix="", ver=Vcur) 
+    if ver == V06
+        return sparse(semiwted_chimera_ijv_v6(n; verbose=verbose, prefix=prefix, ver=ver))
+    else
+        return sparse(semiwted_chimera_ijv(n; verbose=verbose, prefix=prefix, ver=ver))
+    end
+end
 
 function semiwted_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
     if ver == V06
@@ -731,6 +736,14 @@ function semiwted_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=
     return semiwted_chimera(n; verbose=verbose, prefix=prefix, ver=ver)
 
 end
+
+function semiwted_chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
+    if ver == V06
+        return semiwted_chimera_ijv_v6(n, verbose=verbose, prefix=prefix, ver=ver)
+    else
+        return semiwted_chimera_ijv_v7(n, verbose=verbose, prefix=prefix, ver=ver)
+    end
+end       
 
 function semiwted_chimera_ijv_v6(n::Integer; verbose=false, prefix="", ver=Vcur)
 
@@ -833,7 +846,7 @@ function semiwted_chimera_ijv_v6(n::Integer; verbose=false, prefix="", ver=Vcur)
     end
 end
 
-function semiwted_chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
+function semiwted_chimera_ijv_v7(n::Integer; verbose=false, prefix="", ver=Vcur)
 
     if (n < 2)
         return empty_graph_ijv(1)
@@ -965,14 +978,16 @@ function chimera(n::Integer; verbose=false, prefix="", ver=Vcur)
 
     gr = sparse(chimera_ijv(n, verbose=verbose, prefix=prefix, ver=ver))
 
-    k = 1+floor(Integer,-log.(rand_ver(ver))/2)
+    if ver != V06
+        k = 1+floor(Integer,-log.(rand_ver(ver))/2)
 
-    if k > 1
-        if verbose
-            println(prefix, "thicken($(k))")    
+        if k > 1
+            if verbose
+                println(prefix, "thicken($(k))")    
+            end
+
+            gr = thicken(gr, k)
         end
-
-        gr = thicken(gr, k)
     end
 
     return gr
@@ -1052,6 +1067,7 @@ function rand_weight_sub(a; ver=Vcur)
                     v = v .- mean(v)
                 end
             else
+
                 for i in 1:10
                     v = v - a * (invdeg * v)
                     v = v .- mean(v)
@@ -1069,6 +1085,7 @@ function rand_weight_sub(a; ver=Vcur)
     w[isnan.(w)] .= 1
 
     if (rand_ver(ver) < .5)
+
         w = 1 ./w
     end
 
@@ -1107,14 +1124,17 @@ function wted_chimera(n::Integer; verbose=false, ver=Vcur)
 
     gr = semiwted_chimera(n; verbose=verbose, ver=ver)
 
-    k = 1+floor(Integer,-log.(rand_ver(ver))/2)
 
-    if k > 1
-        if verbose
-            println(prefix, "thicken($(k))")    
+    if ver != V06
+        k = 1+floor(Integer,-log.(rand_ver(ver))/2)
+
+        if k > 1
+            if verbose
+                println("thicken($(k))")    
+            end
+
+            gr = thicken(gr, k)
         end
-        
-        gr = thicken(gr, k)
     end
 
     return rand_weight(gr, ver=ver)

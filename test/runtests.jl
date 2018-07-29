@@ -4,6 +4,7 @@ using LinearAlgebra
 using Random
 using SparseArrays
 using LinearAlgebra
+using RandomV06
 
 L = Laplacians
 include("testIncludes.jl")
