@@ -105,7 +105,7 @@ module Laplacians
   export generalized_necklace
   export subsampleEdges
 
-  export twoLift
+  export two_lift
   export join_graphs, join_graphs!, disjoin
 
   export plotGraph

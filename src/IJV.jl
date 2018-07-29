@@ -7,6 +7,7 @@ Our graph generators with _ijv at the end of their name produce these.
 =#
 
 import Base: ==, hash, +, *, transpose, adjoint
+import SparseArrays: nnz
 
 mutable struct IJV{Tv,Ti}
     n::Ti
@@ -22,6 +23,8 @@ end
     a.i == b.i &&
     a.j == b.j &&
     a.v == b.v
+
+nnz(a::IJV) = a.nnz
 
 hash(a::IJV) = 
     hash((a.n, a.nnz, a.i, a.j, a.v), hash(IJV))

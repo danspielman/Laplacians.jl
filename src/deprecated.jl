@@ -24,3 +24,7 @@
 @deprecate semiWtedChimera(n::Integer, k::Integer; verbose=false, prefix="") semiwted_chimera(n, k, verbose=verbose, prefix=prefix)
     
 @deprecate thickenOnce(a) thicken_once(a)
+
+@deprecate twoLift(a, flip::AbstractArray{Bool,1}) two_lift(a, flip)
+@deprecate twoLift(a) two_lift(a)
+@deprecate twoLift(a, k::Integer) two_lift(a, k)

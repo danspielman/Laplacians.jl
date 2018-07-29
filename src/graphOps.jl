@@ -408,14 +408,14 @@ end # subsampleEdges
 
 
 """
-    graph = twoLift(a, flip::AbstractArray{Bool,1})
-    graph = twoLift(a)
-    graph = twoLift(a, k::Integer)
+    graph = two_lift(a, flip::AbstractArray{Bool,1})
+    graph = two_lift(a)
+    graph = two_lift(a, k::Integer)
 
 Creats a 2-lift of a.  `flip` is a boolean indicating which edges cross.
 In the third version, k is the number of edges that cross.
 """
-function twoLift(a, flip::AbstractArray{Bool,1})
+function two_lift(a::SparseMatrixCSC, flip::AbstractArray{Bool,1})
     (ai,aj,av) = findnz(triu(a))
     m = length(ai)
     n = size(a)[1]
@@ -426,9 +426,49 @@ function twoLift(a, flip::AbstractArray{Bool,1})
     return [a00 a11; a11 a00]
 end
 
-twoLift(a; ver=Vcur) = twoLift(a,rand_ver(ver, false:true,div(nnz(a),2)))
+function two_lift(a::IJV{Tv,Ti}, flip::AbstractArray{Bool,1}) where {Tv,Ti}
 
-twoLift(a, k::Integer; ver=Vcur) = twoLift(a,randperm_ver(ver, div(nnz(a),2)) .> k)
+    ii = Array{Ti}(undef, a.nnz)
+    jj = Array{Ti}(undef, a.nnz)
+    vv = Array{Tv}(undef, a.nnz)
+
+    ind = 0
+    cnt = 0
+
+    for i in 1:a.nnz
+        if (a.i[i] < a.j[i])
+
+            cnt += 1
+            if flip[cnt]
+                ind += 1
+                ii[ind] = a.i[i]
+                jj[ind] = a.j[i]
+                vv[ind] = a.v[i]
+
+                ind += 1
+                ii[ind] = a.i[i]+a.n
+                jj[ind] = a.j[i]+a.n
+                vv[ind] = a.v[i]
+            else
+                ind += 1
+                ii[ind] = a.i[i]
+                jj[ind] = a.j[i]+a.n
+                vv[ind] = a.v[i]
+
+                ind += 1
+                ii[ind] = a.i[i]+a.n
+                jj[ind] = a.j[i]
+                vv[ind] = a.v[i]
+            end
+        end
+    end
+
+    return IJV(2*a.n, 2*a.nnz, [ii;jj], [jj;ii], [vv;vv])
+end
+
+two_lift(a; ver=Vcur) = two_lift(a,rand_ver(ver, false:true,div(nnz(a),2)))
+
+two_lift(a, k::Integer; ver=Vcur) = two_lift(a,randperm_ver(ver, div(nnz(a),2)) .> k)
 
 
 

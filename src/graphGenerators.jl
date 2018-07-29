@@ -486,6 +486,21 @@ function randperm_ver(::Type{Vcur}, a::IJV)
         perm[a.i], perm[a.j], a.v)
 end   
 
+function randperm_ver!(::Type{Vcur}, a::IJV)
+    perm = randperm_ver(Vcur, a.n)  
+    a.i = perm[a.i];
+    a.j = perm[a.j];
+
+end   
+
+function randperm_ver!(::Type{V06}, a::IJV)
+    perm = randperm_ver(V06, a.n)  
+    a.i = perm[a.i];
+    a.j = perm[a.j];
+
+end   
+
+
 randperm(a::IJV) = randperm_ver(Vcur, a)
   
 
@@ -708,15 +723,16 @@ semiwted_chimera(n::Integer; verbose=false, prefix="", ver=Vcur) =
 function semiwted_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
     if ver == V06
         srand_ver(ver, 100*n+k)
-    else
-        srand_ver(ver, hash(n, hash(k)))
+        return sparse(semiwted_chimera_ijv_v6(n; verbose=verbose, prefix=prefix, ver=ver))
     end
+        
+    srand_ver(ver, hash(n, hash(k)))
 
     return semiwted_chimera(n; verbose=verbose, prefix=prefix, ver=ver)
 
 end
 
-function semiwted_chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
+function semiwted_chimera_ijv_v6(n::Integer; verbose=false, prefix="", ver=Vcur)
 
     if (n < 2)
         return empty_graph_ijv(1)
@@ -817,6 +833,126 @@ function semiwted_chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
     end
 end
 
+function semiwted_chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
+
+    if (n < 2)
+        return empty_graph_ijv(1)
+    end
+
+    gr = empty_graph(n)
+
+    r = rand_ver(ver)^2
+
+    pr = string(" ",prefix)
+
+            
+    if (n < 30) || (rand_ver(ver) < .2)
+
+        gr = pure_random_ijv(n, verbose=verbose, prefix=prefix, ver=ver)
+
+    elseif (n < 200)
+        # just join disjoint copies of graphs
+
+        n1 = 10 + floor(Integer,(n-20)*rand_ver(ver))
+        n2 = n - n1
+        k = ceil(Integer,exp(rand_ver(ver)*log(min(n1,n2)/2)))
+
+        if verbose
+            println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+        end
+
+        gr = join_graphs(r*chimera_ijv(n1;verbose=verbose,prefix=pr, ver=ver),
+          chimera_ijv(n2;verbose=verbose,prefix=pr, ver=ver),
+          k, ver=ver)
+
+    elseif rand_ver(ver) < .7
+
+            # split with probability .7
+
+        
+            n2 = ceil(Integer,10*exp(rand_ver(ver)*log(n/20)))
+
+            if n2 < n/2
+                n1 = n - n2
+            else
+                n1 = n2
+                n2 = n - n2
+            end
+
+            k = floor(Integer,1+exp(rand_ver(ver)*log(min(n1,n2)/2)))
+
+            if verbose
+                println(prefix,"joinGraphs($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+            end
+
+            gr = r*chimera_ijv(n1;verbose=verbose,prefix=pr, ver=ver)
+            join_graphs!(gr,
+                chimera_ijv(n2;verbose=verbose,prefix=pr, ver=ver),
+                k, ver=ver)
+
+        else
+            n1 = floor(Integer,10*exp(rand_ver(ver)*log(n/100)))
+
+            n2 = floor(Integer, n / n1)
+
+            choice = rand_ver(ver)
+
+            if choice < .45
+
+                if verbose
+                    println(prefix,"productGraph($(r)*chimera($(n1)),chimera($(n2)))")
+                end
+
+                gr = product_graph(r*chimera_ijv(n1;verbose=verbose,prefix=pr, ver=ver),
+                chimera_ijv(n2;verbose=verbose,prefix=pr, ver=ver))
+
+            elseif choice < 0.9
+
+                k = floor(Integer,1+exp(rand_ver(ver)*log(min(n1,n2)/10)))
+
+                if verbose
+                    println(prefix, "generalizedNecklace($(r)*chimera($(n1)),chimera($(n2)),$(k))")
+                end
+
+                gr = generalized_necklace(r*chimera_ijv(n1;verbose=verbose,prefix=pr, ver=ver),
+                chimera_ijv(n2;verbose=verbose,prefix=pr, ver=ver),
+                k, ver=ver)
+
+            else 
+
+                n1 = div(n,2)
+                k = ceil(Integer,exp(rand_ver(ver)*log(n/2)))
+
+                if verbose
+                    println(prefix, "two_lift(chimera($(n1), $(k)")
+                end
+
+                gr1 = chimera_ijv(n1;verbose=verbose, prefix=pr, ver=ver)
+                gr = two_lift(gr1, k)
+
+            end
+
+        end
+        
+
+    n3 = n - gr.n
+    if (n3 > 0)
+
+        if verbose
+            println(prefix, "join_graphs!(gr($(gr.n)),chimera($(n3)),2), $(ver)")
+        end
+
+        join_graphs!(gr,chimera_ijv(n3;verbose=verbose,prefix=pr, ver=ver),
+        2, ver=ver)
+    end
+
+    randperm_ver!(ver, gr)
+    return gr
+
+end
+
+
+
 
 """
     graph = chimera(n::Integer; verbose=false, ver=Vcur)
@@ -825,9 +961,22 @@ Builds a chimeric graph on n vertices.
 The components come from pureRandomGraph,
 connected by joinGraphs, productGraph and generalizedNecklace
 """
-chimera(n::Integer; verbose=false, prefix="", ver=Vcur) = 
-    sparse(chimera_ijv(n, verbose=verbose, prefix=prefix, ver=ver))
+function chimera(n::Integer; verbose=false, prefix="", ver=Vcur) 
 
+    gr = sparse(chimera_ijv(n, verbose=verbose, prefix=prefix, ver=ver))
+
+    k = 1+floor(Integer,-log.(rand_ver(ver))/2)
+
+    if k > 1
+        if verbose
+            println(prefix, "thicken($(k))")    
+        end
+
+        gr = thicken(gr, k)
+    end
+
+    return gr
+end
 
 
 function chimera_ijv(n::Integer; verbose=false, prefix="", ver=Vcur)
@@ -955,5 +1104,18 @@ end
 Generate a chimera, and then apply a random weighting scheme
 """
 function wted_chimera(n::Integer; verbose=false, ver=Vcur)
-    return rand_weight(semiwted_chimera(n; verbose=verbose, ver=ver), ver=ver)
+
+    gr = semiwted_chimera(n; verbose=verbose, ver=ver)
+
+    k = 1+floor(Integer,-log.(rand_ver(ver))/2)
+
+    if k > 1
+        if verbose
+            println(prefix, "thicken($(k))")    
+        end
+        
+        gr = thicken(gr, k)
+    end
+
+    return rand_weight(gr, ver=ver)
 end

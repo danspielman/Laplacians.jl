@@ -22,18 +22,14 @@ To get the current version of the master branch, run `Pkg.checkout("Laplacians")
 
 # Verson 0.3.1
 
-Changes still to make:
-
-* Put lifts and thicken into the new chimera.
-
-
-
 Changes:
+
+* The major change here is to the chimera and wted_chimera graph generators.  The old versions have been preserved (despite the change in pseudorandom generators)
 
 * Moved `lex.jl` to the directory `buggy`, as on further testing we found bugs in it.
 
 * dropped wGrid3, as it produced a 4d grid so probably wasn't being used anyway.  Dropped wGrid2 also.
-* Changed the names of many functions to bring closer to the Julia standard naming scheme.  New names are empty_graph, path_graph, ring_graph, complete_graph, generalized_ring, rand_gen_ring, product_graph, join_graphs, ...  Set deprecation warnings for the old names.
+* Changed the names of many functions to bring closer to the Julia standard naming scheme.  New names are empty_graph, path_graph, ring_graph, complete_graph, generalized_ring, rand_gen_ring, product_graph, join_graphs, two_lift ...  Set deprecation warnings for the old names.
 
 
 
