@@ -1,7 +1,7 @@
 # Generators
 
 `Laplacians.jl` implements generators for many standard graphs.
-The [`chimera`](@ref) and [`wtedChimera`](@ref) generators are
+The [`chimera`](@ref) and [`wted_chimera`](@ref) generators are
 designed to stress code by combining these standard graphs in tricky
 ways.  While no one of these graphs need be a hard case for any
 application, the goal is for these generators to explore the space of
@@ -12,7 +12,7 @@ code.
 `chimera(n,k)` first sets the seed of the psrg to k.
 In this way, it generates the kth chimera graph, and messes with your
 psrg.
-`wtedChimera` is similar, but it generates weighted graphs.
+`wted_chimera` is similar, but it generates weighted graphs.
 
 ## Function list
 

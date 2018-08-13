@@ -3,7 +3,7 @@
 # testing the interface routines
 
 n = 100;
-a = wtedChimera(100,1);
+a = wted_chimera(100,1);
 b = randn(n);
 b = b .- mean(b);
 la = Laplacians.forceLap(a);
@@ -26,7 +26,7 @@ fa = conSolve(a)
 
 @test norm(la*fa(b,verbose=true) - b) < 1e-2
 
-a2 = disjoin(chimera(100,2),wtedChimera(200,3))
+a2 = disjoin(chimera(100,2),wted_chimera(200,3))
 la2 = lap(a2)
 n = size(a2,1)
 b2 = randn(n);
@@ -99,9 +99,9 @@ Laplacians.print_ll_col(llp,1)
 llo = Laplacians.LLMatOrd(a);
 Laplacians.print_ll_col(llo,1)
 
-a = wtedChimera(1111,1);
+a = wted_chimera(1111,1);
 llp = Laplacians.LLmatp(a)
-srand(1)
+Random.seed!(1)
 ldli = Laplacians.approxChol(llp);
 @test Laplacians.condNumber(a, ldli, verbose=true) < 20
 
@@ -151,7 +151,7 @@ tol = 1e-11
 
 for i in 1:50
     println()
-    println("wtedChimera($n, $i)")
+    println("wted_chimera($n, $i)")
     if isodd(i)
         gr = wted_chimera(n,i,verbose=true, ver=L.V06)
     else
@@ -179,9 +179,9 @@ for i in 1:50
     wted_chimera(n, i, verbose=true)
 end
 
-a = wtedChimera(1234,1);
+a = wted_chimera(1234,1);
 for i in 2:5
-    global a = disjoin(a,wtedChimera(1234,i))
+    global a = disjoin(a,wted_chimera(1234,i))
 end
 n = size(a,1)
 b = randn(n)
@@ -206,7 +206,7 @@ end
 
 
 n = 10
-a = rand(n,n)
+a = rand(Float64,n,n)
 a = a + a'
 a = a - Diagonal(diag(a))
 a = sparse(a)
@@ -214,7 +214,7 @@ println("rand complete graph")
 testSolvers(a,maxtime=10)
 
 n = 100
-a = rand(n,n)
+a = rand(Float64, n,n)
 a = a + a'
 a = a - Diagonal(diag(a))
 a = sparse(a)
@@ -224,16 +224,16 @@ testSolvers(a,maxtime=10)
 
 n = 20000
 i = 1
-println("wtedChimera($n, $i)")
-gr = wtedChimera(n,i)
+println("wted_chimera($n, $i)")
+gr = wted_chimera(n,i)
 testSolvers(gr,maxtime=10)
 
 n = 100000
 i = 1
 b = randn(n)
 b = b .- mean(b)
-println("wtedChimera($n, $i)")
-gr = wtedChimera(n,i)
+println("wted_chimera($n, $i)")
+gr = wted_chimera(n,i)
 f = KMPLapSolver(gr,tol=1e-1,verbose=true)
 x = f(b)
 
@@ -243,8 +243,8 @@ x = f(b)
 # Not all solvers work with them yet
 
 n = 2000
-gr1 = wtedChimera(n,1)
-gr2 = wtedChimera(n,2)
+gr1 = wted_chimera(n,1)
+gr2 = wted_chimera(n,2)
 gr = disjoin(gr1,gr2)
 
 b1 = rand(n); b1 = b1 .- mean(b1)
@@ -258,7 +258,7 @@ la = lap(gr)
 
 # Testing code inside Sampling Solver
 
-a = wtedChimera(100,1)
+a = wted_chimera(100,1)
 t = akpw(a)
 la = lap(a)
 lt = lap(t)
@@ -279,7 +279,7 @@ sp.verboseSS = true
 
 
 n = 100
-a = wtedChimera(n,1)
+a = wted_chimera(n,1)
 b = randn(n)
 b = b .- mean(b)
 la = lap(a)

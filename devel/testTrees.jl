@@ -13,7 +13,7 @@ told = Array(Float64,0)
 tp = Array(Float64,0)
 
 for i in 1:nruns
-    a = wtedChimera(n+i,1)
+    a = wted_chimera(n+i,1)
     f(t) = sum(compStretches(t,a))/nnz(a)
     
     try
@@ -64,7 +64,7 @@ for i in 1:nruns
     push!(stold,astold)
         
     catch err
-        println("bad on wtedChimera ", n, " ", i)
+        println("bad on wted_chimera ", n, " ", i)
         @show err
     end
 
@@ -108,7 +108,7 @@ told = Array(Float64,0)
 tp = Array(Float64,0)
 
 for i in 1:nruns
-    a = wtedChimera(n,i)
+    a = wted_chimera(n,i)
     f(t) = sum(compStretches(t,a))/nnz(a)
     
     try
@@ -150,7 +150,7 @@ for i in 1:nruns
     push!(stold,astold)
         
     catch err
-        println("bad on wtedChimera ", n, " ", i)
+        println("bad on wted_chimera ", n, " ", i)
         @show err
     end
 
@@ -201,7 +201,7 @@ told = Array(Float64,0)
 h = open(fn,"w")
 
 for i in 1:nruns
-    a = wtedChimera(n,i)
+    a = wted_chimera(n,i)
     f(t) = sum(compStretches(t,a))/nnz(a)
     
     try
@@ -278,7 +278,7 @@ for i in 1:nruns
     print(h, "\n")
         
     catch
-        println("bad on wtedChimera ", n, " ", i)
+        println("bad on wted_chimera ", n, " ", i)
     end
 
 

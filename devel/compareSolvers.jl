@@ -30,7 +30,7 @@ function compareSolvers(n, nruns; maxtime=Inf)
     ilist = Array(Int64,nruns)
 
     for i in 1:nruns
-        a = wtedChimera(n,i)
+        a = wted_chimera(n,i)
         la = lap(a)
         
         b = randn(n)

@@ -346,7 +346,7 @@ For example
 
 ```julia
 julia> rhss = []
-julia> a = wtedChimera(100)
+julia> a = wted_chimera(100)
 julia> sola = approxCholLap(a)
 julia> wrappedSolver = wrapCaptureRhs(sola,rhss)
 julia> b = randn(100)

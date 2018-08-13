@@ -876,7 +876,7 @@ function compGraph(graph, comp)
         end
     end
 
-    ind = findall(aind)
+    ind = findall(aind .> 0)
     aic = aic[ind]
     ajc = ajc[ind]
     av = av[ind]

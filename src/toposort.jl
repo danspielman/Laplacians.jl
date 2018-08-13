@@ -16,7 +16,7 @@ function toposort(mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
     popSorted::Array{Ti,1} = zeros(Ti,n);
     seen::Array{Bool,1} = falses(n);
     popCount::Ti = 0
-    s = DataStructures.Stack(Tuple{Ti,Ti})
+    s = DataStructures.Stack{Tuple{Ti,Ti}}()
     for i = 1:n
         if seen[i]
             continue

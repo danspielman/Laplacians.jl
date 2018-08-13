@@ -38,7 +38,7 @@ end
 """
     s = FastSampler(p)
 """
-function FastSampler(p::Array{Tv,1}; residual::Bool = false, rng::AbstractRNG=Base.Random.GLOBAL_RNG) where Tv
+function FastSampler(p::Array{Tv,1}; residual::Bool = false, rng::AbstractRNG=Random.GLOBAL_RNG) where Tv
 
     @assert(minimum(p) > 0, "The probability vector has a negative entry")
 

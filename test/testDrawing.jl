@@ -1,6 +1,6 @@
 if !haskey(ENV,"LAPLACIANS_NOPLOT")
     println("*** TESTING PLOTTING ***")
-    a = wtedChimera(102,2)
+    a = wted_chimera(102,2)
     spectralDrawing(a)
 else
     println("NOT TESTING PLOTTING")

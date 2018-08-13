@@ -715,7 +715,7 @@ end
     graph = semiwted_chimera(n::Integer; verbose=false, ver=Vcur)
 
 A Chimera graph with some weights.  The weights just appear when graphs are combined.
-For more interesting weights, use `wtedChimera`
+For more interesting weights, use `wted_chimera`
 """
 function semiwted_chimera(n::Integer; verbose=false, prefix="", ver=Vcur) 
     if ver == V06
@@ -727,11 +727,11 @@ end
 
 function semiwted_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
     if ver == V06
-        srand_ver(ver, 100*n+k)
+        seed_ver!(ver, 100*n+k)
         return sparse(semiwted_chimera_ijv_v6(n; verbose=verbose, prefix=prefix, ver=ver))
     end
         
-    srand_ver(ver, hash(n, hash(k)))
+    seed_ver!(ver, hash(n, hash(k)))
 
     return semiwted_chimera(n; verbose=verbose, prefix=prefix, ver=ver)
 
@@ -1019,9 +1019,9 @@ return it, but it does not yet.
 """
 function chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
     if ver == V06
-        srand_ver(ver, 100*n+k)
+        seed_ver!(ver, 100*n+k)
     else
-        srand_ver(ver, hash(n, hash(k)))
+        seed_ver!(ver, hash(n, hash(k)))
     end
 
     g = chimera(n; verbose=verbose, prefix=prefix, ver=ver)
@@ -1106,9 +1106,9 @@ return it, but it does not yet.
 """
 function wted_chimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
     if ver == V06
-        srand_ver(ver, 100*n+k)
+        seed_ver!(ver, 100*n+k)
     else
-        srand_ver(ver, hash(n, hash(k)))
+        seed_ver!(ver, hash(n, hash(k)))
     end
     g = wted_chimera(n; verbose=verbose, ver=ver)
     return g

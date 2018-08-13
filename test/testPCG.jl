@@ -1,4 +1,4 @@
-srand(1)
+Random.seed!(1)
 a = mapweight(grid2(20),x->1/(rand(1)[1]));
 la = lap(a)
 n = size(la)[1]
@@ -41,7 +41,7 @@ x = cg(la,bbig,maxits=200,maxtime=1,verbose=true);
 
 
 n = 100
-a = wtedChimera(n,3)
+a = wted_chimera(n,3)
 la = lap(a)
 
 f = cgSolver(la,verbose=false)

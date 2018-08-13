@@ -10,7 +10,7 @@ Laplacians.forceLap(a)
 Laplacians.forceLap(abs.(a))
 
 
-a = wtedChimera(100,101);
+a = wted_chimera(100,101);
 la = lap(a);
 la[1,1] += 1;
 f = Laplacians.sddmWrapLap(approxCholLap, la, verbose=true);

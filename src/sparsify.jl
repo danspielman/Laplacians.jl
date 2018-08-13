@@ -25,7 +25,7 @@ function sparsify(a; ep=0.3, matrixConcConst=4.0, JLfac=4.0)
 
   U = wtedEdgeVertexMat(a)
   m = size(U,1)
-  R = randn(m,k)
+  R = randn(Float64, m,k)
   UR = U'*R;
 
   V = zeros(n,k)
@@ -41,7 +41,7 @@ function sparsify(a; ep=0.3, matrixConcConst=4.0, JLfac=4.0)
       prs[h] = min(1,av[h]* (norm(V[i,:]-V[j,:])^2/k) * matrixConcConst *log(n)/ep^2)
   end
 
-  ind = rand(size(prs)) .< prs
+  ind = rand(Float64,size(prs)) .< prs
 
   as = sparse(ai[ind],aj[ind],av[ind]./prs[ind],n,n)
   as = as + as'

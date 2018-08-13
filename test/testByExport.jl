@@ -2,7 +2,7 @@
 # Create this by copying over the export commands from Laplacians.jl
 
 n = 101
-a = wtedChimera(n,1)
+a = wted_chimera(n,1)
 
 # export symPermuteCSC
 
@@ -144,7 +144,7 @@ a2 = ErdosRenyiClusterFix(100,4)
 
 # export chimera
 # export randWeight
-# export wtedChimera, semiWtedChimera
+# export wted_chimera, semiWtedChimera
 
 for i in 1:5
     semiWtedChimera(10000,i)
@@ -154,7 +154,7 @@ end
 # export readIJ, readIJV, writeIJV
 
 n = 101
-a = wtedChimera(n,1)
+a = wted_chimera(n,1)
 writeIJV("tmp.txt",a)
 a2 = readIJV("tmp.txt")
 @test sum(abs.(a-a2)) == 0
@@ -175,7 +175,7 @@ uniformWeight!(a2)
 b = edgeVertexMat(a2)
 @test sum(abs.(b'*b - lap(unweight(a2)))) == 0
 
-a = wtedChimera(102,2)
+a = wted_chimera(102,2)
 b = wtedEdgeVertexMat(a)
 @test sum(abs.(b'*b - lap(a))) < 1e-8
 
@@ -220,7 +220,7 @@ diagmat(a)
 
 # export shortestPaths, shortestPathTree, pathFromParents
 
-a = wtedChimera(102,1)
+a = wted_chimera(102,1)
 shortestPaths(a,1)
 shortestPathTree(a,1)
 
@@ -240,7 +240,7 @@ Laplacians.intHeapSort(nh)
 
 # export matToTreeDepth
 
-a = wtedChimera(101,1)
+a = wted_chimera(101,1)
 t = akpw(a)
 tr = matToTree(t)
 tr, d1 = matToTreeDepth(t);
@@ -264,13 +264,13 @@ t0 = complete_binary_tree(6); t0[1,2] = 0; t0[2,1] = 0; dropzeros!(t0);
   # export maxflow
 
 for i in 1:10
-    maxflow(wtedChimera(102,i),1,2)
-    maxflow(wtedChimera(102,i),1,2,justflow=false)
+    maxflow(wted_chimera(102,i),1,2)
+    maxflow(wted_chimera(102,i),1,2,justflow=false)
 end
 
   # export akpw, akpwU
 
-akpw(wtedChimera(10000,1),ver=2)
+akpw(wted_chimera(10000,1),ver=2)
 
   # export prn
   # export apr
@@ -319,7 +319,7 @@ f = Laplacians.augTreeFactor(a, akpw(a));
   # include("sparsify.jl")
   # export sparsify
 
-a = wtedChimera(1000,1)
+a = wted_chimera(1000,1)
 dave = nnz(a)/size(a,1)
 a = thicken(a,round(Int,200/dave))
 as = sparsify(a,ep=1,JLfac=4);

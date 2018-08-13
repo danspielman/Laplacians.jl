@@ -68,7 +68,7 @@ To solve a system of linear equations, one first passes the matrix defining the 
 
 ~~~julia
 julia> n = 1000;
-julia> a = wtedChimera(n);  # produces a graph, as a sparse adjacency matrix
+julia> a = wted_chimera(n);  # produces a graph, as a sparse adjacency matrix
 julia> b = randn(n); 
 julia> b = b - mean(b); # so there is a solution
 julia> f = cholLap(a)
@@ -168,7 +168,7 @@ We have written implementations of Conjugate Gradient (CG) and Preconditioned Co
 These routines use BLAS when possible, and slower routines when dealing with data types that BLAS cannot handle.  
 
 ~~~julia
-srand(1)
+seed!(1)
 n = 50
 M = randn(n,n); M = M * M';
 b = randn(n)
@@ -187,7 +187,7 @@ To create a function `f` that uses cg to solve systems in M, use [`cgSolver`](@r
 
 ~~~julia
 julia> n = 1000;
-julia> a = wtedChimera(n,1);
+julia> a = wted_chimera(n,1);
 julia> f = Laplacians.cgLapSolver(a,maxits=100);
 
 julia> b = randn(n);
@@ -211,7 +211,7 @@ CG BLAS stopped after: 253 iterations with relative error 7.860172210007891e-7.
 PCG also takes as input a preconditioner.  This should be a function.  Here is an example of how one might construct and use a diagonal preonditioner.  To motivate this, I will use a grid with highly varying weights on edges.
 
 ~~~julia
-srand(1)
+seed!(1)
 a = mapweight(grid2(200),x->1/(rand(1)[1]));
 la = lap(a)
 n = size(la)[1]

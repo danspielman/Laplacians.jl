@@ -47,7 +47,7 @@ function vary_tests(tests, dic, a, grName)
 
   testVMatlabLap(tests, dic, a, b, verbose=true, tol=1e-8, testName=grName)
   for i in 1:5
-    srand(i)
+    seed!(i)
     tn = string("wt",i," ",grName)
     aw = Laplacians.randWeightSub(a)
     testVMatlabLap(tests, dic, aw, b, verbose=true, tol=1e-8, testName=tn)
@@ -60,7 +60,7 @@ function vary_tests(tests, dic, a, grName)
     testName=string("thick ",grName))
 
   for i in 1:5
-      srand(i)
+      seed!(i)
       tn = string("wt",i," thick ",grName)
       aw = Laplacians.randWeightSub(at)
       testVMatlabLap(tests, dic, aw, b, verbose=true, tol=1e-8, testName=tn)
@@ -73,7 +73,7 @@ save(fn,"dic",dic)
 vary_tests(tests,dic,grid3(100), "grid3(100)")
 save(fn,"dic",dic)
 
-vary_tests(tests,dic,randRegular(1000000,3), "randRegular(1000000,3)")
+vary_tests(tests,dic,rand_regular(1000000,3), "rand_regular(1000000,3)")
 save(fn,"dic",dic)
 
 vary_tests(tests,dic,grownGraph(1000000,2), "grownGraph(1000000,2)")

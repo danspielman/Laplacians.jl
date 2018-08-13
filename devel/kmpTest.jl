@@ -225,7 +225,7 @@ function testAtSize(n, results; frac1=1/3, frac2 = 1/15)
 
     i = 1
     while i < 10^6
-        a = wtedChimera(n,i)
+        a = wted_chimera(n,i)
         x = testKMP(a, frac1 = frac1, frac2 = frac2)
         if maximum(x) > mxval
             mxi = i
@@ -327,8 +327,8 @@ function manyRunsW(n,numruns,pList)
     out = zeros(numruns, 1+length(pList))
     tot = zeros(1+length(pList))
     for it in 1:numruns
-        println("wtedChimera(", n, ", ", it, ")" )
-        a = wtedChimera(n,it)
+        println("wted_chimera(", n, ", ", it, ")" )
+        a = wted_chimera(n,it)
         b = randn(n)
         b = b - mean(b)
         
