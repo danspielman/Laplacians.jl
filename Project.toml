@@ -1,6 +1,7 @@
 name = "Laplacians"
 uuid = "fcc4d086-9b61-11e8-1f70-a9de5a76d094"
 authors = ["Dan Spielman <spielman@cs.yale.edu>"]
+version = "0.3.2"
 
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
