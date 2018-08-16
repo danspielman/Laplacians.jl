@@ -3,7 +3,6 @@ import Base.size
 import Base.eltype
 import LinearAlgebra.issymmetric
 
-import LinearAlgebra.A_mul_B!
 import LinearAlgebra.mul!
 
 
@@ -28,13 +27,6 @@ issymmetric(A::SqLinOp{Tv,Ti}) where {Tv,Ti} = A.issym
 
 function *(A::SqLinOp{Tv,Ti}, b) where {Tv,Ti}
     return A.multFn(b)
-end
-
-function A_mul_B!(Y, A::SqLinOp{Tv,Ti}, B) where {Tv,Ti} 
-    Y1 = A*B
-    for i in 1:A.n
-        Y[i] = Y1[i]
-    end
 end
 
 # put in for compat with Arpack in Julia v0.7
