@@ -16,9 +16,11 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 ## Current Development Version
 
-To get the current version of the master branch, run `Pkg.checkout("Laplacians")`
+To get the current version of the master branch, run `pkg> add Laplacians#master`
 
+# Version 1.0.0
 
+This version works with Julia version 1.0.0.
 
 # Verson 0.3.1
 
