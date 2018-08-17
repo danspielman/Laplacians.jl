@@ -35,6 +35,8 @@ module Laplacians
 
   using DelimitedFiles
 
+  using PyPlot
+
   include("IJV.jl")
 
   include("fastCSC.jl")
@@ -87,6 +89,9 @@ module Laplacians
   export chimera
   export rand_weight
   export wted_chimera, semiwted_chimera
+
+  include("latinSquares.jl")
+  export latin_square, latin_square_graph
 
   include("IO.jl")
   export readIJ, readIJV, writeIJV

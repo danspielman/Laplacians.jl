@@ -18,6 +18,8 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
 
+* Added `latin_square_graph` and `latin_square`.
+
 # Version 1.0.0
 
 This version works with Julia version 1.0.0.
