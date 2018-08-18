@@ -109,6 +109,12 @@ end
 
 @test abs(s - 8649.442267154831) < 1e-5
 
+latin_square_graph(5)
+S = latin_square(5)
+latin_square_graph(S)
+
+
+
 ;
 
 

@@ -562,31 +562,31 @@ end
 
 
 """
-    plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)
+    plot_graph(gr,x,y;color=[0,0,1],dots=true,setaxis=true,number=false)
 
 Plots graph gr with coordinates (x,y)
 """
-function plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)
+function plot_graph(gr,x,y;color=[0,0,1],dots=true,setaxis=true,number=false)
   (ai,aj,av) = findnz(triu(gr))
   arx = [x[ai]';x[aj]';NaN*ones(length(ai))']
   ary = [y[ai]';y[aj]';NaN*ones(length(ai))']
-  p = plot(arx[:],ary[:],color=color)
+  p = PyPlot.plot(arx[:],ary[:],color=color)
 
   if dots
-    plot(x,y,color=color,marker="o",linestyle="none")
+    PyPlot.plot(x,y,color=color,marker="o",linestyle="none")
   end #if
 
 
   if number
     for i in 1:length(x)
-      annotate(i, xy = [x[i]; y[i]])
+        PyPlot.annotate(i, xy = [x[i]; y[i]])
     end
   end
 
-  axis("off")
+  PyPlot.axis("off")
 
   if setaxis
-  ax = axes()
+  ax = PyPlot.axes()
 
   minx = minimum(x)
   maxx = maximum(x)
@@ -602,6 +602,51 @@ function plotGraph(gr,x,y,color=[0,0,1];dots=true,setaxis=true,number=false)
 end # plotGraph
 
 """
+    plot_graph(gr,x,y,z;color=[0,0,1],dots=true,setaxis=true,number=false)
+
+Plots graph gr with coordinates (x,y,z)
+"""
+function plot_graph(gr,x,y,z;color=[0,0,1],dots=true,setaxis=true,number=false)
+  (ai,aj,av) = findnz(triu(gr))
+  arx = [x[ai]';x[aj]';NaN*ones(length(ai))']
+  ary = [y[ai]';y[aj]';NaN*ones(length(ai))']
+  arz = [z[ai]';z[aj]';NaN*ones(length(ai))']
+  p = PyPlot.plot3D(arx[:],ary[:],arz[:],color=color)
+
+  if dots
+    PyPlot.plot3D(x,y,z,color=color,marker="o",linestyle="none")
+  end #if
+
+
+  if number
+    for i in 1:length(x)
+        PyPlot.annotate(i, xyz = [x[i]; y[i]; z[i]])
+    end
+  end
+
+  PyPlot.axis("off")
+
+  if setaxis
+  ax = PyPlot.axes()
+
+  minx = minimum(x)
+  maxx = maximum(x)
+  miny = minimum(y)
+  maxy = maximum(y)
+  minz = minimum(z)
+  maxz = maximum(z)
+  delx = maxx - minx
+  dely = maxy - miny
+  delz = maxz - minz
+  ax[:set_ylim]([miny - dely/20, maxy + dely/20])
+  ax[:set_xlim]([minx - delx/20, maxx + delx/20])
+  ax[:set_zlim]([minz - delz/20, maxz + delz/20])
+  end
+
+  return p
+end # plotGraph
+
+"""
     spectralDrawing(a)
 
 Computes spectral coordinates, and then uses plotGraph to draw
@@ -609,7 +654,7 @@ Computes spectral coordinates, and then uses plotGraph to draw
 function spectralDrawing(a)
 
     x, y = spectralCoords(a)
-    plotGraph(a,x,y)
+    plot_graph(a,x,y)
 
 end # spectralDrawing
 

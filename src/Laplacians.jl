@@ -113,7 +113,7 @@ module Laplacians
   export two_lift
   export join_graphs, join_graphs!, disjoin
 
-  export plotGraph
+  export plot_graph
 
   export shortIntGraph, floatGraph
 

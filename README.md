@@ -18,7 +18,11 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
 
+Changes:
+
 * Added `latin_square_graph` and `latin_square`.
+* Allow `plot_graph` to plot in 3D. 
+* Fixed performance bug due to lazy matrix transpose.
 
 # Version 1.0.0
 

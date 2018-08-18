@@ -150,5 +150,49 @@ function test_latin_square(S)
     b = b && length(unique(S)) == n
     return b
 end
-    
 
+"""
+    a = latin_square_graph(S::Matrix{Int})
+    a = latin_square_graph(n::Int)
+
+Construct the adjacency matrix of the latin square graph for the latin square S.
+If only n is provided, construct a latin square graph of dimension n.
+"""
+function latin_square_graph(S::Matrix{Int})
+
+    @assert test_latin_square(S)
+
+    n = size(S,1)
+
+    ijv = Laplacians.complete_graph_ijv(n)
+    ci = copy(ijv.i)
+    cj = copy(ijv.j)
+
+    lsgi = Int[]
+    lsgj = Int[]
+
+    # construct the column cliques
+    for i in 1:n
+        append!(lsgi, ci .+ n*(i-1))
+        append!(lsgj, cj .+ n*(i-1))
+    end
+
+    # construct the row cliques
+    for i in 1:n
+        append!(lsgi, n*ci .+ (i-n))
+        append!(lsgj, n*cj .+ (i-n))
+    end
+    
+    # construct the value cliques
+    nums = reshape([1:n^2;],n,n)
+
+    for i in 1:n
+        ind = nums[S .== i]
+        append!(lsgi, ind[ci])
+        append!(lsgj, ind[cj])
+    end
+
+    return sparse(lsgi, lsgj, 1.0, n^2, n^2)
+end
+
+latin_square_graph(n::Int) = latin_square_graph(latin_square(n))

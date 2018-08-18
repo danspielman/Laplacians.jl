@@ -28,3 +28,7 @@
 @deprecate twoLift(a, flip::AbstractArray{Bool,1}) two_lift(a, flip)
 @deprecate twoLift(a) two_lift(a)
 @deprecate twoLift(a, k::Integer) two_lift(a, k)
+
+@deprecate plotGraph(gr,x,y;color=[0,0,1],dots=true,setaxis=true,number=false) plot_graph(gr,x,y;color=color,dots=dots,setaxis=setaxis,number=number)
+@deprecate plotGraph(gr,x,y,z;color=[0,0,1],dots=true,setaxis=true,number=false) plot_graph(gr,x,y,z;color=color,dots=dots,setaxis=setaxis,number=number)
+
