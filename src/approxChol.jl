@@ -23,12 +23,12 @@ We then have the outline:
 * get_ll_col and compress_ll_col : used inside the elimination
 * approxChol : the main routine
 * LDLsolver, and its forward and backward solve the apply LDLinv
-* approxCholLap: the main solver, which calls approxCholLap1 on connected
+* approxchol_lap: the main solver, which calls approxchol_lap1 on connected
     components.
-    This then calls one of approxCholLapWdeg, approxCholLapGiven or approxCholLapGreedy,
+    This then calls one of approxchol_lapWdeg, approxchol_lapGiven or approxchol_lapGreedy,
     depending on the parameters.
 
-* approxCholLapChol - for producing a Cholesky factor instead of an LDLinv.
+* approxchol_lapChol - for producing a Cholesky factor instead of an LDLinv.
   might be useful if optimized.
 * data structures that are used for the adaptive low-degree version to
   choose the next vertex.
@@ -727,8 +727,8 @@ end
 
 
 """
-    solver = approxCholLap(a); x = solver(b);
-    solver = approxCholLap(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
+    solver = approxchol_lap(a); x = solver(b);
+    solver = approxchol_lap(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
 
 A heuristic by Daniel Spielman inspired by the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.  Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
 The `ApproxCholParams` let you choose one of three orderings to perform the elimination.
@@ -741,7 +741,7 @@ The `ApproxCholParams` let you choose one of three orderings to perform the elim
 
 For more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html
 """
-function approxCholLap(a::SparseMatrixCSC{Tv,Ti};
+function approxchol_lap(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
@@ -749,7 +749,7 @@ function approxCholLap(a::SparseMatrixCSC{Tv,Ti};
   pcgIts=Int[],
   params=ApproxCholParams()) where {Tv,Ti}
 
-    return Laplacians.lapWrapComponents(approxCholLap1, a,
+    return Laplacians.lapWrapComponents(approxchol_lap1, a,
     verbose=verbose,
     tol=tol,
     maxits=maxits,
@@ -760,7 +760,7 @@ function approxCholLap(a::SparseMatrixCSC{Tv,Ti};
 
 end
 
-function approxCholLapGreedy(a::SparseMatrixCSC;
+function approxchol_lapGreedy(a::SparseMatrixCSC;
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
@@ -796,7 +796,7 @@ function approxCholLapGreedy(a::SparseMatrixCSC;
 
 end
 
-function approxCholLapGiven(a::SparseMatrixCSC;
+function approxchol_lapGiven(a::SparseMatrixCSC;
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
@@ -832,7 +832,7 @@ function approxCholLapGiven(a::SparseMatrixCSC;
 
 end
 
-function approxCholLapWdeg(a::SparseMatrixCSC;
+function approxchol_lapWdeg(a::SparseMatrixCSC;
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
@@ -883,7 +883,7 @@ end
 
 
 
-function approxCholLap1(a::SparseMatrixCSC{Tv,Ti};
+function approxchol_lap1(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
   maxits=1000,
   maxtime=Inf,
@@ -900,7 +900,7 @@ function approxCholLap1(a::SparseMatrixCSC{Tv,Ti};
 
     if params.order == :deg
 
-      return approxCholLapGreedy(a,
+      return approxchol_lapGreedy(a,
         verbose=verbose,
         tol=tol,
         maxits=maxits,
@@ -911,7 +911,7 @@ function approxCholLap1(a::SparseMatrixCSC{Tv,Ti};
 
     elseif params.order == :wdeg
 
-      return approxCholLapWdeg(a,
+      return approxchol_lapWdeg(a,
         verbose=verbose,
         tol=tol,
         maxits=maxits,
@@ -921,7 +921,7 @@ function approxCholLap1(a::SparseMatrixCSC{Tv,Ti};
 
 
     else
-      return approxCholLapGiven(a,
+      return approxchol_lapGiven(a,
         verbose=verbose,
         tol=tol,
         maxits=maxits,
@@ -935,15 +935,15 @@ function approxCholLap1(a::SparseMatrixCSC{Tv,Ti};
 end
 
 """
-    solver = approxCholSddm(sddm); x = solver(b);
-    solver = approxCholSddm(sddm; tol=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
+    solver = approxchol_sddm(sddm); x = solver(b);
+    solver = approxchol_sddm(sddm; tol=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
 
-Solves sddm systems by wrapping approxCholLap.
+Solves sddm systems by wrapping approxchol_lap.
 Not yet optimized directly for sddm.
 
 For more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html 
 """
-approxCholSddm = sddmWrapLap(approxCholLap)
+approxchol_sddm = sddmWrapLap(approxchol_lap)
 
 
 
@@ -1118,7 +1118,7 @@ end
 This variation of approxChol creates a cholesky factor to do the elimination.
 It has not yet been optimized, and does not yet make the cholesky factor lower triangular
 """
-function approxCholLapChol(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[]) where {Tv,Ti}
+function approxchol_lapChol(a::SparseMatrixCSC{Tv,Ti}; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[]) where {Tv,Ti}
 
     tol_ =tol
     maxits_ =maxits

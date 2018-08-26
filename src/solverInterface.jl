@@ -71,12 +71,12 @@ function nullSolver(a;params...)
 end
 
 """
-    solveSDDM = cholSDDM(sddm::AbstractMatrix; tol, maxits, maxtime, verbose, pcgIts=Int[])
+    solveSDDM = chol_sddm(sddm::AbstractMatrix; tol, maxits, maxtime, verbose, pcgIts=Int[])
 
 This functions wraps cholfact so that it satsfies our interface.
 It ignores all the keyword arguments.
 """
-cholSDDM = wrapInterface(X->cholesky(X))
+chol_sddm = wrapInterface(X->cholesky(X))
 
 
 """
@@ -240,7 +240,7 @@ function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf,
                 subSolver = nullSolver
 
             elseif (length(ind) < 50)
-                subSolver = lapWrapConnected(cholSDDM,asub)
+                subSolver = lapWrapConnected(chol_sddm,asub)
 
             else
 
@@ -293,11 +293,11 @@ end
 
 
 """
-    solver = cholLap(A::AbstractArray)
+    solver = chol_lap(A::AbstractArray)
 
 Uses Cholesky Factorization to solve systems in Laplacians.
 """
-cholLap = lapWrapSDDM(cholSDDM)
+chol_lap = lapWrapSDDM(chol_sddm)
 
 
 
@@ -347,7 +347,7 @@ For example
 ```julia
 julia> rhss = []
 julia> a = wted_chimera(100)
-julia> sola = approxCholLap(a)
+julia> sola = approxchol_lap(a)
 julia> wrappedSolver = wrapCaptureRhs(sola,rhss)
 julia> b = randn(100)
 julia> x = wrappedSolver(b,verbose=true)
@@ -384,7 +384,7 @@ For example
 ```julia
 julia> mats = []
 julia> rhss = []
-julia> solver = wrapCapture(approxCholLap, mats, rhss)
+julia> solver = wrapCapture(approxchol_lap, mats, rhss)
 julia> a = chimera(10)
 julia> f = solver(a);
 julia> size(mats[1])

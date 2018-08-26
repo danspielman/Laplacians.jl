@@ -9,7 +9,7 @@ of the actual bounds.
 """
 function johnlind(a::SparseMatrixCSC{Tv,Ti};
  				eps::Tv = 0.5,
- 				solver=approxCholLap,
+ 				solver=approxchol_lap,
  				retXhat::Bool = false) where {Tv,Ti}
 
 	n = a.n

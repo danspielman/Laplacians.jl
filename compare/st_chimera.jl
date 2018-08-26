@@ -22,10 +22,10 @@ include("$(lapdir)/compare/compare_solvers_TL.jl")
 
 
 ac_deg = function(a; verbose=false, args...)
-    approxCholLap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
+    approxchol_lap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
 end
 ac_wdeg = function(a; verbose=false, args...)
-    approxCholLap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
+    approxchol_lap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
 end
 
 
@@ -34,7 +34,7 @@ test_acw = SolverTest(ac_wdeg, "ac_fast")
 test_amg = SolverTest(AMGLapSolver, "pyamg")
     
 # removed chol because killing it can cause a crash
-#test3 = SolverTest(cholLap, "chol")
+#test3 = SolverTest(chol_lap, "chol")
 #test4 = SolverTest(cgLapSolver, "cg")
 tests = [test_ac test_acw test_amg]
 

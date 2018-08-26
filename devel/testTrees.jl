@@ -14,7 +14,7 @@ tp = Array(Float64,0)
 
 for i in 1:nruns
     a = wted_chimera(n+i,1)
-    f(t) = sum(compStretches(t,a))/nnz(a)
+    f(t) = sum(comp_stretches(t,a))/nnz(a)
     
     try
     
@@ -109,7 +109,7 @@ tp = Array(Float64,0)
 
 for i in 1:nruns
     a = wted_chimera(n,i)
-    f(t) = sum(compStretches(t,a))/nnz(a)
+    f(t) = sum(comp_stretches(t,a))/nnz(a)
     
     try
     
@@ -202,7 +202,7 @@ h = open(fn,"w")
 
 for i in 1:nruns
     a = wted_chimera(n,i)
-    f(t) = sum(compStretches(t,a))/nnz(a)
+    f(t) = sum(comp_stretches(t,a))/nnz(a)
     
     try
     

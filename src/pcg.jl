@@ -129,7 +129,7 @@ Specialized for the case when the preconditioner the Laplacian matrix of `B`.
 It solves the preconditioner by Cholesky Factorization.
 """
 function pcgLapSolver(A::AbstractMatrix, B::AbstractMatrix; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[])
-    fact = cholLap(B)
+    fact = chol_lap(B)
 
     tol_=tol
     maxits_=maxits

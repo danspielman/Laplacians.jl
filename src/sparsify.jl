@@ -18,7 +18,7 @@ function sparsify(a; ep=0.3, matrixConcConst=4.0, JLfac=4.0)
     @warn "Calling sparsify with ep > 1 can produce a disconnected graph."
   end
 
-  f = approxCholLap(a,tol=1e-2);
+  f = approxchol_lap(a,tol=1e-2);
 
   n = size(a,1)
   k = round(Int, JLfac*log(n)) # number of dims for JL

@@ -56,19 +56,19 @@ f0 = Laplacians.lapWrapComponents(Laplacians.cgLapSolver, a)
 @test norm(la*f0(b,tol=1e-4,maxits=200,verbose=true)-b)/norm(b) < 1e-2
 
 
-f = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(cholSDDM),a)
+f = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(chol_sddm),a)
 @test norm(la*f(b)-b)/norm(b) < 1e-8
 
-solver = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(Laplacians.cholSDDM))
+solver = Laplacians.lapWrapComponents(Laplacians.lapWrapConnected(Laplacians.chol_sddm))
 f = solver(a,verbose = true)
 norm(la*f(b,tol=1e-3)-b)/norm(b)
 
 its2 = [0]
 f = Laplacians.lapWrapSDDM(Laplacians.cgSolver,a,tol=1e-2,pcgIts=its)
 @test norm(la*f(b,verbose=true,pcgIts = its2, tol=1e-3)-b) / norm(b) < 1e-2
-f = Laplacians.lapWrapSDDM(Laplacians.cholSDDM,a)
+f = Laplacians.lapWrapSDDM(Laplacians.chol_sddm,a)
 @test norm(la*f(b)-b) / norm(b) < 1e-2
-f = Laplacians.cholLap(a)
+f = Laplacians.chol_lap(a)
 @test norm(la*f(b)-b) / norm(b) < 1e-2
 fs = Laplacians.lapWrapSDDM(cgSolver)
 f = fs(a, tol=1e-2, verbose=true)
@@ -79,7 +79,7 @@ x = f(b, tol=1e-6);
 
 mats = []
 rhss = []
-solver = Laplacians.wrapCapture(approxCholLap, mats, rhss)
+solver = Laplacians.wrapCapture(approxchol_lap, mats, rhss)
 a = chimera(10)
 as = shortIntGraph(a)
 f = solver(a);
@@ -89,7 +89,7 @@ b = randn(10)
 x = f(b);
 xs = fs(b);
 
-solver = Laplacians.approxCholLapChol(a,verbose=true)
+solver = Laplacians.approxchol_lapChol(a,verbose=true)
 x = solver(b);
 
 # testing approxChol internals
@@ -189,13 +189,13 @@ b = b .- mean(b)
 la = lap(a)
 
 ee1 = function(a; verbose=false, args...)
-    approxCholLap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
+    approxchol_lap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
 end
 ee2 = function(a; verbose=false, args...)
-    approxCholLap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
+    approxchol_lap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
 end
 ee3 = function(a; verbose=false, args...)
-    approxCholLap(a; params=ApproxCholParams(:given), verbose=verbose, args...)
+    approxchol_lap(a; params=ApproxCholParams(:given), verbose=verbose, args...)
 end
 for sol in [augTreeLap, KMPLapSolver, cgLapSolver, ee1, ee2, ee3]
     fx1 = sol(a, tol=1e-6, maxtime=5);

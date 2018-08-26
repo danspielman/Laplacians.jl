@@ -1395,7 +1395,7 @@ So, to find the total stretch, we should sum them all and then divide by 2.</p>
 <div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span class="n">st</span> <span class="o">=</span> <span class="n">compStretches</span><span class="p">(</span><span class="n">mst</span><span class="p">,</span><span class="n">a</span><span class="p">)</span>
+<div class=" highlight hl-julia"><pre><span class="n">st</span> <span class="o">=</span> <span class="n">comp_stretches</span><span class="p">(</span><span class="n">mst</span><span class="p">,</span><span class="n">a</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -1528,7 +1528,7 @@ So, to find the total stretch, we should sum them all and then divide by 2.</p>
 <span class="p">@</span><span class="n">time</span> <span class="n">a</span> <span class="o">=</span> <span class="n">uniformWeight</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 <span class="p">@</span><span class="n">time</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">a</span><span class="o">&#39;</span><span class="p">;</span>
 <span class="p">@</span><span class="n">time</span> <span class="n">mst</span> <span class="o">=</span> <span class="n">kruskal</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-<span class="p">@</span><span class="n">time</span> <span class="n">st</span> <span class="o">=</span> <span class="n">compStretches</span><span class="p">(</span><span class="n">mst</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
+<span class="p">@</span><span class="n">time</span> <span class="n">st</span> <span class="o">=</span> <span class="n">comp_stretches</span><span class="p">(</span><span class="n">mst</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
 </pre></div>
 
 </div>
@@ -1863,7 +1863,7 @@ It should never be too bad.  It wants a positive definite system.</p>
     <div class="input_area">
 <div class=" highlight hl-julia"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">grid2</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">t</span> <span class="o">=</span> <span class="n">randishKruskal</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-<span class="n">st</span> <span class="o">=</span> <span class="n">compStretches</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">comp_stretches</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
 <span class="n">sum</span><span class="p">(</span><span class="n">st</span><span class="p">)</span><span class="o">/</span><span class="n">nnz</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 </pre></div>
 
@@ -1894,7 +1894,7 @@ It should never be too bad.  It wants a positive definite system.</p>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-julia"><pre><span class="n">t</span> <span class="o">=</span> <span class="n">randishPrim</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-<span class="n">st</span> <span class="o">=</span> <span class="n">compStretches</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">comp_stretches</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
 <span class="n">sum</span><span class="p">(</span><span class="n">st</span><span class="p">)</span><span class="o">/</span><span class="n">nnz</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 </pre></div>
 

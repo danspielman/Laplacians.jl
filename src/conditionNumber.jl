@@ -14,8 +14,8 @@ It is randomized, so you might want to run it again if you don't trust the answe
 function support(a1,a2; tol=1e-5)
     la1 = lap(a1)
     la2 = lap(a2)
-    f1 = approxCholLap(a1,tol=tol)
-    f2 = approxCholLap(a2,tol=tol)
+    f1 = approxchol_lap(a1,tol=tol)
+    f2 = approxchol_lap(a2,tol=tol)
     op12 = SqLinOp(false,1.0,size(a1,1),b->la2*f1(b))
     op21 = SqLinOp(false,1.0,size(a2,1),b->la1*f2(b))
 

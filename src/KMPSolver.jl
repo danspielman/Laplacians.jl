@@ -259,7 +259,7 @@ function KMPLapSolver1(a; verbose=false,
             println("The graph is small.  Solve directly")
         end
         
-        return cholLap(a)
+        return chol_lap(a)
     end
 
 
@@ -268,7 +268,7 @@ function KMPLapSolver1(a; verbose=false,
             println("The graph is a tree.  Solve directly")
         end
         
-        return cholLap(a)
+        return chol_lap(a)
     end
 
 
@@ -277,7 +277,7 @@ function KMPLapSolver1(a; verbose=false,
     else
         tree = akpw(a)
         if verbose
-            println("akpw stretch : ", sum(compStretches(tree,a))/nnz(a))
+            println("akpw stretch : ", sum(comp_stretches(tree,a))/nnz(a))
         end
     end
 
@@ -340,7 +340,7 @@ function KMPLapPrecon(a, t, params; verbose=false)
 
     rest = a-t;
 
-    st = compStretches(t,rest);
+    st = comp_stretches(t,rest);
     aveStretch = sum(st)/nnz(rest)
 
     if params.treeScale > 0
@@ -390,7 +390,7 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Real, level::Int, para
     # if is nothing in ijvs
     if m == 0
         la = lap(tree)
-        return cholLap(a)
+        return chol_lap(a)
     end
 
 
@@ -403,7 +403,7 @@ function KMPLapPreconSub(tree, ijvs::IJVS, targetStretch::Real, level::Int, para
 
         rest = sparse(ijvs1.i,ijvs1.j,ijvs1.v,n,n)
 
-        return cholLap(rest + rest' + tree)
+        return chol_lap(rest + rest' + tree)
         
     else
 

@@ -21,17 +21,17 @@ include("$(lapdir)/compare/compare_solvers_TL.jl")
 
 
 ac_deg = function(a; verbose=false, args...)
-    approxCholLap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
+    approxchol_lap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
 end
 ac_wdeg = function(a; verbose=false, args...)
-    approxCholLap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
+    approxchol_lap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
 end
 
 
 test_ac = SolverTest(ac_deg, "ac")
 test_acw = SolverTest(ac_wdeg, "ac_fast")
 test_amg = SolverTest(AMGLapSolver, "pyamg")
-test_chol = SolverTest(cholLap, "chol")
+test_chol = SolverTest(chol_lap, "chol")
     
 tests = [test_ac test_acw test_amg test_chol]
 

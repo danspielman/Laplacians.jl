@@ -119,8 +119,8 @@ module Laplacians
 
   export lap
   export adj
-  export spectralCoords
-  export spectralDrawing
+  export spectral_coords
+  export spectral_drawing
 
   export diagmat
 
@@ -141,7 +141,7 @@ module Laplacians
   export matToTreeDepth
   export tarjanStretch
   export compDepth
-  export compStretches
+  export comp_stretches
   export dfsOrder
 
   include("pcg.jl")
@@ -179,7 +179,7 @@ module Laplacians
   export blockSample
 
   include("solverInterface.jl")
-  export cholSDDM, cholLap, lapWrapSDDM
+  export chol_sddm, chol_lap, lapWrapSDDM
 
 
   include("augTreeSolver.jl")
@@ -194,7 +194,7 @@ module Laplacians
 
   include("approxCholTypes.jl")
   include("approxChol.jl")
-  export approxCholLap, ApproxCholParams, approxCholSddm
+  export approxchol_lap, ApproxCholParams, approxchol_sddm
 
   include("complexSolvers.jl")
   export SDDMSolvers

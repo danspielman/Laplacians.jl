@@ -94,12 +94,12 @@ To see if Laplacians is working, try typing
 
 ~~~julia
 a = chimera(100,6)
-spectralDrawing(a)
+spectral_drawing(a)
 ~~~
 
 or
 
 ~~~julia
 a = generalizedNecklace(grid2(6),grid2(3),2)
-spectralDrawing(a)
+spectral_drawing(a)
 ~~~

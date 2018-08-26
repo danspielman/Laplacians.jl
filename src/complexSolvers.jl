@@ -27,7 +27,7 @@ include("powerIteration.jl")
 export powerIteration
 
 """A list containing SDDM linear system solvers. They take in a SDDM matrix plus tol, maxits and maxtime parameters."""
-SDDMSolvers = [augTreeSddm, KMPSDDMSolver, approxCholSddm]
+SDDMSolvers = [augTreeSddm, KMPSDDMSolver, approxchol_sddm]
 
 """A list containing Laplacian linear system solvers. They take in an adjacency matrix plus tol, maxits and maxtime parameters."""
-LapSolvers = [approxCholLap, augTreeLap, KMPLapSolver, cgLapSolver]
+LapSolvers = [approxchol_lap, augTreeLap, KMPLapSolver, cgLapSolver]

@@ -204,8 +204,8 @@ twoLift(a,3)
 
   # export lap
   # export adj
-  # export spectralCoords
-  # export spectralDrawing
+  # export spectral_coords
+  # export spectral_drawing
 
   # export toUnitVector
 
@@ -248,7 +248,7 @@ d2 = Laplacians.treeDepthDFS(t)
 
   # export tarjanStretch
   # export compDepth
-  # export compStretches
+  # export comp_stretches
   # export dfsOrder
 
 Laplacians.bfsOrder(t,1)
@@ -302,7 +302,7 @@ blockSample(r)
 
   # export SolverTest, speedTestLapSolvers
 
-solvers = [SolverTest(approxCholLap,"ac") SolverTest(augTreeLap,"aug")]
+solvers = [SolverTest(approxchol_lap,"ac") SolverTest(augTreeLap,"aug")]
 
 dic = Dict()
 n = 1000

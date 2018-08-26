@@ -40,7 +40,7 @@ This is the old alg.  We now recommend using augmentTreeOpt.
 """
 function augmentTree(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti}, k::Ti) where {Tv,Ti}
 
-    st = compStretches(tree, A)
+    st = comp_stretches(tree, A)
 
     # just to be safe, remove the tree from this
     #=
@@ -102,7 +102,7 @@ function augmentTreeOpt(tree::SparseMatrixCSC{Tv,Ti}, A::SparseMatrixCSC{Tv,Ti};
     n = A.n
     m = length(ai)
 
-    st = compStretches(tree, Aminus)
+    st = comp_stretches(tree, Aminus)
     _,_,sv = findnz(triu(st))
 
     
@@ -270,7 +270,7 @@ function augTreeLapPrecon(a::SparseMatrixCSC{Tv,Ti}; params=AugTreeParams()) whe
     F = (h -> h)
 
     try
-        F = cholLap(augtree)
+        F = chol_lap(augtree)
     catch
         println("cholfact failed in augTreeLapPrecon.  Going to backup routine")
         F = augTreeFactor(augtree, tree)
@@ -362,7 +362,7 @@ function augTreeFactor(a, tree; verbose=false,
     a1 = rest + subtree
     la1 = lap(a1)
 
-    fsub = cholLap(a1)
+    fsub = chol_lap(a1)
 
 
     f1 = function(b::Array{Float64,1})

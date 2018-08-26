@@ -5,13 +5,13 @@
 The main purpose of this package is to experiment with the implementation of algorithms for solving systems of linear equations in Laplacian and symmetric, diagonally dominant, M-matrices (SDDM).
 
 At present, the fastest solver in this package for Laplacians is
-[`approxCholLap`](@ref).
-For SDDM systems, one should use [`approxCholSddm`](@ref).  Here is a quick demo.  Read more for other solvers and other options you can pass to the solvers.
+[`approxchol_lap`](@ref).
+For SDDM systems, one should use [`approxchol_sddm`](@ref).  Here is a quick demo.  Read more for other solvers and other options you can pass to the solvers.
 
 ~~~julia
 julia> a = grid3(50); # an adjacency matrix
 julia> la = lap(a); # it's Laplacian
-julia> sol = approxCholLap(a); # a solver for la
+julia> sol = approxchol_lap(a); # a solver for la
 julia> b = randn(size(la,1)); b = b - mean(b); # a right-hand-side
 julia> x = sol(b); # the solution
 julia> norm(la*x-b) / norm(b)
@@ -24,7 +24,7 @@ PCG stopped after: 0.022 seconds and 3 iterations with relative error 0.07929402
 
 julia> sddm = copy(la); # doing it with a SDDM matrix
 julia> sddm[1,1] += 1;
-julia> sol = approxCholSddm(sddm, verbose=true); # solver, with output
+julia> sol = approxchol_sddm(sddm, verbose=true); # solver, with output
 Using greedy degree ordering. Factorization time: 0.7143130302429199
 Ratio of operator edges to original edges: 2.1120548223350255
 ratio of max to min diagonal of laplacian : 6.0
@@ -71,7 +71,7 @@ julia> n = 1000;
 julia> a = wted_chimera(n);  # produces a graph, as a sparse adjacency matrix
 julia> b = randn(n); 
 julia> b = b - mean(b); # so there is a solution
-julia> f = cholLap(a)
+julia> f = chol_lap(a)
 (::#79) (generic function with 1 method)
 julia> x = f(b);
 julia> la = lap(a);  # construct the Laplacian of a
@@ -148,13 +148,13 @@ norm(sddm*x-b)
  	1.0598778281116327e-14
 ~~~
 
-As `cholfact` does not satisfy our interface, we wrap it in a routine [`cholSDDM`](@ref) that does.
+As `cholfact` does not satisfy our interface, we wrap it in a routine [`chol_sddm`](@ref) that does.
 
-To solve systems in Laplacian matrices, use [`cholLap`](@ref).  Recall that this routine should be passed the adjacency matrix.
+To solve systems in Laplacian matrices, use [`chol_lap`](@ref).  Recall that this routine should be passed the adjacency matrix.
 
 
 ~~~julia
-f = cholLap(a)
+f = chol_lap(a)
 b = randn(n); 
 b = b - mean(b);
 norm(la*f(b) - b)
@@ -303,7 +303,7 @@ These first two follow that paper reasonably closely.
 
 The following is a modification of the algorithm that eliminates edges one at a time.  The code is by Daniel Spielman.  The algorithm has not yet been analyzed.  It is presently the fastest in this package.
 
-* [`approxCholLap`](@ref)
+* [`approxchol_lap`](@ref)
 
 ## Algebraic Multigrid
 

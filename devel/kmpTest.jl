@@ -144,7 +144,7 @@ function testSampler(a; t=akpw(a), frac1=1/5)
 
     rest = a-t;
 
-    st = compStretches(t,rest);
+    st = comp_stretches(t,rest);
     aveStretch = sum(st)/nnz(rest)
     @show aveStretch
     
@@ -180,7 +180,7 @@ end
 
 
 function testKMP(a; t=akpw(a), frac1=1/5, frac2=1/20)
-    st = compStretches(t,a);
+    st = comp_stretches(t,a);
     aveStretch = sum(st)/nnz(a)
     @show aveStretch
     
@@ -189,7 +189,7 @@ function testKMP(a; t=akpw(a), frac1=1/5, frac2=1/20)
     heavy = rest+fac*t;
     n = size(a,1);
     
-    strest = compStretches(t,rest)
+    strest = comp_stretches(t,rest)
     probs = triu(strest);
     probs = probs * (n*frac1)/ sum(probs);
     
@@ -200,7 +200,7 @@ function testKMP(a; t=akpw(a), frac1=1/5, frac2=1/20)
     samp1 = sparse(ai,aj,av.*select./pv,n,n)
     samp1 = samp1 + samp1';
     
-    st1 = compStretches(t*fac, samp1);
+    st1 = comp_stretches(t*fac, samp1);
     (s1i,s1j,s1v) = findnz(triu(samp1))
     
     nits = 20
@@ -253,7 +253,7 @@ function makeHeavy(a; t=akpw(a),  params::KMPparams=defaultKMPparams)
 
     rest = aord-tord;
 
-    st = compStretches(tord,rest);
+    st = comp_stretches(tord,rest);
     aveStretch = sum(st)/nnz(rest)
 
     targetStretch = 1/(params.treeScale*log(n)/log(2))

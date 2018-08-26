@@ -647,29 +647,29 @@ function plot_graph(gr,x,y,z;color=[0,0,1],dots=true,setaxis=true,number=false)
 end # plotGraph
 
 """
-    spectralDrawing(a)
+    spectral_drawing(a)
 
 Computes spectral coordinates, and then uses plotGraph to draw
 """
-function spectralDrawing(a)
+function spectral_drawing(a)
 
-    x, y = spectralCoords(a)
+    x, y = spectral_coords(a)
     plot_graph(a,x,y)
 
-end # spectralDrawing
+end # spectral_drawing
 
 """
-    spectralCoords(a)
+    spectral_coords(a)
 
 Computes the spectral coordinates of a graph
 """
-function spectralCoords(a)
+function spectral_coords(a)
 
     E = eigs(lap(a), nev = 3, which=:SR)
     V = E[2]
     return V[:,2], V[:,3]
 
-end # spectralCoords
+end # spectral_coords
 
 
 """

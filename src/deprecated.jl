@@ -32,3 +32,11 @@
 @deprecate plotGraph(gr,x,y;color=[0,0,1],dots=true,setaxis=true,number=false) plot_graph(gr,x,y;color=color,dots=dots,setaxis=setaxis,number=number)
 @deprecate plotGraph(gr,x,y,z;color=[0,0,1],dots=true,setaxis=true,number=false) plot_graph(gr,x,y,z;color=color,dots=dots,setaxis=setaxis,number=number)
 
+@deprecate approxCholLap(a; args...) approxchol_lap(a; args...) 
+@deprecate approxCholSDDM(a; args...) approxchol_sddm(a; args...) 
+@deprecate cholLap(a; args...) chol_lap(a; args...)
+@deprecate cholSDDM(a; args...) chol_sddm(a; args...)
+
+@deprecate spectralDrawing(a) spectral_drawing(a)
+@deprecate spectralCoords(a) spectral_coords(a)
+@deprecate compStretches(tree, mat) comp_stretches(tree, mat)

@@ -378,14 +378,14 @@ end # TarjanStretchSub
 Returns the answer as a sparse matrix with the same nonzero structure as `mat`.
 Assumes that `mat` is symmetric.
 `tree` should be the adjacency matrix of a spanning tree."""
-function compStretches(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
+function comp_stretches(tree::SparseMatrixCSC{Tv,Ti}, mat::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
 
     t, depth = matToTreeDepth(tree)
 
     stretches = tarjanStretch(t,mat,depth)
     return stretches
     
-end # compStretches
+end # comp_stretches
 
 
 """Compute the vector of depths in a tree that is in DFS order,

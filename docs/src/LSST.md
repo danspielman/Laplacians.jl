@@ -2,7 +2,7 @@
 
 We have implemented a variant of the algorithm of Alon, Karp, Peleg and West for computing low stretch spanning trees.  It is called `akpw`.  For unweighted graphs we provide a faster variant called `akpwU`.  If you require faster algorithms, with possibly higher average stretch, you can try the heuristics `randishPrim` or `randishKruskal`.
 
-You can compute the stretch of a graph with respect to a spanning tree with the routine `compStretches`.  It returns a sparse matrix with one entry for each edge in the graph giving its stretch.  For example:
+You can compute the stretch of a graph with respect to a spanning tree with the routine `comp_stretches`.  It returns a sparse matrix with one entry for each edge in the graph giving its stretch.  For example:
 
 ~~~julia
 julia> graph = grid2(4)
@@ -11,7 +11,7 @@ julia> graph = grid2(4)
 julia> tree = akpwU(graph)
 16x16 sparse matrix with 30 Float64 entries:
 
-julia> st = compStretches(tree,graph)
+julia> st = comp_stretches(tree,graph)
 16x16 sparse matrix with 48 Float64 entries:
 	[2 ,  1]  =  1.0
 	[5 ,  1]  =  1.0
@@ -50,19 +50,19 @@ julia> graph = chimera(1000000,1);
 julia> @time tree = akpw(graph);
   5.700285 seconds (16.10 M allocations: 1.263 GB, 11.16% gc time)
 
-julia> aveStretch = sum(compStretches(tree,graph))/nnz(graph)
+julia> aveStretch = sum(comp_stretches(tree,graph))/nnz(graph)
 8.793236275779616
 
 julia> @time tree = randishPrim(graph);
   3.736225 seconds (3.21 M allocations: 566.887 MB, 6.40% gc time)
 
-julia> aveStretch = sum(compStretches(tree,graph))/nnz(graph)
+julia> aveStretch = sum(comp_stretches(tree,graph))/nnz(graph)
 10.800094649795756
 
 julia> @time tree = randishKruskal(graph);
   2.515443 seconds (3.21 M allocations: 423.529 MB, 4.35% gc time)
 
-julia> aveStretch = sum(compStretches(tree,graph))/nnz(graph)
+julia> aveStretch = sum(comp_stretches(tree,graph))/nnz(graph)
 37.819948689847564
 
 ~~~

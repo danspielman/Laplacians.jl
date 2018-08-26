@@ -23,12 +23,12 @@ For some examples of some of the things you can do with Laplacians, look at
 *  [An example of sparsification](http://github.com/danspielman/Laplacians.jl/blob/master/notebooks/Sparsification Demo.ipynb)
 *  And, try the chimera and wtedChimera graph generators.  They are designed to generate a wide variety of graphs so as to exercise code.
 
-If you want to solve Laplacian equations, we recommend `approxCholLap`.
+If you want to solve Laplacian equations, we recommend `approxchol_lap`.
 
 The algorithms provide by Laplacians.jl include:
 
 * `akpw`, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.
-* `approxCholLap`: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.   For SDDM systems, use `approxCholSddm`.
+* `approxchol_lap`: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.   For SDDM systems, use `approxchol_sddm`.
 * `sparsify`, an implementation of sparsification by effective resistance sampling, following Spielman and Srivastava.
 * `KMPLapSolver` and `KMPSDDSolver`: linear equation solvers based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
 * `samplingSDDSolver` and `samplingLapSolver`, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
@@ -72,11 +72,11 @@ This is the first version that is compatible with Julia 0.7.  Other changes:
 
 ## Version 0.2.2, December 28, 2017
 
-Fixed two bugs: one in shortestPaths, and one that prevented passing some parameters to approxCholSddm.  Improved the documentation for solving linear equations.
+Fixed two bugs: one in shortestPaths, and one that prevented passing some parameters to approxchol_sddm.  Improved the documentation for solving linear equations.
 
 ## Version 0.2.1, September 18, 2017
 
-Fixed a bug in `approxCholSddm` that caused it to be slow.
+Fixed a bug in `approxchol_sddm` that caused it to be slow.
 
 ## Version 0.2.0, July 17, 2017
 
@@ -85,7 +85,7 @@ Julia 0.5.X.
 
 Changes:
 
-* Added `approxCholSddm`, a wrapper of `approxCholLap` that solves
+* Added `approxchol_sddm`, a wrapper of `approxchol_lap` that solves
   SDDM systems.
 
 ## Version 0.1.4, June 6, 2017
@@ -102,8 +102,8 @@ Changes:
 
 Major Changes:
 
-* Changed the name of the approximate Cholesky solver from `edgeElimLap` to `approxCholLap`.  Made improvements in this solver.
-* Improved PCG so that it can now detect stagnation.  Made options to do this even better when using it with a good preconditioner, like `approxCholLap`.
+* Changed the name of the approximate Cholesky solver from `edgeElimLap` to `approxchol_lap`.  Made improvements in this solver.
+* Improved PCG so that it can now detect stagnation.  Made options to do this even better when using it with a good preconditioner, like `approxchol_lap`.
 * Added in code for comparing the running times of solvers.  The difficulty here is that we need to stop them if they run too long.  Added code to do this with threads inside Julia, and with `gtimeout` when calling Matlab to use icc, CMG, or LAMG.
 
 ## Version 0.1.2, April 2, 2017

@@ -21,10 +21,10 @@ include("$(lapdir)/compare/compare_solvers_TL.jl")
 
 
 ac_deg = function(a; verbose=false, args...)
-    approxCholLap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
+    approxchol_lap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
 end
 ac_wdeg = function(a; verbose=false, args...)
-    approxCholLap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
+    approxchol_lap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
 end
 
 
