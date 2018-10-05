@@ -1,5 +1,8 @@
 # Installation
 
+**Caveat: These instructions are old (circa Julia 0.5)  The same ideas apply, but they need updating.  You can probably find a better reference now.** 
+
+
 Before you can use Laplacians, you need Julia.
 So, we'll begin with instructions for installing Julia.  I (Dan S.) found that it worked best if I installed Python first.  So, I'll suggest that you do the same.
 

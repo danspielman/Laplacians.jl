@@ -39,6 +39,16 @@ The algorithms provide by Laplacians.jl include:
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
 
+# Version 1.0.1
+
+Changes:
+
+- Added `latin_square_graph` and `latin_square`.
+- Allow `plot_graph` to plot in 3D. 
+- Fixed performance bug due to lazy matrix transpose.
+- Changed more function names to agree with Julia naming conventions.
+- Update documentation and examples.
+
 # Version 1.0.0
 
 This version works with Julia version 1.0.0.

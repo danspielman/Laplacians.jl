@@ -18,11 +18,15 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
 
+# Version 1.0.1
+
 Changes:
 
 * Added `latin_square_graph` and `latin_square`.
 * Allow `plot_graph` to plot in 3D. 
 * Fixed performance bug due to lazy matrix transpose.
+* Changed more function names to agree with Julia naming conventions.
+* Update documentation and examples.
 
 # Version 1.0.0
 
@@ -57,11 +61,11 @@ This is the first version that is compatible with Julia 0.7.  Other changes:
 
 ## Version 0.2.2, December 28, 2017 
 
-Fixed two bugs: one in shortestPaths, and one that prevented passing some parameters to approxCholSddm.  Improved the documentation for solving linear equations.
+Fixed two bugs: one in shortestPaths, and one that prevented passing some parameters to approxchol_sddm.  Improved the documentation for solving linear equations.
 
 ## Version 0.2.1, September 18, 2017
 
-Fixed a bug in `approxCholSddm` that caused it to be slow.
+Fixed a bug in `approxchol_sddm` that caused it to be slow.
 
 ## Version 0.2.0, July 17, 2017
 
@@ -70,7 +74,7 @@ Julia 0.5.X.
 
 Changes:
 
-* Added `approxCholSddm`, a wrapper of `approxCholLap` that solves
+* Added `approxchol_sddm`, a wrapper of `approxchol_lap` that solves
   SDDM systems.
 
 ## Version 0.1.4, June 6, 2017
@@ -87,8 +91,8 @@ Changes:
 
 Major Changes:
 
-* Changed the name of the approximate Cholesky solver from `edgeElimLap` to `approxCholLap`.  Made improvements in this solver.
-* Improved PCG so that it can now detect stagnation.  Made options to do this even better when using it with a good preconditioner, like `approxCholLap`.
+* Changed the name of the approximate Cholesky solver from `edgeElimLap` to `approxchol_lap`.  Made improvements in this solver.
+* Improved PCG so that it can now detect stagnation.  Made options to do this even better when using it with a good preconditioner, like `approxchol_lap`.
 * Added in code for comparing the running times of solvers.  The difficulty here is that we need to stop them if they run too long.  Added code to do this with threads inside Julia, and with `gtimeout` when calling Matlab to use icc, CMG, or LAMG.
 
 ## Version 0.1.2, April 2, 2017
