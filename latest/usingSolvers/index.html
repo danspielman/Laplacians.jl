@@ -245,10 +245,10 @@
 <p><a id='Solving-linear-equations-in-Laplacians-and-SDD-matrices-1'></a></p>
 <h1 id="solving-linear-equations-in-laplacians-and-sdd-matrices">Solving linear equations in Laplacians and SDD matrices</h1>
 <p>The main purpose of this package is to experiment with the implementation of algorithms for solving systems of linear equations in Laplacian and symmetric, diagonally dominant, M-matrices (SDDM).</p>
-<p>At present, the fastest solver in this package for Laplacians is <a href="../solvers/index.html#Laplacians.approxCholLap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>approxCholLap</code></a>. For SDDM systems, one should use <a href="../solvers/index.html#Laplacians.approxCholSddm"><code>approxCholSddm</code></a>.  Here is a quick demo.  Read more for other solvers and other options you can pass to the solvers.</p>
+<p>At present, the fastest solver in this package for Laplacians is <a href="../solvers/index.html#Laplacians.approxchol_lap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>approxchol_lap</code></a>. For SDDM systems, one should use <a href="../solvers/index.html#Laplacians.approxchol_sddm"><code>approxchol_sddm</code></a>.  Here is a quick demo.  Read more for other solvers and other options you can pass to the solvers.</p>
 <pre><code class="julia">julia&gt; a = grid3(50); # an adjacency matrix
 julia&gt; la = lap(a); # it's Laplacian
-julia&gt; sol = approxCholLap(a); # a solver for la
+julia&gt; sol = approxchol_lap(a); # a solver for la
 julia&gt; b = randn(size(la,1)); b = b - mean(b); # a right-hand-side
 julia&gt; x = sol(b); # the solution
 julia&gt; norm(la*x-b) / norm(b)
@@ -261,7 +261,7 @@ PCG stopped after: 0.022 seconds and 3 iterations with relative error 0.07929402
 
 julia&gt; sddm = copy(la); # doing it with a SDDM matrix
 julia&gt; sddm[1,1] += 1;
-julia&gt; sol = approxCholSddm(sddm, verbose=true); # solver, with output
+julia&gt; sol = approxchol_sddm(sddm, verbose=true); # solver, with output
 Using greedy degree ordering. Factorization time: 0.7143130302429199
 Ratio of operator edges to original edges: 2.1120548223350255
 ratio of max to min diagonal of laplacian : 6.0
@@ -294,10 +294,10 @@ julia&gt; norm(sddm*x - b) / norm(b)
 <p><em>All of the Laplacian solvers take the adjacency matrix of the underlying graph as input.</em></p>
 <p>To solve a system of linear equations, one first passes the matrix defining the system to a linear equation solving algorithm.  This will return a function that solves systems of linear equations in that matrix.  For example,</p>
 <pre><code class="julia">julia&gt; n = 1000;
-julia&gt; a = wtedChimera(n);  # produces a graph, as a sparse adjacency matrix
+julia&gt; a = wted_chimera(n);  # produces a graph, as a sparse adjacency matrix
 julia&gt; b = randn(n); 
 julia&gt; b = b - mean(b); # so there is a solution
-julia&gt; f = cholLap(a)
+julia&gt; f = chol_lap(a)
 (::#79) (generic function with 1 method)
 julia&gt; x = f(b);
 julia&gt; la = lap(a);  # construct the Laplacian of a
@@ -360,9 +360,9 @@ norm(sddm*x-b)
     1.0598778281116327e-14
 </code></pre>
 
-<p>As <code>cholfact</code> does not satisfy our interface, we wrap it in a routine <a href="../solvers/index.html#Laplacians.cholSDDM"><code>cholSDDM</code></a> that does.</p>
-<p>To solve systems in Laplacian matrices, use <a href="../solvers/index.html#Laplacians.cholLap"><code>cholLap</code></a>.  Recall that this routine should be passed the adjacency matrix.</p>
-<pre><code class="julia">f = cholLap(a)
+<p>As <code>cholfact</code> does not satisfy our interface, we wrap it in a routine <a href="../solvers/index.html#Laplacians.chol_sddm"><code>chol_sddm</code></a> that does.</p>
+<p>To solve systems in Laplacian matrices, use <a href="../solvers/index.html#Laplacians.chol_lap"><code>chol_lap</code></a>.  Recall that this routine should be passed the adjacency matrix.</p>
+<pre><code class="julia">f = chol_lap(a)
 b = randn(n); 
 b = b - mean(b);
 norm(la*f(b) - b)
@@ -372,7 +372,7 @@ norm(la*f(b) - b)
 <p><a id='CG-and-PCG-1'></a></p>
 <h2 id="cg-and-pcg">CG and PCG</h2>
 <p>We have written implementations of Conjugate Gradient (CG) and Preconditioned Conjugate Gradient (PCG) that satisfy the interface. These routines use BLAS when possible, and slower routines when dealing with data types that BLAS cannot handle.  </p>
-<pre><code class="julia">srand(1)
+<pre><code class="julia">seed!(1)
 n = 50
 M = randn(n,n); M = M * M';
 b = randn(n)
@@ -387,9 +387,9 @@ norm(M*xbig - bbig)
 1.605742093628722039938504001423963138146137896744531914963345296279741402982296e-37
 </code></pre>
 
-<p>To create a function <code>f</code> that uses cg to solve systems in M, use <a href="../solvers/index.html#Laplacians.cgSolver"><code>cgSolver</code></a>.  For Laplacians, use <a href="../solvers/index.html#Laplacians.cgLapSolver-Tuple{SparseMatrixCSC}"><code>cgLapSolver</code></a>.</p>
+<p>To create a function <code>f</code> that uses cg to solve systems in M, use <a href="../solvers/index.html#Laplacians.cgSolver"><code>cgSolver</code></a>.  For Laplacians, use <a href="../solvers/index.html#Laplacians.cgLapSolver-Tuple{SparseArrays.SparseMatrixCSC}"><code>cgLapSolver</code></a>.</p>
 <pre><code class="julia">julia&gt; n = 1000;
-julia&gt; a = wtedChimera(n,1);
+julia&gt; a = wted_chimera(n,1);
 julia&gt; f = Laplacians.cgLapSolver(a,maxits=100);
 
 julia&gt; b = randn(n);
@@ -409,7 +409,7 @@ CG BLAS stopped after: 253 iterations with relative error 7.860172210007891e-7.
 </code></pre>
 
 <p>PCG also takes as input a preconditioner.  This should be a function.  Here is an example of how one might construct and use a diagonal preonditioner.  To motivate this, I will use a grid with highly varying weights on edges.</p>
-<pre><code class="julia">srand(1)
+<pre><code class="julia">seed!(1)
 a = mapweight(grid2(200),x-&gt;1/(rand(1)[1]));
 la = lap(a)
 n = size(la)[1]
@@ -458,7 +458,7 @@ PCG BLAS stopped after: 260 iterations with relative error 0.009864463201800925.
 
 <p><a id='Low-Stretch-Spanning-Trees-1'></a></p>
 <h2 id="low-stretch-spanning-trees">Low-Stretch Spanning Trees</h2>
-<p>In order to make preconditioners, we will want low-stretch spanning trees.  We do not yet have any code that is guaranteed to produce these.  Instead, we supply three heuristics: <a href="../akpw/index.html#Laplacians.akpw-Tuple{Any}"><code>akpw</code></a> which is inspired by the algorith of Alon, Karp, Peleg and West, and  randomized versions of Prim and Kruskal's algorithm. <a href="../randTrees/index.html#Laplacians.randishKruskal-Tuple{SparseMatrixCSC}"><code>randishKruskal</code></a> samples the remaining edges with probability proportional to their weight.  <a href="../randTrees/index.html#Laplacians.randishPrim-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval"><code>randishPrim</code></a> samples edges on the boundary while using the same rule.  We recommend using <a href="../akpw/index.html#Laplacians.akpw-Tuple{Any}"><code>akpw</code></a>.</p>
+<p>In order to make preconditioners, we will want low-stretch spanning trees.  We do not yet have any code that is guaranteed to produce these.  Instead, we supply three heuristics: <a href="../akpw/index.html#Laplacians.akpw-Tuple{Any}"><code>akpw</code></a> which is inspired by the algorith of Alon, Karp, Peleg and West, and  randomized versions of Prim and Kruskal's algorithm. <a href="../randTrees/index.html#Laplacians.randishKruskal-Tuple{SparseArrays.SparseMatrixCSC}"><code>randishKruskal</code></a> samples the remaining edges with probability proportional to their weight.  <a href="../randTrees/index.html#Laplacians.randishPrim-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval"><code>randishPrim</code></a> samples edges on the boundary while using the same rule.  We recommend using <a href="../akpw/index.html#Laplacians.akpw-Tuple{Any}"><code>akpw</code></a>.</p>
 <p>See <a href="../LSST/index.html">Low Stretch Spanning Trees</a> to learn more about these.</p>
 <p><a id='Augmented-Spanning-Tree-Preconditioners-1'></a></p>
 <h2 id="augmented-spanning-tree-preconditioners">Augmented Spanning Tree Preconditioners</h2>
@@ -468,7 +468,7 @@ PCG BLAS stopped after: 260 iterations with relative error 0.009864463201800925.
 <li><a href="../solvers/index.html#Laplacians.augTreeSddm-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>augTreeSddm</code></a>, for SDDM matrices</li>
 <li><a href="../solvers/index.html#Laplacians.augTreeLap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>augTreeLap</code></a></li>
 <li><a href="../solvers/index.html#Laplacians.augTreePrecon-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>augTreePrecon</code></a></li>
-<li><a href="../solvers/index.html#Laplacians.augmentTree-Union{Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti},Ti}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>augmentTree</code></a></li>
+<li><a href="../solvers/index.html#Laplacians.augmentTree-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti},Ti}} where Ti where Tv"><code>augmentTree</code></a></li>
 </ul>
 <p><a id='The-solvers-of-Koutis,-Miller-and-Peng.-1'></a></p>
 <h2 id="the-solvers-of-koutis-miller-and-peng">The solvers of Koutis, Miller and Peng.</h2>
@@ -482,12 +482,12 @@ PCG BLAS stopped after: 260 iterations with relative error 0.009864463201800925.
 <p>These are inspired by the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. </p>
 <p>These first two follow that paper reasonably closely.</p>
 <ul>
-<li><a href="../solvers/index.html#Laplacians.samplingSDDMSolver-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>samplingSDDMSolver</code></a></li>
-<li><a href="../solvers/index.html#Laplacians.samplingLapSolver-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>samplingLapSolver</code></a></li>
+<li><a href="../@ref"><code>samplingSDDMSolver</code></a></li>
+<li><a href="../@ref"><code>samplingLapSolver</code></a></li>
 </ul>
 <p>The following is a modification of the algorithm that eliminates edges one at a time.  The code is by Daniel Spielman.  The algorithm has not yet been analyzed.  It is presently the fastest in this package.</p>
 <ul>
-<li><a href="../solvers/index.html#Laplacians.approxCholLap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>approxCholLap</code></a></li>
+<li><a href="../solvers/index.html#Laplacians.approxchol_lap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>approxchol_lap</code></a></li>
 </ul>
 <p><a id='Algebraic-Multigrid-1'></a></p>
 <h2 id="algebraic-multigrid">Algebraic Multigrid</h2>

@@ -212,6 +212,7 @@
               
                 <p><a id='Installation-1'></a></p>
 <h1 id="installation">Installation</h1>
+<p><strong>Caveat: These instructions are old (circa Julia 0.5)  The same ideas apply, but they need updating.  You can probably find a better reference now.</strong> </p>
 <p>Before you can use Laplacians, you need Julia. So, we'll begin with instructions for installing Julia.  I (Dan S.) found that it worked best if I installed Python first.  So, I'll suggest that you do the same.</p>
 <p>All of these instruction assume you are using a Mac. </p>
 <p><a id='Python-1'></a></p>
@@ -269,12 +270,12 @@ julia&gt; using IJulia
 <p>(note that these are not the same variable: the environment variable in Julia is available as <code>ENV["LAPLACIANS_NOPLOT"]</code>. Actually, defining these variables to anything will have the same effect.  So, setting them to false has the same effect as setting them to true.</p>
 <p>To see if Laplacians is working, try typing</p>
 <pre><code class="julia">a = chimera(100,6)
-spectralDrawing(a)
+spectral_drawing(a)
 </code></pre>
 
 <p>or</p>
 <pre><code class="julia">a = generalizedNecklace(grid2(6),grid2(3),2)
-spectralDrawing(a)
+spectral_drawing(a)
 </code></pre>
               
             </div>

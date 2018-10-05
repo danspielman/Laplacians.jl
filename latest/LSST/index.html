@@ -203,14 +203,14 @@
                 <p><a id='Low-Stretch-Spanning-Trees-1'></a></p>
 <h1 id="low-stretch-spanning-trees">Low Stretch Spanning Trees</h1>
 <p>We have implemented a variant of the algorithm of Alon, Karp, Peleg and West for computing low stretch spanning trees.  It is called <code>akpw</code>.  For unweighted graphs we provide a faster variant called <code>akpwU</code>.  If you require faster algorithms, with possibly higher average stretch, you can try the heuristics <code>randishPrim</code> or <code>randishKruskal</code>.</p>
-<p>You can compute the stretch of a graph with respect to a spanning tree with the routine <code>compStretches</code>.  It returns a sparse matrix with one entry for each edge in the graph giving its stretch.  For example:</p>
+<p>You can compute the stretch of a graph with respect to a spanning tree with the routine <code>comp_stretches</code>.  It returns a sparse matrix with one entry for each edge in the graph giving its stretch.  For example:</p>
 <pre><code class="julia">julia&gt; graph = grid2(4)
 16x16 sparse matrix with 48 Float64 entries:
 
 julia&gt; tree = akpwU(graph)
 16x16 sparse matrix with 30 Float64 entries:
 
-julia&gt; st = compStretches(tree,graph)
+julia&gt; st = comp_stretches(tree,graph)
 16x16 sparse matrix with 48 Float64 entries:
     [2 ,  1]  =  1.0
     [5 ,  1]  =  1.0
@@ -247,19 +247,19 @@ julia&gt; graph = chimera(1000000,1);
 julia&gt; @time tree = akpw(graph);
   5.700285 seconds (16.10 M allocations: 1.263 GB, 11.16% gc time)
 
-julia&gt; aveStretch = sum(compStretches(tree,graph))/nnz(graph)
+julia&gt; aveStretch = sum(comp_stretches(tree,graph))/nnz(graph)
 8.793236275779616
 
 julia&gt; @time tree = randishPrim(graph);
   3.736225 seconds (3.21 M allocations: 566.887 MB, 6.40% gc time)
 
-julia&gt; aveStretch = sum(compStretches(tree,graph))/nnz(graph)
+julia&gt; aveStretch = sum(comp_stretches(tree,graph))/nnz(graph)
 10.800094649795756
 
 julia&gt; @time tree = randishKruskal(graph);
   2.515443 seconds (3.21 M allocations: 423.529 MB, 4.35% gc time)
 
-julia&gt; aveStretch = sum(compStretches(tree,graph))/nnz(graph)
+julia&gt; aveStretch = sum(comp_stretches(tree,graph))/nnz(graph)
 37.819948689847564
 
 </code></pre>
