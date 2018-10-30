@@ -196,6 +196,9 @@ module Laplacians
   include("approxChol.jl")
   export approxchol_lap, ApproxCholParams, approxchol_sddm
 
+  include("fiedler.jl")
+  export fiedler
+
   include("complexSolvers.jl")
   export SDDMSolvers
   export LapSolvers
