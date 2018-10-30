@@ -300,6 +300,10 @@ s = FastSampler(r)
 sample(s)
 blockSample(r)
 
+# export fiedler
+
+e = fiedler(chimera(100))
+
   # export SolverTest, speedTestLapSolvers
 
 solvers = [SolverTest(approxchol_lap,"ac") SolverTest(augTreeLap,"aug")]
