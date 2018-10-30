@@ -302,7 +302,7 @@ blockSample(r)
 
 # export fiedler
 
-e = fiedler(chimera(100))
+fiedler(chimera(100))
 
   # export SolverTest, speedTestLapSolvers
 
