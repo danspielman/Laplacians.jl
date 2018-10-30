@@ -14,6 +14,6 @@ script:
   - julia -e 'using Pkg; Pkg.clone(pwd()); Pkg.add("Laplacians"); Pkg.test("Laplacians"; coverage=true)'
   
 after_success:
-  - julia -e 'cd(Pkg.dir("Laplacians")); Pkg.add(PackageSpec(name="Coverage", version="0.6.0")); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'cd(Pkg.dir("Laplacians")); Pkg.add(Pkg.PackageSpec(name="Coverage", version="0.6.0")); using Coverage; Codecov.submit(Codecov.process_folder())'
   - julia -e 'ps=Pkg.PackageSpec(name="Documenter", version="0.19"); Pkg.add(ps); Pkg.pin(ps)'
   - julia -e 'cd(Pkg.dir("Laplacians")); include(joinpath("docs", "make.jl"))'
