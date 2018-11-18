@@ -252,11 +252,15 @@ function thicken(a::SparseMatrixCSC,k; ver = Vcur)
 
     ne0 = nnz(a)/2
 
-    ne = ne0
+    target = min(ne0*k, n*(n-1)/2)
 
     a_new = a
 
-    while nnz(a_new)/2 < ne0*k
+    max_tries = 5*k
+    ntries = 0
+
+    while nnz(a_new)/2 < target && ntries <= max_tries
+        ntries += 1
 
         before = nnz(a_new)/2
 
