@@ -217,117 +217,117 @@
 </code></pre>
 
 <p>Create an adjacency matrix and a diagonal vector from an SDD M-matrix. That is, from a Laplacian with added diagonal weights</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L27-L32' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L27-L32' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.diagmat-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.diagmat-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.diagmat</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>d = diagmat(a)
 </code></pre>
 
 <p>Returns the diagonal weighted degree matrix(as a sparse matrix) of a graph</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L675-L679' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L679-L683' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.disjoin-Tuple{SparseArrays.SparseMatrixCSC,SparseArrays.SparseMatrixCSC}' href='#Laplacians.disjoin-Tuple{SparseArrays.SparseMatrixCSC,SparseArrays.SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.disjoin</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = disjoin(a,b)
 </code></pre>
 
 <p>Create a disjoint union of graphs a and b,   with no edges between them.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L529-L534' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L533-L538' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.edgeVertexMat-Tuple{SparseArrays.SparseMatrixCSC}' href='#Laplacians.edgeVertexMat-Tuple{SparseArrays.SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.edgeVertexMat</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>U = edgeVertexMat(a)
 </code></pre>
 
 <p>The signed edge-vertex adjacency matrix</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L369-L373' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L373-L377' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.floatGraph-Tuple{SparseArrays.SparseMatrixCSC}' href='#Laplacians.floatGraph-Tuple{SparseArrays.SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.floatGraph</code></strong> &mdash; <em>Method</em>.</p>
 <p>graph = floatGraph(a::SparseMatrixCSC)</p>
 <p>Convert the nonzero entries in a graph to Float64.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L11-L15' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L11-L15' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.join_graphs!-Tuple{Laplacians.IJV,Laplacians.IJV,Integer}' href='#Laplacians.join_graphs!-Tuple{Laplacians.IJV,Laplacians.IJV,Integer}'>#</a>
 <strong><code>Laplacians.join_graphs!</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = join_graphs!(a::IJV, b::IJV, k::Integer)
 </code></pre>
 
 <p>Create a disjoint union of graphs a and b,  and then put k random edges between them, merging b into a.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L510-L515' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L514-L519' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.join_graphs-Union{Tuple{Tind}, Tuple{Tval}, Tuple{SparseMatrixCSC{Tval,Tind},SparseMatrixCSC{Tval,Tind},Integer}} where Tind where Tval' href='#Laplacians.join_graphs-Union{Tuple{Tind}, Tuple{Tval}, Tuple{SparseMatrixCSC{Tval,Tind},SparseMatrixCSC{Tval,Tind},Integer}} where Tind where Tval'>#</a>
 <strong><code>Laplacians.join_graphs</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = joinGraphs(a, b, k::Integer)
 </code></pre>
 
 <p>Create a disjoint union of graphs a and b,  and then put k random edges between them</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L476-L481' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L480-L485' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.lap-Tuple{Any}' href='#Laplacians.lap-Tuple{Any}'>#</a>
 <strong><code>Laplacians.lap</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>l = lap(a)
 </code></pre>
 
 <p>Create a Laplacian matrix from an adjacency matrix. We might want to do this differently, say by enforcing symmetry</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L20-L24' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L20-L24' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.mapweight-Union{Tuple{Tind}, Tuple{Tval}, Tuple{SparseMatrixCSC{Tval,Tind},Any}} where Tind where Tval' href='#Laplacians.mapweight-Union{Tuple{Tind}, Tuple{Tval}, Tuple{SparseMatrixCSC{Tval,Tind},Any}} where Tind where Tval'>#</a>
 <strong><code>Laplacians.mapweight</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>b = mapweight(a, x-&gt;rand())
 </code></pre>
 
 <p>Create a new graph that is the same as the original, but with f applied to each nonzero entry of a. For example, to make the weight of every edge uniform in [0,1], we could write.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L105-L109' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L105-L109' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.plot_graph-NTuple{4,Any}' href='#Laplacians.plot_graph-NTuple{4,Any}'>#</a>
 <strong><code>Laplacians.plot_graph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>plot_graph(gr,x,y,z;color=[0,0,1],dots=true,setaxis=true,number=false)
 </code></pre>
 
 <p>Plots graph gr with coordinates (x,y,z)</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L604-L608' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L608-L612' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.plot_graph-Tuple{Any,Any,Any}' href='#Laplacians.plot_graph-Tuple{Any,Any,Any}'>#</a>
 <strong><code>Laplacians.plot_graph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>plot_graph(gr,x,y;color=[0,0,1],dots=true,setaxis=true,number=false)
 </code></pre>
 
 <p>Plots graph gr with coordinates (x,y)</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L564-L568' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L568-L572' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.power-Tuple{SparseArrays.SparseMatrixCSC,Int64}' href='#Laplacians.power-Tuple{SparseArrays.SparseMatrixCSC,Int64}'>#</a>
 <strong><code>Laplacians.power</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>ap = power(a::SparseMatrixCSC, k::Int)
 </code></pre>
 
 <p>Returns the kth power of a.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L179-L183' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L179-L183' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.product_graph-Tuple{SparseArrays.SparseMatrixCSC,SparseArrays.SparseMatrixCSC}' href='#Laplacians.product_graph-Tuple{SparseArrays.SparseMatrixCSC,SparseArrays.SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.product_graph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>aprod = productGraph(a0, a1)
 </code></pre>
 
 <p>The Cartesian product of two graphs.  When applied to two paths, it gives a grid.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L144-L148' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L144-L148' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.shortIntGraph-Tuple{SparseArrays.SparseMatrixCSC}' href='#Laplacians.shortIntGraph-Tuple{SparseArrays.SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.shortIntGraph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = shortIntGraph(a::SparseMatrixCSC)
 </code></pre>
 
 <p>Convert the indices in a graph to 32-bit ints. This takes less storage, but does not speed up much.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L2-L7' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L2-L7' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.spectral_coords-Tuple{Any}' href='#Laplacians.spectral_coords-Tuple{Any}'>#</a>
 <strong><code>Laplacians.spectral_coords</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>spectral_coords(a)
 </code></pre>
 
 <p>Computes the spectral coordinates of a graph</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L661-L665' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L665-L669' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.spectral_drawing-Tuple{Any}' href='#Laplacians.spectral_drawing-Tuple{Any}'>#</a>
 <strong><code>Laplacians.spectral_drawing</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>spectral_drawing(a)
 </code></pre>
 
 <p>Computes spectral coordinates, and then uses plotGraph to draw</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L649-L653' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L653-L657' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.subsampleEdges-Tuple{SparseArrays.SparseMatrixCSC,Float64}' href='#Laplacians.subsampleEdges-Tuple{SparseArrays.SparseMatrixCSC,Float64}'>#</a>
 <strong><code>Laplacians.subsampleEdges</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = subsampleEdges(a::SparseMatrixCSC, p::Float64)
 </code></pre>
 
 <p>Create a new graph from the old, but keeping edge edge with probability <code>p</code></p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L394-L398' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L398-L402' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.thicken-Tuple{SparseArrays.SparseMatrixCSC,Any}' href='#Laplacians.thicken-Tuple{SparseArrays.SparseMatrixCSC,Any}'>#</a>
 <strong><code>Laplacians.thicken</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>a_new = thicken(A,k)
@@ -342,7 +342,7 @@ a2 = thicken(a,3)
 plotGraph(a2,x,y)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L227-L247' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L227-L247' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.thicken_once-Tuple{SparseArrays.SparseMatrixCSC}' href='#Laplacians.thicken_once-Tuple{SparseArrays.SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.thicken_once</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>a_new = thicken_once(a)
@@ -355,7 +355,7 @@ a2 = unweight(a + thicken_once(a))
 plotGraph(a2,x,y)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L190-L203' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L190-L203' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.two_lift-Tuple{SparseArrays.SparseMatrixCSC,AbstractArray{Bool,1}}' href='#Laplacians.two_lift-Tuple{SparseArrays.SparseMatrixCSC,AbstractArray{Bool,1}}'>#</a>
 <strong><code>Laplacians.two_lift</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = two_lift(a, flip::AbstractArray{Bool,1})
@@ -364,35 +364,35 @@ graph = two_lift(a, k::Integer)
 </code></pre>
 
 <p>Creats a 2-lift of a.  <code>flip</code> is a boolean indicating which edges cross. In the third version, k is the number of edges that cross.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L410-L417' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L414-L421' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.uniformWeight!-Tuple{SparseArrays.SparseMatrixCSC}' href='#Laplacians.uniformWeight!-Tuple{SparseArrays.SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.uniformWeight!</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>uniformWeight!(a)
 </code></pre>
 
 <p>Set the weight of every edge to random uniform [0,1]</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L130-L134' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L130-L134' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.unweight!-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval' href='#Laplacians.unweight!-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval'>#</a>
 <strong><code>Laplacians.unweight!</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>unweight!(a)
 </code></pre>
 
 <p>Change the weight of every edge in a to 1</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L87-L91' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L87-L91' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.unweight-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval' href='#Laplacians.unweight-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval'>#</a>
 <strong><code>Laplacians.unweight</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>wt1 = unweight(a)
 </code></pre>
 
 <p>Create a new graph in that is the same as the original, but with all edge weights 1</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L73-L77' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L73-L77' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.wtedEdgeVertexMat-Tuple{SparseArrays.SparseMatrixCSC}' href='#Laplacians.wtedEdgeVertexMat-Tuple{SparseArrays.SparseMatrixCSC}'>#</a>
 <strong><code>Laplacians.wtedEdgeVertexMat</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>U = wtedEdgeVertexMat(a)
 </code></pre>
 
 <p>The signed and weighted edge-vertex adjacency matrix, so U'*U = L</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphOps.jl#L381-L385' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphOps.jl#L385-L389' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>

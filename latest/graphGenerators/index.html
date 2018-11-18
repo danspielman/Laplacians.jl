@@ -216,8 +216,8 @@
 <li><a href="index.html#Laplacians.ErdosRenyi-Tuple{Integer,Integer}"><code>Laplacians.ErdosRenyi</code></a></li>
 <li><a href="index.html#Laplacians.ErdosRenyiCluster-Tuple{Integer,Integer}"><code>Laplacians.ErdosRenyiCluster</code></a></li>
 <li><a href="index.html#Laplacians.ErdosRenyiClusterFix-Tuple{Integer,Integer}"><code>Laplacians.ErdosRenyiClusterFix</code></a></li>
-<li><a href="index.html#Laplacians.chimera-Tuple{Integer}"><code>Laplacians.chimera</code></a></li>
 <li><a href="index.html#Laplacians.chimera-Tuple{Integer,Integer}"><code>Laplacians.chimera</code></a></li>
+<li><a href="index.html#Laplacians.chimera-Tuple{Integer}"><code>Laplacians.chimera</code></a></li>
 <li><a href="index.html#Laplacians.complete_binary_tree-Tuple{Integer}"><code>Laplacians.complete_binary_tree</code></a></li>
 <li><a href="index.html#Laplacians.complete_graph-Tuple{Integer}"><code>Laplacians.complete_graph</code></a></li>
 <li><a href="index.html#Laplacians.empty_graph-Tuple{Integer}"><code>Laplacians.empty_graph</code></a></li>
@@ -237,8 +237,8 @@
 <li><a href="index.html#Laplacians.rand_weight-Tuple{Any}"><code>Laplacians.rand_weight</code></a></li>
 <li><a href="index.html#Laplacians.ring_graph-Tuple{Any}"><code>Laplacians.ring_graph</code></a></li>
 <li><a href="index.html#Laplacians.semiwted_chimera-Tuple{Integer}"><code>Laplacians.semiwted_chimera</code></a></li>
-<li><a href="index.html#Laplacians.wted_chimera-Tuple{Integer,Integer}"><code>Laplacians.wted_chimera</code></a></li>
 <li><a href="index.html#Laplacians.wted_chimera-Tuple{Integer}"><code>Laplacians.wted_chimera</code></a></li>
+<li><a href="index.html#Laplacians.wted_chimera-Tuple{Integer,Integer}"><code>Laplacians.wted_chimera</code></a></li>
 <li><a href="index.html#Random.randperm-Tuple{AbstractArray{T,2} where T}"><code>Random.randperm</code></a></li>
 </ul>
 <p><a id='Laplacians.ErdosRenyi-Tuple{Integer,Integer}' href='#Laplacians.ErdosRenyi-Tuple{Integer,Integer}'>#</a>
@@ -247,54 +247,54 @@
 </code></pre>
 
 <p>Generate a random graph on n vertices with m edges. The actual number of edges will probably be smaller, as we sample with replacement</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L507-L513' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L507-L513' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.ErdosRenyiCluster-Tuple{Integer,Integer}' href='#Laplacians.ErdosRenyiCluster-Tuple{Integer,Integer}'>#</a>
 <strong><code>Laplacians.ErdosRenyiCluster</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = ErdosRenyiCluster(n::Integer, k::Integer; ver=Vcur)
 </code></pre>
 
 <p>Generate an ER graph with average degree k, and then return the largest component. Will probably have fewer than n vertices. If you want to add a tree to bring it back to n, try ErdosRenyiClusterFix.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L528-L536' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L528-L536' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.ErdosRenyiClusterFix-Tuple{Integer,Integer}' href='#Laplacians.ErdosRenyiClusterFix-Tuple{Integer,Integer}'>#</a>
 <strong><code>Laplacians.ErdosRenyiClusterFix</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = ErdosRenyiClusterFix(n::Integer, k::Integer; ver=Vcur)
 </code></pre>
 
 <p>Like an Erdos-Renyi cluster, but add back a tree so it has n vertices</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L550-L555' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L550-L555' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.chimera-Tuple{Integer,Integer}' href='#Laplacians.chimera-Tuple{Integer,Integer}'>#</a>
 <strong><code>Laplacians.chimera</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = chimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
 </code></pre>
 
 <p>Builds the kth chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L1012-L1019' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L1012-L1019' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.chimera-Tuple{Integer}' href='#Laplacians.chimera-Tuple{Integer}'>#</a>
 <strong><code>Laplacians.chimera</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = chimera(n::Integer; verbose=false, ver=Vcur)
 </code></pre>
 
 <p>Builds a chimeric graph on n vertices. The components come from pureRandomGraph, connected by joinGraphs, productGraph and generalizedNecklace</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L970-L976' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L970-L976' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.complete_binary_tree-Tuple{Integer}' href='#Laplacians.complete_binary_tree-Tuple{Integer}'>#</a>
 <strong><code>Laplacians.complete_binary_tree</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = completeBinaryTree(n::Int64)
 </code></pre>
 
 <p>The complete binary tree on n vertices</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L160-L164' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L160-L164' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.complete_graph-Tuple{Integer}' href='#Laplacians.complete_graph-Tuple{Integer}'>#</a>
 <strong><code>Laplacians.complete_graph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = complete_graph(n)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L34-L36' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L34-L36' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.empty_graph-Tuple{Integer}' href='#Laplacians.empty_graph-Tuple{Integer}'>#</a>
 <strong><code>Laplacians.empty_graph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>ijv = empty_graph(n)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L12-L14' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L12-L14' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.generalized_ring-Union{Tuple{T}, Tuple{T,Array{T,N} where N}} where T<:Integer' href='#Laplacians.generalized_ring-Union{Tuple{T}, Tuple{T,Array{T,N} where N}} where T<:Integer'>#</a>
 <strong><code>Laplacians.generalized_ring</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = generalized_ring(n, gens)
@@ -304,14 +304,14 @@
 <pre><code>generalized_ring(17, [1 5])
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L68-L79' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L68-L79' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.grid2-Tuple{Integer,Integer}' href='#Laplacians.grid2-Tuple{Integer,Integer}'>#</a>
 <strong><code>Laplacians.grid2</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = grid2(n::Int64, m::Int64; isotropy=1)
 </code></pre>
 
 <p>An n-by-m grid graph.  iostropy is the weighting on edges in one direction.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L187-L191' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L187-L191' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.grid2coords-Tuple{Int64,Int64}' href='#Laplacians.grid2coords-Tuple{Int64,Int64}'>#</a>
 <strong><code>Laplacians.grid2coords</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = grid2coords(n::Int64, m::Int64)
@@ -319,7 +319,7 @@ graph = grid2coords(n::Int64)
 </code></pre>
 
 <p>Coordinates for plotting the vertices of the n-by-m grid graph</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L241-L246' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L241-L246' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.grid3-Tuple{Integer,Integer,Integer}' href='#Laplacians.grid3-Tuple{Integer,Integer,Integer}'>#</a>
 <strong><code>Laplacians.grid3</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = grid3(n1, n2, n3)
@@ -327,103 +327,103 @@ graph = grid3(n)
 </code></pre>
 
 <p>An n1-by-n2-by-n3 grid graph.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L201-L206' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L201-L206' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.grown_graph-Tuple{Integer,Integer}' href='#Laplacians.grown_graph-Tuple{Integer,Integer}'>#</a>
 <strong><code>Laplacians.grown_graph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = grown_graph(n, k; ver=Vcur)
 </code></pre>
 
 <p>Create a graph on n vertices. For each vertex, give it k edges to randomly chosen prior vertices. This is a variety of a preferential attachment graph.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L308-L315' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L308-L315' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.grown_graph_d-Tuple{Integer,Integer}' href='#Laplacians.grown_graph_d-Tuple{Integer,Integer}'>#</a>
 <strong><code>Laplacians.grown_graph_d</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = grown_graph_d(n::Integer, k::Integer; ver=Vcur)
 </code></pre>
 
 <p>Like a grownGraph, but it forces the edges to all be distinct. It starts out with a k+1 clique on the first k vertices</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L353-L358' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L353-L358' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.hypercube-Tuple{Integer}' href='#Laplacians.hypercube-Tuple{Integer}'>#</a>
 <strong><code>Laplacians.hypercube</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = hyperCube(d::Int64)
 </code></pre>
 
 <p>The d dimensional hypercube.  Has 2^d vertices and d*2^(d-1) edges.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L133-L137' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L133-L137' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.path_graph-Tuple{Any}' href='#Laplacians.path_graph-Tuple{Any}'>#</a>
 <strong><code>Laplacians.path_graph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = path_graph(n)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L18-L20' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L18-L20' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.pref_attach-Tuple{Integer,Integer,Float64}' href='#Laplacians.pref_attach-Tuple{Integer,Integer,Float64}'>#</a>
 <strong><code>Laplacians.pref_attach</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = pref_attach(n::Int64, k::Int64, p::Float64; ver=Vcur)
 </code></pre>
 
 <p>A preferential attachment graph in which each vertex has k edges to those that come before.  These are chosen with probability p to be from a random vertex, and with probability 1-p to come from the endpoint of a random edge. It begins with a k-clique on the first k+1 vertices.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L383-L390' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L383-L390' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.pure_random_graph-Tuple{Integer}' href='#Laplacians.pure_random_graph-Tuple{Integer}'>#</a>
 <strong><code>Laplacians.pure_random_graph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = pure_random_graph(n::Integer; verbose=false, ver=Vcur)
 </code></pre>
 
 <p>Generate a random graph with n vertices from one of our natural distributions</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L580-L584' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L580-L584' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.rand_gen_ring-Tuple{Integer,Integer}' href='#Laplacians.rand_gen_ring-Tuple{Integer,Integer}'>#</a>
 <strong><code>Laplacians.rand_gen_ring</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = rand_gen_ring(n, k; verbose = false, ver=Vcur)
 </code></pre>
 
 <p>A random generalized ring graph of degree k. Gens always contains 1, and the other k-1 edge types are chosen from an exponential distribution</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L107-L113' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L107-L113' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.rand_matching-Tuple{Integer}' href='#Laplacians.rand_matching-Tuple{Integer}'>#</a>
 <strong><code>Laplacians.rand_matching</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = rand_matching(n::Integer; ver=Vcur)
 </code></pre>
 
 <p>A random matching on n vertices</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L256-L260' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L256-L260' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.rand_regular-Tuple{Integer,Integer}' href='#Laplacians.rand_regular-Tuple{Integer,Integer}'>#</a>
 <strong><code>Laplacians.rand_regular</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = rand_regular(n, k; ver=Vcur)
 </code></pre>
 
 <p>A sum of k random matchings on n vertices</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L277-L281' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L277-L281' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.rand_weight-Tuple{Any}' href='#Laplacians.rand_weight-Tuple{Any}'>#</a>
 <strong><code>Laplacians.rand_weight</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = randWeight(graph; ver=Vcur)
 </code></pre>
 
 <p>Applies one of a number of random weighting schemes to the edges of the graph</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L1031-L1035' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L1031-L1035' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.ring_graph-Tuple{Any}' href='#Laplacians.ring_graph-Tuple{Any}'>#</a>
 <strong><code>Laplacians.ring_graph</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = ring_graph(n)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L47-L49' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L47-L49' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.semiwted_chimera-Tuple{Integer}' href='#Laplacians.semiwted_chimera-Tuple{Integer}'>#</a>
 <strong><code>Laplacians.semiwted_chimera</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = semiwted_chimera(n::Integer; verbose=false, ver=Vcur)
 </code></pre>
 
 <p>A Chimera graph with some weights.  The weights just appear when graphs are combined. For more interesting weights, use <code>wted_chimera</code></p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L714-L719' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L714-L719' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.wted_chimera-Tuple{Integer,Integer}' href='#Laplacians.wted_chimera-Tuple{Integer,Integer}'>#</a>
 <strong><code>Laplacians.wted_chimera</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = wted_chimera(n::Integer, k::Integer; verbose=false, ver=Vcur)
 </code></pre>
 
 <p>Builds the kth wted chimeric graph on n vertices. It does this by resetting the random number generator seed. It should captute the state of the generator before that and then return it, but it does not yet.</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L1099-L1106' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L1099-L1106' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.wted_chimera-Tuple{Integer}' href='#Laplacians.wted_chimera-Tuple{Integer}'>#</a>
 <strong><code>Laplacians.wted_chimera</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = wted_chimera(n::Integer)
 </code></pre>
 
 <p>Generate a chimera, and then apply a random weighting scheme</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L1118-L1122' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L1118-L1122' class='documenter-source'>source</a><br></p>
 <p><a id='Random.randperm-Tuple{AbstractArray{T,2} where T}' href='#Random.randperm-Tuple{AbstractArray{T,2} where T}'>#</a>
 <strong><code>Random.randperm</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>graph = randperm(mat::AbstractMatrix)
@@ -431,7 +431,7 @@ graph = grid3(n)
 </code></pre>
 
 <p>Randomly permutes the vertex indices</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/87091da5bfbc2b2a8795c5f4a8f1afe4b1b015a3/src/graphGenerators.jl#L457-L462' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphGenerators.jl#L457-L462' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
