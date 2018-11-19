@@ -20,6 +20,7 @@ To get the current version of the master branch, run `pkg> add Laplacians#master
 Changes:
 
 * Added `fiedler` for computing Fiedler vectors and values.  That is, the smallest nonzero eigenvalue of the Laplacian.
+* Fixed a bug in `thicken` that could cause it to loop forever, and cause `chimera` to do the same.
 
 # Version 1.0.1
 
