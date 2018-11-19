@@ -204,8 +204,8 @@
 <h1 id="graph-utilities">Graph Utilities</h1>
 <p>These are utilities to facilitate the use of sparse matrices as graphs.</p>
 <ul>
-<li><a href="index.html#Laplacians.backIndices-Union{Tuple{Array{Array{Tuple{Tv1,Tv2},1},1}}, Tuple{Tv2}, Tuple{Tv1}} where Tv2 where Tv1"><code>Laplacians.backIndices</code></a></li>
 <li><a href="index.html#Laplacians.backIndices-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>Laplacians.backIndices</code></a></li>
+<li><a href="index.html#Laplacians.backIndices-Union{Tuple{Array{Array{Tuple{Tv1,Tv2},1},1}}, Tuple{Tv2}, Tuple{Tv1}} where Tv2 where Tv1"><code>Laplacians.backIndices</code></a></li>
 <li><a href="index.html#Laplacians.compConductance-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv"><code>Laplacians.compConductance</code></a></li>
 <li><a href="index.html#Laplacians.findEntries-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv"><code>Laplacians.findEntries</code></a></li>
 <li><a href="index.html#Laplacians.flipIndex-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval"><code>Laplacians.flipIndex</code></a></li>
@@ -217,19 +217,19 @@
 <p><a id='Laplacians.backIndices-Union{Tuple{Array{Array{Tuple{Tv1,Tv2},1},1}}, Tuple{Tv2}, Tuple{Tv1}} where Tv2 where Tv1' href='#Laplacians.backIndices-Union{Tuple{Array{Array{Tuple{Tv1,Tv2},1},1}}, Tuple{Tv2}, Tuple{Tv1}} where Tv2 where Tv1'>#</a>
 <strong><code>Laplacians.backIndices</code></strong> &mdash; <em>Method</em>.</p>
 <p>Same as the above, but now the graph is in adjacency list form </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphUtils.jl#L95' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/30335496cb95f72c1e48dbe3f579ad1d11e98587/src/graphUtils.jl#L95' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.backIndices-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.backIndices-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.backIndices</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes the back indices in a graph in O(M+N). works if for every edge (u,v), (v,u) is also in the graph </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphUtils.jl#L58' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/30335496cb95f72c1e48dbe3f579ad1d11e98587/src/graphUtils.jl#L58' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.compConductance-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv' href='#Laplacians.compConductance-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.compConductance</code></strong> &mdash; <em>Method</em>.</p>
 <p>Returns the quality of the cut for a given graph and a given cut set s.   the result will be |outgoing edges| / min(|vertices in set|, |N - vertices in set|)</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphUtils.jl#L155-L159' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/30335496cb95f72c1e48dbe3f579ad1d11e98587/src/graphUtils.jl#L155-L159' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.findEntries-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv' href='#Laplacians.findEntries-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.findEntries</code></strong> &mdash; <em>Method</em>.</p>
 <p>Similar to findnz, but also returns 0 entries that have an edge in the sparse matrix </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphUtils.jl#L136' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/30335496cb95f72c1e48dbe3f579ad1d11e98587/src/graphUtils.jl#L136' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.flipIndex-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval' href='#Laplacians.flipIndex-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval'>#</a>
 <strong><code>Laplacians.flipIndex</code></strong> &mdash; <em>Method</em>.</p>
 <p>For a symmetric matrix, this gives the correspondance between pairs of entries in an ijv. So, ai[ind] = aj[flip[ind]].  For example, </p>
@@ -245,23 +245,23 @@ backind = fl[10] = 4
 [ai[backind],aj[backind],av[backind]] = [4.0,2.0,0.7]
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphUtils.jl#L33-L49' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/30335496cb95f72c1e48dbe3f579ad1d11e98587/src/graphUtils.jl#L33-L49' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.getObound-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv' href='#Laplacians.getObound-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.getObound</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes the number of edges leaving s </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphUtils.jl#L189' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/30335496cb95f72c1e48dbe3f579ad1d11e98587/src/graphUtils.jl#L189' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.getVolume-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv' href='#Laplacians.getVolume-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.getVolume</code></strong> &mdash; <em>Method</em>.</p>
 <p>Computes the volume of subset s in an unweighted graph G </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphUtils.jl#L171' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/30335496cb95f72c1e48dbe3f579ad1d11e98587/src/graphUtils.jl#L171' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.setValue-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Ti,Ti,Tv}} where Ti where Tv' href='#Laplacians.setValue-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Ti,Ti,Tv}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.setValue</code></strong> &mdash; <em>Method</em>.</p>
 <p>Sets the value of a certain edge in a sparse graph; value can be 0 without the edges dissapearing </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphUtils.jl#L27' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/30335496cb95f72c1e48dbe3f579ad1d11e98587/src/graphUtils.jl#L27' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.wdeg-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Ti}} where Ti where Tv' href='#Laplacians.wdeg-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Ti}} where Ti where Tv'>#</a>
 <strong><code>Laplacians.wdeg</code></strong> &mdash; <em>Method</em>.</p>
 <p>Finds the weighted degree of a vertex in the graph </p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/57f697a232a8f0498c071ade3d2c04c204e7b7fa/src/graphUtils.jl#L17' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/30335496cb95f72c1e48dbe3f579ad1d11e98587/src/graphUtils.jl#L17' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
