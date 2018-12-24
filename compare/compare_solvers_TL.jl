@@ -18,6 +18,8 @@ The timeout features won't work with the matlab solvers.
 
 ===========================================================#
 
+using Statistics
+
 """
     function speedTestLapTL{Tv,Ti}(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=Inf, maxtime=Inf, verbose=false)
 
@@ -27,7 +29,7 @@ Uses threads to time limit all solvers after the first to at most 10x the time.
 """
 function speedTestLapTL(solvers, dic, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1}; tol::Real=1e-2, maxits=10000, maxtime=1000, verbose=false, testName="") where {Tv,Ti}
 
-    b = b - mean(b)
+    b = b - mean(b)*ones(size(b))
 
     la = lap(a)
 
@@ -153,7 +155,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
   tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
   test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10) where {Tv,Ti}
 
-    b = b - mean(b)
+    b = b - mean(b)*ones(size(b))
 
     la = lap(a)
 
@@ -171,7 +173,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
     itscol(name) = "$(name)_its"
     errcol(name) = "$(name)_err"
 
-    dic["names"] = Array{String}(0)
+    dic["names"] = String[]
     for t in solvers
         push!(dic["names"], t.name)
     end
@@ -267,14 +269,14 @@ function testVMatlabLap(solvers::Array, dic::Dict, maker::Function; testName="")
     a = maker()
     n = size(a,1)
     b = randn(n);
-    b = b - mean(b);
+    b = b - mean(b)*ones(size(b));
     testVMatlabLap(solvers, dic, a, b, testName=testName, verbose=true)
 end
 
 
-function testVMatlabSddm{Tv,Ti}(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
+function testVMatlabSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
-  test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10)
+  test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10) where {Tv,Ti}
 
 
     it = Int[1]
