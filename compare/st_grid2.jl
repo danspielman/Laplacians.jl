@@ -69,7 +69,7 @@ while time() - t0 < 60*60*hours
     b = b / norm(b)
     x = testVMatlabLap(tests, dic, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false)
 
-    @save fn "dic" dic
+    @save fn dic
 
     global n = 2*n
 
