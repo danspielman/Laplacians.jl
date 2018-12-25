@@ -1,64 +1,56 @@
 #=
   TRILINOS_HOME needs to be set to where Trilinos lives for using MATLAB,
   for example you could put the following in .bash_profile
-  export TRILINOS_HOME="/Users/me/Trilinos_collection/Trilinos_gcc"
+  export TRILINOS_HOME="/Users/janedoe/Trilinos_collection/Trilinos_gcc"
 
   and need gtimeout, which can get from brew install coreutils
 =#
 
+using MatrixMarket
+using CSV
+
+include("./MatrixMarketVectors.jl")
+
 function timeLimitMueluBelos(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
-
-    mf = MatFile("fromJulia.mat","w")
-    put_variable(mf, "la", la)
-    put_variable(mf, "b", b)
-    put_variable(mf, "tol", tol)
-    put_variable(mf, "maxits", maxits)
-    close(mf)
     
-    fn = "$(Pkg.dir("Laplacians"))/matlab/timeLamg.m"
-    mat = ENV["MATLAB_HOME"]
-    matlab = "$(mat)/bin/matlab"
-    cmd = `gtimeout $(limit) $(matlab) -nojvm \< $(fn)`
+    trilinosHome = ENV["TRILINOS_HOME"]
+    scriptpath = "$trilinosHome/script_belos-muelu_timed/muelu_belos.exe"
+    scripxmlsettings = "$trilinosHome/script_belos-muelu_timed/SA_3LVL.xml"
+    
+    tmpOutFileName = "tmpToJulia.csv"
+    matpath = "tmpFromJulia_mat.mtx"
+    vecpath = "tmpFromJulia_vec.mtx"
 
-    t0 = now()
+    mmwrite(matpath,la)
+    mmwritevec(vecpath,b)
 
     bt = Inf
     st = Inf
     err = Inf
     iter = Inf
-    start = -Inf
+
+    cmd = `gtimeout $(limit) $(scriptpath) --verbose=false --muelu-xml=$(scripxmlsettings) --tol=1e-6 --max-iters=$(maxits) --filepath=$(matpath) --rhsfile=$(vecpath) --outputfile=$(tmpOutFileName)`
 
     try
         run(cmd)
+        results = CSV.read(tmpOutFileName)
+        
+        bt = results[1,:TimeSetup]
+        st = results[1,:TimeSolve]
+        iter = 0 #we're not recording this atm
+        err = results[1,:relresidual]
     catch
-        println("Matlab Died")
+        println("Muelu Belos Script Died")
     end
-
-    try
-        mf = MatFile("toJulia.mat")
-
-        bt = get_variable(mf,:bt)
-        st = get_variable(mf,:st)
-        err = get_variable(mf,:relres)
-        iter = get_variable(mf,:iter)
-        start = get_variable(mf,:startTime)
-        close(mf)
-    catch
-        println("No .mat file generated")
-    end
-    
-
-
+        
     if verbose
       println("Build Time: ", bt)
       println("Solve Time: ", st)
-      println("Iterations: ", iter)
+      #println("Iterations: ", iter)
       println("error: ", err)
-      d1 = DateTime(start,"d-u-yyyy H:M:S")
-      println("Time to load and start Matlab: $(d1-DateTime(t0))/1000)")
+      #d1 = DateTime(start,"d-u-yyyy H:M:S")
+      #println("Time to load and start Matlab: $(d1-DateTime(t0))/1000)")
     end
 
-
     return (st, bt, iter, err)
-
 end
