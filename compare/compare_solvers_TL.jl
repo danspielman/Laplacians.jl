@@ -153,7 +153,7 @@ Also compares them against the solvers we have in matlab, with a time limit of 1
 """
 function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
-  test_icc=true, test_cmg=true, test_lamg=true, tl_fac=10) where {Tv,Ti}
+  test_icc=false, test_cmg=false, test_lamg=false, test_muelubelos=false, tl_fac=10) where {Tv,Ti}
 
     b = b - mean(b)*ones(size(b))
 
@@ -186,6 +186,9 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
     end
     if test_lamg
       push!(dic["names"], "lamg")
+    end
+    if test_muelubelos
+      push!(dic["names"], "muelubelos")
     end
 
     for name in dic["names"]
@@ -256,6 +259,14 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
       end
       ret = timeLimitLamg(tl, lap(a), b,verbose = true);
       pushSpeedResult!(dic, "lamg", ret)
+    end
+
+    if test_lamg
+      if verbose
+          println("lamg")
+      end
+      ret = timeLimitMueluBelos(tl, lap(a), b,verbose = true);
+      pushSpeedResult!(dic, "muelubelos", ret)
     end
 
     return x
