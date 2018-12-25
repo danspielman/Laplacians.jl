@@ -232,6 +232,8 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
 
     end
 
+    println()
+
     if tl == 0
         error("tl is zero")
     end
@@ -261,9 +263,9 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
       pushSpeedResult!(dic, "lamg", ret)
     end
 
-    if test_lamg
+    if test_muelubelos
       if verbose
-          println("lamg")
+          println("muelubelos")
       end
       ret = timeLimitMueluBelos(tl, lap(a), b,verbose = true);
       pushSpeedResult!(dic, "muelubelos", ret)

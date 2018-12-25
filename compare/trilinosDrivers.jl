@@ -14,7 +14,7 @@ include("./MatrixMarketVectors.jl")
 function timeLimitMueluBelos(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
     
     trilinosHome = ENV["TRILINOS_HOME"]
-    scriptpath = "$trilinosHome/script_belos-muelu_timed/muelu_belos.exe"
+    scriptpath = "$(trilinosHome)/script_belos-muelu_timed/muelu_belos.exe"
     scripxmlsettings = "$trilinosHome/script_belos-muelu_timed/SA_3LVL.xml"
     
     tmpOutFileName = "tmpToJulia.csv"
@@ -30,7 +30,7 @@ function timeLimitMueluBelos(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=
     iter = Inf
 
     cmd = `gtimeout $(limit) $(scriptpath) --verbose=false --muelu-xml=$(scripxmlsettings) --tol=1e-6 --max-iters=$(maxits) --filepath=$(matpath) --rhsfile=$(vecpath) --outputfile=$(tmpOutFileName)`
-
+    
     try
         run(cmd)
         results = CSV.read(tmpOutFileName)
@@ -39,8 +39,11 @@ function timeLimitMueluBelos(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=
         st = results[1,:TimeSolve]
         iter = 0 #we're not recording this atm
         err = results[1,:relresidual]
-    catch
-        println("Muelu Belos Script Died")
+    catch e
+        bt = backtrace()
+        msg = sprint(showerror, e, bt)
+        println(msg)
+        println("Muelu Belos script died")
     end
         
     if verbose

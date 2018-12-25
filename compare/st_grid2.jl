@@ -20,8 +20,8 @@ using LinearAlgebra
 lapdir = dirname(pathof(Laplacians))
 
 include("$(lapdir)/../compare/matlabSafe.jl")
+include("$(lapdir)/../compare/trilinosDrivers.jl")
 include("$(lapdir)/../compare/compare_solvers_TL.jl")
-
 
 ac_deg = function(a; verbose=false, args...)
     approxchol_lap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
@@ -67,7 +67,7 @@ while time() - t0 < 60*60*hours
     b = randn(size(a,1))
     b = b - mean(b)*ones(size(b))
     b = b / norm(b)
-    x = testVMatlabLap(tests, dic, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false)
+    x = testVMatlabLap(tests, dic, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false, test_muelubelos=true )
 
     @save fn dic
 

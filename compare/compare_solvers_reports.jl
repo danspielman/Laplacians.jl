@@ -1,6 +1,10 @@
 using Plots
-plotlyjs()
-
+pyplot
+()
+#plotly()
+#plotlyjs() #plotlyjs issue: https://github.com/JuliaPlots/Plots.jl/issues/1793
+using Statistics
+using Printf
 
 function total_time(dic; names = dic["names"], labels = dic["names"])
     plt = Plots.plot(title = "Seconds Distribution")
@@ -141,29 +145,28 @@ end
 
 function plot_relative(dic)
 
-  plot_relative(dic,"tot","Total Time")
-  plot_relative(dic,"build","Build Time")
-  plot_relative(dic,"solve","Solve Time")
-  plot_relative(dic,"its","Iterations")
-
+  p1 = plot_relative(dic,"tot","Total Time")
+  p2 = plot_relative(dic,"build","Build Time")
+  p3 = plot_relative(dic,"solve","Solve Time")
+  p4 = plot_relative(dic,"its","Iterations")
+  return plot(p1,p2,p3,p4)
 end
 
 function vec_stats(v)
-    v = sort(v)
+    v = sort(vec(v))
     n = length(v)
-    print("mean: ",round(mean(v),3))
-    pts = round.(Int, [1, n/4, n/2, 3n/4, n])
-    print(" quarts: ", v[pts])
+    @printf("mean: %e \n",mean(v))
+    pts = round.(Int, [1, n/4, n/2, 3n/4, n],RoundUp)
+    @printf(" quarts: %e %e %e %e %e ", v[pts[1]], v[pts[2]], v[pts[3]], v[pts[4]], v[pts[5]])
     println()
 end
 
 function vec_stats(v,cnt)
-    v = sort(v)
+    v = sort(vec(v))
     n = length(v)
-    print("mean: ",round.(mean(v),3))
-    pts = round.(Int, [1, n/4, n/2, 3n/4, n])
-    print(" quarts: ", v[pts])
-
+    @printf("mean: %e \n",mean(v))
+    pts = round.(Int, [1, n/4, n/2, 3n/4, n],RoundUp)
+    @printf(" quarts: %e %e %e %e %e ", v[pts[1]], v[pts[2]], v[pts[3]], v[pts[4]], v[pts[5]])
     print("  (Inf: ",sum(isinf.(cnt)), ")")
 
     println()
@@ -205,7 +208,7 @@ end
 
 function plot_relative(dic,str,title)
 
-  plt = Plots.plot(title = title)
+    plt = scatter(title = title)
     sol1 = dic["names"][1]
     key = "$(sol1)_$(str)"
 
@@ -217,12 +220,13 @@ function plot_relative(dic,str,title)
         key = "$(name)_$(str)"
         thisrow = dic[key]
         threshrow = min.(thisrow, 10*baserow) ./ baserow
-        Plots.plot!(sort(threshrow), label=rowname)
+        scatter!(sort(threshrow), label=rowname)
 
         print(str, " " ,rowname, " ")
         vec_stats(threshrow, thisrow)
-  end
-  display(plt)
+    end
+    #display(plt)
+    return plt
 end
 
 function compare_two(dic,sol1,sol2)
