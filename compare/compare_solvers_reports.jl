@@ -129,9 +129,10 @@ function total_time_nnz_loglog(dic; names = dic["names"],
         #y = sort(y)
         y[y .== Inf] .= mx
         #y = y * 10^(-b)  
-        Plots.plot!(log.(x), log.(y), label="", linewidth=3, color=cols[i])
-        Plots.scatter!(log.(x), log.(y), label=labels[i], linewidth=3, color=cols[i])
+        Plots.plot!(x, y, label="", linewidth=3, color=cols[i])
+        Plots.scatter!(x, y, label=labels[i], linewidth=3, color=cols[i])
     end
+  Plots.plot!(xaxis=(:log), yaxis=(:log))
   plot!(ytickfont = font(12))
   plot!(legendfont = font(16))
     plot!(guidefont = font(16))
