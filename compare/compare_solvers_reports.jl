@@ -93,6 +93,54 @@ function total_time_nnz(dic; names = dic["names"],
   return plt, mn, mx
 end
 
+function total_time_nnz_loglog(dic; names = dic["names"],
+                        labels = names,
+                        cols=distinguishable_colors(length(names)),
+                            #ref=[]
+                            )
+    if isa(cols,Dict)
+       cols = [cols[x] for x in names];
+    end
+
+    # if ~isempty(ref)
+    #     yref = 10*dic["$(ref)_tot"] ./ dic["ne"]
+    # end
+
+    x = dic["ne"]
+    
+    plt = Plots.plot()
+    mn = Inf
+    mx = 0
+    for name in names
+        y = dic["$(name)_tot"]
+        # if ~isempty(ref)
+        #     y = min.(y, yref)
+        # end
+        mn = min(mn,minimum(y))
+        mx = max(mx,maximum(y[y .< Inf]))
+    end
+   # b = floor(log(mx)/log(10))
+    for i in 1:length(names)
+        name = names[i]
+        y = dic["$(name)_tot"]
+        # if ~isempty(ref)
+        #     y = min.(y, yref)
+        # end
+        #y = sort(y)
+        y[y .== Inf] .= mx
+        #y = y * 10^(-b)  
+        Plots.plot!(log.(x), log.(y), label="", linewidth=3, color=cols[i])
+        Plots.scatter!(log.(x), log.(y), label=labels[i], linewidth=3, color=cols[i])
+    end
+  plot!(ytickfont = font(12))
+  plot!(legendfont = font(16))
+    plot!(guidefont = font(16))
+    #plot!(xticks=[])
+  #title!("$(10.0^(round.(Int,b))) Seconds / Edge, Distribution")
+  display(plt)
+  return plt, mn, mx
+end
+
 
 
 
