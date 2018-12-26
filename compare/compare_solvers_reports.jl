@@ -1,6 +1,5 @@
 using Plots
-pyplot
-()
+pyplot()
 #plotly()
 #plotlyjs() #plotlyjs issue: https://github.com/JuliaPlots/Plots.jl/issues/1793
 using Statistics
@@ -28,7 +27,7 @@ function total_time_relative(dic; names = dic["names"], labels=names, cols=disti
   mn = 1
   mx = 1
     
-    for i in 2:length(names)
+  for i in 2:length(names)
         name = names[i]
       y = sort(min.(dic["$(name)_tot"] ./ rel, 10))
       mn = min(mn,minimum(y))
@@ -53,13 +52,13 @@ function total_time_nnz(dic; names = dic["names"],
                         labels = names,
                         cols=distinguishable_colors(length(names)),
                         ref=[])
-    if isa(cols,Dict)
-        cols = [cols[x] for x in names];
-    end
+    #if isa(cols,Dict)
+    #    cols = [cols[x] for x in names];
+    #end
 
-    if ~isempty(ref)
-        yref = 10*dic["$(ref)_tot"] ./ dic["ne"]
-    end
+    # if ~isempty(ref)
+    #     yref = 10*dic["$(ref)_tot"] ./ dic["ne"]
+    # end
     
     plt = Plots.plot()
     mn = Inf
@@ -81,7 +80,7 @@ function total_time_nnz(dic; names = dic["names"],
             y = min.(y, yref)
         end
       y = sort(y)
-      y[y .== Inf] = mx
+      y[y .== Inf] .= mx
       y = y * 10^(-b)  
       Plots.plot!(y, label=labels[i], linewidth=3, color=cols[i])
     end
@@ -91,7 +90,7 @@ function total_time_nnz(dic; names = dic["names"],
     plot!(xticks=[])
   title!("$(10.0^(round.(Int,b))) Seconds / Edge, Distribution")
   display(plt)
-  return mn, mx
+  return plt, mn, mx
 end
 
 

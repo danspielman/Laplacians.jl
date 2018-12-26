@@ -3,6 +3,8 @@
   for example you could put the following in .bash_profile
   export TRILINOS_HOME="/Users/janedoe/Trilinos_collection/Trilinos_gcc"
 
+  WARNING: currently needs the above line AND NO / (slash) at end, which is not common?
+
   and need gtimeout, which can get from brew install coreutils
 =#
 
