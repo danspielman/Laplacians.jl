@@ -52,13 +52,13 @@ function total_time_nnz(dic; names = dic["names"],
                         labels = names,
                         cols=distinguishable_colors(length(names)),
                         ref=[])
-    #if isa(cols,Dict)
-    #    cols = [cols[x] for x in names];
-    #end
+    if isa(cols,Dict)
+       cols = [cols[x] for x in names];
+    end
 
-    # if ~isempty(ref)
-    #     yref = 10*dic["$(ref)_tot"] ./ dic["ne"]
-    # end
+    if ~isempty(ref)
+        yref = 10*dic["$(ref)_tot"] ./ dic["ne"]
+    end
     
     plt = Plots.plot()
     mn = Inf
