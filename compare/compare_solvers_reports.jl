@@ -46,6 +46,38 @@ function total_time_relative(dic; names = dic["names"], labels=names, cols=disti
   return plt
 end
 
+function total_time_relative_unsort(dic; names = dic["names"], labels=names, cols=distinguishable_colors(length(names)))
+
+    if isa(cols,Dict)
+        cols = [cols[x] for x in names];
+    end
+
+  plt = Plots.plot(title = "(Time / Time for $(labels[1])), Distribution")
+  rel = dic["$(names[1])_tot"]
+
+  mn = 1
+  mx = 1
+    
+  for i in 2:length(names)
+        name = names[i]
+      #y = sort(min.(dic["$(name)_tot"] ./ rel, 10))
+      y = min.(dic["$(name)_tot"] ./ rel, 10)
+      mn = min(mn,minimum(y))
+      mx = max(mx,maximum(y))
+      Plots.plot!(y, label=labels[i], linewidth=3, color=cols[i])
+  end
+  Plots.plot!(ylimits=(0:10),yticks=[0;round(mn,2);1:10])
+
+  plot!(ytickfont = font(16))
+  plot!(legendfont = font(16))
+  plot!(guidefont = font(16))
+    plot!(xticks=[])
+
+
+  display(plt)
+  return plt
+end
+
 
 
 function total_time_nnz(dic; names = dic["names"],
@@ -200,6 +232,15 @@ function plot_relative(dic)
   return plot(p1,p2,p3,p4)
 end
 
+function plot_relative_unsort(dic)
+
+  p1 = plot_relative_unsort(dic,"tot","Total Time")
+  p2 = plot_relative_unsort(dic,"build","Build Time")
+  p3 = plot_relative_unsort(dic,"solve","Solve Time")
+  p4 = plot_relative_unsort(dic,"its","Iterations")
+  return plot(p1,p2,p3,p4)
+end
+
 function vec_stats(v)
     v = sort(vec(v))
     n = length(v)
@@ -255,6 +296,29 @@ end
 
 
 function plot_relative(dic,str,title)
+
+    plt = scatter(title = title)
+    sol1 = dic["names"][1]
+    key = "$(sol1)_$(str)"
+
+    baserow = dic["$(sol1)_$(str)"]
+
+    for i in 2:length(dic["names"])
+        name = dic["names"][i]
+        rowname = "$name / $(sol1)"
+        key = "$(name)_$(str)"
+        thisrow = dic[key]
+        threshrow = min.(thisrow, 10*baserow) ./ baserow
+        scatter!(sort(threshrow), label=rowname)
+
+        print(str, " " ,rowname, " ")
+        vec_stats(threshrow, thisrow)
+    end
+    #display(plt)
+    return plt
+end
+
+function plot_relative_unsort(dic,str,title)
 
     plt = scatter(title = title)
     sol1 = dic["names"][1]
