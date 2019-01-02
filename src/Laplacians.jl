@@ -35,8 +35,6 @@ module Laplacians
 
   using DelimitedFiles
 
-  using PyPlot
-
   include("IJV.jl")
 
   include("fastCSC.jl")
