@@ -67,7 +67,7 @@ while time() - t0 < 60*60*hours
     b = randn(size(a,1))
     b = b - mean(b)*ones(size(b))
     b = b / norm(b)
-    x = testVMatlabLap(tests, dic, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false, test_muelubelos=true )
+    x = testVMatlabLap(tests, dic, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=true, test_cmg=false, test_lamg=false, test_muelubelos=false )
 
     @save fn dic
 
