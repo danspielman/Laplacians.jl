@@ -38,7 +38,8 @@ test_chol = SolverTest(chol_lap, "chol")
     
 #tests = [test_ac test_acw test_amg test_chol]
 tests = [test_ac test_acw test_chol]
-    
+#tests = [test_ac test_acw]
+   
 # warm up the code
 a = chimera(10000,1)
 b = randn(10000)
