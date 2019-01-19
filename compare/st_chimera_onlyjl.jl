@@ -63,12 +63,13 @@ t0 = time()
 
 while time() - t0 < 60*60*hours
 
+    ti = time()
     global i += 1
     println("-----------")
     println(i)
 
-    a = chimera(n,i)
-    aw = randWeight(a)
+    @time a = chimera(n,i)
+    @time aw = randWeight(a)
 
     tn = "chimera($n,$i)"
     b = randn(n)
@@ -79,5 +80,8 @@ while time() - t0 < 60*60*hours
     tn = "wtedChimera($n,$i)"
     x = testVMatlabLap(tests, dic, aw, b, verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false, test_muelubelos=false )
     @save fn dic
+
+    @printf("time this iter = %f",time() - ti)
+    @printf("time all  iter = %f",time() - t0)
 
 end
