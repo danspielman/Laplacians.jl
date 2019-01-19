@@ -17,6 +17,7 @@ using MATLAB
 using SparseArrays
 using Statistics
 using LinearAlgebra
+using Printf
 
 lapdir = dirname(pathof(Laplacians))
 
@@ -69,7 +70,9 @@ while time() - t0 < 60*60*hours
     println(i)
 
     @time a = chimera(n,i)
+    @show Base.summarysize(a)
     @time aw = randWeight(a)
+    @show Base.summarysize(aw)
 
     tn = "chimera($n,$i)"
     b = randn(n)
@@ -81,7 +84,7 @@ while time() - t0 < 60*60*hours
     x = testVMatlabLap(tests, dic, aw, b, verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false, test_muelubelos=false )
     @save fn dic
 
-    @printf("time this iter = %f",time() - ti)
-    @printf("time all  iter = %f",time() - t0)
+    @printf("time (sec) this iter = %.1f\n",time() - ti)
+    @printf("time (sec) all  iter = %.1f\n",time() - t0)
 
 end
