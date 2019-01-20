@@ -79,11 +79,6 @@ tn = "chimera(1000,1)"
 dicWarmup = Dict() 
 @show @elapsed x = testVMatlabLap(tests, dicWarmup, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos )
 @show @elapsed @save "warmupdummy.jld" dicWarmup
-# warm up the test code again?
-dicWarmup = Dict() 
-@show @elapsed x = testVMatlabLap(tests, dicWarmup, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos )
-@show @elapsed @save "warmupdummy.jld" dicWarmup
-
     
 dic = Dict()
 
@@ -110,7 +105,7 @@ while time() - t0 < 60*60*hours
     @time b = randn(n)
     @time b = b .- mean(b)
     @time b = b / norm(b)
-    x = testVMatlabLap(tests, dicWarmup, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos )
+    x = testVMatlabLap(tests, dic, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos )
     @save fn dic
     #tn = "wtedChimera($n,$i)"
     #x = testVMatlabLap(tests, dic, aw, b, verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false, test_muelubelos=false )
