@@ -42,8 +42,8 @@ function timeLimitMueluBelos(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=
         iter = 0 #we're not recording this atm
         err = results[1,:relresidual]
     catch e
-        bt = backtrace()
-        msg = sprint(showerror, e, bt)
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
         println(msg)
         println("Muelu Belos script died")
     end

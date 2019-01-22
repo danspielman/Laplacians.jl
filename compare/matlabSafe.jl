@@ -36,7 +36,10 @@ function timeLimitCmg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
 
     try
         run(cmd)
-    catch
+    catch e
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
+        println(msg)
         println("Matlab Died")
     end
 
@@ -95,7 +98,10 @@ function timeLimitIcc(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
 
     try
         run(cmd)
-    catch
+    catch e
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
+        println(msg)
         println("Matlab Died")
     end
 
@@ -154,7 +160,10 @@ function timeLimitLamg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
 
     try
         run(cmd)
-    catch
+    catch e
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
+        println(msg)
         println("Matlab Died")
     end
 
@@ -213,7 +222,10 @@ function timeLimitLamgSddm(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=fa
 
     try
         run(cmd)
-    catch
+    catch e
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
+        println(msg)
         println("Matlab Died")
     end
 
