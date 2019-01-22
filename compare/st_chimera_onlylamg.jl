@@ -34,7 +34,7 @@ using Printf
 
 lapdir = dirname(pathof(Laplacians))
 
-#include("$(lapdir)/../compare/matlabSafe.jl")
+include("$(lapdir)/../compare/matlabSafe.jl")
 #include("$(lapdir)/../compare/trilinosDrivers.jl")
 include("$(lapdir)/../compare/compare_solvers_TL.jl")
 
