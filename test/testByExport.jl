@@ -264,8 +264,26 @@ t0 = complete_binary_tree(6); t0[1,2] = 0; t0[2,1] = 0; dropzeros!(t0);
   # export maxflow
 
 for i in 1:10
-    maxflow(wted_chimera(102,i),1,2)
-    maxflow(wted_chimera(102,i),1,2,justflow=false)
+  a = wted_chimera(100,i)
+  a[90:99,100] .= 2;
+  a[100,90:99] .= 2;
+  a[1,2:10] .= 2;
+  a[2:10,1] .= 2;
+  f,c = maxflow(a,1,100)
+
+  @test sum(abs.(f+f')) < 1e-8
+  y = f*ones(100)
+  y[1] = 0
+  y[100] = 0
+  @test sum(abs.(y)) < 1e-8  
+
+  x = zeros(100)
+  x[c] .= 1.0
+  t = findall(iszero,x)
+  @test abs( sum(a[c,t]) - sum(f[1,:])  ) < 1e-8
+
+  @test maximum(f - a) < 1e-8
+
 end
 
   # export akpw, akpwU
