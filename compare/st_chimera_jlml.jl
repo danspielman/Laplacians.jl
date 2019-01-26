@@ -18,7 +18,7 @@ tpre = time()
 n = Base.parse(Int64,ARGS[1])
 hours = Base.parse(Float64,ARGS[2])
 
-fn = "st_chimera_all_$(n)h$(hours).jld"
+fn = "st_chimera_jlml_$(n)h$(hours).jld"
 println(fn)
 
 using Laplacians
