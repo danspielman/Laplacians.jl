@@ -49,7 +49,6 @@ end
 
 test_ac = SolverTest(ac_deg, "ac")
 test_acw = SolverTest(ac_wdeg, "ac_fast")
-#test_amg = SolverTest(AMGLapSolver, "pyamg")
     
 # removed chol because killing it can cause a crash
 #test3 = SolverTest(chol_lap, "chol")

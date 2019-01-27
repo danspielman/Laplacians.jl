@@ -84,6 +84,7 @@ function total_time_nnz(dic; names = dic["names"],
                         labels = names,
                         cols=distinguishable_colors(length(names)),
                         ref=[])
+    #dic = copy(dic)
     if isa(cols,Dict)
        cols = [cols[x] for x in names];
     end
@@ -149,8 +150,11 @@ function total_time_nnz_loglog(dic; names = dic["names"],
         #     y = min.(y, yref)
         # end
         mn = min(mn,minimum(y))
-        mx = max(mx,maximum(y[y .< Inf]))
+        if any(y .< Inf)
+            mx = max(mx,maximum(y[y .< Inf]))
+        end
     end
+
    # b = floor(log(mx)/log(10))
     for i in 1:length(names)
         name = names[i]
@@ -159,7 +163,7 @@ function total_time_nnz_loglog(dic; names = dic["names"],
         #     y = min.(y, yref)
         # end
         #y = sort(y)
-        y[y .== Inf] .= mx
+        y[y .== Inf] .= 2*mx
         #y = y * 10^(-b)  
         Plots.plot!(x, y, label="", linewidth=3, color=cols[i])
         Plots.scatter!(x, y, label=labels[i], linewidth=3, color=cols[i])
@@ -172,6 +176,35 @@ function total_time_nnz_loglog(dic; names = dic["names"],
   #title!("$(10.0^(round.(Int,b))) Seconds / Edge, Distribution")
   display(plt)
   return plt, mn, mx
+end
+
+function total_pair(dic, name1, name2)
+    plt = Plots.plot()
+    mn = Inf
+    mx = 0
+    y1 = dic["$(name1)_tot"]
+    y2 = dic["$(name2)_tot"]
+    
+    mn = min(mn,minimum(y1),minimum(y2))
+    if any(y1 .< Inf)
+        mx = max(mx,maximum(y1))
+    end
+    if any(y2 .< Inf)
+        mx = max(mx,maximum(y2))
+    end
+    y1[y1 .== Inf] .= 2*mx
+    y2[y2 .== Inf] .= 2*mx
+
+    Plots.plot!([mn,mx], [mn,mx], labels="", linewidth=3)
+    Plots.scatter!(y1, y2, label="", linewidth=3)
+
+    
+    Plots.plot!(xaxis=(:log), yaxis=(:log))
+    plot!(ytickfont = font(12))
+    plot!(legendfont = font(16))
+    plot!(guidefont = font(16))
+    display(plt)
+    return plt, mn, mx
 end
 
 
