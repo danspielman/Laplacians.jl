@@ -55,9 +55,9 @@ test_acw = SolverTest(ac_wdeg, "ac_fast")
 #test3 = SolverTest(chol_lap, "chol")
 #test4 = SolverTest(cgLapSolver, "cg")
 #tests = [test_ac test_acw test_amg]
-#tests = [test_ac test_acw]
+tests = [test_ac test_acw]
 
-    tests = [test_acw]
+#   tests = [test_acw]
 
 run_icc = false
 run_cmg = false
