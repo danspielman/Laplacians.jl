@@ -153,9 +153,9 @@ Also compares them against the solvers we have in matlab, with a time limit of 1
 """
 function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real=1e-8, maxits=1000, maxtime=1000, verbose=false, testName="",
-  test_icc=false, test_cmg=false, test_lamg=false, test_muelubelos=false, tl_fac=10) where {Tv,Ti}
+  test_icc=false, test_cmg=false, test_lamg=false, test_muelubelos=false, tl_fac=10, tl=0) where {Tv,Ti}
 
-    b = b - mean(b)*ones(size(b))
+    b = b .- mean(b)
 
     la = lap(a)
 
@@ -210,7 +210,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
 
     x = []
 
-    tl = 0
+    #tl = 0
 
     for i in 1:length(solvers)
         solverTest = solvers[i]
@@ -222,7 +222,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
 
         ret = testSolver(solverTest.solver, a, b, tol, maxits, verbose)
 
-        if i == 1
+        if i == 1 && tl == 0
             x = ret[5]
             tl = round(Int,30 + tl_fac*(ret[1]+ret[2]))
         end
@@ -238,38 +238,43 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
         error("tl is zero")
     end
 
-    if test_cmg
-      if verbose
-          println("cmg")
-      end
+    if test_cmg || test_icc || test_lamg || test_muelubelos
+        la = lap(a)
+ 
+        if test_cmg
+            if verbose
+                println("cmg")
+            end
 
-      ret = timeLimitCmg(tl, lap(a), b,verbose = true);
-      pushSpeedResult!(dic, "cmg", ret)
-    end
+            ret = timeLimitCmg(tl, la, b,verbose = true);
+            pushSpeedResult!(dic, "cmg", ret)
+        end
 
-    if test_icc
-      if verbose
-          println("icc")
-      end
-      ret = timeLimitIcc(tl, lap(a), b,verbose = true);
-      pushSpeedResult!(dic, "icc", ret)
-    end
+        if test_icc
+            if verbose
+                println("icc")
+            end
+            ret = timeLimitIcc(tl, la, b,verbose = true);
+            pushSpeedResult!(dic, "icc", ret)
+        end
 
-    if test_lamg
-      if verbose
-          println("lamg")
-      end
-      ret = timeLimitLamg(tl, lap(a), b,verbose = true);
-      pushSpeedResult!(dic, "lamg", ret)
-    end
+        if test_lamg
+            if verbose
+                println("lamg")
+            end
+            ret = timeLimitLamg(tl, la, b,verbose = true);
+            pushSpeedResult!(dic, "lamg", ret)
+        end
 
-    if test_muelubelos
-      if verbose
-          println("muelubelos")
-      end
-      ret = timeLimitMueluBelos(tl, lap(a), b,verbose = true);
-      pushSpeedResult!(dic, "muelubelos", ret)
+        if test_muelubelos
+            if verbose
+                println("muelubelos")
+            end
+            ret = timeLimitMueluBelos(tl, la, b,verbose = true);
+            pushSpeedResult!(dic, "muelubelos", ret)
+        end
     end
+    
 
     return x
 
