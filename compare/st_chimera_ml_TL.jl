@@ -57,8 +57,8 @@ test_acw = SolverTest(ac_wdeg, "ac_fast")
 
 tests = []
     
-run_icc = true
-run_cmg = true
+run_icc = false
+run_cmg = false
 run_lamg = true
 run_muelubelos = false
     
