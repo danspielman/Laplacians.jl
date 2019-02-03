@@ -197,7 +197,11 @@ function total_pair(dic, name1, name2)
 
     Plots.plot!([mn,mx], [mn,mx], labels="", linewidth=3)
     Plots.plot!([mn,mx], 2 .*[mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 5 .*[mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 10 .*[mn,mx], labels="", linewidth=3)
     Plots.plot!([mn,mx], 0.5 .*[mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 0.2 .*[mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 0.1 .*[mn,mx], labels="", linewidth=3)
     Plots.scatter!(y1, y2, label="", linewidth=3)
 
     
