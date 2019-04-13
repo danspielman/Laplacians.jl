@@ -202,18 +202,24 @@
               
                 <p><a id='IO-1'></a></p>
 <h1 id="io">IO</h1>
-<p><a id='Laplacians.readIJ' href='#Laplacians.readIJ'>#</a>
-<strong><code>Laplacians.readIJ</code></strong> &mdash; <em>Function</em>.</p>
-<p>To read a simple edge list, each line being an (i, j) pair</p>
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/370dbf7ab8f61685341baec1acdd416b24ff3df0/src/IO.jl#L2' class='documenter-source'>source</a><br></p>
-<p><a id='Laplacians.readIJV-Tuple{AbstractString}' href='#Laplacians.readIJV-Tuple{AbstractString}'>#</a>
-<strong><code>Laplacians.readIJV</code></strong> &mdash; <em>Method</em>.</p>
-<p>To read a simple edge list, each line being an (i, j, v) pair. The parens should not be there in the format, just commas separating. To generate this format in Matlab, you just need to be careful to write the vertex indices with sufficient precision.  For example, you can do this</p>
-<pre><code>&gt;&gt; [ai,aj,av] = find(triu(a));
-&gt;&gt; dlmwrite('graph.txt',[ai,aj,av],'precision',9);
+<p><a id='Laplacians.read_graph-Tuple{AbstractString}' href='#Laplacians.read_graph-Tuple{AbstractString}'>#</a>
+<strong><code>Laplacians.read_graph</code></strong> &mdash; <em>Method</em>.</p>
+<pre><code>adj = read_graph(fn)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/370dbf7ab8f61685341baec1acdd416b24ff3df0/src/IO.jl#L14-L24' class='documenter-source'>source</a><br></p>
+<p>Read a graph from a file in IJ or IJV format. That is, each line of the file should represent one edge. Each edge should be specified by the indices of its vertices, separated by a whitespace or a comma.  If the graph is weighted, the weight should follow the second index.  For example, the unweighted complete graph on 3 vertices would appear as the file</p>
+<pre><code>1 2
+1 3
+2 3
+</code></pre>
+
+<p>A weighted path on 3 vertices with edge weights <code>1.5</code> and <code>2.5</code> would be</p>
+<pre><code>1, 2, 1.5
+2, 3, 2.5
+</code></pre>
+
+<p>The function tries to detect the delimiter type (comma or whitespace) from the first line of the file.  The format must be consistent. Vertex indices start at <code>1</code>.</p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/ee678a22fc6ceab495f2e2dcdcc4a262be2adbd5/src/IO.jl#L1-L27' class='documenter-source'>source</a><br></p>
 <p><a id='Laplacians.writeIJV-Tuple{AbstractString,Any}' href='#Laplacians.writeIJV-Tuple{AbstractString,Any}'>#</a>
 <strong><code>Laplacians.writeIJV</code></strong> &mdash; <em>Method</em>.</p>
 <p>Writes the upper portion of a matrix in ijv format, one row for each edge, separated by commas.  Only writes the upper triangular portion. The result can be read from Matlab like this:</p>
@@ -224,7 +230,7 @@
 &gt;&gt; a = a + a';
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/370dbf7ab8f61685341baec1acdd416b24ff3df0/src/IO.jl#L38-L50' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/danspielman/Laplacians.jl/blob/ee678a22fc6ceab495f2e2dcdcc4a262be2adbd5/src/IO.jl#L62-L74' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
