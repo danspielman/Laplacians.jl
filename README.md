@@ -19,12 +19,10 @@ To get the current version of the master branch, run `pkg> add Laplacians#master
 
 Changes:
 
+* Added `harmonic_interp` to interpolate harmonic functions on graphs.  This is the fundamental routine used in Label Propagation / Semi-Supervised Learning on Graphs. 
 * Added a function `read_graph` to replace `readIJ` and `readIJV`.  It is a little more robust.
-
 * Cleaned up `maxflow` so that it now returns a flow and cut as a matrix and set.
-
 * Made `pcg` a little more general.
-
 * Added `fiedler` for computing Fiedler vectors and values.  That is, the smallest nonzero eigenvalue of the Laplacian.
 * Fixed a bug in `thicken` that could cause it to loop forever, and cause `chimera` to do the same.
 

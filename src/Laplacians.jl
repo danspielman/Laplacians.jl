@@ -220,6 +220,8 @@ module Laplacians
   # include("isotonicIPM.jl")
   # export isotonicIPM, isotonicIPMrelEps
 
+  include("harmonic.jl")
+  export harmonic_interp
 
   include("from_cholmod.jl")
   export cholmod_perm, ask_cholmod

@@ -377,4 +377,16 @@ johnlind(a)
 
   # export toposort, dirEdgeVertexMat
 
+a = wted_chimera(301,1)
+S = [1;2;3]
+vals = [1.0;2.0;3.0]
+x = harmonic_interp(a, S, vals, tol=1e-10)
+@test x[S] == vals
+b = lap(a)*x
+b[S] .= 0
+@test sum(abs.(b)) < 1e-6
+
+
+
+
 println("End of testByExport")

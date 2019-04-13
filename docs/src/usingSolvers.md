@@ -57,6 +57,26 @@ A _SDDM_ matrix (symmetric, diagonally-dominant M-matrix) is a matrix that is bo
 Laplacians.jl contains code for solving systems of linear equations in both Laplacian and SDDM matrices.  In fact, these problems are equivalent.  So, usually a solver for one type of system is implemented, and then wrapped to solve the other.
 The same ideas can be used to solve systems of equations in SDD matrices (the off-diagonals can be positive or negative), but a wrapper for these has not yet been written.
 
+## Harmonic Interpolation
+
+One of the main reasons to solve Laplacian and SDDM systems is to interpolate harmonic functions on graphs.  In an unweighted graph, these have the property that the value at every vertex is the average of the values of its neighbors.  To make this sensible, some values must be fixed.
+
+For example, below we fit a harmonic function on the 4-by-4 grid.
+We fix the values of vertices `1`, `4`, and `16` to `0.0`, `0.5`, and `2.0`, respectively.  We then show the results by forcing them into a 4-by-4 grid.
+
+~~~julia
+julia> a = grid2(4);
+julia> S = [1; 4; 16];
+julia> vals = [0; 0.5; 2];
+julia> x = harmonic_interp(a, S, vals);
+julia> reshape(x,4,4)
+4×4 Array{Float64,2}:
+ 0.0       0.460942  0.749255  0.903101
+ 0.398927  0.633572  0.883721  1.05695
+ 0.563208  0.790698  1.09511   1.38402
+ 0.5       0.8709    1.322     2.0     
+~~~
+
 
 ## The Solver Interface
 
@@ -69,7 +89,7 @@ To solve a system of linear equations, one first passes the matrix defining the 
 ~~~julia
 julia> n = 1000;
 julia> a = wted_chimera(n);  # produces a graph, as a sparse adjacency matrix
-julia> b = randn(n); 
+julia> b = randn(n);
 julia> b = b - mean(b); # so there is a solution
 julia> f = chol_lap(a)
 (::#79) (generic function with 1 method)
@@ -118,7 +138,7 @@ julia> norm(la*x-b)/norm(b)
 8.886882933294668e-5
 ~~~  
 
- 
+
 
 
 For some experiments with solvers, including some of those below, look at the notebook Solvers.ipynb.
@@ -155,7 +175,7 @@ To solve systems in Laplacian matrices, use [`chol_lap`](@ref).  Recall that thi
 
 ~~~julia
 f = chol_lap(a)
-b = randn(n); 
+b = randn(n);
 b = b - mean(b);
 norm(la*f(b) - b)
 	2.0971536951312585e-15
@@ -225,10 +245,10 @@ prec(x) = x ./ d
 PCG BLAS stopped at maxtime.
 PCG BLAS stopped after: 530 iterations with relative error 0.07732478003311881.
   1.007756 seconds (10.32 k allocations: 648.525 MB, 9.69% gc time)
- 
+
 @time x = pcg(la,b,prec,maxtime=3,tol=1e-2,verbose=true);
 PCG BLAS stopped after: 1019 iterations with relative error 0.009984013184429813.
-  2.086828 seconds (19.57 k allocations: 1.216 GB, 9.92% gc time) 
+  2.086828 seconds (19.57 k allocations: 1.216 GB, 9.92% gc time)
 ~~~
 
 Without the preconditioner, CG takes much longer on this example.
@@ -294,7 +314,7 @@ Solvers inspired by the algorithm from "Approaching optimality for solving SDD s
 
 ## Sampling Solvers of Kyng and Sachdeva
 
-These are inspired by the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016. 
+These are inspired by the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.
 
 These first two follow that paper reasonably closely.
 
@@ -345,7 +365,7 @@ You must have installed Yiannis Koutis's [Combinatorial Multigrid Code](http://w
 * `x = matlabCmgSolver(mat, b; tol::Real=1e-6, maxits=10000)`
 
 The matrix `mat` can either be SDDM or a Laplacian.  This solves the system in `b`.
- 
+
 If you need to specify the solver separately from `b`, you can call
 
 * `x = matlabCmgSolver(mat; tol::Real=1e-6, maxits=10000)`
