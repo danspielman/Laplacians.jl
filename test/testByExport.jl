@@ -152,12 +152,32 @@ end
 
 
 # export readIJ, readIJV, writeIJV
-
+println("Testing IO")
 n = 101
 a = wted_chimera(n,1)
 writeIJV("tmp.txt",a)
 a2 = readIJV("tmp.txt")
 @test sum(abs.(a-a2)) == 0
+
+a2 = read_graph("tmp.txt")
+@test sum(abs.(a-a2)) == 0
+
+fh = open("tmp.txt","w")
+write(fh,"1, 3, 4 \n 2, 3, 2.5 \n")
+close(fh)
+
+a1 = read_graph("tmp.txt")
+
+fh = open("tmp.txt","w")
+write(fh,"1 3 4 \n 2 3 2.5 \n")
+close(fh)
+
+a2 = read_graph("tmp.txt")
+
+@test a1 == a2
+
+rm("tmp.txt")
+
 
 # export unweight, unweight!
 
@@ -275,7 +295,7 @@ for i in 1:10
   y = f*ones(100)
   y[1] = 0
   y[100] = 0
-  @test sum(abs.(y)) < 1e-8  
+  @test sum(abs.(y)) < 1e-8
 
   x = zeros(100)
   x[c] .= 1.0
