@@ -1173,7 +1173,7 @@ var documenterSearchIndex = {"docs": [
     "page": "solvers",
     "title": "Laplacians.approxchol_lap",
     "category": "method",
-    "text": "solver = approxchol_lap(a); x = solver(b);\nsolver = approxchol_lap(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())\n\nA heuristic by Daniel Spielman inspired by the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.  Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it. The ApproxCholParams let you choose one of three orderings to perform the elimination.\n\nApproxCholParams(:given) - in the order given.   This is the fastest for construction the preconditioner, but the slowest solve.\nApproxCholParams(:deg) - always eliminate the node of lowest degree.   This is the slowest build, but the fastest solve.\nApproxCholParams(:wdeg) - go by a perturbed order of wted degree.  \n\nFor more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html\n\n\n\n\n\n"
+    "text": "solver = approxchol_lap(a); x = solver(b);\nsolver = approxchol_lap(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())\n\nA heuristic by Daniel Spielman inspired by the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.  Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it. The ApproxCholParams let you choose one of three orderings to perform the elimination.\n\nApproxCholParams(:given) - in the order given.   This is the fastest for construction the preconditioner, but the slowest solve.\nApproxCholParams(:deg) - always eliminate the node of lowest degree.   This is the slowest build, but the fastest solve.\nApproxCholParams(:wdeg) - go by a perturbed order of wted degree.\n\nFor more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html\n\n\n\n\n\n"
 },
 
 {
@@ -1181,7 +1181,7 @@ var documenterSearchIndex = {"docs": [
     "page": "solvers",
     "title": "Laplacians.approxchol_sddm",
     "category": "function",
-    "text": "solver = approxchol_sddm(sddm); x = solver(b);\nsolver = approxchol_sddm(sddm; tol=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())\n\nSolves sddm systems by wrapping approxchol_lap. Not yet optimized directly for sddm.\n\nFor more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html \n\n\n\n\n\n"
+    "text": "solver = approxchol_sddm(sddm); x = solver(b);\nsolver = approxchol_sddm(sddm; tol=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())\n\nSolves sddm systems by wrapping approxchol_lap. Not yet optimized directly for sddm.\n\nFor more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html\n\n\n\n\n\n"
 },
 
 {
