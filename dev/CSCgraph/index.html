@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Sparse matrices as graphs · Laplacians.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Laplacians.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">About</a></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="../Installation/">Installation</a></li><li><a class="toctext" href="../Examples/">Examples</a></li><li class="current"><a class="toctext" href>Sparse matrices as graphs</a><ul class="internal"></ul></li><li><a class="toctext" href="../usingSolvers/">Solving Linear Equations</a></li><li><a class="toctext" href="../LSST/">Low Stretch Spanning Trees</a></li></ul></li><li><a class="toctext" href="../Developing/">Developing</a></li><li><span class="toctext">API</span><ul><li><a class="toctext" href="../graphGenerators/">generators</a></li><li><a class="toctext" href="../operators/">operators</a></li><li><a class="toctext" href="../graphUtils/">graphUtils</a></li><li><a class="toctext" href="../graphAlgs/">graphAlgs</a></li><li><a class="toctext" href="../IO/">IO</a></li><li><a class="toctext" href="../solvers/">solvers</a></li><li><a class="toctext" href="../sparsification/">sparsification</a></li><li><a class="toctext" href="../akpw/">akpw</a></li><li><a class="toctext" href="../treeAlgs/">treeAlgs</a></li><li><a class="toctext" href="../randTrees/">randTrees</a></li><li><a class="toctext" href="../localClustering/">localClustering</a></li><li><a class="toctext" href="../privateFuncs/">Private Functions</a></li><li><a class="toctext" href="../indexOfAll/">All of the above</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Manual</li><li><a href>Sparse matrices as graphs</a></li></ul><a class="edit-page" href="https://github.com/danspielman/Laplacians.jl/blob/master/docs/src/CSCgraph.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Sparse matrices as graphs</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Using-sparse-matrices-as-graphs-1" href="#Using-sparse-matrices-as-graphs-1">Using sparse matrices as graphs</a></h1><p>The routines <code>deg</code>, <code>nbri</code> and <code>weighti</code> will let you treat a sparse matrix like a graph.</p><p><code>deg(graph, u)</code> is the degree of node u. <code>nbri(graph, u, i)</code> is the ith neighbor of node u. <code>weighti(graph, u, i)</code> is the weight of the edge to the ith neighbor of node u.</p><p>Note that we start indexing from 1.</p><p>For example, to iterate over the neighbors of node v,   and play with the attached nodes, you could write code like:</p><pre><code class="language-julia">  for i in 1:deg(mat, v)
+     nbr = nbri(mat, v, i)
+     wt = weighti(mat, v, i)
+     foo(v, nbr, wt)
+  end</code></pre><p>But, this turns out to be much slower than working with the structure directly, like</p><pre><code class="language-julia">  for ind in mat.colptr[v]:(mat.colptr[v+1]-1)
+      nbr = mat.rowval[ind]
+      wt = mat.nzval[ind]
+      foo(v, nbr, wt)
+  end</code></pre><ul><li>[ ] Maybe we can make a macro to replace those functions.  It could be faster and more readable.</li></ul><h3><a class="nav-anchor" id="The-SparseMatrixCSC-data-structure-1" href="#The-SparseMatrixCSC-data-structure-1">The SparseMatrixCSC data structure</a></h3><p>You can explore what is going on with the data structure by looking at some examples.  For example, here is a randomly weighted complete graph on 4 vertices, first displayed as a matrix:</p><pre><code class="language-julia">gr = round(10*uniformWeight(completeGraph(4)))
+
+4x4 sparse matrix with 12 Float64 entries:
+	[2, 1]  =  3.0
+	[3, 1]  =  3.0
+	[4, 1]  =  6.0
+	[1, 2]  =  3.0
+	[3, 2]  =  1.0
+	[4, 2]  =  2.0
+	[1, 3]  =  3.0
+	[2, 3]  =  1.0
+	[4, 3]  =  7.0
+	[1, 4]  =  6.0
+	[2, 4]  =  2.0
+	[3, 4]  =  7.0
+	
+full(gr)
+
+4x4 Array{Float64,2}:
+ 0.0  3.0  3.0  6.0
+ 3.0  0.0  1.0  2.0
+ 3.0  1.0  0.0  7.0
+ 6.0  2.0  7.0  0.0</code></pre><p>To see the underlying data structure, use <code>fieldnames</code>.</p><pre><code class="language-julia">fieldnames(gr)
+
+5-element Array{Symbol,1}:
+ :m     
+ :n     
+ :colptr
+ :rowval
+ :nzval </code></pre><p><code>m</code> and <code>n</code> are the dimensions of the matrix. The entries of the matrix are stored in nzval. colptr[i] is the index in nzval of the first nonzero entry in column i.  rowval tells you which rows in each column are nonzero. The indices of the nonzero entries in column i are stored in  rowval[colptr[i]] through rowval[colptr[i+1]-1].</p><pre><code class="language-julia">gr.colptr 
+
+5-element Array{Int64,1}:
+  1
+  4
+  7
+ 10
+ 13
+ 
+ [gr.rowval gr.nzval]
+ 
+ 12x2 Array{Float64,2}:
+ 2.0  3.0
+ 3.0  3.0
+ 4.0  6.0
+ 1.0  3.0
+ 3.0  1.0
+ 4.0  2.0
+ 1.0  3.0
+ 2.0  1.0
+ 4.0  7.0
+ 1.0  6.0
+ 2.0  2.0
+ 3.0  7.0</code></pre><footer><hr/><a class="previous" href="../Examples/"><span class="direction">Previous</span><span class="title">Examples</span></a><a class="next" href="../usingSolvers/"><span class="direction">Next</span><span class="title">Solving Linear Equations</span></a></footer></article></body></html>
