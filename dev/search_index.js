@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "About",
     "title": "Current Development Version",
     "category": "section",
-    "text": "To get the current version of the master branch, run pkg> add Laplacians#masterChanges:Added harmonic_interp to interpolate harmonic functions on graphs.  This is the fundamental routine used in Label Propagation / Semi-Supervised Learning on Graphs.\nAdded a function read_graph to replace readIJ and readIJV.  It is a little more robust.\nCleaned up maxflow so that it now returns a flow and cut as a matrix and set.\nMade pcg a little more general.\nAdded fiedler for computing Fiedler vectors and values.  That is, the smallest nonzero eigenvalue of the Laplacian.\nFixed a bug in thicken that could cause it to loop forever, and cause chimera to do the same."
+    "text": "To get the current version of the master branch, run pkg> add Laplacians#masterChanges:Added harmonic_interp to interpolate harmonic functions on graphs.  This is the fundamental routine used in Label Propagation / Semi-Supervised Learning on Graphs.\nAdded a function read_graph to replace readIJ and readIJV.  It is a little more robust.\nCleaned up maxflow so that it now returns a flow and cut as a matrix and set.\nMade pcg a little more general.\nAdded fiedler for computing Fiedler vectors and values.  That is, the smallest nonzero eigenvalue of the Laplacian.\nFixed a bug in thicken that could cause it to loop forever, and cause chimera to do the same.\nChanged the graph drawing code to use Plots instead of PyPlot."
 },
 
 {
@@ -789,7 +789,7 @@ var documenterSearchIndex = {"docs": [
     "page": "operators",
     "title": "Laplacians.spectral_coords",
     "category": "method",
-    "text": "spectral_coords(a)\n\nComputes the spectral coordinates of a graph\n\n\n\n\n\n"
+    "text": "x, y = spectral_coords(a)\n\nComputes the spectral coordinates of a graph. If more than 2 coords are desired, you can use\n\n    x, y, z = spectral_coords(a; k = 3)\n\n\n\n\n\n"
 },
 
 {
@@ -797,7 +797,7 @@ var documenterSearchIndex = {"docs": [
     "page": "operators",
     "title": "Laplacians.spectral_drawing",
     "category": "method",
-    "text": "spectral_drawing(a)\n\nComputes spectral coordinates, and then uses plotGraph to draw\n\n\n\n\n\n"
+    "text": "spectral_drawing(a)\n\nComputes spectral coordinates, and then uses plot_graph to draw\n\n\n\n\n\n"
 },
 
 {
