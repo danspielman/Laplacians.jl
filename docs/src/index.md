@@ -48,7 +48,7 @@ Changes:
 * Made `pcg` a little more general.
 * Added `fiedler` for computing Fiedler vectors and values.  That is, the smallest nonzero eigenvalue of the Laplacian.
 * Fixed a bug in `thicken` that could cause it to loop forever, and cause `chimera` to do the same.
-
+* Changed the graph drawing code to use Plots instead of PyPlot.
 
 
 # Version 1.0.1

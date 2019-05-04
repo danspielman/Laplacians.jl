@@ -35,7 +35,7 @@ module Laplacians
 
   using DelimitedFiles
 
-  using PyPlot
+  using Plots
 
   include("IJV.jl")
 
