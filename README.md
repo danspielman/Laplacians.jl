@@ -17,8 +17,11 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
 
+# Version 1.1.0
+
 Changes:
 
+* Updating to use Julia's new Registrator.
 * Added `harmonic_interp` to interpolate harmonic functions on graphs.  This is the fundamental routine used in Label Propagation / Semi-Supervised Learning on Graphs.
 * Added a function `read_graph` to replace `readIJ` and `readIJV`.  It is a little more robust.
 * Cleaned up `maxflow` so that it now returns a flow and cut as a matrix and set.
