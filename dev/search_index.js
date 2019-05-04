@@ -21,7 +21,15 @@ var documenterSearchIndex = {"docs": [
     "page": "About",
     "title": "Current Development Version",
     "category": "section",
-    "text": "To get the current version of the master branch, run pkg> add Laplacians#masterChanges:Added harmonic_interp to interpolate harmonic functions on graphs.  This is the fundamental routine used in Label Propagation / Semi-Supervised Learning on Graphs.\nAdded a function read_graph to replace readIJ and readIJV.  It is a little more robust.\nCleaned up maxflow so that it now returns a flow and cut as a matrix and set.\nMade pcg a little more general.\nAdded fiedler for computing Fiedler vectors and values.  That is, the smallest nonzero eigenvalue of the Laplacian.\nFixed a bug in thicken that could cause it to loop forever, and cause chimera to do the same.\nChanged the graph drawing code to use Plots instead of PyPlot."
+    "text": "To get the current version of the master branch, run pkg> add Laplacians#master"
+},
+
+{
+    "location": "#Version-1.1.0-1",
+    "page": "About",
+    "title": "Version 1.1.0",
+    "category": "section",
+    "text": "Changes:Updating to use Julia\'s new Registrator.\nAdded harmonic_interp to interpolate harmonic functions on graphs.  This is the fundamental routine used in Label Propagation / Semi-Supervised Learning on Graphs.\nAdded a function read_graph to replace readIJ and readIJV.  It is a little more robust.\nCleaned up maxflow so that it now returns a flow and cut as a matrix and set.\nMade pcg a little more general.\nAdded fiedler for computing Fiedler vectors and values.  That is, the smallest nonzero eigenvalue of the Laplacian.\nFixed a bug in thicken that could cause it to loop forever, and cause chimera to do the same.\nChanged the graph drawing code to use Plots instead of PyPlot."
 },
 
 {
