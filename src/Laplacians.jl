@@ -35,7 +35,7 @@ module Laplacians
 
   using DelimitedFiles
 
-  using PyPlot
+  using Plots
 
   include("IJV.jl")
 
@@ -59,7 +59,6 @@ module Laplacians
   export getObound
 
   include("graphGenerators.jl")
-  export readIJ
   export ring_graph
   export generalized_ring
   export rand_matching
@@ -94,7 +93,7 @@ module Laplacians
   export latin_square, latin_square_graph
 
   include("IO.jl")
-  export readIJ, readIJV, writeIJV
+  export writeIJV, read_graph
 
   include("graphOps.jl")
 
@@ -221,6 +220,8 @@ module Laplacians
   # include("isotonicIPM.jl")
   # export isotonicIPM, isotonicIPMrelEps
 
+  include("harmonic.jl")
+  export harmonic_interp
 
   include("from_cholmod.jl")
   export cholmod_perm, ask_cholmod

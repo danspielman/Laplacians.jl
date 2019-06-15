@@ -269,7 +269,7 @@ function pcg(mat, b::Vector{Tval}, pre::Function;
 
     x = zeros(Tval,n)
     bestx = zeros(Tval,n)
-    bestnr = one(Tval)
+    bestnr = 1.0
 
     r = copy(b)
     z = pre(r)

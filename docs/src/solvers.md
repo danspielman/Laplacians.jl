@@ -10,6 +10,6 @@ Pages   = ["solvers.md"]
 
 ```@autodocs
 Modules = [Laplacians]
-Pages   = ["solverInterface.jl", "pcg.jl","approxChol.jl", "augTreeSolver.jl", "samplingSolver.jl","KMPSolver.jl", "externalSolvers.jl"]
+Pages   = ["solverInterface.jl", "pcg.jl","approxChol.jl", "augTreeSolver.jl", "samplingSolver.jl","KMPSolver.jl", "externalSolvers.jl", "harmonic.jl"]
 Private = false
 ```

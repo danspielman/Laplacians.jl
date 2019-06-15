@@ -1,8 +1,15 @@
 """ 
-  implementation of Dinic's algorithm. computes the maximum flow and min-cut in G between s and t 
-  we consider the adjacency matrix to be the capacity matrix 
+    F, C = maxflow(G, s, t)
+
+G is the adjacency matrix of an undirected graph, with edge weights equal to capacity.
+Computes the maximum s-t flow, F, and the minimum cut, C.
+
+F[a,b] is flow from a to b, and F[b,a] = -F[a,b].
+C is the set reachable from s using unsaturated edges.
+
+Uses Dinic's algorithm.  It would probably be easy to make this work for directed graphs.
 """
-function maxflow(G::SparseMatrixCSC{Tv, Ti}, s::Int64, t::Int64; justflow = true) where {Tv, Ti}
+function maxflow(G::SparseMatrixCSC{Tv, Ti}, s::Int64, t::Int64) where {Tv, Ti}
 
   n = max(G.n, G.m)
 
@@ -111,43 +118,32 @@ function maxflow(G::SparseMatrixCSC{Tv, Ti}, s::Int64, t::Int64; justflow = true
 
   end
 
-  if justflow == true
-    return totalflow
-  else
-    # compute the min-cut
-    left = 0
-    right = 1
-    Q[right] = s
-    inQ[s] = true
+  # compute the min-cut
+  left = 0
+  right = 1
+  Q[right] = s
+  inQ[s] = true
 
-    while left < right
-      left = left + 1
+  while left < right
+    left = left + 1
 
-      u = Q[left]
-      for i in 1:deg(G, u)
-        v = nbri(G, u, i)
+    u = Q[left]
+    for i in 1:deg(G, u)
+      v = nbri(G, u, i)
 
-        if inQ[v] == 0 && weighti(C, u, i) > 0
-          right = right + 1
-          Q[right] = v
-          inQ[v] = 1
-        end
+      if inQ[v] == 0 && weighti(C, u, i) > 0
+        right = right + 1
+        Q[right] = v
+        inQ[v] = 1
       end
     end
-
-    cut = Tuple{Int64,Int64}[]
-    for i in 1:right
-      u = Q[i]
-      for j in 1:deg(G, u)
-        v = nbri(G, u, j)
-
-        if weighti(C, u, j) == 0
-          push!(cut, (u, v))
-        end
-      end
-    end
-
-    return totalflow, cut
   end
 
+  cut = Q[1:right]
+  flow = C - G
+
+  return flow, cut
 end
+
+
+

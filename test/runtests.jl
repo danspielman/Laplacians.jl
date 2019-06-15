@@ -15,9 +15,8 @@ include("testByFile.jl")
 
 include("testByExport.jl")
 
+include("testDrawing.jl")
+
 include("testSolvers.jl")
 
 include("testPCG.jl")
-
-
-

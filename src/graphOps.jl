@@ -53,20 +53,20 @@ function extendMatrix(a::SparseMatrixCSC{Tv,Ti}, d::Array{Tv,1}) where {Tv,Ti}
     if sum(abs.(d)) == 0
         return a
     end
-    
+
     dpos = d.*(d.>0)
 
     n = length(d)
-    
+
     ai,aj,av=findnz(a)
-    
+
     ai2 = [ai;1:n;(n+1)*ones(Int,n)]
     aj2 = [aj;(n+1)*ones(Int,n);1:n]
     av2 = [av;dpos;dpos]
     a2 = sparse(ai2,aj2,av2)
-    
+
     return a2
-    
+
 end
 
 
@@ -323,8 +323,8 @@ function generalizedNecklace(A::SparseMatrixCSC{Tv, Ti}, H::SparseMatrixCSC, k::
   return sparse(newI, newJ, newW)
 end # generalizedNecklace
 
-function generalized_necklace(A::IJV, H::IJV, k::Integer; ver=Vcur) 
-  
+function generalized_necklace(A::IJV, H::IJV, k::Integer; ver=Vcur)
+
     if ver == V06
         H = IJV(sparse(H))
     end
@@ -332,12 +332,12 @@ function generalized_necklace(A::IJV, H::IJV, k::Integer; ver=Vcur)
     # these are square matrices
     n = A.n
     m = H.n
-  
+
     # duplicate the vertices in A so that each vertex in H corresponds to a copy of A
     newW = kron(ones(m), A.v)
     newI = kron(ones(Int, m), A.i) + kron(n * collect(0:(m-1)), ones(Int, A.nnz) )
     newJ = kron(ones(Int, m), A.j) + kron(n * collect(0:(m-1)), ones(Int, A.nnz) )
-  
+
     # for each edge in H, add k random edges between two corresponding components
     # multiedges will be concatenated to a single edge with higher weight
 
@@ -348,8 +348,8 @@ function generalized_necklace(A::IJV, H::IJV, k::Integer; ver=Vcur)
     ind = 0
     for i in 1:H.nnz
       u = H.i[i]
-      v = H.j[i] 
-  
+      v = H.j[i]
+
       if (u < v)
         #component x is from 1 + (x - 1) * n to n + (x - 1) * n
         for j in 1:k
@@ -363,11 +363,11 @@ function generalized_necklace(A::IJV, H::IJV, k::Integer; ver=Vcur)
         end
       end
     end
-  
+
     return IJV(n*m, length(newI) + k*H.nnz, [newI; Hi; Hj] , [newJ; Hj; Hi], [newW; Hv; Hv])
 
   end # generalizedNecklace
-  
+
 
 
 """
@@ -499,12 +499,12 @@ function join_graphs(a::SparseMatrixCSC{Tval,Tind}, b::SparseMatrixCSC{Tval,Tind
 end
 
 
-function join_graphs(a::IJV, b::IJV, k::Integer; ver=Vcur) 
+function join_graphs(a::IJV, b::IJV, k::Integer; ver=Vcur)
 
     ji = rand_ver(ver, 1:a.n,k)
     jj = rand_ver(ver, 1:b.n,k) .+ a.n
 
-    gi = [a.i; b.i .+ a.n ; ji ; jj] 
+    gi = [a.i; b.i .+ a.n ; ji ; jj]
     gj = [a.j; b.j .+ a.n ; jj; ji]
     gv = [a.v ; b.v ; ones(2*k)]
 
@@ -517,7 +517,7 @@ end
  Create a disjoint union of graphs a and b,
  and then put k random edges between them, merging b into a.
 """
-function join_graphs!(a::IJV, b::IJV, k::Integer; ver=Vcur) 
+function join_graphs!(a::IJV, b::IJV, k::Integer; ver=Vcur)
 
     ji = rand_ver(ver, 1:a.n,k)
     jj = rand_ver(ver, 1:b.n,k) .+ a.n
@@ -538,12 +538,12 @@ end
 """
 disjoin(a::SparseMatrixCSC,b::SparseMatrixCSC) = join_graphs(a,b,0)
 
-disjoin(a::IJV, b::IJV) = IJV(a.n+b.n, a.nnz + b.nnz, 
+disjoin(a::IJV, b::IJV) = IJV(a.n+b.n, a.nnz + b.nnz,
         [a.i ; b.i .+ a.n],
         [a.j ; b.j .+ a.n],
         [a.v;b.v])
 
-function disjoin!(a::IJV, b::IJV) 
+function disjoin!(a::IJV, b::IJV)
     append!(a.i, b.i .+ a.n )
     append!(a.j, b.j .+ a.n )
     append!(a.v, b.v)
@@ -556,7 +556,7 @@ end
 
 Only keep the first n vertices of a.
 """
-function firstn(a::IJV, n::Integer) 
+function firstn(a::IJV, n::Integer)
     mask = (a.i .<= n) .& (a.j .<= n)
     return IJV(n, sum(mask), a.i[mask], a.j[mask], a.v[mask])
 end
@@ -571,39 +571,44 @@ end
 Plots graph gr with coordinates (x,y)
 """
 function plot_graph(gr,x,y;color=[0,0,1],dots=true,setaxis=true,number=false)
-  (ai,aj,av) = findnz(triu(gr))
-  arx = [x[ai]';x[aj]';NaN*ones(length(ai))']
-  ary = [y[ai]';y[aj]';NaN*ones(length(ai))']
-  p = PyPlot.plot(arx[:],ary[:],color=color)
 
-  if dots
-    PyPlot.plot(x,y,color=color,marker="o",linestyle="none")
-  end #if
-
-
-  if number
-    for i in 1:length(x)
-        PyPlot.annotate(i, xy = [x[i]; y[i]])
+    if isa(color, Vector) && length(color) == 3
+        col = RGB(color...)
+    else
+        col = color
     end
-  end
 
-  PyPlot.axis("off")
+    p = plot(;legend=false, axis=false, xticks=false, yticks=false)
 
-  if setaxis
-  ax = PyPlot.axes()
+    (ai,aj,av) = findnz(triu(gr))
+    for i in 1:length(ai)
+        s = [ai[i]; aj[i]]
+        plot!(p, x[s], y[s], linecolor=col)
+    end
 
-  minx = minimum(x)
-  maxx = maximum(x)
-  miny = minimum(y)
-  maxy = maximum(y)
-  delx = maxx - minx
-  dely = maxy - miny
-  ax[:set_ylim]([miny - dely/20, maxy + dely/20])
-  ax[:set_xlim]([minx - delx/20, maxx + delx/20])
-  end
+    if dots
+        scatter!(p,x, y , markercolor=col, markerstrokecolor=false)
+    end
 
-  return p
-end # plotGraph
+    if number
+        annotate!(p, x, y, collect(1:length(x)))
+    end
+
+    minx = minimum(x)
+    maxx = maximum(x)
+    miny = minimum(y)
+    maxy = maximum(y)
+    delx = maxx - minx
+    dely = maxy - miny
+
+    plot!(p; ylims = (miny - dely/20, maxy + dely/20))
+    plot!(p; xlims = (minx - delx/20, maxx + delx/20))
+
+    display(p)
+    return p
+end
+
+
 
 """
     plot_graph(gr,x,y,z;color=[0,0,1],dots=true,setaxis=true,number=false)
@@ -611,49 +616,52 @@ end # plotGraph
 Plots graph gr with coordinates (x,y,z)
 """
 function plot_graph(gr,x,y,z;color=[0,0,1],dots=true,setaxis=true,number=false)
-  (ai,aj,av) = findnz(triu(gr))
-  arx = [x[ai]';x[aj]';NaN*ones(length(ai))']
-  ary = [y[ai]';y[aj]';NaN*ones(length(ai))']
-  arz = [z[ai]';z[aj]';NaN*ones(length(ai))']
-  p = PyPlot.plot3D(arx[:],ary[:],arz[:],color=color)
 
-  if dots
-    PyPlot.plot3D(x,y,z,color=color,marker="o",linestyle="none")
-  end #if
-
-
-  if number
-    for i in 1:length(x)
-        PyPlot.annotate(i, xyz = [x[i]; y[i]; z[i]])
+    if isa(color, Vector) && length(color) == 3
+        col = RGB(color...)
+    else
+        col = color
     end
-  end
 
-  PyPlot.axis("off")
+    p = plot(;legend=false, axis=false, xticks=false, yticks=false)
 
-  if setaxis
-  ax = PyPlot.axes()
+    (ai,aj,av) = findnz(triu(gr))
+    for i in 1:length(ai)
+        s = [ai[i]; aj[i]]
+        plot!(p, x[s], y[s], z[s], linecolor=col)
+    end
 
-  minx = minimum(x)
-  maxx = maximum(x)
-  miny = minimum(y)
-  maxy = maximum(y)
-  minz = minimum(z)
-  maxz = maximum(z)
-  delx = maxx - minx
-  dely = maxy - miny
-  delz = maxz - minz
-  ax[:set_ylim]([miny - dely/20, maxy + dely/20])
-  ax[:set_xlim]([minx - delx/20, maxx + delx/20])
-  ax[:set_zlim]([minz - delz/20, maxz + delz/20])
-  end
+    if dots
+        scatter!(p,x, y, z,  markercolor=col, markerstrokecolor=false)
+    end
 
-  return p
-end # plotGraph
+    if number
+        annotate!(p, x, y, z,  collect(1:length(x)))
+    end
+
+    minx = minimum(x)
+    maxx = maximum(x)
+    miny = minimum(y)
+    maxy = maximum(y)
+    minz = minimum(z)
+    maxz = maximum(z)
+    delx = maxx - minx
+    dely = maxy - miny
+    delz = maxz - minz
+
+    plot!(p; ylims = (miny - dely/20, maxy + dely/20))
+    plot!(p; xlims = (minx - delx/20, maxx + delx/20))
+    plot!(p; zlims = (minz - delz/20, maxz + delz/20))
+
+    display(p)
+    return p
+end
+
 
 """
     spectral_drawing(a)
 
-Computes spectral coordinates, and then uses plotGraph to draw
+Computes spectral coordinates, and then uses plot_graph to draw
 """
 function spectral_drawing(a)
 
@@ -663,15 +671,19 @@ function spectral_drawing(a)
 end # spectral_drawing
 
 """
-    spectral_coords(a)
+    x, y = spectral_coords(a)
 
-Computes the spectral coordinates of a graph
+Computes the spectral coordinates of a graph.
+If more than 2 coords are desired, you can use
+~~~
+    x, y, z = spectral_coords(a; k = 3)
+~~~
 """
-function spectral_coords(a)
+function spectral_coords(a; k = 2)
 
-    E = eigs(lap(a), nev = 3, which=:SR)
+    E = eigs(lap(a), nev = (k+1), which=:SM)
     V = E[2]
-    return V[:,2], V[:,3]
+    return tuple([V[:,i] for i in 2:(k+1)]...)
 
 end # spectral_coords
 
