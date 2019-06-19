@@ -228,4 +228,7 @@ module Laplacians
 
   include("deprecated.jl")
 
+  include("graphGenGeom.jl")
+  export ggrid2_ijv, ggrid2_checkered_ijv, plot_graph_weighted
+
 end # module Laplacians.jl
