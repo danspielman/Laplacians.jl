@@ -1,5 +1,3 @@
-import ..Laplacians
-
 function indexToLinear(x,y,xlen)
     return x+(y-1)*xlen
 end
