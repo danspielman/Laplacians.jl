@@ -171,8 +171,59 @@ function ggrid3_ijv(s1::Integer,s2::Integer,s3::Integer)
     return IJV(n,nnz,i,j,v)
 end
 
+function ggrid3_checkered_ijv(s1::Integer,s2::Integer,s3::Integer,b1::Integer,b2::Integer,b3::Integer,w::Real)
+    l1 = div(s1,b1)
+    l2 = div(s2,b2)
+    l3 = div(s3,b3)
+
+    n = s1*s2*s3
+    nnz = 3*n - s1*s2 - s1*s3 - s2*s3
+    
+    i = Array{Int64,1}(undef,nnz)
+    j = Array{Int64,1}(undef,nnz)
+    v = Array{Float64,1}(undef,nnz)
+
+    e = 1
+
+    for z = 1:s3
+        for y = 1:s2
+            for x = 1:s1
+                checkered = (mod(div(x-1,l1)+div(y-1,l2)+div(z-1,l3),2) == 0)
+
+                # eastward edge
+                if x < s1
+                    i[e] = indexToLinear(x,y,z,s1,s2)
+                    j[e] = indexToLinear(x+1,y,z,s1,s2)
+                    v[e] = checkered ? w : 1
+                    e += 1  
+                end 
+                # northward edge
+                if y < s2
+                    i[e] = indexToLinear(x,y,z,s1,s2)
+                    j[e] = indexToLinear(x,y+1,z,s1,s2)
+                    v[e] = checkered ? w : 1
+                    e += 1
+                end 
+                # upward edge
+                if z < s3
+                    i[e] = indexToLinear(x,y,z,s1,s2)
+                    j[e] = indexToLinear(x,y,z+1,s1,s2)
+                    v[e] = checkered ? w : 1
+                    e += 1
+                end 
+            end
+        end
+    end
+    return IJV(n,nnz,i,j,v)
+end
+
 function ggrid3(s1::Integer,s2::Integer,s3::Integer)
     A = sparse(ggrid3_ijv(s1,s2,s3))
+    return A + A'
+end
+
+function ggrid3_checkered(s1::Integer,s2::Integer,s3::Integer,b1::Integer,b2::Integer,b3::Integer,w::Real)
+    A = sparse(ggrid3_checkered_ijv(s1,s2,s3,b1,b2,b3,w))
     return A + A'
 end
 

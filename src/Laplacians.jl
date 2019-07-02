@@ -233,5 +233,6 @@ module Laplacians
   export ggrid2_checkered_ijv, ggrid2_checkered
   export plot_graph_weighted, ggrid2coords, ggrid3coords
   export ggrid3_ijv, ggrid3
+  export ggrid3_checkered_ijv, ggrid3_checkered
   
 end # module Laplacians.jl
