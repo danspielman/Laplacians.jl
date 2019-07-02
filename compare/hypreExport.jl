@@ -9,14 +9,14 @@
 using MATLAB
 using Laplacians
 
-function hypreExportVector(output_filename, b; tol::Real=1e-8, maxits=1000)
+function hypreExportVector(output_filename, b; num_procs=1, tol::Real=1e-8, maxits=1000)
 
     mf = MatFile("julia2matlab2hypre_vector.mat","w")
     #put_variable(mf, "M", M)
     put_variable(mf, "b", b)
     put_variable(mf, "tol", tol)
     put_variable(mf, "maxits", maxits)
-    put_variable(mf, "num_procs", 2)
+    put_variable(mf, "num_procs", num_procs)
     put_variable(mf, "output_filename", "$(output_filename)")
     close(mf)
 
@@ -37,14 +37,14 @@ function hypreExportVector(output_filename, b; tol::Real=1e-8, maxits=1000)
     end
 end
 
-function hypreExportMatrixVector(filename_matrix, M, filename_vector, b, ; tol::Real=1e-8, maxits=1000)
+function hypreExportMatrixVector(filename_matrix, M, filename_vector, b ; num_procs=1, tol::Real=1e-8, maxits=1000)
 
     mf = MatFile("julia2matlab2hypre_matrixvector.mat","w")
     put_variable(mf, "A", M)
     put_variable(mf, "b", b)
     put_variable(mf, "tol", tol)
     put_variable(mf, "maxits", maxits)
-    put_variable(mf, "num_procs", 2)
+    put_variable(mf, "num_procs", num_procs)
     put_variable(mf, "filename_matrix", "$(filename_matrix)")
     put_variable(mf, "filename_vector", "$(filename_vector)")
     close(mf)
