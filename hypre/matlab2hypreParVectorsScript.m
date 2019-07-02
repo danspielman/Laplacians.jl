@@ -1,8 +1,6 @@
 % should be called with 
 % EXAMPLE
-%  /Applications/MATLAB_R2018b.app/bin/matlab -nojvm < matlab2hypreParVectorsScript" 
-
-display(pwd)
+%  /Applications/MATLAB_R2018b.app/bin/matlab -nojvm < matlab/matlab2hypreParVectorsScript
 
 load 'julia2matlab2hypre_vector.mat'
 % hardcoded vector file name, 
@@ -25,7 +23,7 @@ rest = mod(n, num_procs);
 part = [0 (rest + part_size):part_size:n];
 
 % generate Hypre input files
-Y = [n part(1:num_procs)]'; %comment here just to kill bug in vscode syntax highlighting by closing transpose that it thinks starts a string'
+Y = [n part(1:num_procs)]'; 
 
 for i = 1:num_procs
     nrows = part(i+1) - part(i);

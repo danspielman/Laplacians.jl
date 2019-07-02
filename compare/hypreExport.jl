@@ -36,3 +36,32 @@ function hypreExportVector(output_filename, b; tol::Real=1e-8, maxits=1000)
         println("Matlab Died")
     end
 end
+
+function hypreExportMatrixVector(filename_matrix, M, filename_vector, b, ; tol::Real=1e-8, maxits=1000)
+
+    mf = MatFile("julia2matlab2hypre_matrixvector.mat","w")
+    put_variable(mf, "A", M)
+    put_variable(mf, "b", b)
+    put_variable(mf, "tol", tol)
+    put_variable(mf, "maxits", maxits)
+    put_variable(mf, "num_procs", 2)
+    put_variable(mf, "filename_matrix", "$(filename_matrix)")
+    put_variable(mf, "filename_vector", "$(filename_vector)")
+    close(mf)
+
+    lapdir = dirname(pathof(Laplacians))
+    
+    # fn = "$(hypretestdir)/matlab/matlab2hypreParVectorsScript.m"
+    fn = "$(lapdir)/../hypre/matlab2hypreMatrixVectorScript.m"
+    mat = ENV["MATLAB_HOME"]
+    matlab = "$(mat)/bin/matlab"
+    cmd = `$(matlab) -nojvm \< $(fn)`
+    try
+        run(cmd)
+    catch e
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
+        println(msg)
+        println("Matlab Died")
+    end
+end
