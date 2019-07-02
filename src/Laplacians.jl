@@ -231,6 +231,7 @@ module Laplacians
   include("graphGenGeom.jl")
   export ggrid2_ijv, ggrid2
   export ggrid2_checkered_ijv, ggrid2_checkered
-  export plot_graph_weighted, ggrid2coords
+  export plot_graph_weighted, ggrid2coords, ggrid3coords
+  export ggrid3_ijv, ggrid3
   
 end # module Laplacians.jl
