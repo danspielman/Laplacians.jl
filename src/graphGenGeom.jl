@@ -234,7 +234,7 @@ function ggrid3coords(s1::Integer, s2::Integer, s3::Integer)
     return x, y, z
 end # grid2coords
 
-function plot_graph_weighted(gr,x,y,z;dots=true,setaxis=true,number=false)
+function plot_graph_weighted(gr,x,y,z)#;dots=true,setaxis=true)#,number=false)
 
     if isa(color, Vector) && length(color) == 3
         col = RGB(color...)
@@ -250,13 +250,16 @@ function plot_graph_weighted(gr,x,y,z;dots=true,setaxis=true,number=false)
         plot3d!(p, x[s], y[s], z[s], line_z=av[i], linecolor=:blues )
     end
 
-    if dots
-        scatter!(p,x, y , markercolor=col, markerstrokecolor=false)
-    end
+    # if dots
+    #     scatter!(p, x, y, z, markercolor=col, markerstrokecolor=false)
+    # end
 
-    if number
-        annotate!(p, x, y, collect(1:length(x)))
-    end
+    # if number
+    #     annotate3d!(p, x, y, z, collect(1:length(x)))
+    # end
+    # 3d annotations currently not supported in Plots, but maybe in Plotly?
+    # https://stackoverflow.com/questions/41333965/how-to-make-3d-annotations-in-julia-plots
+    # https://stackoverflow.com/questions/37596865/add-annotation-to-3d-scatterplot-in-plotly
 
     minx = minimum(x)
     maxx = maximum(x)
