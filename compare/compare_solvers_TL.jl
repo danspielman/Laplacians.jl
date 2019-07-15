@@ -421,7 +421,7 @@ function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1
     itscol(name) = "$(name)_its"
     errcol(name) = "$(name)_err"
 
-    dic["names"] = Array{String}(0)
+    dic["names"] = String[]
     for t in solvers
         push!(dic["names"], t.name)
     end

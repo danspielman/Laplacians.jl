@@ -58,9 +58,10 @@ for solver in tests
     x = f(b)
 end
 
+using JLD2
 dic = Dict()
 
-using JLD2
+
 
 n = 10000
 t0 = time()
@@ -82,9 +83,8 @@ while time() - t0 < 60*60*hours
     ni = length(int)
     b = randn(ni);
     b = b / norm(b)
-    x = testSddm(tests, dic, M, b, verbose=true, tol=1e-8, testName=tn, test_icc=true, test_cmg=false, test_lamg=false, test_muelubelos=false )
+    x = testSddm(tests, dic, M, b; verbose=false, tol=1e-8, testName=tn, test_icc=true, test_cmg=false, test_lamg=false)
     @save fn dic
-
     global n = 2*n
 
 end
