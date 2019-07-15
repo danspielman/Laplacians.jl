@@ -339,4 +339,4 @@ function getInterior3(s1::Integer,s2::Integer,s3::Integer)
     return setdiff(1:n,getBoundary3(s1,s2,s3))
 end
 
-function zeroBoundaryLap2(s1,)
+# function zeroBoundaryLap2(s1,)

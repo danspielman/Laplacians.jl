@@ -23,7 +23,9 @@ function timeLimitHypre(limit, M, b; tol::Real=1e-8, maxits=1000, verbose=false,
 
     hypreExportMatrixVector(matname,M,vecname,b,num_procs=num_procs)
 
-    tmpOutFileName = "tmpToJulia.csv"
+    tmpOutFileName_relres = "relres.out"
+    tmpOutFileName_setuptime = "setup.timing.out"
+    tmpOutFileName_solvetime = "solve.timing.out"
 
     bt = Inf
     st = Inf
@@ -32,21 +34,20 @@ function timeLimitHypre(limit, M, b; tol::Real=1e-8, maxits=1000, verbose=false,
 
     #cmd = `gtimeout $(limit) $(scriptpath) --verbose=false --muelu-xml=$(scripxmlsettings) --tol=1e-6 --max-iters=$(maxits) --filepath=$(matpath) --rhsfile=$(vecpath) --outputfile=$(tmpOutFileName)`
 
-    cmd = `gtimeout $(limit)  mpirun -np 2 $(scriptpath) -solver 1 -fromfile $(matname) -rhsparcsrfile $(vecname) -print`
+    cmd = `gtimeout $(limit)  mpirun -np $(num_procs) $(scriptpath) -solver 1 -fromfile $(matname) -rhsparcsrfile $(vecname) -print`
     
     try
         run(cmd)
-        results = CSV.read(tmpOutFileName)
         
-        bt = results[1,:TimeSetup]
-        st = results[1,:TimeSolve]
+        bt = CSV.read(tmpOutFileName_setuptime;header=false)[1,1]
+        st = CSV.read(tmpOutFileName_solvetime;header=false)[1,1]
         iter = 0 #we're not recording this atm
-        err = results[1,:relresidual]
+        err = CSV.read(tmpOutFileName_relres;header=false)[1,1]
     catch e
         errtrace = backtrace()
         msg = sprint(showerror, e, errtrace)
         println(msg)
-        println("Muelu Belos script died")
+        println("Hypre script died")
     end
         
     if verbose
