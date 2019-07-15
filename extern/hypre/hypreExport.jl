@@ -23,7 +23,7 @@ function hypreExportVector(output_filename, b; num_procs=1, tol::Real=1e-8, maxi
     lapdir = dirname(pathof(Laplacians))
     
     # fn = "$(hypretestdir)/matlab/matlab2hypreParVectorsScript.m"
-    fn = "$(lapdir)/../hypre/matlab2hypreParVectorsScript.m"
+    fn = "$(lapdir)/../extern/hypre/matlab2hypreParVectorsScript.m"
     mat = ENV["MATLAB_HOME"]
     matlab = "$(mat)/bin/matlab"
     cmd = `$(matlab) -nojvm \< $(fn)`
@@ -52,7 +52,7 @@ function hypreExportMatrixVector(filename_matrix, M, filename_vector, b ; num_pr
     lapdir = dirname(pathof(Laplacians))
     
     # fn = "$(hypretestdir)/matlab/matlab2hypreParVectorsScript.m"
-    fn = "$(lapdir)/../hypre/matlab2hypreMatrixVectorScript.m"
+    fn = "$(lapdir)/../extern/hypre/matlab2hypreMatrixVectorScript.m"
     mat = ENV["MATLAB_HOME"]
     matlab = "$(mat)/bin/matlab"
     cmd = `$(matlab) -nojvm \< $(fn)`

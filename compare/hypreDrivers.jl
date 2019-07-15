@@ -1,19 +1,18 @@
 #=
-  TRILINOS_HOME needs to be set to where Trilinos lives for using MATLAB,
+  HYPRE_HOME needs to be set to where Hypre lives for using MATLAB,
   for example you could put the following in .bash_profile
-  export TRILINOS_HOME="/Users/janedoe/Trilinos_collection/Trilinos_gcc"
+  export HYPRE_HOME="/Users/janedoe/hypre"
 
   WARNING: currently needs the above line AND NO / (slash) at end, which is not common?
 
   and need gtimeout, which can get from brew install coreutils
 =#
 
-using MatrixMarket
 using CSV
 
-include("./MatrixMarketVectors.jl")
+function timeLimitHypre(limit, M, b; verbose=false, num_procs=2)
+    # function timeLimitHypre(limit, M, b; tol::Real=1e-8, maxits=1000, verbose=false, num_procs=2)
 
-function timeLimitHypre(limit, M, b; tol::Real=1e-8, maxits=1000, verbose=false, num_procs=2)
     
     solverHome = ENV["HYPRE_HOME"]
     scriptpath = "$(solverHome)/src/test/ij_print"
