@@ -229,10 +229,14 @@ module Laplacians
   include("deprecated.jl")
 
   include("graphGenGeom.jl")
+  export plot_graph_weighted
   export ggrid2_ijv, ggrid2
   export ggrid2_checkered_ijv, ggrid2_checkered
-  export plot_graph_weighted, ggrid2coords, ggrid3coords
+  export ggrid2coords
+  export getInterior2, getBoundary2
   export ggrid3_ijv, ggrid3
   export ggrid3_checkered_ijv, ggrid3_checkered
+  export ggrid3coords
+  export getInterior3, getBoundary3
   
 end # module Laplacians.jl

@@ -275,3 +275,68 @@ function plot_graph_weighted(gr,x,y,z)#;dots=true,setaxis=true)#,number=false)
     display(p)
     return p
 end
+
+function getBoundary2(s1::Integer,s2::Integer)
+    n = s1*s2
+    bot = 1:s1
+    top = n-s1+1:n
+    left = s1+1:s1:n-s1
+    right = 2*s1:s1:n-1
+    bndry = [bot; top; left; right]
+    return bndry
+end
+
+function getInterior2(s1::Integer,s2::Integer)
+    n = s1*s2
+    return setdiff(1:n,getBoundary2(s1,s2))
+end
+
+function getBoundary3(s1::Integer,s2::Integer,s3::Integer)
+    n = s1*s2*s3
+    zsidesize = s1*s2
+    xsidesize = s2*s3
+    ysidesize = s1*s3
+
+    # alternatively, we could get z boundary as
+    # zside1b = 1:zsidesize # bot 
+    # zside2b = n-zsidesize+1:n # top
+    
+    zside1 = Array{Int64}(undef,zsidesize)
+    for (i,(x,y)) in Base.Iterators.enumerate(Base.product(1:s1,1:s2))
+        zside1[i] = indexToLinear(x,y,1,s1,s2)
+    end
+    
+    zside2 = Array{Int64}(undef,zsidesize)
+    for (i,(x,y)) in Base.Iterators.enumerate(Base.product(1:s1,1:s2))
+        zside2[i] = indexToLinear(x,y,s3,s1,s2)
+    end
+    
+    xside1 = Array{Int64}(undef,xsidesize)
+    for (i,(y,z)) in Base.Iterators.enumerate(Base.product(1:s2,1:s3))
+        xside1[i] = indexToLinear(1,y,z,s1,s2)
+    end
+    
+    xside2 = Array{Int64}(undef,xsidesize)
+    for (i,(y,z)) in Base.Iterators.enumerate(Base.product(1:s2,1:s3))
+        xside2[i] = indexToLinear(s1,y,z,s1,s2)
+    end
+    
+    yside1 = Array{Int64}(undef,ysidesize)
+    for (i,(x,z)) in Base.Iterators.enumerate(Base.product(1:s1,1:s3))
+        yside1[i] = indexToLinear(x,1,z,s1,s2)
+    end
+    
+    yside2 = Array{Int64}(undef,ysidesize)
+    for (i,(x,z)) in Base.Iterators.enumerate(Base.product(1:s1,1:s3))
+        yside2[i] = indexToLinear(x,s2,z,s1,s2)
+    end
+    
+    return [zside1; zside2; xside1; xside2; yside1; yside2]
+end
+
+function getInterior3(s1::Integer,s2::Integer,s3::Integer)
+    n = s1*s2*s3
+    return setdiff(1:n,getBoundary3(s1,s2,s3))
+end
+
+function zeroBoundaryLap2(s1,)
