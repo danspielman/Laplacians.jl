@@ -45,7 +45,7 @@ s = round(Int,n^(1/3))
 s1 = s
 s2 = s
 s3 = s
-@time A = ggrid3_checkered(s1,s2,s3);
+@time A = ggrid3(s1,s2,s3);
 @time L = lap(A)
 @time int = getInterior3(s1,s2,s3)
 @time M = L[int,int];
@@ -54,7 +54,7 @@ ni = length(int)
 b = randn(ni);
 b = b / norm(b)
 for solver in tests
-    f = solver.solver(a,verbose=true)
+    f = solver.solver(M,verbose=true)
     x = f(b)
 end
 
