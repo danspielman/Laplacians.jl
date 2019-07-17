@@ -490,7 +490,7 @@ function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1
           println("hypre")
       end
       
-      ret = timeLimitHypre(limit, sdd, b; verbose=false, num_procs=2)
+      ret = timeLimitHypre(tl, sdd, b; verbose=false, num_procs=2)
       pushSpeedResult!(dic, "hypre", ret)
     end
 

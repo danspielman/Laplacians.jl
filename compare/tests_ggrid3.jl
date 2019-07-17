@@ -21,6 +21,7 @@ lapdir = dirname(pathof(Laplacians))
 
 include("$(lapdir)/../compare/matlabSafe.jl")
 include("$(lapdir)/../compare/hypreDrivers.jl")
+include("$(lapdir)/../extern/hypre/hypreExport.jl")
 include("$(lapdir)/../compare/compare_solvers_TL.jl")
 
 ac_deg = function(a; verbose=false, args...)
