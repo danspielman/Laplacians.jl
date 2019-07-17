@@ -7,6 +7,13 @@ load 'julia2matlab2hypre_matrixvector.mat'
 %   string with name filename_vector
 %   integer with name num_procs
 
+% RJK 2019 
+% issue with num_procs being int64
+% this caused matlab to do broken integer arithmetic
+% (e.g. int64(3)/int64(2) = int64 2, when one would like int64(3)/int64(2) = int64 1 or fractional)
+% could also fix by using idivide(int64(3),int64(2))=int64 1
+num_procs = double(num_procs)
+
 filename = filename_matrix;
 
 % Error handling.
