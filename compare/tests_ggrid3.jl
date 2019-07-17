@@ -40,8 +40,14 @@ test_chol = SolverTest(chol_sddm, "chol")
 tests = [test_ac test_acw test_chol]
 #tests = [test_ac test_acw]
 
-# warm up the code
+using JLD2
+
+# warm up the test code
+dicWarmup = Dict()
 n = 10000
+println("----- warm up starting ------")
+println(n)
+
 s = round(Int,n^(1/3))
 s1 = s
 s2 = s
@@ -54,10 +60,12 @@ tn = "ggrid3($(s))"
 ni = length(int)
 b = randn(ni);
 b = b / norm(b)
-for solver in tests
-    f = solver.solver(M,verbose=true)
-    x = f(b)
-end
+x = testSddm(tests, dicWarmup, M, b; verbose=false, tol=1e-8, testName=tn, test_icc=true, test_cmg=false, test_lamg=false)
+@save fn dicWarmup    
+
+println("----- warm up complete ------")
+
+# actual tests
 
 using JLD2
 dic = Dict()
