@@ -144,6 +144,7 @@ end
 
 import Laplacians.initDictCol!
 import Laplacians.testSolver
+import Laplacians.testSolverSddm
 import Laplacians.pushSpeedResult!
 
 """
