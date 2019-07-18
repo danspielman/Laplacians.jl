@@ -73,8 +73,6 @@ println("----- warm up complete ------")
 using JLD2
 dic = Dict()
 
-
-
 n = 10000
 
 t0 = time()
@@ -82,7 +80,7 @@ t0 = time()
 while time() - t0 < 60*60*hours
 
     println("-----------")
-    println(n)
+    println("n = $(n)")
 
     s = round(Int,n^(1/3))
     tn = "ggrid3($(s))"
