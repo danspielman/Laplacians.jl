@@ -148,3 +148,34 @@ function testSolver(solver, a, b, tol, maxits, verbose)
   end
 
 end
+
+
+function testSolverSddm(solver, M, b, tol, maxits, verbose)
+
+    try
+  
+      GC.gc()
+      t0 = time()
+      f = solver(M, tol=tol, maxits=maxits, verbose=verbose)
+      build_time = time() - t0
+  
+      it = [0]
+      GC.gc()
+      
+      t0 = time()
+      x = f(b, pcgIts = it, tol=tol, maxits=maxits, verbose=verbose)
+      solve_time = time() - t0
+  
+      err = norm(M * x .- b) / norm(b)
+  
+      ret = (solve_time, build_time, it[1], err, x)
+      if verbose
+        println((solve_time, build_time, it[1], err))
+      end
+      return ret
+    catch
+      println("Solver Error.")
+      return (Inf, Inf, Inf, Inf)
+    end
+  
+  end

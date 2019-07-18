@@ -469,7 +469,7 @@ function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1
             println(solverTest.name)
         end
 
-        ret = testSolver(solverTest.solver, sdd, b, tol, maxits, verbose)
+        ret = testSolverSddm(solverTest.solver, sdd, b, tol, maxits, verbose)
 
         if i == 1
             x = ret[5]
