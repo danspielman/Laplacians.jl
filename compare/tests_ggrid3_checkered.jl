@@ -8,7 +8,7 @@ Which will run for approximately 1 hour, increasing the sizes of the graphs.
 
 hours = Base.parse(Float64,ARGS[1])
 
-fn = "tests_ggrid3_checkered_h$(hours).jld"
+fn = "$(PROGRAM_FILE).h$(hours).jld"
 println(fn)
 
 using Laplacians
@@ -99,7 +99,7 @@ while time() - t0 < 60*60*hours
     ni = length(int)
     b = randn(ni);
     b = b / norm(b)
-    x = testSddm(tests, dic, M, b; verbose=false, tol=1e-8, testName=tn, test_icc=true, test_cmg=false, test_lamg=false)
+    x = testSddm(tests, dic, M, b; verbose=true, tol=1e-8, testName=tn, test_icc=true, test_cmg=false, test_lamg=false)
     @save fn dic
     global n = 2*n
 

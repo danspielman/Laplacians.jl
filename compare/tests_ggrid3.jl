@@ -8,7 +8,7 @@ Which will run for approximately 1 hour, increasing the sizes of the graphs.
 
 hours = Base.parse(Float64,ARGS[1])
 
-fn = "tests_ggrid3_h$(hours).jld"
+fn = "$(PROGRAM_FILE).h$(hours).jld"
 println(fn)
 
 using Laplacians

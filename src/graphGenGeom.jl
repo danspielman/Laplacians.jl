@@ -340,3 +340,62 @@ function getInterior3(s1::Integer,s2::Integer,s3::Integer)
 end
 
 # function zeroBoundaryLap2(s1,)
+
+
+
+function ggrid3_checkeredrandom_ijv(s1::Integer,s2::Integer,s3::Integer,b1::Integer,b2::Integer,b3::Integer,multrange::Integer,seed::Integer)
+    l1 = div(s1,b1)
+    l2 = div(s2,b2)
+    l3 = div(s3,b3)
+    b1odd = mod(b1,2) == 0 ? b1+1 : b1
+    b2odd = mod(b2,2) == 0 ? b2+1 : b2
+    b3odd = mod(b3,2) == 0 ? b3+1 : b3
+
+    n = s1*s2*s3
+    nnz = 3*n - s1*s2 - s1*s3 - s2*s3
+    
+    i = Array{Int64,1}(undef,nnz)
+    j = Array{Int64,1}(undef,nnz)
+    v = Array{Float64,1}(undef,nnz)
+
+    e = 1
+
+    w = 1 #TODO RAT
+
+    for z = 1:s3
+        for y = 1:s2
+            for x = 1:s1
+                @show x,y,z
+                @show boxInd1 = div(x-1,l1)+1
+                @show boxInd2 = div(y-1,l2)+1
+                @show boxInd3 = div(z-1,l3)+1
+                @show boxIndLinear = indexToLinear(boxInd1,boxInd2,boxInd3,b1odd,b2odd)
+                boxIndLinearCheck = mod(boxIndLinear-1,2) == 0
+                checkered = (mod(div(x-1,l1)+div(y-1,l2)+div(z-1,l3),2) == 0)
+                @assert(boxIndLinearCheck == checkered)
+                # eastward edge
+                if x < s1
+                    i[e] = indexToLinear(x,y,z,s1,s2)
+                    j[e] = indexToLinear(x+1,y,z,s1,s2)
+                    v[e] = checkered ? w : 1
+                    e += 1  
+                end 
+                # northward edge
+                if y < s2
+                    i[e] = indexToLinear(x,y,z,s1,s2)
+                    j[e] = indexToLinear(x,y+1,z,s1,s2)
+                    v[e] = checkered ? w : 1
+                    e += 1
+                end 
+                # upward edge
+                if z < s3
+                    i[e] = indexToLinear(x,y,z,s1,s2)
+                    j[e] = indexToLinear(x,y,z+1,s1,s2)
+                    v[e] = checkered ? w : 1
+                    e += 1
+                end 
+            end
+        end
+    end
+    return IJV(n,nnz,i,j,v)
+end
