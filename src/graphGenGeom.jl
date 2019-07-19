@@ -1,3 +1,5 @@
+using Random
+
 function indexToLinear(x,y,xlen)
     return x+(y-1)*xlen
 end
@@ -343,7 +345,7 @@ end
 
 
 
-function ggrid3_checkeredrandom_ijv(s1::Integer,s2::Integer,s3::Integer,b1::Integer,b2::Integer,b3::Integer,multrange::Integer,seed::Integer)
+function ggrid3_checkeredrandom_ijv(s1::Integer,s2::Integer,s3::Integer,b1::Integer,b2::Integer,b3::Integer,multrange::Integer,seed::Integer=1234)
     l1 = div(s1,b1)
     l2 = div(s2,b2)
     l3 = div(s3,b3)
@@ -360,19 +362,21 @@ function ggrid3_checkeredrandom_ijv(s1::Integer,s2::Integer,s3::Integer,b1::Inte
 
     e = 1
 
-    w = 1 #TODO RAT
+    rng = MersenneTwister(seed);
 
     for z = 1:s3
         for y = 1:s2
             for x = 1:s1
-                @show x,y,z
-                @show boxInd1 = div(x-1,l1)+1
-                @show boxInd2 = div(y-1,l2)+1
-                @show boxInd3 = div(z-1,l3)+1
-                @show boxIndLinear = indexToLinear(boxInd1,boxInd2,boxInd3,b1odd,b2odd)
+                boxInd1 = div(x-1,l1)+1
+                boxInd2 = div(y-1,l2)+1
+                boxInd3 = div(z-1,l3)+1
+                boxIndLinear = indexToLinear(boxInd1,boxInd2,boxInd3,b1odd,b2odd)
                 boxIndLinearCheck = mod(boxIndLinear-1,2) == 0
                 checkered = (mod(div(x-1,l1)+div(y-1,l2)+div(z-1,l3),2) == 0)
                 @assert(boxIndLinearCheck == checkered)
+                wexponent = mod(hash(seed+boxIndLinear),multrange)
+                w = 10.0^(-wexponent)
+
                 # eastward edge
                 if x < s1
                     i[e] = indexToLinear(x,y,z,s1,s2)
@@ -398,4 +402,9 @@ function ggrid3_checkeredrandom_ijv(s1::Integer,s2::Integer,s3::Integer,b1::Inte
         end
     end
     return IJV(n,nnz,i,j,v)
+end
+
+function ggrid3_checkeredrandom(s1::Integer,s2::Integer,s3::Integer,b1::Integer,b2::Integer,b3::Integer,multrange::Integer,seed::Integer=1234)
+    A = sparse(ggrid3_checkeredrandom_ijv(s1,s2,s3,b1,b2,b3,multrange,seed))
+    return A + A'
 end

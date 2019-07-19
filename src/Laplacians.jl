@@ -238,5 +238,6 @@ module Laplacians
   export ggrid3_checkered_ijv, ggrid3_checkered
   export ggrid3coords
   export getInterior3, getBoundary3
+  export ggrid3_checkeredrandom
   
 end # module Laplacians.jl
