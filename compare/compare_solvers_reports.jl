@@ -209,8 +209,9 @@ function total_pair(dic, name1, name2)
     plot!(ytickfont = font(12))
     plot!(legendfont = font(16))
     plot!(guidefont = font(16))
-    display(plt)
-    return plt, mn, mx
+    # display(plt)
+    # return plt, mn, mx
+    return plt
 end
 
 
