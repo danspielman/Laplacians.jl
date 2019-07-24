@@ -19,6 +19,7 @@ using MATLAB
 using SparseArrays
 using Statistics
 using LinearAlgebra
+using Printf
 
 lapdir = dirname(pathof(Laplacians))
 
@@ -43,29 +44,35 @@ test_acw = SolverTest(ac_wdeg, "ac_fast")
 #tests = [test_ac test_acw test_chol]
 tests = [test_ac test_acw]
 
+run_hypre = false
+run_icc = false
+run_cmg = false
+run_lamg = false
+run_muelubelos = false
+
 using JLD2
 
 # warm up the test code
 println("----- warm up starting ------")
 dicWarmup = Dict()
 iWarmup = 0
-nWarumup = 1000
-println("i = $(i)")
+nWarmup = 1000
+println("i = $(iWarmup)")
 println("n = $(n)")
 
-@time a = chimera(nWarumup,iWarmup)
+@time a = chimera(nWarmup,iWarmup)
 @show Base.summarysize(a)
 @time aw = rand_weight(a)
 @show Base.summarysize(aw)
 
-tn = "chimera($nWarumup,$iWarmup)"
-@time b = randn(nWarumup)
+tn = "chimera($nWarmup,$iWarmup)"
+@time b = randn(nWarmup)
 @time b = b .- mean(b)
 @time b = b / norm(b)
 x = testVMatlabLap(tests, dicWarmup, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos )
 @save fn dicWarmup
-tn = "wtedChimera($nWarumup,$iWarmup)"
-x = testVMatlabLap(tests, dicWarmup, aw, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos )
+tn = "wtedChimera($nWarmup,$iWarmup)"
+x = testVMatlabLap(tests, dicWarmup, aw, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos, test_hypre=run_hypre )
 @save fn dicWarmup
 
 println("----- warm up complete ------")
@@ -96,10 +103,10 @@ while time() - t0 < 60*60*hours
     @time b = randn(n)
     @time b = b .- mean(b)
     @time b = b / norm(b)
-    x = testVMatlabLap(tests, dic, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos )
+    x = testVMatlabLap(tests, dic, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos, test_hypre=run_hypre )
     @save fn dic
     tn = "wtedChimera($n,$i)"
-    x = testVMatlabLap(tests, dic, aw, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos )
+    x = testVMatlabLap(tests, dic, aw, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos, test_hypre=run_hypre )
     @save fn dic
 
     @printf("time (sec) this iter = %.1f\n",time() - ti)

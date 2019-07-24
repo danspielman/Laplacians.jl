@@ -154,7 +154,7 @@ Also compares them against the solvers we have in matlab, with a time limit of 1
 """
 function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real = 1e-8, maxits = 1000, maxtime = 1000, verbose = false, testName = "",
-                        test_icc = false, test_cmg = false, test_lamg = false, test_muelubelos = false, tl_fac = 10, tl = 0) where {Tv,Ti}
+                        test_icc = false, test_cmg = false, test_lamg = false, test_muelubelos = false, test_hypre = false, tl_fac = 10, tl = 0) where {Tv,Ti}
 
     @show tl
 
