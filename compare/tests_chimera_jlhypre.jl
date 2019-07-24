@@ -8,7 +8,16 @@ on chimeras with n = 2000
 
 tpre = time()
 
-n = Base.parse(Int64,ARGS[1])
+n = 0
+
+try
+    global n
+    n = convert(Int64,Base.parse(Float64,ARGS[1]))
+catch e
+    global n
+    n = Base.parse(Int64,ARGS[1])
+end
+
 hours = Base.parse(Float64,ARGS[2])
 
 fn = "$(PROGRAM_FILE).n$(n).h$(hours).jld"
@@ -58,7 +67,7 @@ dicWarmup = Dict()
 iWarmup = 0
 nWarmup = 1000
 println("i = $(iWarmup)")
-println("n = $(n)")
+println("n = $(nWarmup)")
 
 @time a = chimera(nWarmup,iWarmup)
 @show Base.summarysize(a)
