@@ -160,7 +160,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
 
     b = b .- mean(b)
 
-    la = lap(a)
+    #la = lap(a) #TODO RAT we do this later, so don't need here
 
     it = Int[1]
 
@@ -181,6 +181,9 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
         push!(dic["names"], t.name)
     end
 
+    if test_hypre
+        push!(dic["names"], "hypre")
+    end
     if test_cmg
         push!(dic["names"], "cmg")
     end
@@ -241,11 +244,23 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
         error("tl is zero")
     end
 
-    if test_cmg || test_icc || test_lamg || test_muelubelos
+    if test_hypre || test_cmg || test_icc || test_lamg || test_muelubelos
         la = lap(a)
+
+
+        if test_hypre
+            if verbose
+                println("--------------")
+                println("hypre")
+            end
+        
+            ret = timeLimitHypre(tl, la, b; verbose = false, num_procs = 2)
+            pushSpeedResult!(dic, "hypre", ret)
+        end
  
         if test_cmg
             if verbose
+                println("--------------")
                 println("cmg")
             end
 
@@ -255,6 +270,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
 
         if test_icc
             if verbose
+                println("--------------")
                 println("icc")
             end
             ret = timeLimitIcc(tl, la, b, verbose = true);
@@ -263,6 +279,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
 
         if test_lamg
             if verbose
+                println("--------------")
                 println("lamg")
             end
             ret = timeLimitLamg(tl, la, b, verbose = true);
@@ -271,6 +288,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
 
         if test_muelubelos
             if verbose
+                println("--------------")
                 println("muelubelos")
             end
             ret = timeLimitMueluBelos(tl, la, b, verbose = true);
@@ -403,7 +421,7 @@ function testVMatlabSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Arr
 
 end
 
-function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
+function testSddm(solvers, dic::Dict, sddmmat::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real = 1e-8, maxits = 1000, maxtime = 1000, verbose = true, testName = "",
    test_hypre = true, test_icc = false, test_cmg = false, test_lamg = false, tl_fac = 10) where {Tv,Ti}
 
@@ -449,9 +467,9 @@ function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1
         initDictCol!(dic, errcol(name), Float64)
     end
 
-    nv = size(sdd, 1)
-    ne = nnz(sdd)
-    hash_a = hash(sdd)
+    nv = size(sddmmat, 1)
+    ne = nnz(sddmmat)
+    hash_a = hash(sddmmat)
 
     push!(dic["nv"], nv)
     push!(dic["ne"], ne)
@@ -470,7 +488,7 @@ function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1
             println(solverTest.name)
         end
 
-        ret = testSolverSddm(solverTest.solver, sdd, b, tol, maxits, verbose)
+        ret = testSolverSddm(solverTest.solver, sddmmat, b, tol, maxits, verbose)
 
         if i == 1
             x = ret[5]
@@ -492,7 +510,7 @@ function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1
             println("hypre")
         end
       
-        ret = timeLimitHypre(tl, sdd, b; verbose = false, num_procs = 2)
+        ret = timeLimitHypre(tl, sddmmat, b; verbose = false, num_procs = 2)
         pushSpeedResult!(dic, "hypre", ret)
     end
 
@@ -502,7 +520,7 @@ function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1
             println("cmg")
         end
 
-        ret = timeLimitCmg(tl, sdd, b, verbose = true);
+        ret = timeLimitCmg(tl, sddmmat, b, verbose = true);
         pushSpeedResult!(dic, "cmg", ret)
     end
 
@@ -511,7 +529,7 @@ function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1
             println("--------------")
             println("icc")
         end
-        ret = timeLimitIcc(tl, sdd, b, verbose = true);
+        ret = timeLimitIcc(tl, sddmmat, b, verbose = true);
         pushSpeedResult!(dic, "icc", ret)
     end
 
@@ -520,7 +538,7 @@ function testSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1
             println("--------------")
             println("lamg")
         end
-        ret = timeLimitLamgSddm(tl, sdd, b, verbose = true);
+        ret = timeLimitLamgSddm(tl, sddmmat, b, verbose = true);
         pushSpeedResult!(dic, "lamg", ret)
     end
 
