@@ -156,8 +156,6 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
   tol::Real = 1e-8, maxits = 1000, maxtime = 1000, verbose = false, testName = "",
                         test_icc = false, test_cmg = false, test_lamg = false, test_muelubelos = false, test_hypre = false, tl_fac = 10, tl = 0) where {Tv,Ti}
 
-    @show tl
-
     b = b .- mean(b)
 
     #la = lap(a) #TODO RAT we do this later, so don't need here
