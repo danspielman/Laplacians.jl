@@ -252,7 +252,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
                 println("hypre")
             end
         
-            ret = timeLimitHypre(tl, la, b; verbose = false, num_procs = 2)
+            ret = timeLimitHypre(tl, la, b; verbose = true, num_procs = 2)
             pushSpeedResult!(dic, "hypre", ret)
         end
  
@@ -311,9 +311,9 @@ function testVMatlabLap(solvers::Array, dic::Dict, maker::Function; testName = "
 end
 
 
-function testVMatlabSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
+function testVMatlabSddm(solvers, dic::Dict, sddmat::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
   tol::Real = 1e-8, maxits = 1000, maxtime = 1000, verbose = false, testName = "",
-  test_icc = true, test_cmg = true, test_lamg = true, tl_fac = 10) where {Tv,Ti}
+  test_icc = true, test_cmg = true, test_lamg = true, test_hypre = false, tl_fac = 10) where {Tv,Ti}
 
 
     it = Int[1]
@@ -335,6 +335,9 @@ function testVMatlabSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Arr
         push!(dic["names"], t.name)
     end
 
+    if test_hypre
+        push!(dic["names"], "hypre")
+    end
     if test_cmg
         push!(dic["names"], "cmg")
     end
@@ -353,9 +356,9 @@ function testVMatlabSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Arr
         initDictCol!(dic, errcol(name), Float64)
     end
 
-    nv = size(sdd, 1)
-    ne = nnz(sdd)
-    hash_a = hash(sdd)
+    nv = size(sddmat, 1)
+    ne = nnz(sddmat)
+    hash_a = hash(sddmat)
 
     push!(dic["nv"], nv)
     push!(dic["ne"], ne)
@@ -374,7 +377,7 @@ function testVMatlabSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Arr
             println(solverTest.name)
         end
 
-        ret = testSolver(solverTest.solver, sdd, b, tol, maxits, verbose)
+        ret = testSolver(solverTest.solver, sddmat, b, tol, maxits, verbose)
 
         if i == 1
             x = ret[5]
@@ -390,12 +393,22 @@ function testVMatlabSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Arr
         error("tl is zero")
     end
 
+    if test_hypre
+        if verbose
+            println("--------------")
+            println("hypre")
+        end
+    
+        ret = timeLimitHypre(tl, sddmat, b; verbose = true, num_procs = 2)
+        pushSpeedResult!(dic, "hypre", ret)
+    end
+
     if test_cmg
         if verbose
             println("cmg")
         end
 
-        ret = timeLimitCmg(tl, sdd, b, verbose = true);
+        ret = timeLimitCmg(tl, sddmat, b, verbose = true);
         pushSpeedResult!(dic, "cmg", ret)
     end
 
@@ -403,7 +416,7 @@ function testVMatlabSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Arr
         if verbose
             println("icc")
         end
-        ret = timeLimitIcc(tl, sdd, b, verbose = true);
+        ret = timeLimitIcc(tl, sddmat, b, verbose = true);
         pushSpeedResult!(dic, "icc", ret)
     end
 
@@ -411,7 +424,7 @@ function testVMatlabSddm(solvers, dic::Dict, sdd::SparseMatrixCSC{Tv,Ti}, b::Arr
         if verbose
             println("lamg")
         end
-        ret = timeLimitLamgSddm(tl, sdd, b, verbose = true);
+        ret = timeLimitLamgSddm(tl, sddmat, b, verbose = true);
         pushSpeedResult!(dic, "lamg", ret)
     end
 
