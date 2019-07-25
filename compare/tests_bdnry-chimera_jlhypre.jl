@@ -69,7 +69,7 @@ nWarmup = 1000
 println("i = $(iWarmup)")
 println("n = $(nWarmup)")
 
-@time a = chimera(nWarmup,i)
+@time a = chimera(nWarmup,iWarmup)
 @show Base.summarysize(a)
 L = lap(a)
 @time aw = rand_weight(a)
@@ -83,10 +83,10 @@ b = randn(ni);
 @time M = L[int,int];
 @time Mw = Lw[int,int];
 
-tn = "chimera($n,$i)"
+tn = "chimera($nWarmup,$iWarmup)"
 x = testVMatlabLap(tests, dicWarmup, M, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_hypre=run_hypre )
 @save fn dicWarmup
-tn = "wtedChimera($n,$i)"
+tn = "wtedChimera($nWarmup,$iWarmup)"
 x = testVMatlabLap(tests, dicWarmup, Mw, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_hypre=run_hypre )
 @save fn dicWarmup
 
