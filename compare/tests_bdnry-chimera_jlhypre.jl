@@ -38,10 +38,10 @@ include("$(lapdir)/../extern/hypre/hypreExport.jl")
 include("$(lapdir)/../compare/compare_solvers_TL.jl")
 
 ac_deg = function(a; verbose=false, args...)
-    approxchol_lap(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
+    approxchol_sddm(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
 end
 ac_wdeg = function(a; verbose=false, args...)
-    approxchol_lap(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
+    approxchol_sddm(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
 end
 
 
@@ -69,20 +69,27 @@ nWarmup = 1000
 println("i = $(iWarmup)")
 println("n = $(nWarmup)")
 
-@time a = chimera(nWarmup,iWarmup)
+@time a = chimera(nWarmup,i)
 @show Base.summarysize(a)
+L = lap(a)
 @time aw = rand_weight(a)
 @show Base.summarysize(aw)
+Lw = lap(aw)
 
-tn = "chimera($nWarmup,$iWarmup)"
-@time b = randn(nWarmup)
-@time b = b .- mean(b)
-@time b = b / norm(b)
-x = testVMatlabLap(tests, dicWarmup, a, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos )
+@time int = setdiff(1:nWarmup,1:ceil(nWarmup^(1/3)):nWarmup)
+ni = length(int)
+b = randn(ni);
+@time b = b / norm(b);
+@time M = L[int,int];
+@time Mw = Lw[int,int];
+
+tn = "chimera($n,$i)"
+x = testVMatlabLap(tests, dicWarmup, M, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_hypre=run_hypre )
 @save fn dicWarmup
-tn = "wtedChimera($nWarmup,$iWarmup)"
-x = testVMatlabLap(tests, dicWarmup, aw, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_muelubelos=run_muelubelos, test_hypre=run_hypre )
+tn = "wtedChimera($n,$i)"
+x = testVMatlabLap(tests, dicWarmup, Mw, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_hypre=run_hypre )
 @save fn dicWarmup
+
 
 println("----- warm up complete ------")
 
