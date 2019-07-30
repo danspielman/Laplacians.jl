@@ -125,10 +125,10 @@ while time() - t0 < 60*60*hours
     @time Mw = Lw[int,int];
 
     tn = "chimera($n,$i)"
-    x = testVMatlabLap(tests, dic, M, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_hypre=run_hypre )
+    x = testSddm(tests, dic, M, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_hypre=run_hypre )
     @save fn dic
     tn = "wtedChimera($n,$i)"
-    x = testVMatlabLap(tests, dic, Mw, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_hypre=run_hypre )
+    x = testSddm(tests, dic, Mw, b, verbose=true, tol=1e-8, testName=tn, test_icc=run_icc, test_cmg=run_cmg, test_lamg=run_lamg, test_hypre=run_hypre )
     @save fn dic
 
     @printf("time (sec) this iter = %.1f\n",time() - ti)
