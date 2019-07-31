@@ -38,7 +38,7 @@ test_acw = SolverTest(ac_wdeg, "ac_fast")
 #test_chol = SolverTest(chol_sddm, "chol")
 #tests = [test_ac test_acw test_amg test_chol]
 #tests = [test_ac test_acw test_chol]
-#tests = [test_ac test_acw]
+tests = [test_ac test_acw]
 
 using JLD2
 
