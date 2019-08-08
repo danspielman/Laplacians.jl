@@ -352,8 +352,53 @@ function ggrid3_checkered_ijv(s1::Integer, s2::Integer, s3::Integer, b1::Integer
     return IJV(n, nnz, i, j, v)
 end
 
+function ggrid3_aniso_ijv(s1::Integer, s2::Integer, s3::Integer, w1::Real, w2::Real=1, w3::Real=1)
+    n = s1 * s2 * s3
+    nnz = 3 * n - s1 * s2 - s1 * s3 - s2 * s3
+    
+    i = Array{Int64,1}(undef, nnz)
+    j = Array{Int64,1}(undef, nnz)
+    v = Array{Float64,1}(undef, nnz)
+
+    e = 1
+
+    for z = 1:s3
+        for y = 1:s2
+            for x = 1:s1
+                if x < s1
+                    i[e] = indexToLinear(x, y, z, s1, s2)
+                    j[e] = indexToLinear(x + 1, y, z, s1, s2)
+                    v[e] = w1
+                    e += 1  
+                end 
+                # northward edge
+                if y < s2
+                    i[e] = indexToLinear(x, y, z, s1, s2)
+                    j[e] = indexToLinear(x, y + 1, z, s1, s2)
+                    v[e] = w2
+                    e += 1
+                end 
+                # upward edge
+                if z < s3
+                    i[e] = indexToLinear(x, y, z, s1, s2)
+                    j[e] = indexToLinear(x, y, z + 1, s1, s2)
+                    v[e] = w3
+                    e += 1
+                end 
+            end
+        end
+    end
+    return IJV(n, nnz, i, j, v)
+end
+
 function ggrid3(s1::Integer, s2::Integer, s3::Integer)
     A = sparse(ggrid3_ijv(s1, s2, s3))
+    return A + A'
+end
+
+
+function ggrid3_aniso(s1::Integer, s2::Integer, s3::Integer, w1::Real, w2::Real=1, w3::Real=1)
+    A = sparse(ggrid3_aniso_ijv(s1, s2, s3, w1, w2, w3))
     return A + A'
 end
 
