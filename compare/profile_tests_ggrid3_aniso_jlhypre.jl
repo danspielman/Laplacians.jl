@@ -70,48 +70,54 @@ println("----- warm up complete ------")
 # actual tests
 
 using JLD2
-dic = Dict()
+using Profile
 
-n = round(Int,2e4)
-w = 1
+@profile for profileDummy = 1:1
 
-t0 = time()
+    dic = Dict()
 
-while time() - t0 < 60*60*hours
+    n = round(Int,2e4)
+    global w = 1
 
-    println("-----------")
-    println("n = $(n)")
+    t0 = time()
 
-    s = round(Int,n^(1/3))
-    s1 = s
-    s2 = s
-    s3 = s
-    tn = "ggrid3_aniso($(s1),$(s2),$(s3),$(w))"
-    @time A = ggrid3_aniso(s1,s2,s3,w);
-    @time L = lap(A)
-    @time int = getInterior3(s1,s2,s3)
-    @time M = L[int,int];
-    ni = length(int)
-    b = randn(ni);
-    b = b / norm(b)
-    x = testSddm(tests, dic, M, b; verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false)
-    @save fn dic
+    while time() - t0 < 60*60*hours
 
-    s = round(Int,n^(1/3))
-    s1 = s
-    s2 = s
-    s3 = s
-    tn = "ggrid3_aniso($(s1),$(s2),$(s3),1/($(w)))"
-    @time A = ggrid3_aniso(s1,s2,s3,1/w);
-    @time L = lap(A)
-    @time int = getInterior3(s1,s2,s3)
-    @time M = L[int,int];
-    ni = length(int)
-    b = randn(ni);
-    b = b / norm(b)
-    x = testSddm(tests, dic, M, b; verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false)
-    @save fn dic
+        println("-----------")
+        println("n = $(n)")
 
-    global w = 10*w
+        s = round(Int,n^(1/3))
+        s1 = s
+        s2 = s
+        s3 = s
+        tn = "ggrid3_aniso($(s1),$(s2),$(s3),$(w))"
+        @time A = ggrid3_aniso(s1,s2,s3,w);
+        @time L = lap(A)
+        @time int = getInterior3(s1,s2,s3)
+        @time M = L[int,int];
+        ni = length(int)
+        b = randn(ni);
+        b = b / norm(b) 
+        x = testSddm(tests, dic, M, b; verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false)
+        @save fn dic
+
+        s = round(Int,n^(1/3))
+        s1 = s
+        s2 = s
+        s3 = s
+        tn = "ggrid3_aniso($(s1),$(s2),$(s3),1/($(w)))"
+        @time A = ggrid3_aniso(s1,s2,s3,1/w);
+        @time L = lap(A)
+        @time int = getInterior3(s1,s2,s3)
+        @time M = L[int,int];
+        ni = length(int)
+        b = randn(ni);
+        b = b / norm(b)
+        x = testSddm(tests, dic, M, b; verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false)
+        @save fn dic
+
+        global w = 10*w
+
+    end
 
 end

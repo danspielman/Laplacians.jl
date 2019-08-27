@@ -144,7 +144,7 @@ function testSolver(solver, a, b, tol, maxits, verbose)
     return ret
   catch
     println("Solver Error.")
-    return (Inf, Inf, Inf, Inf)
+    return (Inf, Inf, Inf, Inf, Inf)
   end
 
 end
@@ -175,7 +175,7 @@ function testSolverSddm(solver, M, b, tol, maxits, verbose)
       return ret
     catch
       println("Solver Error.")
-      return (Inf, Inf, Inf, Inf)
+      return (Inf, Inf, Inf, Inf, Inf)
     end
   
   end
