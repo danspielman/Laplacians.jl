@@ -442,7 +442,7 @@ function testSddm(solvers, dic::Dict, sddmmat::SparseMatrixCSC{Tv,Ti}, b::Array{
     # init the dict, if it is the first time
     initDictCol!(dic, "nv", Int)
     initDictCol!(dic, "ne", Int)
-    initDictCol!(dic, "hash_a", UInt64)
+    # initDictCol!(dic, "hash_a", UInt64)
     initDictCol!(dic, "testName", String)
 
     solvecol(name) = "$(name)_solve"
@@ -480,11 +480,11 @@ function testSddm(solvers, dic::Dict, sddmmat::SparseMatrixCSC{Tv,Ti}, b::Array{
 
     nv = size(sddmmat, 1)
     ne = nnz(sddmmat)
-    hash_a = hash(sddmmat)
+    # hash_a = hash(sddmmat) # this took a huge amount of time according to Profile?
 
     push!(dic["nv"], nv)
     push!(dic["ne"], ne)
-    push!(dic["hash_a"], hash_a)
+    # push!(dic["hash_a"], hash_a)
     push!(dic["testName"], testName)
 
     x = []
