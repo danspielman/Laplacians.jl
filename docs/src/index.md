@@ -40,6 +40,12 @@ The algorithms provide by Laplacians.jl include:
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
 
+# Version 1.1.1
+
+Change: minor bug fix for spectral graph drawing.
+
+Verified compatibility with Julia 1.2.
+
 # Version 1.1.0
 
 Changes:
