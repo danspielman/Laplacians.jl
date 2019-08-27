@@ -25,6 +25,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "#Version-1.1.1-1",
+    "page": "About",
+    "title": "Version 1.1.1",
+    "category": "section",
+    "text": "Change: minor bug fix for spectral graph drawing.Verified compatibility with Julia 1.2."
+},
+
+{
     "location": "#Version-1.1.0-1",
     "page": "About",
     "title": "Version 1.1.0",
