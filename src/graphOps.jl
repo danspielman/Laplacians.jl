@@ -681,7 +681,7 @@ If more than 2 coords are desired, you can use
 """
 function spectral_coords(a; k = 2)
 
-    E = eigs(lap(a), nev = (k+1), which=:SM)
+    E = eigs(lap(a), nev = (k+1), which=:SR)
     V = E[2]
     return tuple([V[:,i] for i in 2:(k+1)]...)
 
