@@ -540,7 +540,7 @@ function ggrid3_checkeredrandom_ijv(s1::Integer, s2::Integer, s3::Integer, b1::I
 
     e = 1
 
-    rng = MersenneTwister(seed);
+    # rng = MersenneTwister(seed);
 
     for z = 1:s3
         for y = 1:s2
@@ -584,5 +584,52 @@ end
 
 function ggrid3_checkeredrandom(s1::Integer, s2::Integer, s3::Integer, b1::Integer, b2::Integer, b3::Integer, multrange::Integer, seed::Integer = 1234)
     A = sparse(ggrid3_checkeredrandom_ijv(s1, s2, s3, b1, b2, b3, multrange, seed))
+    return A + A'
+end
+
+function ggrid3_perc_ijv(s1::Integer, s2::Integer, s3::Integer, w::Real, seed::Integer = 1234, p::Real = 0.2488)
+    n = s1 * s2 * s3
+    nnz = 3 * n - s1 * s2 - s1 * s3 - s2 * s3
+    
+    i = Array{Int64,1}(undef, nnz)
+    j = Array{Int64,1}(undef, nnz)
+    v = Array{Float64,1}(undef, nnz)
+
+    e = 1
+
+    rng = MersenneTwister(seed);
+
+    for z = 1:s3
+        for y = 1:s2
+            for x = 1:s1
+                if x < s1
+                    i[e] = indexToLinear(x, y, z, s1, s2)
+                    j[e] = indexToLinear(x + 1, y, z, s1, s2)
+                    v[e] = rand(rng) < p ? w : 1
+                    e += 1  
+                end 
+                # northward edge
+                if y < s2
+                    i[e] = indexToLinear(x, y, z, s1, s2)
+                    j[e] = indexToLinear(x, y + 1, z, s1, s2)
+                    v[e] = rand(rng) < p ? w : 1
+                    e += 1
+                end 
+                # upward edge
+                if z < s3
+                    i[e] = indexToLinear(x, y, z, s1, s2)
+                    j[e] = indexToLinear(x, y, z + 1, s1, s2)
+                    v[e] = rand(rng) < p ? w : 1
+                    e += 1
+                end 
+            end
+        end
+    end
+    return IJV(n, nnz, i, j, v)
+end
+
+
+function ggrid3_perc(s1::Integer, s2::Integer, s3::Integer, w::Real, seed::Integer = 1234, p::Real = 0.2488)
+    A = sparse(ggrid3_perc_ijv(s1, s2, s3, w, seed, p))
     return A + A'
 end
