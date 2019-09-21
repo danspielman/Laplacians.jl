@@ -27,18 +27,19 @@ include("$(lapdir)/../compare/compare_solvers_TL.jl")
 ac_deg = function(a; verbose=false, args...)
     approxchol_sddm(a; params=ApproxCholParams(:deg), verbose=verbose, args...)
 end
-ac_wdeg = function(a; verbose=false, args...)
-    approxchol_sddm(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
-end
+# ac_wdeg = function(a; verbose=false, args...)
+#     approxchol_sddm(a; params=ApproxCholParams(:wdeg), verbose=verbose, args...)
+# end
 
 
 test_ac = SolverTest(ac_deg, "ac")
-test_acw = SolverTest(ac_wdeg, "ac_fast")
+#test_acw = SolverTest(ac_wdeg, "ac_fast")
 #test_amg = SolverTest(AMGLapSolver, "pyamg")
 #test_chol = SolverTest(chol_sddm, "chol") 
 #tests = [test_ac test_acw test_amg test_chol]
 #tests = [test_ac test_acw test_chol]
-tests = [test_ac test_acw]
+#tests = [test_ac test_acw]
+tests = [test_ac]
 
 using JLD2
 
@@ -76,7 +77,6 @@ n = round(Int,32e6)
 w = 1e5
 
 iter = 0
-itersPerN = 5
 
 t0 = time()
 
@@ -105,8 +105,5 @@ while time() - t0 < 60*60*hours
     x = testSddm(tests, dic, M, b; verbose=true, tol=1e-8, testName=tn, test_icc=false, test_cmg=false, test_lamg=false)
     @save fn dic
 
-    if mod(iter,itersPerN) == 0
-        global n = 2*n
-    end
     global iter += 1
 end
