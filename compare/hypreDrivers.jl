@@ -10,7 +10,7 @@
 
 using CSV
 
-function timeLimitHypre(limit, M, b; verbose=false, num_procs=2)
+function timeLimitHypre(limit, M, b; verbose=false, num_procs=2, tol=1e-8)
     # function timeLimitHypre(limit, M, b; tol::Real=1e-8, maxits=1000, verbose=false, num_procs=2)
 
     
@@ -33,7 +33,7 @@ function timeLimitHypre(limit, M, b; verbose=false, num_procs=2)
 
     #cmd = `gtimeout $(limit) $(scriptpath) --verbose=false --muelu-xml=$(scripxmlsettings) --tol=1e-6 --max-iters=$(maxits) --filepath=$(matpath) --rhsfile=$(vecpath) --outputfile=$(tmpOutFileName)`
 
-    cmd = `gtimeout $(limit)  mpirun -np $(num_procs) $(scriptpath) -solver 1 -fromfile $(matname) -rhsparcsrfile $(vecname) -print`
+    cmd = `gtimeout $(limit)  mpirun -np $(num_procs) $(scriptpath) -solver 1 -fromfile $(matname) -rhsparcsrfile $(vecname) -print -tol=$(tol)`
     
     try
         run(cmd)

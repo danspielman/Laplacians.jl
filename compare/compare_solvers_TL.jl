@@ -252,7 +252,7 @@ function testVMatlabLap(solvers, dic::Dict, a::SparseMatrixCSC{Tv,Ti}, b::Array{
                 println("hypre")
             end
         
-            ret = timeLimitHypre(tl, la, b; verbose = true, num_procs = 2)
+            ret = timeLimitHypre(tl, la, b; verbose = true, num_procs = 2, tol=tol)
             pushSpeedResult!(dic, "hypre", ret)
         end
  
@@ -399,7 +399,7 @@ function testVMatlabSddm(solvers, dic::Dict, sddmat::SparseMatrixCSC{Tv,Ti}, b::
             println("hypre")
         end
     
-        ret = timeLimitHypre(tl, sddmat, b; verbose = true, num_procs = 2)
+        ret = timeLimitHypre(tl, sddmat, b; verbose = true, num_procs = 2, tol=tol)
         pushSpeedResult!(dic, "hypre", ret)
     end
 
@@ -521,7 +521,133 @@ function testSddm(solvers, dic::Dict, sddmmat::SparseMatrixCSC{Tv,Ti}, b::Array{
             println("hypre")
         end
       
-        ret = timeLimitHypre(tl, sddmmat, b; verbose = false, num_procs = 2)
+        ret = timeLimitHypre(tl, sddmmat, b; verbose = false, num_procs = 2, tol=tol)
+        pushSpeedResult!(dic, "hypre", ret)
+    end
+
+    if test_cmg
+        if verbose
+            println("--------------")
+            println("cmg")
+        end
+
+        ret = timeLimitCmg(tl, sddmmat, b, verbose = true);
+        pushSpeedResult!(dic, "cmg", ret)
+    end
+
+    if test_icc
+        if verbose
+            println("--------------")
+            println("icc")
+        end
+        ret = timeLimitIcc(tl, sddmmat, b, verbose = true);
+        pushSpeedResult!(dic, "icc", ret)
+    end
+
+    if test_lamg
+        if verbose
+            println("--------------")
+            println("lamg")
+        end
+        ret = timeLimitLamgSddm(tl, sddmmat, b, verbose = true);
+        pushSpeedResult!(dic, "lamg", ret)
+    end
+
+    return x
+
+end
+
+
+function testSddmDebug(solvers, dic::Dict, sddmmat::SparseMatrixCSC{Tv,Ti}, b::Array{Tv,1};
+  tol::Real = 1e-8, maxits = 1000, maxtime = 1000, verbose = true, testName = "",
+   test_hypre = true, test_icc = false, test_cmg = false, test_lamg = false, tl_fac = 10) where {Tv,Ti}
+
+
+    it = Int[1]
+
+    # init the dict, if it is the first time
+    initDictCol!(dic, "nv", Int)
+    initDictCol!(dic, "ne", Int)
+    # initDictCol!(dic, "hash_a", UInt64)
+    initDictCol!(dic, "testName", String)
+
+    solvecol(name) = "$(name)_solve"
+    buildcol(name) = "$(name)_build"
+    totcol(name) = "$(name)_tot"
+    itscol(name) = "$(name)_its"
+    errcol(name) = "$(name)_err"
+
+    dic["names"] = String[]
+    for t in solvers
+        push!(dic["names"], t.name)
+    end
+
+
+    if test_hypre
+        push!(dic["names"], "hypre")
+    end
+    if test_cmg
+        push!(dic["names"], "cmg")
+    end
+    if test_icc
+        push!(dic["names"], "icc")
+    end
+    if test_lamg
+        push!(dic["names"], "lamg")
+    end
+
+    for name in dic["names"]
+        initDictCol!(dic, solvecol(name), Float64)
+        initDictCol!(dic, buildcol(name), Float64)
+        initDictCol!(dic, totcol(name), Float64)
+        initDictCol!(dic, itscol(name), Float64)
+        initDictCol!(dic, errcol(name), Float64)
+    end
+
+    nv = size(sddmmat, 1)
+    ne = nnz(sddmmat)
+    # hash_a = hash(sddmmat) # this took a huge amount of time according to Profile?
+
+    push!(dic["nv"], nv)
+    push!(dic["ne"], ne)
+    # push!(dic["hash_a"], hash_a)
+    push!(dic["testName"], testName)
+
+    x = []
+
+    tl = 0
+
+    for i in 1:length(solvers)
+        solverTest = solvers[i]
+
+        if verbose
+            println("--------------")
+            println(solverTest.name)
+        end
+
+        ret = testSolverSddm(solverTest.solver, sddmmat, b, tol, maxits, verbose)
+
+        if i == 1
+            x = ret[5]
+            tl = round(Int, 30 + tl_fac * (ret[1] + ret[2]))
+        end
+
+
+        pushSpeedResult!(dic, solverTest.name, ret)
+
+    end
+
+    if tl == 0
+        error("tl is zero")
+    end
+
+    if test_hypre
+        if verbose
+            println("--------------")
+            println("hypre")
+        end
+      
+        ret = timeLimitHypre(tl, sddmmat, b; verbose = false, num_procs = 2, tol=tol)
         pushSpeedResult!(dic, "hypre", ret)
     end
 
