@@ -22,7 +22,7 @@ Computes a zero-fill incomplete Cholesky factorization of sdd, and returns a fun
 """
 function matlab_ichol(sdd)
 
-    if ~isdefined(:MATLAB)
+    if ~(@isdefined MATLAB)
         error("Type using MATLAB before calling this routine.")
     end
 
