@@ -109,9 +109,17 @@ a2 = complete_binary_tree(7)
 
 a2 = complete_graph(7)
 
+# export complete_bipartite_graph
+
+a2 = complete_bipartite_graph(7)
+
 # export path_graph
 
 a2 = path_graph(7)
+
+# export star_graph
+
+a2 = star_graph(7)
 
 # export grid2
 
@@ -194,6 +202,15 @@ uniformWeight!(a2)
 
 b = edgeVertexMat(a2)
 @test sum(abs.(b'*b - lap(unweight(a2)))) == 0
+
+  # export line_graph
+
+c = line_graph(path_graph(10))
+@test nnz(c) == 16
+c = line_graph(ring_graph(10))
+@test nnz(c) == 20
+c = line_graph(complete_graph(10))
+@test nnz(c) == 16*10*9/2
 
 a = wted_chimera(102,2)
 b = wtedEdgeVertexMat(a)
