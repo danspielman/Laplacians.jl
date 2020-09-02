@@ -172,7 +172,7 @@ function blockSolver(comps, solvers; tol::Real=1e-6, maxits=Inf, maxtime=Inf, ve
         for i in 1:length(comps)
             ind = comps[i]
             bi = b[ind]
-            x[ind] = (solvers[i])(bi;  tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgTmp)
+            x[ind] .= (solvers[i])(bi;  tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgTmp)
             if length(pcgIts) > 0
                 pcgIts[1] = max(pcgIts[1],pcgTmp[1])
             end

@@ -19,7 +19,7 @@ Note that this is much faster than actually computing the factorization
 function ask_cholmod(sdd)
     ba = SuiteSparse.CHOLMOD
     #cm = ba.common()
-    cm = ba.defaults(ba.common_struct)
+    cm = ba.defaults(ba.common_struct[Threads.threadid()])
 
     anal = ba.analyze(ba.Sparse(lap(sdd)), cm);
 
@@ -49,7 +49,7 @@ Return the permutation that cholmod would apply.
 function cholmod_perm(sdd)
     ba = SuiteSparse.CHOLMOD
     #cm = ba.common()
-    cm = ba.defaults(ba.common_struct)
+    cm = ba.defaults(ba.common_struct[Threads.threadid()])
 
     anal = ba.analyze(ba.Sparse(lap(sdd)), cm);
 
