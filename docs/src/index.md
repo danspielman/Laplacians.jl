@@ -40,6 +40,16 @@ The algorithms provide by Laplacians.jl include:
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
 
+# Version 1.2.0
+
+This version is compatible with Julia 1.4 and 1.5, but not earlier versions.
+
+Changes:
+
+* Added two graph generators: `complete_bipartite_graph`, `star_graph`.
+* Added a function `line_graph` that computes the line graph of an input graph.
+
+
 # Version 1.1.1
 
 Change: minor bug fix for spectral graph drawing.
