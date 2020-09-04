@@ -387,28 +387,11 @@ end
 
 Let G = (V, E) be a graph. The line graph of G is the graph whose vertices are the edges of G in which two are connected if they share an endpoint in G.
 That is, (u, v),(w, z) is an edge of the line graph if one of {u, v} is the same as one of {w, z}
-
-Run time O(num_vertices + max_degree * num_edges)
 """
 function line_graph(G::SparseMatrixCSC)
-    upper_triang_G = triu(G, 1)
-    (ii_G,jj_G) = findnz(upper_triang_G)
-    nnz_G = length(ii_G)
-    # Create a map from vertex to edge label (index)
-    dict = Dict{Int64, Vector{Int64}}()
-    map((v1, v2, e) -> begin
-            haskey(dict, v1) ? push!(dict[v1], e) : dict[v1] = [e]
-            haskey(dict, v2) ? push!(dict[v2], e) : dict[v2] = [e]
-            end
-        , ii_G, jj_G, 1:nnz_G)
-    # Create cliques for all edges adjacent to a given vertex
-    e = map((edges) -> collect(subsets(edges, 2)), values(dict))
-    h = reduce(vcat, e)
-    ii_H = [tup[1] for tup in h]
-    jj_H = [tup[2] for tup in h]
-    vv_H = ones(length(ii_H))
-    upper_traing_H = sparse(ii_H, jj_H, vv_H, nnz_G, nnz_G)
-    return(upper_traing_H + transpose(upper_traing_H))
+    u = abs.(edgeVertexMat(G));
+    uu = u*u';
+    return uu - Diagonal(diag(uu))
 end
 
 """

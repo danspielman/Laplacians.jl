@@ -32,7 +32,6 @@ module Laplacians
   using LinearAlgebra
   using Statistics
   using Printf
-  using IterTools
 
   using DelimitedFiles
 
