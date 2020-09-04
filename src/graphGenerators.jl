@@ -30,6 +30,20 @@ function path_graph_ijv(n::Integer)
         ones(2*(n-1)))
 end
 
+"""
+    graph = star_graph(n)
+"""
+star_graph(n) = sparse(star_graph_ijv(n))
+
+"""
+    ijv = star_graph_ijv(n::Int64)
+"""
+function star_graph_ijv(n::Integer)
+    IJV(n, 2*(n-1),
+        [ones(Int, n-1) ; collect(2:n)], 
+        [collect(2:n); ones(Int, n-1)], 
+        ones(2*(n-1)))
+end
 
 """
     graph = complete_graph(n)
@@ -42,6 +56,19 @@ end
     ijv = complete_graph_ijv(n)
 """
 complete_graph_ijv(n::Integer) = IJV(complete_graph(n))
+
+
+"""
+    graph = complete_bipartite_graph(n)
+"""
+function complete_bipartite_graph(n::Integer)
+    return sparse([zeros(n,n) ones(n,n) ; ones(n,n) zeros(n,n)])
+end 
+
+"""
+    ijv = complete_bipartite_graph_ijv(n)
+"""
+complete_bipartite_graph_ijv(n::Integer) = IJV(complete_bipartite_graph(n))
 
 
 """

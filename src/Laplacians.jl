@@ -32,6 +32,7 @@ module Laplacians
   using LinearAlgebra
   using Statistics
   using Printf
+  using IterTools
 
   using DelimitedFiles
 
@@ -69,8 +70,10 @@ module Laplacians
   export hypercube
   export complete_binary_tree
   export complete_graph
+  export complete_bipartite_graph
   export empty_graph
   export path_graph
+  export star_graph
 
   #export wgrid2
 
@@ -102,6 +105,7 @@ module Laplacians
   export uniformWeight, uniformWeight!
 
   export edgeVertexMat, wtedEdgeVertexMat
+  export line_graph
 
   export power, thicken_once, thicken
 

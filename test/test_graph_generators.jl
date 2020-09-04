@@ -10,9 +10,19 @@ L.transpose(L.path_graph_ijv(5))
 L.adjoint(L.path_graph_ijv(5))
 L.compress(L.path_graph_ijv(5))
 
+@test L.star_graph(1) == L.empty_graph(1)
+@test L.star_graph(4) == L.sparse([0 1 1 1 ; 1 0 0 0 ; 1 0 0 0 ; 1 0 0 0 ])
+@test L.star_graph_ijv(1) == L.empty_graph_ijv(1)
+@test L.star_graph_ijv(4) == Laplacians.IJV{Float64,Int64}(4, 6, [1, 1, 1, 2, 3, 4], [2, 3, 4, 1, 1, 1], [1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+
 @test L.complete_graph_ijv(1) == L.empty_graph_ijv(1)
 @test complete_graph(1) == empty_graph(1)
 L.complete_graph_ijv(5)
+
+@test L.complete_bipartite_graph(1) == L.sparse([0 1 ; 1 0])
+@test L.complete_bipartite_graph(0) == L.empty_graph(0)
+@test L.complete_bipartite_graph_ijv(1) == L.IJV{Float64,Int64}(2, 2, [2, 1], [1, 2], [1.0, 1.0])
+@test L.complete_bipartite_graph_ijv(0) == L.empty_graph_ijv(0)
 
 @test L.ring_graph_ijv(1) == L.empty_graph_ijv(1)
 @test ring_graph(1) == empty_graph(1)

@@ -93,7 +93,7 @@ solver = Laplacians.approxchol_lapChol(a,verbose=true)
 x = solver(b);
 
 # testing approxChol internals
-a = randRegular(20,3)
+a = rand_regular(20,3)
 llp = Laplacians.LLmatp(a)
 Laplacians.print_ll_col(llp,1)
 llo = Laplacians.LLMatOrd(a);

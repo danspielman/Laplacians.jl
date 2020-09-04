@@ -80,38 +80,46 @@ getObound(a,collect(1:10))
   # export ringGraph
   # export generalizedRing
   # export randMatching
-  # export randRegular
+  # export rand_regular
 
 
-# export grownGraph
+# export grown_graph
 
-a2 = grownGraph(100,3)
+a2 = grown_graph(100,3)
 
-# export grownGraphD
+# export grown_graph_d
 
-a2 = grownGraphD(100,3)
+a2 = grown_graph_d(100,3)
 
-# export prefAttach
+# export pref_attach
 
-a2 = prefAttach(100,3,0.5)
-a2 = prefAttach(5,4,0.5)
+a2 = pref_attach(100,3,0.5)
+a2 = pref_attach(5,4,0.5)
 
 
-# export hyperCube
+# export hypercube
 
-a2 = hyperCube(3)
+a2 = hypercube(3)
 
-# export completeBinaryTree
+# export complete_binary_tree
 
-a2 = completeBinaryTree(7)
+a2 = complete_binary_tree(7)
 
-# export completeGraph
+# export complete_graph
 
-a2 = completeGraph(7)
+a2 = complete_graph(7)
 
-# export pathGraph
+# export complete_bipartite_graph
 
-a2 = pathGraph(7)
+a2 = complete_bipartite_graph(7)
+
+# export path_graph
+
+a2 = path_graph(7)
+
+# export star_graph
+
+a2 = star_graph(7)
 
 # export grid2
 
@@ -144,19 +152,19 @@ a2 = ErdosRenyiClusterFix(100,4)
 
 # export chimera
 # export randWeight
-# export wted_chimera, semiWtedChimera
+# export wted_chimera, semiwted_chimera
 
 for i in 1:5
-    semiWtedChimera(10000,i)
+    semiwted_chimera(10000,i)
 end
 
 
-# export readIJ, readIJV, writeIJV
+# export readIJ, read_graph, writeIJV
 println("Testing IO")
 n = 101
 a = wted_chimera(n,1)
 writeIJV("tmp.txt",a)
-a2 = readIJV("tmp.txt")
+a2 = read_graph("tmp.txt")
 @test sum(abs.(a-a2)) == 0
 
 a2 = read_graph("tmp.txt")
@@ -195,6 +203,15 @@ uniformWeight!(a2)
 b = edgeVertexMat(a2)
 @test sum(abs.(b'*b - lap(unweight(a2)))) == 0
 
+  # export line_graph
+
+c = line_graph(path_graph(10))
+@test nnz(c) == 16
+c = line_graph(ring_graph(10))
+@test nnz(c) == 20
+c = line_graph(complete_graph(10))
+@test nnz(c) == 16*10*9/2
+
 a = wted_chimera(102,2)
 b = wtedEdgeVertexMat(a)
 @test sum(abs.(b'*b - lap(a))) < 1e-8
@@ -211,10 +228,10 @@ b = wtedEdgeVertexMat(a)
 
 subsampleEdges(a,0.5)
 
-# export twoLift
+# export two_lift
 
-twoLift(a)
-twoLift(a,3)
+two_lift(a)
+two_lift(a,3)
 
   # export joinGraphs, disjoin
 
