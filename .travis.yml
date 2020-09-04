@@ -7,7 +7,7 @@ branches:
 
 language: julia
 julia:
-  - 1.0
+  - 1.4
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
