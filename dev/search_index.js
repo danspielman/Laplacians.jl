@@ -25,6 +25,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "#Version-1.2.0-1",
+    "page": "About",
+    "title": "Version 1.2.0",
+    "category": "section",
+    "text": "This version is compatible with Julia 1.4 and 1.5, but not earlier versions.Changes:Added two graph generators: complete_bipartite_graph, star_graph.\nAdded a function line_graph that computes the line graph of an input graph."
+},
+
+{
     "location": "#Version-1.1.1-1",
     "page": "About",
     "title": "Version 1.1.1",
