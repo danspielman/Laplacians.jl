@@ -497,6 +497,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "graphGenerators/#Laplacians.complete_bipartite_graph-Tuple{Integer}",
+    "page": "generators",
+    "title": "Laplacians.complete_bipartite_graph",
+    "category": "method",
+    "text": "graph = complete_bipartite_graph(n)\n\n\n\n\n\n"
+},
+
+{
     "location": "graphGenerators/#Laplacians.complete_graph-Tuple{Integer}",
     "page": "generators",
     "title": "Laplacians.complete_graph",
@@ -641,6 +649,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "graphGenerators/#Laplacians.star_graph-Tuple{Any}",
+    "page": "generators",
+    "title": "Laplacians.star_graph",
+    "category": "method",
+    "text": "graph = star_graph(n)\n\n\n\n\n\n"
+},
+
+{
     "location": "graphGenerators/#Laplacians.wted_chimera-Tuple{Integer,Integer}",
     "page": "generators",
     "title": "Laplacians.wted_chimera",
@@ -689,7 +705,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "operators/#Laplacians.adj-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "operators/#Laplacians.adj-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "operators",
     "title": "Laplacians.adj",
     "category": "method",
@@ -697,7 +713,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "operators/#Laplacians.diagmat-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "operators/#Laplacians.diagmat-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "operators",
     "title": "Laplacians.diagmat",
     "category": "method",
@@ -737,7 +753,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "operators/#Laplacians.join_graphs-Union{Tuple{Tind}, Tuple{Tval}, Tuple{SparseMatrixCSC{Tval,Tind},SparseMatrixCSC{Tval,Tind},Integer}} where Tind where Tval",
+    "location": "operators/#Laplacians.join_graphs-Union{Tuple{Tind}, Tuple{Tval}, Tuple{SparseArrays.SparseMatrixCSC{Tval,Tind},SparseArrays.SparseMatrixCSC{Tval,Tind},Integer}} where Tind where Tval",
     "page": "operators",
     "title": "Laplacians.join_graphs",
     "category": "method",
@@ -753,7 +769,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "operators/#Laplacians.mapweight-Union{Tuple{Tind}, Tuple{Tval}, Tuple{SparseMatrixCSC{Tval,Tind},Any}} where Tind where Tval",
+    "location": "operators/#Laplacians.line_graph-Tuple{SparseArrays.SparseMatrixCSC}",
+    "page": "operators",
+    "title": "Laplacians.line_graph",
+    "category": "method",
+    "text": "H = line_graph(G::SparseMatrixCSC)\n\nLet G = (V, E) be a graph. The line graph of G is the graph whose vertices are the edges of G in which two are connected if they share an endpoint in G. That is, (u, v),(w, z) is an edge of the line graph if one of {u, v} is the same as one of {w, z}\n\n\n\n\n\n"
+},
+
+{
+    "location": "operators/#Laplacians.mapweight-Union{Tuple{Tind}, Tuple{Tval}, Tuple{SparseArrays.SparseMatrixCSC{Tval,Tind},Any}} where Tind where Tval",
     "page": "operators",
     "title": "Laplacians.mapweight",
     "category": "method",
@@ -857,7 +881,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "operators/#Laplacians.unweight!-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval",
+    "location": "operators/#Laplacians.unweight!-Union{Tuple{SparseArrays.SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval",
     "page": "operators",
     "title": "Laplacians.unweight!",
     "category": "method",
@@ -865,7 +889,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "operators/#Laplacians.unweight-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval",
+    "location": "operators/#Laplacians.unweight-Union{Tuple{SparseArrays.SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval",
     "page": "operators",
     "title": "Laplacians.unweight",
     "category": "method",
@@ -905,7 +929,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphUtils/#Laplacians.backIndices-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "graphUtils/#Laplacians.backIndices-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "graphUtils",
     "title": "Laplacians.backIndices",
     "category": "method",
@@ -913,7 +937,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphUtils/#Laplacians.compConductance-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
+    "location": "graphUtils/#Laplacians.compConductance-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
     "page": "graphUtils",
     "title": "Laplacians.compConductance",
     "category": "method",
@@ -921,7 +945,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphUtils/#Laplacians.findEntries-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "graphUtils/#Laplacians.findEntries-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "graphUtils",
     "title": "Laplacians.findEntries",
     "category": "method",
@@ -929,7 +953,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphUtils/#Laplacians.flipIndex-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval",
+    "location": "graphUtils/#Laplacians.flipIndex-Union{Tuple{SparseArrays.SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval",
     "page": "graphUtils",
     "title": "Laplacians.flipIndex",
     "category": "method",
@@ -937,7 +961,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphUtils/#Laplacians.getObound-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
+    "location": "graphUtils/#Laplacians.getObound-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
     "page": "graphUtils",
     "title": "Laplacians.getObound",
     "category": "method",
@@ -945,7 +969,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphUtils/#Laplacians.getVolume-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
+    "location": "graphUtils/#Laplacians.getVolume-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
     "page": "graphUtils",
     "title": "Laplacians.getVolume",
     "category": "method",
@@ -953,7 +977,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphUtils/#Laplacians.setValue-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Ti,Ti,Tv}} where Ti where Tv",
+    "location": "graphUtils/#Laplacians.setValue-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Ti,Ti,Tv}} where Ti where Tv",
     "page": "graphUtils",
     "title": "Laplacians.setValue",
     "category": "method",
@@ -961,7 +985,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphUtils/#Laplacians.wdeg-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Ti}} where Ti where Tv",
+    "location": "graphUtils/#Laplacians.wdeg-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Ti}} where Ti where Tv",
     "page": "graphUtils",
     "title": "Laplacians.wdeg",
     "category": "method",
@@ -1001,7 +1025,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphAlgs/#Laplacians.components-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "graphAlgs/#Laplacians.components-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "graphAlgs",
     "title": "Laplacians.components",
     "category": "method",
@@ -1017,7 +1041,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphAlgs/#Laplacians.kruskal-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "graphAlgs/#Laplacians.kruskal-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "graphAlgs",
     "title": "Laplacians.kruskal",
     "category": "method",
@@ -1041,7 +1065,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "graphAlgs/#Laplacians.shortestPaths-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Ti}} where Ti where Tv",
+    "location": "graphAlgs/#Laplacians.shortestPaths-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Ti}} where Ti where Tv",
     "page": "graphAlgs",
     "title": "Laplacians.shortestPaths",
     "category": "method",
@@ -1185,7 +1209,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "solvers/#Laplacians.approxchol_lap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "solvers/#Laplacians.approxchol_lap-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "solvers",
     "title": "Laplacians.approxchol_lap",
     "category": "method",
@@ -1209,7 +1233,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "solvers/#Laplacians.augTreeLap-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "solvers/#Laplacians.augTreeLap-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "solvers",
     "title": "Laplacians.augTreeLap",
     "category": "method",
@@ -1217,7 +1241,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "solvers/#Laplacians.augTreeLapPrecon-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "solvers/#Laplacians.augTreeLapPrecon-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "solvers",
     "title": "Laplacians.augTreeLapPrecon",
     "category": "method",
@@ -1225,7 +1249,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "solvers/#Laplacians.augTreePrecon-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "solvers/#Laplacians.augTreePrecon-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "solvers",
     "title": "Laplacians.augTreePrecon",
     "category": "method",
@@ -1233,7 +1257,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "solvers/#Laplacians.augTreeSddm-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "solvers/#Laplacians.augTreeSddm-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "solvers",
     "title": "Laplacians.augTreeSddm",
     "category": "method",
@@ -1241,7 +1265,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "solvers/#Laplacians.augmentTree-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti},Ti}} where Ti where Tv",
+    "location": "solvers/#Laplacians.augmentTree-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},SparseArrays.SparseMatrixCSC{Tv,Ti},Ti}} where Ti where Tv",
     "page": "solvers",
     "title": "Laplacians.augmentTree",
     "category": "method",
@@ -1385,7 +1409,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "treeAlgs/#Laplacians.comp_stretches-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti}}} where Ti where Tv",
+    "location": "treeAlgs/#Laplacians.comp_stretches-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},SparseArrays.SparseMatrixCSC{Tv,Ti}}} where Ti where Tv",
     "page": "treeAlgs",
     "title": "Laplacians.comp_stretches",
     "category": "method",
@@ -1417,7 +1441,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "randTrees/#Laplacians.randishPrim-Union{Tuple{SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval",
+    "location": "randTrees/#Laplacians.randishPrim-Union{Tuple{SparseArrays.SparseMatrixCSC{Tval,Tind}}, Tuple{Tind}, Tuple{Tval}} where Tind where Tval",
     "page": "randTrees",
     "title": "Laplacians.randishPrim",
     "category": "method",
@@ -1441,7 +1465,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "localClustering/#Laplacians.dumbRefineCut-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
+    "location": "localClustering/#Laplacians.dumbRefineCut-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
     "page": "localClustering",
     "title": "Laplacians.dumbRefineCut",
     "category": "method",
@@ -1449,7 +1473,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "localClustering/#Laplacians.refineCut-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
+    "location": "localClustering/#Laplacians.refineCut-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
     "page": "localClustering",
     "title": "Laplacians.refineCut",
     "category": "method",
@@ -1457,7 +1481,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "localClustering/#Laplacians.apr-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}} where Ti where Tv",
+    "location": "localClustering/#Laplacians.apr-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}} where Ti where Tv",
     "page": "localClustering",
     "title": "Laplacians.apr",
     "category": "method",
@@ -1465,7 +1489,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "localClustering/#Laplacians.localImprove-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
+    "location": "localClustering/#Laplacians.localImprove-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1}}} where Ti where Tv",
     "page": "localClustering",
     "title": "Laplacians.localImprove",
     "category": "method",
@@ -1473,7 +1497,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "localClustering/#Laplacians.prn-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Int64}} where Ti where Tv",
+    "location": "localClustering/#Laplacians.prn-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Int64}} where Ti where Tv",
     "page": "localClustering",
     "title": "Laplacians.prn",
     "category": "method",
@@ -1505,7 +1529,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.IJV-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "privateFuncs/#Laplacians.IJV-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "Private Functions",
     "title": "Laplacians.IJV",
     "category": "method",
@@ -1537,7 +1561,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.addToGPrime-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Array{Tuple{Int64,Float64},1},1},Dict{Int64,Int64},Dict{Int64,Int64},Int64,Int64,Float64,Float64,Int64}} where Ti where Tv",
+    "location": "privateFuncs/#Laplacians.addToGPrime-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Array{Tuple{Int64,Float64},1},1},Dict{Int64,Int64},Dict{Int64,Int64},Int64,Int64,Float64,Float64,Int64}} where Ti where Tv",
     "page": "Private Functions",
     "title": "Laplacians.addToGPrime",
     "category": "method",
@@ -1545,7 +1569,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.approxCholPQDec!-Union{Tuple{Tind}, Tuple{ApproxCholPQ{Tind},Any}} where Tind",
+    "location": "privateFuncs/#Laplacians.approxCholPQDec!-Union{Tuple{Tind}, Tuple{Laplacians.ApproxCholPQ{Tind},Any}} where Tind",
     "page": "Private Functions",
     "title": "Laplacians.approxCholPQDec!",
     "category": "method",
@@ -1553,7 +1577,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.approxCholPQInc!-Union{Tuple{Tind}, Tuple{ApproxCholPQ{Tind},Any}} where Tind",
+    "location": "privateFuncs/#Laplacians.approxCholPQInc!-Union{Tuple{Tind}, Tuple{Laplacians.ApproxCholPQ{Tind},Any}} where Tind",
     "page": "Private Functions",
     "title": "Laplacians.approxCholPQInc!",
     "category": "method",
@@ -1561,7 +1585,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.approxchol_lapChol-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "privateFuncs/#Laplacians.approxchol_lapChol-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "Private Functions",
     "title": "Laplacians.approxchol_lapChol",
     "category": "method",
@@ -1569,7 +1593,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.augmentTreeOpt-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC{Tv,Ti}}} where Ti where Tv",
+    "location": "privateFuncs/#Laplacians.augmentTreeOpt-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},SparseArrays.SparseMatrixCSC{Tv,Ti}}} where Ti where Tv",
     "page": "Private Functions",
     "title": "Laplacians.augmentTreeOpt",
     "category": "method",
@@ -1582,6 +1606,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Laplacians.blockSolver",
     "category": "method",
     "text": "Apply the ith solver on the ith component\n\n\n\n\n\n"
+},
+
+{
+    "location": "privateFuncs/#Laplacians.complete_bipartite_graph_ijv-Tuple{Integer}",
+    "page": "Private Functions",
+    "title": "Laplacians.complete_bipartite_graph_ijv",
+    "category": "method",
+    "text": "ijv = complete_bipartite_graph_ijv(n)\n\n\n\n\n\n"
 },
 
 {
@@ -1601,7 +1633,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.extendMatrix-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Tv,1}}} where Ti where Tv",
+    "location": "privateFuncs/#Laplacians.extendMatrix-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Tv,1}}} where Ti where Tv",
     "page": "Private Functions",
     "title": "Laplacians.extendMatrix",
     "category": "method",
@@ -1625,7 +1657,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.generalizedNecklace-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},SparseMatrixCSC,Int64}} where Ti where Tv",
+    "location": "privateFuncs/#Laplacians.generalizedNecklace-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},SparseArrays.SparseMatrixCSC,Int64}} where Ti where Tv",
     "page": "Private Functions",
     "title": "Laplacians.generalizedNecklace",
     "category": "method",
@@ -1649,7 +1681,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.initGPrime-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Dict{Int64,Int64},Dict{Int64,Int64},Float64,Int64}} where Ti where Tv",
+    "location": "privateFuncs/#Laplacians.initGPrime-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1},Dict{Int64,Int64},Dict{Int64,Int64},Float64,Int64}} where Ti where Tv",
     "page": "Private Functions",
     "title": "Laplacians.initGPrime",
     "category": "method",
@@ -1689,7 +1721,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.localFlow-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}, Tuple{SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64,Any}} where Ti where Tv",
+    "location": "privateFuncs/#Laplacians.localFlow-Union{Tuple{Ti}, Tuple{Tv}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64}, Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti},Array{Int64,1},Float64,Float64,Any}} where Ti where Tv",
     "page": "Private Functions",
     "title": "Laplacians.localFlow",
     "category": "method",
@@ -1777,6 +1809,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "privateFuncs/#Laplacians.star_graph_ijv-Tuple{Integer}",
+    "page": "Private Functions",
+    "title": "Laplacians.star_graph_ijv",
+    "category": "method",
+    "text": "ijv = star_graph_ijv(n::Int64)\n\n\n\n\n\n"
+},
+
+{
     "location": "privateFuncs/#Laplacians.testZeroDiag-Tuple{Any}",
     "page": "Private Functions",
     "title": "Laplacians.testZeroDiag",
@@ -1785,7 +1825,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "privateFuncs/#Laplacians.treeDepthDFS-Union{Tuple{SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
+    "location": "privateFuncs/#Laplacians.treeDepthDFS-Union{Tuple{SparseArrays.SparseMatrixCSC{Tv,Ti}}, Tuple{Ti}, Tuple{Tv}} where Ti where Tv",
     "page": "Private Functions",
     "title": "Laplacians.treeDepthDFS",
     "category": "method",
