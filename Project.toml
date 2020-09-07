@@ -17,8 +17,8 @@ SuiteSparse = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
+julia = "1.4, 1.5"
 Arpack = "0.4"
-DataStructures = "≥ 0.7.0"
-Plots =  "≥ 1.6"
-julia = "≥ 0.7.0"
+DataStructures = "0.7 - 0.17"
+Plots =  "1.6"
 RandomV06 = "0.0.2"
