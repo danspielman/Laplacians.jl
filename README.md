@@ -158,3 +158,4 @@ It was captured right before the upgrade to Julia 0.5
 The development of this package has been supported in part by the
 National Science Foundation Award CCF-1562041  and by the Office of Naval
 Research Award N00014-16-1-2374.
+
