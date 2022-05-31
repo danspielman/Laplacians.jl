@@ -386,8 +386,8 @@ function akpwSub5(graph)
 
         for i in (prevTreePtr+1):treeEdges.endPtr
             edgeind = treeEdges.q[i]
-            ainame = find_root(nameMap, ai[edgeind])
-            ajname = find_root(nameMap, aj[edgeind])
+            ainame = find_root!(nameMap, ai[edgeind])
+            ajname = find_root!(nameMap, aj[edgeind])
             if (ainame < ajname)
                 union!(nameMap, ainame,ajname)
             else
@@ -404,8 +404,8 @@ function akpwSub5(graph)
         for i in 1:length(curIJVind)
             ijv = curIJVind[i]
             ind = ijv.ind
-            namei = find_root(nameMap,ai[ind])
-            namej = find_root(nameMap,aj[ind])
+            namei = find_root!(nameMap,ai[ind])
+            namej = find_root!(nameMap,aj[ind])
             if (namei != namej)
                 if (ijv.v > maxv)
                     maxv = ijv.v
@@ -419,8 +419,8 @@ function akpwSub5(graph)
         while (last <= m) && (origList[last].v > xf*maxv)
             ijv = origList[last]
             
-            namei = find_root(nameMap,ijv.i)
-            namej = find_root(nameMap,ijv.j)
+            namei = find_root!(nameMap,ijv.i)
+            namej = find_root!(nameMap,ijv.j)
             if namei != namej
                 if maxv == 0
                     maxv = ijv.v

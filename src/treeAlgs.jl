@@ -353,19 +353,19 @@ function tarjanStretchSub(u::Ti, t::RootedTree{Tv,Ti}, mat::SparseMatrixCSC{Tv,T
 
         seen[v] = true
 
-        # ancestor[DataStructures.find_root(su, v)] = par
+        # ancestor[DataStructures.find_root!(su, v)] = par
         
         for ind in mat.colptr[v]:(mat.colptr[v+1]-1)
             w = mat.rowval[ind]
             if seen[w]
-                answer[ind] = mat.nzval[ind]*(depth[v] + depth[w] - 2*depth[ancestor[DataStructures.find_root(su,w)]])
+                answer[ind] = mat.nzval[ind]*(depth[v] + depth[w] - 2*depth[ancestor[DataStructures.find_root!(su,w)]])
                 # println(u, " ", v, " : ", answer[ind])
             end # can fill u-v query
         end # over queries
 
         DataStructures.union!(su, par, v)
         
-        ancestor[DataStructures.find_root(su, par)] = par
+        ancestor[DataStructures.find_root!(su, par)] = par
         
 
      end # for vi, v
