@@ -52,12 +52,15 @@ Return the permutation that cholmod would apply.
 function cholmod_perm(sdd)
     ba = SuiteSparse.CHOLMOD
     #cm = ba.common()
-    cm = ba.defaults(ba.common_struct[Threads.threadid()])
+    #cm = ba.defaults(ba.common_struct[Threads.threadid()])
 
-    anal = ba.analyze(ba.Sparse(lap(sdd)), cm);
+    anal = ba.cholmod_l_analyze(ba.Sparse(sdd), ba.COMMONS[Threads.threadid()])
+    s_anal = unsafe_load(anal)
+    
+    #anal = ba.analyze(ba.Sparse(lap(sdd)), cm);
 
     #s_anal = unsafe_load(get(anal.p))
-    s_anal = unsafe_load(pointer(anal))
+    #s_anal = unsafe_load(pointer(anal))
 
     n = Int(s_anal.n)
 
