@@ -80,7 +80,7 @@ x = f(b, tol=1e-6);
 mats = []
 rhss = []
 solver = Laplacians.wrapCapture(approxchol_lap, mats, rhss)
-a = chimera(10)
+a = chimera(10,1)
 as = shortIntGraph(a)
 f = solver(a);
 fs = solver(as);
@@ -89,6 +89,7 @@ b = randn(10)
 x = f(b);
 xs = fs(b);
 
+# note: this will fail if the graph is not connected
 solver = Laplacians.approxchol_lapChol(a,verbose=true)
 x = solver(b);
 
