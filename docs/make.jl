@@ -40,6 +40,6 @@ makedocs(modules=[Laplacians],
 
     )
 
-deploydocs(;
+deploydocs(
            repo = "github.com/danspielman/Laplacians.jl.git",
 )
