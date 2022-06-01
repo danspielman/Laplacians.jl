@@ -42,4 +42,5 @@ makedocs(modules=[Laplacians],
 
 deploydocs(
            repo = "github.com/danspielman/Laplacians.jl.git",
+           deploy_config = Documenter.GitHubActions(),
 )
