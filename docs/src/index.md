@@ -1,6 +1,6 @@
 # Laplacians.jl
 
-[![codecov](https://codecov.io/gh/danspielman/Laplacians.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/danspielman/Laplacians.jl)
+[![codecov](https://codecov.io/gh/danspielman/Laplacians.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/danspielman/Laplacians.jl/dev)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://danspielman.github.io/Laplacians.jl/latest)
 
 
@@ -38,6 +38,10 @@ The algorithms provide by Laplacians.jl include:
 ## Current Development Version
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
+
+# Version 1.3.0
+
+This version is compatible with Julia 1.7, but not earlier versions. We do not presently have a version that works with Julia 1.6, and we'll try to fix that.
 
 # Version 1.2.0
 

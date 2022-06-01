@@ -1,7 +1,7 @@
 # Laplacians.jl
 
 [![codecov](https://codecov.io/gh/danspielman/Laplacians.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/danspielman/Laplacians.jl)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://danspielman.github.io/Laplacians.jl/latest)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://danspielman.github.io/Laplacians.jl/dev)
 
 [![Laplacians](http://pkg.julialang.org/badges/Laplacians_0.6.svg)](http://pkg.julialang.org/detail/Laplacians)
 
