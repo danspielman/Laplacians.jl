@@ -43,12 +43,10 @@ To get the current version of the master branch, run `pkg> add Laplacians#master
 
 This is compatible with Julia 1.7. The only significant change from 1.2.0 was dictated by a change in interface to SuiteSparse.
 
-# Version 1.2.1
-This is the version for Julia 1.6. It is identical to 1.2.0 except that some slow tests have been removed, and the compat entry has been changed.
-
 # Version 1.2.0
 
-This version is compatible with Julia 1.4 and 1.5, but not earlier versions.
+This version is compatible with Julia 1.4, 1.5, and 1.6. but not earlier versions.
+Some features of this version will break in Julia 1.7.
 
 Changes:
 
