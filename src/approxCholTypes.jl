@@ -104,4 +104,6 @@ mutable struct ApproxCholPQ{Tind}
     minlist::Int
     nitems::Int
     n::Int
+    # RG21 this is just a quick hack to make it work with multiedge
+    split::Int
 end

@@ -35,20 +35,33 @@ We then have the outline:
 
 =#
 
-"""
-    params = ApproxCholParams(order, output)
+#=
+    params = ApproxCholParams(order, output, split, merge)
 order can be one of
 * :deg (by degree, adaptive),
 * :wdeg (by original wted degree, nonadaptive),
 * :given
-"""
+split represents the number of multiedges to split the original edges into.
+If split < 1, it means we are not splitting at all, so
+use the initial implementation.
+If merge < 1, it means we are not merging at all.
+Equivalently, we can set merge to be typemax(Int64),
+but that might be slightly less efficient.
+Setting merge = 1 will effectively reduce ac 
+to its basic form, i.e. split < 1, but setting 
+merge to be 1 is less efficient.
+=#
 mutable struct ApproxCholParams
     order::Symbol
     stag_test::Integer
+    split::Int64
+    merge::Int64
 end
 
-ApproxCholParams() = ApproxCholParams(:deg, 5)
-ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5)
+ApproxCholParams() = ApproxCholParams(:deg, 5, 0, 0)
+ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5, 0, 0)
+ApproxCholParams(sym::Symbol, k::Int64) = ApproxCholParams(sym, 5, k, 0)
+ApproxCholParams(sym::Symbol, k::Int64, m::Int64) = ApproxCholParams(sym, 5, k, m)
 
 LDLinv(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval} =
   LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Tind[],Tval[],zeros(Tval,a.n))
@@ -96,6 +109,57 @@ function LLmatp(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
     return LLmatp{Tind,Tval}(n, degs, cols, llelems)
 end
 
+function LLmatp(a::SparseMatrixCSC{Tval,Tind}, split::Int64) where {Tind,Tval}
+    n = size(a,1)
+    m = nnz(a) * split
+
+    degs = zeros(Tind,n)
+
+    flips = flipIndex(a)
+
+    cols = Array{LLp{Tind,Tval}}(undef, n)
+    llelems = Array{LLp{Tind,Tval}}(undef, m)
+
+    @inbounds for i in 1:n
+        degs[i] = split * (a.colptr[i+1] - a.colptr[i])
+        
+        # split the edge for split times
+        ind = a.colptr[i]
+        j = a.rowval[ind]
+        v = a.nzval[ind] / split
+        llpend = LLp{Tind,Tval}(j,v)
+        next = llelems[split * ind] = llpend
+        for k in 1:split-1
+            next = llelems[split * (ind - 1) + k] = LLp{Tind,Tval}(j,v,next)
+        end
+        for ind in (a.colptr[i]+one(Tind)):(a.colptr[i+1]-one(Tind))
+            
+            j = a.rowval[ind]
+            v = a.nzval[ind] / split
+            # split the edge for split times
+            for k in 1:split
+                next = llelems[split * (ind - 1) + k] = LLp{Tind,Tval}(j,v,next)
+            end
+        end
+        cols[i] = next
+    end
+
+    @inbounds for i in 1:n
+        
+        for ind in a.colptr[i]:(a.colptr[i+1]-one(Tind))
+
+            # multiedge
+            for k in 1:split
+                #llelems[split * (ind - 1) + k]
+                #llelems[ split * (flips[ind] - 1) + k]
+                llelems[split * (ind - 1) + k].reverse = llelems[ split * (flips[ind] - 1) + k]
+            end
+        end
+    end
+
+    return LLmatp{Tind,Tval}(n, degs, cols, llelems)
+end
+
 """
   Print a column in an LLmatp matrix.
   This is here for diagnostics.
@@ -119,7 +183,7 @@ function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
 
     ptr = one(Tind)
 
-    @inbounds for i in Tind(1):Tind(n-1)
+    @inbounds for i in Tind(1):Tind(n-1) # a[n,n] == 0 ?
         next = zero(Tind)
 
         for ind in (a.colptr[i]):(a.colptr[i+1]-one(Tind))
@@ -138,6 +202,39 @@ function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
 
     return LLMatOrd{Tind,Tval}(n, cols, llelems)
 end
+
+
+function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, split::Int64) where {Tind,Tval}
+    n = size(a,1)
+    m = nnz(a) * split
+
+    cols = zeros(Tind, n)
+    llelems = Array{LLord{Tind,Tval}}(undef, m)
+
+    ptr = one(Tind)
+
+    @inbounds for i in Tind(1):Tind(n-1)
+        next = zero(Tind)
+
+        for ind in (a.colptr[i]):(a.colptr[i+1]-one(Tind))
+            j = a.rowval[ind]
+            if (i < j)
+                # split the edge for split times
+                v = a.nzval[ind] / split
+                for k in 1:split
+                    llelems[ptr] = LLord{Tind,Tval}(j, next, v)
+                    next = ptr
+                    ptr += one(Tind)
+                end
+
+            end
+        end
+        cols[i] = next
+    end
+
+    return LLMatOrd{Tind,Tval}(n, cols, llelems)
+end
+
 
 function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, perm::Array) where {Tind,Tval}
     n = size(a,1)
@@ -162,6 +259,41 @@ function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, perm::Array) where {Tind,Tval}
               llelems[ptr] = LLord{Tind,Tval}(j, next, v)
               next = ptr
               ptr += one(ptr)
+
+            end
+        end
+        cols[i] = next
+    end
+
+    return LLMatOrd{Tind,Tval}(n, cols, llelems)
+end
+
+
+function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, perm::Array, split::Int64) where {Tind,Tval}
+    n = size(a,1)
+    m = nnz(a) * split
+
+    invp = invperm(perm)
+
+    cols = zeros(Tind, n)
+    llelems = Array{LLord{Tind,Tval}}(undef, m)
+
+    ptr = one(Tind)
+
+    @inbounds for i0 in Tind(1):Tind(n)
+        i = invp[i0]
+        next = zero(Tind)
+
+        for ind in (a.colptr[i0]):(a.colptr[i0+1]-one(Tind))
+            j = invp[a.rowval[ind]]
+            if (i < j)
+                # split the edge for split times
+                v = a.nzval[ind] / split
+                for k in 1:split
+                    llelems[ptr] = LLord{Tind,Tval}(j, next, v)
+                    next = ptr
+                    ptr += one(ptr)
+                end
 
             end
         end
@@ -336,6 +468,266 @@ function compressCol!(
     return ptr
 end
 
+function avgCol!(colspace::Vector{LLp{Tind,Tval}},
+    len::Int) where {Tind,Tval}
+
+    o_col = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
+    sort!(colspace, one(len), len, QuickSort, o_col)
+
+    # average the weights of multiedges
+    cur_edge = 1
+    next_edge = 1
+
+    while next_edge <= len && colspace[cur_edge].row == colspace[next_edge].row
+        next_edge += 1
+    end
+    while cur_edge <= len
+        num_mul = next_edge - cur_edge
+        mul_sum = 0.0
+        for ii in cur_edge : next_edge - 1
+            mul_sum += colspace[ii].val
+        end
+        # change the edge weights
+        new_val = mul_sum / num_mul
+        for ii in cur_edge : next_edge - 1
+            rev_ii = colspace[ii].reverse
+            colspace[ii].val = new_val
+            rev_ii.val = new_val
+        end
+        cur_edge = next_edge
+        while next_edge <= len && colspace[cur_edge].row == colspace[next_edge].row
+            next_edge += 1
+        end
+    end
+
+    # Lexicographical sorting, first weights, then row indices
+    o_col = Base.Order.ord(isless, x->(x.val, x.row), false, Base.Order.Forward)
+    sort!(colspace, one(len), len, QuickSort, o_col)
+    return len
+end
+
+#=
+This function averages the weights of multiedges.
+If the number of multiedges is larger than merge,
+the function also compresses the multiedges 
+and keeps only `merge`-multiedges
+=#
+function compressAvgCol!(colspace::Vector{LLp{Tind,Tval}},
+    len::Int,
+    pq::ApproxCholPQ{Tind},
+    merge::Int64) where {Tind,Tval}
+
+    o_col = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
+    sort!(colspace, one(len), len, QuickSort, o_col)
+
+    # average the weights of multiedges
+    cur_edge = 1
+    next_edge = 1
+
+    # ptr points to the end of previous edge.
+    # At the end it should be the length of the compressed colspace
+    ptr = 0
+
+    while next_edge <= len && colspace[cur_edge].row == colspace[next_edge].row
+        next_edge += 1
+    end
+    while cur_edge <= len
+        num_mul = next_edge - cur_edge
+        mul_sum = 0.0
+        for ii in cur_edge : next_edge - 1
+            mul_sum += colspace[ii].val
+        end
+
+        if num_mul <= merge
+            # change the edge weights
+            new_val = mul_sum / num_mul
+            for ii in cur_edge : next_edge - 1
+                rev_ii = colspace[ii].reverse
+                colspace[ii].val = new_val
+                rev_ii.val = new_val
+                ptr += 1
+                colspace[ptr] = colspace[ii]
+            end
+        else
+            # merge and average the multiedges
+            new_val = mul_sum / merge
+            for ii in cur_edge : cur_edge + merge - 1#next_edge - 1
+                rev_ii = colspace[ii].reverse
+                colspace[ii].val = new_val
+                rev_ii.val = new_val
+                ptr += 1
+                colspace[ptr] = colspace[ii]
+            end
+            currow = colspace[cur_edge].row
+            for ii in cur_edge + merge : next_edge -1
+                colspace[ii].reverse.val = zero(Tval)
+                approxCholPQDec!(pq, currow)
+            end
+        end
+        cur_edge = next_edge
+        while next_edge <= len && colspace[cur_edge].row == colspace[next_edge].row
+            next_edge += 1
+        end
+    end
+
+    # Lexicographical sorting, first weights, then row indices
+    o_col = Base.Order.ord(isless, x->(x.val, x.row), false, Base.Order.Forward)
+    sort!(colspace, one(len), ptr, QuickSort, o_col)
+    return ptr
+end
+
+#=
+function approxChol(a::LLMatOrd{Tind,Tval}) where {Tind,Tval}
+    n = a.n
+
+    # need to make custom one without col info later.
+    ldli = LDLinv(a)
+    ldli_row_ptr = one(Tind)
+
+    d = zeros(Tval,n)
+
+    colspace = Array{LLcol{Tind,Tval}}(undef, n)
+    cumspace = Array{Tval}(undef, n)
+    #vals = Array(Tval,n) # will be able to delete this
+
+    o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
+
+
+    for i in Tind(1):Tind(n-1)
+
+        ldli.col[i] = i  # will get rid of this with new data type
+        ldli.colptr[i] = ldli_row_ptr
+
+        len = get_ll_col(a, i, colspace)
+
+        # RG21 do not compress the column, just sort the entries
+        #len = compressCol!(colspace, len)
+        o_col = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
+        sort!(colspace, one(len), len, QuickSort, o_col)
+
+
+        csum = zero(Tval)
+        for ii in 1:len
+            #vals[ii] = colspace[ii].val    # if immut, no need for vals
+            csum = csum + colspace[ii].val
+            # RG21 
+            if ii <= length(cumspace)
+                cumspace[ii] = csum
+            else
+                push!(cumspace, csum)
+            end
+        end
+        wdeg = csum
+
+        colScale = one(Tval)
+
+        # RG21 this the edge that is not a multiedge of joffset
+        next_edge = 1
+        final_d = 0
+
+        for joffset in 1:(len-1)
+            # RG21 find the next edge that is not a multiedge of the current one
+            isNewNeighbor = false
+            if joffset == next_edge
+                isNewNeighbor = true
+            end
+            while next_edge <= len && colspace[joffset].row == colspace[next_edge].row
+                next_edge += 1
+            end
+
+            # RG21 Avoid adding selfloop at the second last entry
+            if next_edge == len + 1
+                while joffset <= len - 1
+                    ll = colspace[joffset]
+                    final_d += ll.val * colScale
+                    joffset += 1
+                end
+                break
+            end
+
+            llcol = colspace[joffset]
+            w = llcol.val * colScale
+            j = llcol.row
+
+            f = w/(wdeg)
+
+            #vals[joffset] = zero(Tval)
+
+            # kind = Laplacians.blockSample(vals,k=1)[1]
+            # RG21 sample should start from the next_edge
+            r = rand() * (csum - cumspace[next_edge - 1]) + cumspace[next_edge - 1]
+            koff = searchsortedfirst(cumspace,r,one(len),len,o)
+
+            k = colspace[koff].row
+
+            #newEdgeVal = w*(one(Tval)-f)
+            newEdgeVal = colspace[joffset].val * (csum - cumspace[next_edge - 1]) / csum
+
+            # create edge (j,k) with newEdgeVal
+            # do it by reassigning ll
+            if j < k # put it in col j
+                jhead = a.cols[j]
+                a.lles[llcol.ptr] = LLord(k, jhead, newEdgeVal)
+                #ll.next = jhead
+                #ll.val = newEdgeVal
+                #ll.row = k
+                a.cols[j] = llcol.ptr
+            else # put it in col k
+              khead = a.cols[k]
+              a.lles[llcol.ptr] = LLord(j, khead, newEdgeVal)
+              #ll.next = khead
+              #ll.val = newEdgeVal
+              #ll.row = j
+              a.cols[k] = llcol.ptr
+            end
+
+            #=
+            colScale = colScale*(one(Tval)-f)
+            #wdeg = wdeg*(1.0-f)^2
+            wdeg = wdeg - 2w + w^2/wdeg
+            =#
+
+            # RG21 compress all multi edge in ldli 
+            if isNewNeighbor#length(ldli.rowval) == 0 || last(ldli.rowval) != j
+                push!(ldli.rowval,j)
+                push!(ldli.fval, f)
+                ldli_row_ptr = ldli_row_ptr + one(Tind)
+            else
+                ldli.fval[length(ldli.fval)] = last(ldli.fval) + f
+            end
+            # RG21 only update these after we processed all multiedges
+            if joffset == next_edge - 1
+                f = last(ldli.fval)
+                colScale = colScale*(one(Tval)-f)
+                wdeg = wdeg*(one(Tval)-f)^2
+            end
+            # push!(ops, IJop(i,j,1-f,f))  # another time suck
+
+
+        end # for joffset
+
+
+        llcol = colspace[len]
+        final_d += llcol.val * colScale
+        j = llcol.row
+
+        push!(ldli.rowval,j)
+        push!(ldli.fval, one(Tval))
+        ldli_row_ptr = ldli_row_ptr + one(Tind)
+
+        d[i] = final_d
+
+    end # for i
+
+
+    ldli.colptr[n] = ldli_row_ptr
+
+    ldli.d = d
+
+    return ldli
+end
+=#
+
 
 function approxChol(a::LLMatOrd{Tind,Tval}) where {Tind,Tval}
     n = a.n
@@ -441,6 +833,7 @@ function approxChol(a::LLMatOrd{Tind,Tval}) where {Tind,Tval}
 
     return ldli
 end
+
 
 # this one is greedy on the degree - also a big win
 function approxChol(a::LLmatp{Tind,Tval}) where {Tind,Tval}
@@ -558,6 +951,365 @@ function approxChol(a::LLmatp{Tind,Tval}) where {Tind,Tval}
     return ldli
 end
 
+# this one is greedy on the degree - also a big win
+# split is used to create ApproxCholPQ
+function approxChol(a::LLmatp{Tind,Tval}, split::Int) where {Tind,Tval}
+    n = a.n
+
+    ldli = LDLinv(a)
+    ldli_row_ptr = one(Tind)
+
+    d = zeros(n)
+    #@show a.degs
+
+    pq = ApproxCholPQ(a.degs, split)
+
+    it = 1
+
+    colspace = Array{LLp{Tind,Tval}}(undef, n)
+    # we use reversed csumspace to avoid subtraction
+    csumspace_rev = Array{Tval}(undef, n)
+    #cumspace = Array{Tval}(undef, n)
+    vals = Array{Tval}(undef, n) # will be able to delete this
+
+    # we use reversed csumspace to avoid subtraction
+    #o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
+    o_rev = Base.Order.ord(isless, identity, true, Base.Order.Forward)
+
+    @inbounds while it < n
+
+        i = approxCholPQPop!(pq)
+
+        ldli.col[it] = i # conversion!
+        ldli.colptr[it] = ldli_row_ptr
+
+        it = it + 1
+        #println("In approxChol, iteration $(it - 1), column $(i)")
+        #=@show=# len = get_ll_col(a, i, colspace)
+
+        len = avgCol!(colspace, len)
+
+        csum = zero(Tval)
+        for ii in 1:len
+            csum = csum + colspace[ii].val
+            if ii <= length(csumspace_rev)
+                #=@show=# vals[ii] = colspace[ii].val
+            else
+                push!(vals, colspace[ii].val)
+                push!(csumspace_rev, csum)
+            end
+        end
+
+        csum_rev = zero(Tval)
+
+        for ii in len:-1:1
+            csum_rev += colspace[ii].val
+            csumspace_rev[ii] = csum_rev
+        end
+
+
+        #=@show=# wdeg = csum
+
+        colScale = one(Tval)
+
+        # next_edge is the edge that is not a multiedge of joffset
+        next_edge = 1
+        final_d = 0
+        for joffset in 1:(len-1)
+            # find the next edge that is not a multiedge of the current one
+            isNewNeighbor = false
+            if joffset == next_edge
+                isNewNeighbor = true
+            end
+            while next_edge <= len && colspace[joffset].row == colspace[next_edge].row
+                next_edge += 1
+            end
+
+            # Avoid adding selfloop at the second last entry
+            if next_edge == len + 1
+                # Remove all the multiedges left
+                while joffset <= len - 1
+                    ll = colspace[joffset]
+                    final_d += vals[joffset] * colScale
+                    j = ll.row
+                    revj = ll.reverse
+
+                    if it < n
+                        approxCholPQDec!(pq, j)
+                    end
+
+                    revj.val = zero(Tval)
+                    joffset += 1
+                end
+                break
+            end
+
+
+            ll = colspace[joffset]
+            
+            w = vals[joffset] * colScale
+            j = ll.row
+            revj = ll.reverse
+
+            #=@show=# f = w/(wdeg)
+
+            vals[joffset] = zero(Tval)
+
+            # kind = Laplacians.blockSample(vals,k=1)[1]
+            
+            # sample should start from the next_edge
+            #=@show=# r = rand() * csumspace_rev[next_edge]
+            
+            #=@show=# koff = searchsortedlast(csumspace_rev,r,one(len),len,o_rev)
+
+            k = colspace[koff].row
+
+            approxCholPQInc!(pq, k)
+
+            #newEdgeVal = f*(one(Tval)-f)*wdeg
+            #newEdgeVal = colspace[joffset].val * (csum - cumspace[next_edge - 1]) / csum
+            newEdgeVal = colspace[joffset].val * csumspace_rev[next_edge] / csum
+
+            # fix row k in col j
+            revj.row = k   # dense time hog: presumably becaus of cache
+            revj.val = newEdgeVal
+            revj.reverse = ll
+
+            # fix row j in col k
+            khead = a.cols[k]
+            a.cols[k] = ll
+            ll.next = khead
+            ll.reverse = revj
+            ll.val = newEdgeVal
+            ll.row = j
+
+
+            # compress all multi edge in ldli 
+            if isNewNeighbor#length(ldli.rowval) == 0 || last(ldli.rowval) != j
+                push!(ldli.rowval,j)
+                push!(ldli.fval, f)
+                ldli_row_ptr = ldli_row_ptr + one(Tind)
+            else
+                ldli.fval[length(ldli.fval)] = last(ldli.fval) + f
+            end
+
+            # only update these after we processed all multiedges
+            if joffset == next_edge - 1
+                f = last(ldli.fval)
+                #=@show=# colScale = colScale*(one(Tval)-f)
+                #=@show=# wdeg = wdeg*(one(Tval)-f)^2
+            end
+
+            # push!(ops, IJop(i,j,1-f,f))  # another time suck
+        end # for
+        
+        ll = colspace[len]
+        final_d += vals[len] * colScale
+        j = ll.row
+        revj = ll.reverse
+
+        if it < n
+            #@show j
+            approxCholPQDec!(pq, j)
+        end
+
+        revj.val = zero(Tval)
+        
+        push!(ldli.rowval,j)
+        push!(ldli.fval, one(Tval))
+        ldli_row_ptr = ldli_row_ptr + one(Tind)
+        
+        d[i] = final_d
+
+    end
+
+    ldli.colptr[it] = ldli_row_ptr
+
+    ldli.d = d
+
+    return ldli
+end
+
+
+function approxChol(a::LLmatp{Tind,Tval}, split::Int, merge::Int) where {Tind,Tval}
+    n = a.n
+
+    ldli = LDLinv(a)
+    ldli_row_ptr = one(Tind)
+
+    d = zeros(n)
+    #@show a.degs
+
+    pq = ApproxCholPQ(a.degs, split)
+
+    it = 1
+
+    colspace = Array{LLp{Tind,Tval}}(undef, n)
+    # we use reversed csumspace to avoid subtraction
+    csumspace_rev = Array{Tval}(undef, n)
+    #cumspace = Array{Tval}(undef, n)
+    vals = Array{Tval}(undef, n) # will be able to delete this
+
+    # we use reversed csumspace to avoid subtraction
+    #o = Base.Order.ord(isless, identity, false, Base.Order.Forward)
+    o_rev = Base.Order.ord(isless, identity, true, Base.Order.Forward)
+
+    @inbounds while it < n
+
+        i = approxCholPQPop!(pq)
+
+        ldli.col[it] = i # conversion!
+        ldli.colptr[it] = ldli_row_ptr
+
+        it = it + 1
+        #=@show=# len = get_ll_col(a, i, colspace)
+        # do not compress the column, just sort the entries
+        #len = compressCol!(a, colspace, len, pq)  #3hog
+        len = compressAvgCol!(colspace, len, pq, merge)
+
+        csum = zero(Tval)
+        for ii in 1:len
+            csum = csum + colspace[ii].val
+            if ii <= length(csumspace_rev)
+                #=@show=# vals[ii] = colspace[ii].val
+            else
+                push!(vals, colspace[ii].val)
+                push!(csumspace_rev, csum)
+            end
+        end
+
+        csum_rev = zero(Tval)
+
+        for ii in len:-1:1
+            csum_rev += colspace[ii].val
+            csumspace_rev[ii] = csum_rev
+        end
+
+
+        #=@show=# wdeg = csum
+
+        colScale = one(Tval)
+
+        # next_edge is the edge that is not a multiedge of joffset
+        next_edge = 1
+        final_d = 0
+        for joffset in 1:(len-1)
+            # find the next edge that is not a multiedge of the current one
+            isNewNeighbor = false
+            if joffset == next_edge
+                isNewNeighbor = true
+            end
+            while next_edge <= len && colspace[joffset].row == colspace[next_edge].row
+                next_edge += 1
+            end
+
+            # Avoid adding selfloop at the second last entry
+            if next_edge == len + 1
+                # Remove all the multiedges left
+                while joffset <= len - 1
+                    ll = colspace[joffset]
+                    final_d += vals[joffset] * colScale
+                    j = ll.row
+                    revj = ll.reverse
+
+                    if it < n
+                        approxCholPQDec!(pq, j)
+                    end
+
+                    revj.val = zero(Tval)
+                    joffset += 1
+                end
+                break
+            end
+
+
+            ll = colspace[joffset]
+            
+            w = vals[joffset] * colScale
+            j = ll.row
+            revj = ll.reverse
+
+            #=@show=# f = w/(wdeg)
+
+            vals[joffset] = zero(Tval)
+
+            # kind = Laplacians.blockSample(vals,k=1)[1]
+            
+            # sample should start from the next_edge
+            #=@show=# r = rand() * csumspace_rev[next_edge]
+            
+            #=@show=# koff = searchsortedlast(csumspace_rev,r,one(len),len,o_rev)
+
+            k = colspace[koff].row
+
+            approxCholPQInc!(pq, k)
+
+            #newEdgeVal = f*(one(Tval)-f)*wdeg
+            #newEdgeVal = colspace[joffset].val * (csum - cumspace[next_edge - 1]) / csum
+            newEdgeVal = colspace[joffset].val * csumspace_rev[next_edge] / csum
+
+            # fix row k in col j
+            revj.row = k   # dense time hog: presumably becaus of cache
+            revj.val = newEdgeVal
+            revj.reverse = ll
+
+            # fix row j in col k
+            khead = a.cols[k]
+            a.cols[k] = ll
+            ll.next = khead
+            ll.reverse = revj
+            ll.val = newEdgeVal
+            ll.row = j
+
+            # only update these after we processed all multiedges
+            #colScale = colScale*(one(Tval)-f)
+            #wdeg = wdeg*(one(Tval)-f)^2
+
+            # compress all multi edge in ldli 
+            if isNewNeighbor#length(ldli.rowval) == 0 || last(ldli.rowval) != j
+                push!(ldli.rowval,j)
+                push!(ldli.fval, f)
+                ldli_row_ptr = ldli_row_ptr + one(Tind)
+            else
+                ldli.fval[length(ldli.fval)] = last(ldli.fval) + f
+            end
+
+            # only update these after we processed all multiedges
+            if joffset == next_edge - 1
+                f = last(ldli.fval)
+                #=@show=# colScale = colScale*(one(Tval)-f)
+                #=@show=# wdeg = wdeg*(one(Tval)-f)^2
+            end
+
+            # push!(ops, IJop(i,j,1-f,f))  # another time suck
+        end # for
+         
+        ll = colspace[len]
+        final_d += vals[len] * colScale
+        j = ll.row
+        revj = ll.reverse
+
+        if it < n
+            #@show j
+            approxCholPQDec!(pq, j)
+        end
+
+        revj.val = zero(Tval)
+        
+        push!(ldli.rowval,j)
+        push!(ldli.fval, one(Tval))
+        ldli_row_ptr = ldli_row_ptr + one(Tind)
+        
+        d[i] = final_d
+
+    end
+
+    ldli.colptr[it] = ldli_row_ptr
+
+    ldli.d = d
+
+    return ldli
+end
 
 
 #=============================================================
@@ -749,9 +1501,11 @@ function approxchol_lap(a::SparseMatrixCSC{Tv,Ti};
   pcgIts=Int[],
   params=ApproxCholParams()) where {Tv,Ti}
 
-  if minimum(a.nzval) < 0
-      error("Adjacency matrix can not have negative edge weights")
-  end
+    #@show params.split
+
+    if minimum(a.nzval) < 0
+        error("Adjacency matrix can not have negative edge weights")
+    end
 
     return Laplacians.lapWrapComponents(approxchol_lap1, a,
     verbose=verbose,
@@ -782,19 +1536,30 @@ function approxchol_lapGreedy(a::SparseMatrixCSC;
 
   la = lap(a) # a hit !?
 
-  llmat = LLmatp(a)
-  ldli = approxChol(llmat)
+
+  if params.split >= 1 && params.merge < 1
+    llmat = LLmatp(a, params.split)
+    ldli = approxChol(llmat, params.split)
+  elseif params.split >= 1 && params.merge >= 1
+    llmat = LLmatp(a, params.split)
+    ldli = approxChol(llmat, params.split, params.merge)
+  else
+    llmat = LLmatp(a)
+    ldli = approxChol(llmat)
+  end
+  
+  
+  
+
   F(b) = LDLsolver(ldli, b)
 
   if verbose
     println("Using greedy degree ordering. Factorization time: ", time()-t1)
+    # println("Condition number of la and ldl is with tol equals 1e-4: $(condNumber(a, ldli; tol=1e-4))")
+    println("Factorization size: $(2* length(ldli.fval))")
     println("Ratio of operator edges to original edges: ", 2 * length(ldli.fval) / nnz(a))
+    println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la)))
   end
-
-  if verbose
-      println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la)))
-  end
-
 
   f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b .- mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
 
@@ -819,16 +1584,28 @@ function approxchol_lapGiven(a::SparseMatrixCSC;
   la = lap(a)
 
   llmat = LLMatOrd(a)
+
+
+  #=
+  nv = size(a, 1)
+  for i in 1:nv
+    print_ll_col(llmat, i)
+  end
+  println("print all cols complete")
+  =#
+
   ldli = approxChol(llmat)
+
+  
+
   F(b) = LDLsolver(ldli, b)
 
   if verbose
     println("Using given ordering. Factorization time: ", time()-t1)
+    # println("Condition number of la and ldl tol equals 1e-4: $(condNumber(a, ldli; tol=1e-4))")
+    println("Factorization size: $(2* length(ldli.fval))")
     println("Ratio of operator edges to original edges: ", 2 * length(ldli.fval) / nnz(a))
-  end
-
-  if verbose
-      println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la)))
+    println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la)))
   end
 
 
@@ -858,7 +1635,18 @@ function approxchol_lapWdeg(a::SparseMatrixCSC;
   v = v .* (1 .+ rand(length(v)))
   p = sortperm(v)
 
+
   llmat = LLMatOrd(a,p)
+
+
+  #=
+  nv = size(a, 1)
+  for i in 1:nv
+    print_ll_col(llmat, i)
+  end
+  println("print all cols complete")
+  =#
+
   ldli = approxChol(llmat)
 
   ip = invperm(p)
@@ -885,7 +1673,60 @@ function approxchol_lapWdeg(a::SparseMatrixCSC;
 
 end
 
-
+function approxchol_lapRandom(a::SparseMatrixCSC;
+    tol::Real=1e-6,
+    maxits=1000,
+    maxtime=Inf,
+    verbose=false,
+    pcgIts=Int[],
+    params=ApproxCholParams())
+  
+    tol_ =tol
+    maxits_ =maxits
+    maxtime_ =maxtime
+    verbose_ =verbose
+    pcgIts_ =pcgIts
+  
+    t1 = time()
+  
+    la = lap(a)
+  
+    # v = rand(size(a,1))
+    # p = sortperm(v)
+    p = randperm(size(a,1))
+  
+    llmat = LLMatOrd(a,p)
+  
+    #=
+    nv = size(a, 1)
+    for i in 1:nv
+      print_ll_col(llmat, i)
+    end
+    println("print all cols complete")
+    =#
+  
+    ldli = approxChol(llmat)
+  
+    ip = invperm(p)
+    ldlip = LDLinv(p[ldli.col], ldli.colptr, p[ldli.rowval], ldli.fval, ldli.d[ip]);
+  
+    F = function(b)
+      x = zeros(size(b))
+      x = LDLsolver(ldlip, b)
+      #x[p] = LDLsolver(ldli, b[p])
+      return x
+    end
+  
+    if verbose
+        println("Using random ordering. Factorization time: ", time()-t1)
+        println("Ratio of operator edges to original edges: ", 2 * length(ldli.fval) / nnz(a))
+        println("ratio of max to min diagonal of laplacian : ", maximum(diag(la))/minimum(diag(la)))
+    end
+  
+  
+    f(b;tol=tol_,maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_) = pcg(la, b .- mean(b), F, tol=tol, maxits=maxits, maxtime=maxtime, pcgIts=pcgIts, verbose=verbose, stag_test = params.stag_test)
+  
+  end
 
 function approxchol_lap1(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
@@ -924,6 +1765,17 @@ function approxchol_lap1(a::SparseMatrixCSC{Tv,Ti};
         params=params)
 
 
+    elseif params.order == :random 
+
+        return approxchol_lapRandom(a,
+            verbose=verbose,
+            tol=tol,
+            maxits=maxits,
+            maxtime=maxtime,
+            pcgIts=pcgIts,
+            params=params)
+        
+    
     else
       return approxchol_lapGiven(a,
         verbose=verbose,
@@ -948,6 +1800,7 @@ Not yet optimized directly for sddm.
 For more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html
 """
 approxchol_sddm = sddmWrapLap(approxchol_lap)
+#approxchol_sddm = sddmWrapLapComponents(approxchol_lap1)
 
 
 
@@ -964,7 +1817,7 @@ approxchol_sddm = sddmWrapLap(approxchol_lap)
 Given an adjacency matrix a and an ldli computed by approxChol,
 this computes the condition number.
 """
-function condNumber(a, ldli; verbose=false)
+function condNumber(a, ldli; verbose=false, tol=1e-2)
   la = lap(a)
 
   # construct the square operator
@@ -1012,11 +1865,11 @@ function condNumber(a, ldli; verbose=false)
   end
 
   gOp = SqLinOp(true,1.0,size(a,1),g)
-  upper = eigs(gOp;nev=1,which=:LM,tol=1e-2)[1][1]
+  upper = eigs(gOp;nev=1,which=:LM,tol=tol)[1][1]
 
   g2(b) = upper*b - g(b)
   g2Op = SqLinOp(true,1.0,size(a,1),g2)
-  lower = upper - eigs(g2Op;nev=2,which=:LM,tol=1e-2)[1][2]
+  lower = upper - eigs(g2Op;nev=2,which=:LM,tol=tol)[1][2]
 
   if verbose
       println("lower: ", lower, ", upper: ", upper);
@@ -1173,6 +2026,11 @@ function keyMap(x, n)
     return x <= n ? x : n + div(x,n)
 end
 
+
+function keyMap(x, k, upper)
+    return x <= k ? x : min(upper, k + div(x, k))
+end
+
 function ApproxCholPQ(a::Vector{Tind}) where Tind
 
     n = length(a)
@@ -1196,7 +2054,34 @@ function ApproxCholPQ(a::Vector{Tind}) where Tind
         lists[key] = i
     end
 
-    return ApproxCholPQ(elems, lists, minlist, n, n)
+    return ApproxCholPQ(elems, lists, minlist, n, n, one(Tind))
+end
+
+
+function ApproxCholPQ(a::Vector{Tind}, split::Int) where Tind
+
+    n = length(a)
+    elems = Array{ApproxCholPQElem{Tind}}(undef, n)
+    lists = zeros(Tind, 2* split * n+1)
+    minlist = one(n)
+
+    for i in 1:length(a)
+        key = a[i]
+        head = lists[key]
+
+        if head > zero(Tind)
+            elems[i] = ApproxCholPQElem{Tind}(zero(Tind), head, key)
+
+            elems[head] = ApproxCholPQElem{Tind}(i, elems[head].next, elems[head].key)
+        else
+            elems[i] = ApproxCholPQElem{Tind}(zero(Tind), zero(Tind), key)
+
+        end
+
+        lists[key] = i
+    end
+
+    return ApproxCholPQ(elems, lists, minlist, n, n, split)
 end
 
 function approxCholPQPop!(pq::ApproxCholPQ{Tind}) where Tind
@@ -1254,8 +2139,8 @@ end
 """
 function approxCholPQDec!(pq::ApproxCholPQ{Tind}, i) where Tind
 
-    oldlist = keyMap(pq.elems[i].key, pq.n)
-    newlist = keyMap(pq.elems[i].key - one(Tind), pq.n)
+    oldlist = keyMap(pq.elems[i].key, pq.split * pq.n, 2 * pq.split * pq.n + 1)
+    newlist = keyMap(pq.elems[i].key - one(Tind), pq.split * pq.n, 2 * pq.split * pq.n + 1)
 
     if newlist != oldlist
 
@@ -1279,8 +2164,8 @@ end
 """
 function approxCholPQInc!(pq::ApproxCholPQ{Tind}, i) where Tind
 
-    oldlist = keyMap(pq.elems[i].key, pq.n)
-    newlist = keyMap(pq.elems[i].key + one(Tind), pq.n)
+    oldlist = keyMap(pq.elems[i].key, pq.split * pq.n, 2 * pq.split * pq.n + 1)
+    newlist = keyMap(pq.elems[i].key + one(Tind), pq.split * pq.n, 2 * pq.split * pq.n + 1)
 
     if newlist != oldlist
 
@@ -1292,3 +2177,5 @@ function approxCholPQInc!(pq::ApproxCholPQ{Tind}, i) where Tind
 
     return nothing
 end
+
+

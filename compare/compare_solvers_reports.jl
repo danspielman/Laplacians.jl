@@ -1,6 +1,9 @@
 using Plots
-plotlyjs()
-
+pyplot()
+#plotly()
+#plotlyjs() #plotlyjs issue: https://github.com/JuliaPlots/Plots.jl/issues/1793
+using Statistics
+using Printf
 
 function total_time(dic; names = dic["names"], labels = dic["names"])
     plt = Plots.plot(title = "Seconds Distribution")
@@ -24,9 +27,41 @@ function total_time_relative(dic; names = dic["names"], labels=names, cols=disti
   mn = 1
   mx = 1
     
-    for i in 2:length(names)
+  for i in 2:length(names)
         name = names[i]
       y = sort(min.(dic["$(name)_tot"] ./ rel, 10))
+      mn = min(mn,minimum(y))
+      mx = max(mx,maximum(y))
+      Plots.plot!(y, label=labels[i], linewidth=3, color=cols[i])
+  end
+  Plots.plot!(ylimits=(0:10),yticks=[0;round(mn,2);1:10])
+
+  plot!(ytickfont = font(16))
+  plot!(legendfont = font(16))
+  plot!(guidefont = font(16))
+    plot!(xticks=[])
+
+
+  display(plt)
+  return plt
+end
+
+function total_time_relative_unsort(dic; names = dic["names"], labels=names, cols=distinguishable_colors(length(names)))
+
+    if isa(cols,Dict)
+        cols = [cols[x] for x in names];
+    end
+
+  plt = Plots.plot(title = "(Time / Time for $(labels[1])), Distribution")
+  rel = dic["$(names[1])_tot"]
+
+  mn = 1
+  mx = 1
+    
+  for i in 2:length(names)
+        name = names[i]
+      #y = sort(min.(dic["$(name)_tot"] ./ rel, 10))
+      y = min.(dic["$(name)_tot"] ./ rel, 10)
       mn = min(mn,minimum(y))
       mx = max(mx,maximum(y))
       Plots.plot!(y, label=labels[i], linewidth=3, color=cols[i])
@@ -49,8 +84,9 @@ function total_time_nnz(dic; names = dic["names"],
                         labels = names,
                         cols=distinguishable_colors(length(names)),
                         ref=[])
+    #dic = copy(dic)
     if isa(cols,Dict)
-        cols = [cols[x] for x in names];
+       cols = [cols[x] for x in names];
     end
 
     if ~isempty(ref)
@@ -77,7 +113,7 @@ function total_time_nnz(dic; names = dic["names"],
             y = min.(y, yref)
         end
       y = sort(y)
-      y[y .== Inf] = mx
+      y[y .== Inf] .= mx
       y = y * 10^(-b)  
       Plots.plot!(y, label=labels[i], linewidth=3, color=cols[i])
     end
@@ -87,7 +123,95 @@ function total_time_nnz(dic; names = dic["names"],
     plot!(xticks=[])
   title!("$(10.0^(round.(Int,b))) Seconds / Edge, Distribution")
   display(plt)
-  return mn, mx
+  return plt, mn, mx
+end
+
+function total_time_nnz_loglog(dic; names = dic["names"],
+                        labels = names,
+                        cols=distinguishable_colors(length(names)),
+                            #ref=[]
+                            )
+    if isa(cols,Dict)
+       cols = [cols[x] for x in names];
+    end
+
+    # if ~isempty(ref)
+    #     yref = 10*dic["$(ref)_tot"] ./ dic["ne"]
+    # end
+
+    x = dic["ne"]
+    
+    plt = Plots.plot()
+    mn = Inf
+    mx = 0
+    for name in names
+        y = dic["$(name)_tot"]
+        # if ~isempty(ref)
+        #     y = min.(y, yref)
+        # end
+        mn = min(mn,minimum(y))
+        if any(y .< Inf)
+            mx = max(mx,maximum(y[y .< Inf]))
+        end
+    end
+
+   # b = floor(log(mx)/log(10))
+    for i in 1:length(names)
+        name = names[i]
+        y = dic["$(name)_tot"]
+        # if ~isempty(ref)
+        #     y = min.(y, yref)
+        # end
+        #y = sort(y)
+        y[y .== Inf] .= 2*mx
+        #y = y * 10^(-b)  
+        Plots.plot!(x, y, label="", linewidth=3, color=cols[i])
+        Plots.scatter!(x, y, label=labels[i], linewidth=3, color=cols[i])
+    end
+  Plots.plot!(xaxis=(:log), yaxis=(:log))
+  plot!(ytickfont = font(12))
+  plot!(legendfont = font(16))
+    plot!(guidefont = font(16))
+    #plot!(xticks=[])
+  #title!("$(10.0^(round.(Int,b))) Seconds / Edge, Distribution")
+  display(plt)
+  return plt, mn, mx
+end
+
+function total_pair(dic, name1, name2)
+    plt = Plots.plot()
+    mn = Inf
+    mx = 0
+    y1 = dic["$(name1)_tot"]
+    y2 = dic["$(name2)_tot"]
+    
+    mn = min(mn,minimum(y1),minimum(y2))
+    if any(y1 .< Inf)
+        mx = max(mx,maximum(y1))
+    end
+    if any(y2 .< Inf)
+        mx = max(mx,maximum(y2))
+    end
+    y1[y1 .== Inf] .= 2*mx
+    y2[y2 .== Inf] .= 2*mx
+
+    Plots.plot!([mn,mx], [mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 2 .*[mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 5 .*[mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 10 .*[mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 0.5 .*[mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 0.2 .*[mn,mx], labels="", linewidth=3)
+    Plots.plot!([mn,mx], 0.1 .*[mn,mx], labels="", linewidth=3)
+    Plots.scatter!(y1, y2, label="", linewidth=3)
+
+    
+    Plots.plot!(xaxis=(:log), yaxis=(:log))
+    plot!(ytickfont = font(12))
+    plot!(legendfont = font(16))
+    plot!(guidefont = font(16))
+    # display(plt)
+    # return plt, mn, mx
+    return plt
 end
 
 
@@ -141,29 +265,37 @@ end
 
 function plot_relative(dic)
 
-  plot_relative(dic,"tot","Total Time")
-  plot_relative(dic,"build","Build Time")
-  plot_relative(dic,"solve","Solve Time")
-  plot_relative(dic,"its","Iterations")
+  p1 = plot_relative(dic,"tot","Total Time")
+  p2 = plot_relative(dic,"build","Build Time")
+  p3 = plot_relative(dic,"solve","Solve Time")
+  p4 = plot_relative(dic,"its","Iterations")
+  return plot(p1,p2,p3,p4)
+end
 
+function plot_relative_unsort(dic)
+
+  p1 = plot_relative_unsort(dic,"tot","Total Time")
+  p2 = plot_relative_unsort(dic,"build","Build Time")
+  p3 = plot_relative_unsort(dic,"solve","Solve Time")
+  p4 = plot_relative_unsort(dic,"its","Iterations")
+  return plot(p1,p2,p3,p4)
 end
 
 function vec_stats(v)
-    v = sort(v)
+    v = sort(vec(v))
     n = length(v)
-    print("mean: ",round(mean(v),3))
-    pts = round.(Int, [1, n/4, n/2, 3n/4, n])
-    print(" quarts: ", v[pts])
+    @printf("mean: %e \n",mean(v))
+    pts = round.(Int, [1, n/4, n/2, 3n/4, n],RoundUp)
+    @printf(" quarts: %e %e %e %e %e ", v[pts[1]], v[pts[2]], v[pts[3]], v[pts[4]], v[pts[5]])
     println()
 end
 
 function vec_stats(v,cnt)
-    v = sort(v)
+    v = sort(vec(v))
     n = length(v)
-    print("mean: ",round.(mean(v),3))
-    pts = round.(Int, [1, n/4, n/2, 3n/4, n])
-    print(" quarts: ", v[pts])
-
+    @printf("mean: %e \n",mean(v))
+    pts = round.(Int, [1, n/4, n/2, 3n/4, n],RoundUp)
+    @printf(" quarts: %e %e %e %e %e ", v[pts[1]], v[pts[2]], v[pts[3]], v[pts[4]], v[pts[5]])
     print("  (Inf: ",sum(isinf.(cnt)), ")")
 
     println()
@@ -205,7 +337,7 @@ end
 
 function plot_relative(dic,str,title)
 
-  plt = Plots.plot(title = title)
+    plt = scatter(title = title)
     sol1 = dic["names"][1]
     key = "$(sol1)_$(str)"
 
@@ -217,12 +349,36 @@ function plot_relative(dic,str,title)
         key = "$(name)_$(str)"
         thisrow = dic[key]
         threshrow = min.(thisrow, 10*baserow) ./ baserow
-        Plots.plot!(sort(threshrow), label=rowname)
+        scatter!(sort(threshrow), label=rowname)
 
         print(str, " " ,rowname, " ")
         vec_stats(threshrow, thisrow)
-  end
-  display(plt)
+    end
+    #display(plt)
+    return plt
+end
+
+function plot_relative_unsort(dic,str,title)
+
+    plt = scatter(title = title)
+    sol1 = dic["names"][1]
+    key = "$(sol1)_$(str)"
+
+    baserow = dic["$(sol1)_$(str)"]
+
+    for i in 2:length(dic["names"])
+        name = dic["names"][i]
+        rowname = "$name / $(sol1)"
+        key = "$(name)_$(str)"
+        thisrow = dic[key]
+        threshrow = min.(thisrow, 10*baserow) ./ baserow
+        scatter!(sort(threshrow), label=rowname)
+
+        print(str, " " ,rowname, " ")
+        vec_stats(threshrow, thisrow)
+    end
+    #display(plt)
+    return plt
 end
 
 function compare_two(dic,sol1,sol2)
