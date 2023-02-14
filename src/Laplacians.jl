@@ -37,6 +37,8 @@ module Laplacians
 
   using Plots
 
+  using Polynomials
+
   include("IJV.jl")
 
   include("fastCSC.jl")
@@ -71,6 +73,10 @@ module Laplacians
   export complete_graph
   export empty_graph
   export path_graph
+  export bndry_chimera
+  export uni_chimera
+  export uni_bndry_chimera
+  export star_join
 
   #export wgrid2
 
@@ -228,4 +234,20 @@ module Laplacians
 
   include("deprecated.jl")
 
+  include("graphGenGeom.jl")
+  export plot_graph_weighted
+  export ggrid2_ijv, ggrid2
+  export ggrid2_checkered_ijv, ggrid2_checkered
+  export ggrid2coords
+  export getInterior2, getBoundary2
+  export ggrid3_ijv, ggrid3
+  export ggrid3_checkered_ijv, ggrid3_checkered
+  export ggrid3coords
+  export getInterior3, getBoundary3
+  export ggrid3_checkeredrandom, ggrid3_aniso, ggrid3_perc
+  export uniform_grid_sddm
+  export checkered_grid_sddm
+  export aniso_grid_sddm
+  export wgrid_sddm
+  
 end # module Laplacians.jl
