@@ -40,28 +40,36 @@ function adj(sddm::Array{Tv,2}) where Tv
     return adj(sparse(sddm))
 end
 
+function adjValAndExcess(sddm::SparseMatrixCSC{Tv,Ti}) where {Tv,Ti}
+    dVal = Array(diag(sddm))
+    a = sparse(Diagonal(diag(sddm))) - sddm
+    dExcess = sddm*ones(size(sddm,1))
+    return a, dVal, dExcess
+end
+
 
 """
 Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight.
 
 This is an efficient way of writing [a d; d' 0]
 """
-function extendMatrix(a::SparseMatrixCSC{Tv,Ti}, d::Array{Tv,1}) where {Tv,Ti}
+function extendMatrix(a::SparseMatrixCSC{Tv,Ti}, dVal::Array{Tv,1}, dExcess::Array{Tv,1}) where {Tv,Ti}
 
-    @assert size(a,1) == length(d)
+    @assert size(a,1) == length(dExcess)
 
-    if sum(abs.(d)) == 0
+    if sum(abs.(dExcess)) == 0
         return a
     end
 
-    dpos = d.*(d.>0)
-
-    n = length(d)
+    dposindex = findall(dExcess .> 100 * eps(Tv) * dVal) # Not sure about the good relative tolerance
+    dpos = dExcess[dposindex]
+    ndpos = length(dpos)
+    n = length(dExcess)
 
     ai,aj,av=findnz(a)
-
-    ai2 = [ai;1:n;(n+1)*ones(Int,n)]
-    aj2 = [aj;(n+1)*ones(Int,n);1:n]
+    
+    ai2 = [ai;dposindex;(n+1)*ones(Int,ndpos)]
+    aj2 = [aj;(n+1)*ones(Int,ndpos);dposindex]
     av2 = [av;dpos;dpos]
     a2 = sparse(ai2,aj2,av2)
 

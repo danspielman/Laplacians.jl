@@ -252,155 +252,196 @@ function cg(mat, b::Vector{Tval};
     return bestx
 end
 
+
 function pcg(mat, b::Vector{Tval}, pre::Function;
-        tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],
-        stag_test::Integer=0) where Tval
+  tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[],
+  stag_test::Integer=0) where Tval
 
-    local al::Tval
+  local al::Tval
 
-    n = size(mat,2)
+  n = size(mat,2)
 
-    nb = norm(b)
+  nb = norm(b)
+  if verbose
+  println("<b, LDLi b> is $(dot(b, pre(b)))")
+  end
+  # If input vector is zero, quit
+  if nb == 0
+    return zeros(size(b))
+  end
 
-    # If input vector is zero, quit
-    if nb == 0
-      return zeros(size(b))
+  x = zeros(Tval,n)
+  bestx = zeros(Tval,n)
+  bestnr = 1.0
+
+  r = copy(b)
+  z = pre(r)
+  p = copy(z)
+
+  rho = dot(r, z)
+  best_rho = rho
+  stag_count = 0
+
+  t1 = time()
+
+  itcnt = 0
+  while itcnt < maxits
+    itcnt = itcnt+1
+
+    q = mat*p
+
+    pq = dot(p,q)
+
+    #=
+    if (pq < eps(Tval) || isinf(pq))
+      if verbose
+        println("PCG Stopped due to small or large pq")
+        @show pq
+      end
+      break
     end
+    =#
+    al = rho/pq
 
-    x = zeros(Tval,n)
-    bestx = zeros(Tval,n)
-    bestnr = 1.0
+    # the following line could cause slowdown
+    # a heuristic to ensure that axpy2!(al,p,x) makes progress
+    if itcnt % 10 == 0
+        # only do the fancy check once in every 10 iters 
 
-    r = copy(b)
-    z = pre(r)
-    p = copy(z)
-
-    rho = dot(r, z)
-    best_rho = rho
-    stag_count = 0
-
-    t1 = time()
-
-    itcnt = 0
-    while itcnt < maxits
-        itcnt = itcnt+1
-
-        q = mat*p
-
-        pq = dot(p,q)
-
-        if (pq < eps(Tval) || isinf(pq))
-          if verbose
-            println("PCG Stopped due to small or large pq")
-          end
-          break
-        end
-
-        al = rho/pq
-
-        # the following line could cause slowdown
-        if al*norm(p) < eps(Tval)*norm(x)
-          if verbose
-            println("PCG: Stopped due to stagnation.")
-          end
-          break
-        end
-
-        axpy2!(al,p,x)
-        # x = x + al * p
-        #=
-        @inbounds @simd for i in 1:n
-            x[i] += al*p[i]
-        end
-        =#
-        #axpy
-
-        axpy2!(-al,q,r)
-        #r .= r .- al.*q
-        #=
-        @inbounds @simd for i in 1:n
-            r[i] -= al*q[i]
-        end
-        =#
-
-        nr = norm(r)/nb
-        if nr < bestnr
-          bestnr = nr
-          @inbounds @simd for i in 1:n
-            bestx[i] = x[i]
-          end
-        end
-        if nr < tol #Converged?
-            break
-        end
-
-        # here is the top of the code in numerical templates
-
-        z = pre(r)
-
-        oldrho = rho
-        rho = dot(z, r) # this is gamma in hypre.
-
-        if rho < best_rho*(1-1/stag_test)
-          best_rho = rho
-          stag_count = 0
-        else
-          if stag_test > 0
-            if best_rho > (1-1/stag_test)*rho
-              stag_count += 1
-              if stag_count > stag_test
-                println("PCG Stopped by stagnation test ", stag_test)
-                break
-              end
-            end
-          end
-        end
-
-        if (rho < eps(Tval) || isinf(rho))
-          if verbose
-            println("PCG Stopped due to small or large rho")
-          end
-          break
-        end
-
-        # the following would have higher accuracy
-        #       rho = sum(r.^2)
-
-        beta = rho/oldrho
-        if (beta < eps(Tval) || isinf(beta))
-          if verbose
-            println("PCG Stopped due to small or large beta")
-          end
-          break
-        end
-
-        bzbeta!(beta,p,z)
-        #=
-        # p = z + beta*p
-        @inbounds @simd for i in 1:n
-            p[i] = z[i] + beta*p[i]
-        end
-        =#
-
-        if (time() - t1) > maxtime
+        if al*sum(abs.(p)) < eps(Tval)*sum(abs.(x))
             if verbose
-                println("PCG New stopped at maxtime.")
+                println("PCG: Stopped due to stagnation: al*sum(abs.(p)) < eps(Tval)*sum(abs.(x))")
             end
             break
         end
-
     end
 
-    if verbose
-        println("PCG stopped after: ", round((time() - t1),digits=3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+    axpy2!(al,p,x)
+    # x = x + al * p
+    #=
+    @inbounds @simd for i in 1:n
+        x[i] += al*p[i]
+    end
+    =#
+    #axpy
+
+    # new termination condition
+    # a heuristic to ensure that axpy2!(-al,q,r) makes progress
+    if itcnt % 10 == 0
+      # only do the fancy check once in every 10 iters 
+      if al*sum(abs.(q)) < eps(Tval)*sum(abs.(r))
+          if verbose
+              println("PCG: Stopped due to stagnation: al*sum(abs.(q)) < eps(Tval)*sum(abs.(r))")
+          end
+          break
+      end
+  end
+
+    axpy2!(-al,q,r)
+    #r .= r .- al.*q
+    #=
+    @inbounds @simd for i in 1:n
+        r[i] -= al*q[i]
+    end
+    =#
+
+    nr = norm(r)/nb
+    if nr < bestnr
+      bestnr = nr
+      @inbounds @simd for i in 1:n
+        bestx[i] = x[i]
+      end
+    end
+    if nr < tol #Converged?
+      if verbose
+        println("PCG stopped due to small nr (norm(r)/nb) = $(nr)")
+        @show nb
+      end
+        break
     end
 
-    if length(pcgIts) > 0
-        pcgIts[1] = itcnt
+    # here is the top of the code in numerical templates
+
+    z = pre(r)
+
+    oldrho = rho
+    rho = dot(z, r) # this is gamma in hypre.
+
+    if rho < best_rho*(1-1/stag_test)
+      best_rho = rho
+      stag_count = 0
+    else
+      if stag_test > 0
+        if best_rho > (1-1/stag_test)*rho
+          stag_count += 1
+          if stag_count > stag_test
+            println("PCG Stopped by stagnation test ", stag_test)
+            break
+          end
+        end
+      end
+    end
+    
+    if (isinf(rho))
+      if verbose
+        println("PCG Stopped due to large rho")
+      end
+      break
     end
 
+    # the following would have higher accuracy
+    #       rho = sum(r.^2)
 
-    return bestx
+    beta = rho/oldrho
+
+    if (#=beta < eps(Tval) ||=# isinf(beta))
+      if verbose
+        println("PCG Stopped due to large beta")
+      end
+      break
+    end
+
+    # new termination condition
+    # a heuristic to ensure that bzbeta!(beta,p,z) makes progress
+    if itcnt % 10 == 0
+        # only do the fancy check once in every 10 iters 
+        if beta*sum(abs.(p)) < eps(Tval)*sum(abs.(z))
+            if verbose
+                println("PCG: Stopped due to stagnation: beta*sum(abs.(p)) < eps(Tval)*sum(abs.(z))")
+            end
+            break
+        end
+    end
+    
+    
+    bzbeta!(beta,p,z)
+    #=
+    # p = z + beta*p
+    @inbounds @simd for i in 1:n
+        p[i] = z[i] + beta*p[i]
+    end
+    =#
+
+    if (time() - t1) > maxtime
+        if verbose
+            println("PCG New stopped at maxtime.")
+        end
+        break
+    end
+
+  end
+
+  if verbose
+    println("PCG stopped after: ", round((time() - t1),digits=3), " seconds and ", itcnt, " iterations with relative error ", (norm(r)/norm(b)), ".")
+    @show rho
+  end
+
+  if length(pcgIts) > 0
+    pcgIts[1] = itcnt
+  end
+
+
+  return bestx
 end
 
 

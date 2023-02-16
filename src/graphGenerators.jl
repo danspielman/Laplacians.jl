@@ -1056,6 +1056,41 @@ function chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
 end
 
 """
+Wrapper for boundary chimera. 
+It returns an SDDM matrix.
+"""
+function bndry_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
+    a = chimera(n, k; verbose=verbose, prefix=prefix, ver=ver)
+    L = lap(a)
+    int = setdiff(1:n,1:ceil(n^(1/3)):n)
+    M = L[int, int]
+    return M
+end
+
+"""
+Wrapper for unweighted chimera.
+"""
+function uni_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
+    a = chimera(n, k; verbose=verbose, prefix=prefix, ver=ver)
+    unweight!(a)
+    return a 
+end
+
+"""
+Wrapper for unweighted boundary chimera.
+It returns an SDDM matrix.
+"""
+function uni_bndry_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
+    a = chimera(n, k; verbose=verbose, prefix=prefix, ver=ver)
+    unweight!(a)
+    L = lap(a)
+    int = setdiff(1:n,1:ceil(n^(1/3)):n)
+    M = L[int, int]
+    return M
+end
+
+
+"""
     graph = randWeight(graph; ver=Vcur)
 
 Applies one of a number of random weighting schemes to the edges of the graph
@@ -1165,4 +1200,28 @@ function wted_chimera(n::Integer; verbose=false, ver=Vcur)
     end
 
     return rand_weight(gr, ver=ver)
+end
+
+function star_join(a, k)
+    if !issparse(a)
+        a = sparse(a)
+    end
+
+    n = size(a,1)
+
+    anew = kron(I(k),a)
+    ai, aj, av = findnz(anew)
+
+    newv = k*n+1
+    nbrs = collect(1:k)*n
+
+    append!(ai,nbrs)
+    append!(aj,newv*ones(k))
+    append!(av,ones(k))
+
+    append!(aj,nbrs)
+    append!(ai,newv*ones(k))
+    append!(av,ones(k))
+
+    return sparse(ai,aj,av)
 end
