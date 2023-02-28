@@ -14,7 +14,12 @@ The documentation may be found by clicking on one of the "docs" links above.
 
 ## Current Development Version
 
+
 To get the current version of the master branch, run `pkg> add Laplacians#master`
+
+# Version 1.4.0
+
+Contains the revised approximate Cholesky preconditioner described in the forthcoming paper by Gao, Kyng, and Spielman.
 
 # Version 1.3.0
 

@@ -39,6 +39,10 @@ The algorithms provide by Laplacians.jl include:
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
 
+# Version 1.4.0
+
+Contains the revised approximate Cholesky preconditioner described in the forthcoming paper by Gao, Kyng, and Spielman.
+
 # Version 1.3.0
 
 This is compatible with Julia 1.7. The only significant change from 1.2.0 was dictated by a change in interface to SuiteSparse.
