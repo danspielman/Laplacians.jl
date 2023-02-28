@@ -54,14 +54,14 @@ merge to be 1 is less efficient.
 mutable struct ApproxCholParams
     order::Symbol
     stag_test::Integer
-    split::Int64
-    merge::Int64
+    split
+    merge
 end
 
 ApproxCholParams() = ApproxCholParams(:deg, 5, 0, 0)
 ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5, 0, 0)
-ApproxCholParams(sym::Symbol, k::Int64) = ApproxCholParams(sym, 5, k, 0)
-ApproxCholParams(sym::Symbol, k::Int64, m::Int64) = ApproxCholParams(sym, 5, k, m)
+ApproxCholParams(sym::Symbol, k) = ApproxCholParams(sym, 5, k, 0)
+ApproxCholParams(sym::Symbol, k, m) = ApproxCholParams(sym, 5, k, m)
 
 LDLinv(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval} =
   LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Tind[],Tval[],zeros(Tval,a.n))
@@ -109,7 +109,7 @@ function LLmatp(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
     return LLmatp{Tind,Tval}(n, degs, cols, llelems)
 end
 
-function LLmatp(a::SparseMatrixCSC{Tval,Tind}, split::Int64) where {Tind,Tval}
+function LLmatp(a::SparseMatrixCSC{Tval,Tind}, split::Tind) where {Tind,Tval}
     n = size(a,1)
     m = nnz(a) * split
 
@@ -204,7 +204,7 @@ function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval}
 end
 
 
-function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, split::Int64) where {Tind,Tval}
+function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, split::Tind) where {Tind,Tval}
     n = size(a,1)
     m = nnz(a) * split
 
@@ -269,7 +269,7 @@ function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, perm::Array) where {Tind,Tval}
 end
 
 
-function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, perm::Array, split::Int64) where {Tind,Tval}
+function LLMatOrd(a::SparseMatrixCSC{Tval,Tind}, perm::Array, split::Tind) where {Tind,Tval}
     n = size(a,1)
     m = nnz(a) * split
 
@@ -515,7 +515,7 @@ and keeps only `merge`-multiedges
 function compressAvgCol!(colspace::Vector{LLp{Tind,Tval}},
     len::Int,
     pq::ApproxCholPQ{Tind},
-    merge::Int64) where {Tind,Tval}
+    merge::Tind) where {Tind,Tval}
 
     o_col = Base.Order.ord(isless, x->x.row, false, Base.Order.Forward)
     sort!(colspace, one(len), len, QuickSort, o_col)

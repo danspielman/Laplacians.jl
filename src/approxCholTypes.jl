@@ -101,9 +101,9 @@ end
 mutable struct ApproxCholPQ{Tind}
     elems::Array{ApproxCholPQElem{Tind},1} # indexed by node name
     lists::Array{Tind,1}
-    minlist::Int
-    nitems::Int
-    n::Int
+    minlist::Int64
+    nitems::Int64
+    n::Int64
     # RG21 this is just a quick hack to make it work with multiedge
-    split::Int
+    split::Tind
 end
