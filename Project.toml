@@ -20,7 +20,9 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Arpack = "0.4, 0.5"
+CSV = "0.10"
 DataStructures = "0.7 - 0.17, 0.18"
 Plots = "1.6"
+Polynomials = "3.2"
 RandomV06 = "0.0.2"
 julia = "1.7, 1.8"
