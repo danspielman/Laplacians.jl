@@ -1,6 +1,6 @@
 name = "Laplacians"
 uuid = "6f8e5838-0efe-5de0-80a3-5fb4f8dbb1de"
-version = "1.3.0"
+version = "1.4.0"
 
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
@@ -23,4 +23,4 @@ Arpack = "0.4, 0.5"
 DataStructures = "0.7 - 0.17, 0.18"
 Plots = "1.6"
 RandomV06 = "0.0.2"
-julia = "1.7"
+julia = "1.7, 1.8"
