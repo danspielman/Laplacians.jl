@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Low Stretch Spanning Trees · Laplacians.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">Laplacians.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">About</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../Installation/">Installation</a></li><li><a class="tocitem" href="../Examples/">Examples</a></li><li><a class="tocitem" href="../CSCgraph/">Sparse matrices as graphs</a></li><li><a class="tocitem" href="../usingSolvers/">Solving Linear Equations</a></li><li class="is-active"><a class="tocitem" href>Low Stretch Spanning Trees</a></li></ul></li><li><a class="tocitem" href="../Developing/">Developing</a></li><li><span class="tocitem">API</span><ul><li><a class="tocitem" href="../graphGenerators/">generators</a></li><li><a class="tocitem" href="../operators/">operators</a></li><li><a class="tocitem" href="../graphUtils/">graphUtils</a></li><li><a class="tocitem" href="../graphAlgs/">graphAlgs</a></li><li><a class="tocitem" href="../IO/">IO</a></li><li><a class="tocitem" href="../solvers/">solvers</a></li><li><a class="tocitem" href="../sparsification/">sparsification</a></li><li><a class="tocitem" href="../akpw/">akpw</a></li><li><a class="tocitem" href="../treeAlgs/">treeAlgs</a></li><li><a class="tocitem" href="../randTrees/">randTrees</a></li><li><a class="tocitem" href="../localClustering/">localClustering</a></li><li><a class="tocitem" href="../privateFuncs/">Private Functions</a></li><li><a class="tocitem" href="../indexOfAll/">All of the above</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Low Stretch Spanning Trees</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Low Stretch Spanning Trees</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/danspielman/Laplacians.jl/blob/master/docs/src/LSST.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Low-Stretch-Spanning-Trees-1"><a class="docs-heading-anchor" href="#Low-Stretch-Spanning-Trees-1">Low Stretch Spanning Trees</a><a class="docs-heading-anchor-permalink" href="#Low-Stretch-Spanning-Trees-1" title="Permalink"></a></h1><p>We have implemented a variant of the algorithm of Alon, Karp, Peleg and West for computing low stretch spanning trees.  It is called <code>akpw</code>.  For unweighted graphs we provide a faster variant called <code>akpwU</code>.  If you require faster algorithms, with possibly higher average stretch, you can try the heuristics <code>randishPrim</code> or <code>randishKruskal</code>.</p><p>You can compute the stretch of a graph with respect to a spanning tree with the routine <code>comp_stretches</code>.  It returns a sparse matrix with one entry for each edge in the graph giving its stretch.  For example:</p><pre><code class="language-julia">julia&gt; graph = grid2(4)
+16x16 sparse matrix with 48 Float64 entries:
+
+julia&gt; tree = akpwU(graph)
+16x16 sparse matrix with 30 Float64 entries:
+
+julia&gt; st = comp_stretches(tree,graph)
+16x16 sparse matrix with 48 Float64 entries:
+	[2 ,  1]  =  1.0
+	[5 ,  1]  =  1.0
+	[1 ,  2]  =  1.0
+	[3 ,  2]  =  1.0
+	[6 ,  2]  =  3.0
+	[2 ,  3]  =  1.0
+	[4 ,  3]  =  1.0
+	[7 ,  3]  =  1.0
+	[3 ,  4]  =  1.0
+	[8 ,  4]  =  3.0
+	[1 ,  5]  =  1.0
+	[6 ,  5]  =  5.0
+	⋮
+	[8 , 12]  =  3.0
+	[11, 12]  =  1.0
+	[16, 12]  =  1.0
+	[9 , 13]  =  1.0
+	[14, 13]  =  3.0
+	[10, 14]  =  1.0
+	[13, 14]  =  3.0
+	[15, 14]  =  3.0
+	[11, 15]  =  1.0
+	[14, 15]  =  3.0
+	[16, 15]  =  3.0
+	[12, 16]  =  1.0
+	[15, 16]  =  3.0</code></pre><p>Here is an example demonstrating the average stretches and times taken by these algorithms on a large graph.</p><pre><code class="language-julia">
+julia&gt; graph = chimera(1000000,1);
+
+julia&gt; @time tree = akpw(graph);
+  5.700285 seconds (16.10 M allocations: 1.263 GB, 11.16% gc time)
+
+julia&gt; aveStretch = sum(comp_stretches(tree,graph))/nnz(graph)
+8.793236275779616
+
+julia&gt; @time tree = randishPrim(graph);
+  3.736225 seconds (3.21 M allocations: 566.887 MB, 6.40% gc time)
+
+julia&gt; aveStretch = sum(comp_stretches(tree,graph))/nnz(graph)
+10.800094649795756
+
+julia&gt; @time tree = randishKruskal(graph);
+  2.515443 seconds (3.21 M allocations: 423.529 MB, 4.35% gc time)
+
+julia&gt; aveStretch = sum(comp_stretches(tree,graph))/nnz(graph)
+37.819948689847564
+</code></pre><p>Of course, you can get very different results on very different graphs.  But, the ordering of these algorithms respect to time and stretch will usually follow this pattern.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../usingSolvers/">« Solving Linear Equations</a><a class="docs-footer-nextpage" href="../Developing/">Developing »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 28 February 2023 01:43">Tuesday 28 February 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
