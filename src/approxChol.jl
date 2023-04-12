@@ -8,9 +8,7 @@ Kyng and Sachdeva.
 
 A detailed description and experimental evaluation can be found in the paper
 "Robust and Practical Solution of Laplacian Equations by Approximate Elimination"
-by Yuan Gao, Rasmus Kyng, and Daniel A. Spielman.
-
-Paper link: https://arxiv.org/abs/2303.00709.
+by Yuan Gao, Rasmus Kyng, and Daniel A. Spielman. Paper link: https://arxiv.org/abs/2303.00709.
 
 For usage examples, see https://danspielman.github.io/Laplacians.jl/dev/usingSolvers/
 
@@ -1510,7 +1508,7 @@ end
     solver = approxchol_lap(a); x = solver(b);
     solver = approxchol_lap(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
 
-A heuristic by Daniel Spielman inspired by the linear system solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva.  Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
+A heuristic solver by Yuan Gao, Rasmus Kyng, and Daniel Spielman, see paper https://arxiv.org/abs/2303.00709. The solver is inspired by the solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
 The `ApproxCholParams` let you choose one of three orderings to perform the elimination.
 
 * ApproxCholParams(:given) - in the order given.
@@ -1519,7 +1517,7 @@ The `ApproxCholParams` let you choose one of three orderings to perform the elim
     This is the slowest build, but the fastest solve.
 * ApproxCholParams(:wdeg) - go by a perturbed order of wted degree.
 
-For more info, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html
+For more info, see http://danspielman.github.io/Laplacians.jl/dev/usingSolvers/index.html
 """
 function approxchol_lap(a::SparseMatrixCSC{Tv,Ti};
   tol::Real=1e-6,
@@ -1545,6 +1543,24 @@ function approxchol_lap(a::SparseMatrixCSC{Tv,Ti};
 
 
 end
+
+"""
+    solver = approxchol_lap2(a); x = solver(b);
+    solver = approxchol_lap2(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
+
+approxchol_lap2 is slower than approxchol_lap (by roughly a factor 2), but is more robust.
+
+A heuristic solver by Yuan Gao, Rasmus Kyng, and Daniel Spielman, see paper https://arxiv.org/abs/2303.00709. The solver is inspired by the solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
+The `ApproxCholParams` let you choose one of three orderings to perform the elimination.
+
+* ApproxCholParams(:given) - in the order given.
+    This is the fastest for construction the preconditioner, but the slowest solve.
+* ApproxCholParams(:deg) - always eliminate the node of lowest degree.
+    This is the slowest build, but the fastest solve.
+* ApproxCholParams(:wdeg) - go by a perturbed order of wted degree.
+
+For more info, see http://danspielman.github.io/Laplacians.jl/dev/usingSolvers/index.html
+"""
 
 function approxchol_lap2(a::SparseMatrixCSC{Tv,Ti};
     tol::Real=1e-6,
