@@ -202,7 +202,7 @@ module Laplacians
 
   include("approxCholTypes.jl")
   include("approxChol.jl")
-  export approxchol_lap, ApproxCholParams, approxchol_sddm
+  export approxchol_lap, approxchol_lap2, ApproxCholParams, approxchol_sddm
 
   include("fiedler.jl")
   export fiedler

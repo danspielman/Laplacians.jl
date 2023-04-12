@@ -5,14 +5,14 @@
 The main purpose of this package is to experiment with the implementation of algorithms for solving systems of linear equations in Laplacian and symmetric, diagonally dominant, M-matrices (SDDM).
 
 At present, the fastest solver in this package for Laplacians is
-[`approxchol_lap`](@ref).
+[`approxchol_lap`](@ref). A second version [`approxchol_lap2`](@ref) is slower but more robust.
 For SDDM systems, one should use [`approxchol_sddm`](@ref).  Here is a quick demo.  Read more for other solvers and other options you can pass to the solvers.
 
 ~~~julia
 julia> a = grid3(50); # an adjacency matrix
 julia> la = lap(a); # it's Laplacian
 julia> sol = approxchol_lap(a); # a solver for la
-julia> b = randn(size(la,1)); b = b - mean(b); # a right-hand-side
+julia> b = randn(size(la,1)); b = b .- mean(b); # a right-hand-side
 julia> x = sol(b); # the solution
 julia> norm(la*x-b) / norm(b)
 5.911931368666469e-7
@@ -321,9 +321,19 @@ These first two follow that paper reasonably closely.
 * [`samplingSDDMSolver`](@ref)
 * [`samplingLapSolver`](@ref)
 
-The following is a modification of the algorithm that eliminates edges one at a time.  The code is by Daniel Spielman.  The algorithm has not yet been analyzed.  It is presently the fastest in this package.
+The following is a modification of the algorithm that eliminates edges one at a time. This solver is by Yuan Gao, Rasmus Kyng, and Daniel A. Spielman.
+
+The algorithm has not yet been analyzed.  It is presently the fastest in this package, and our recommended choice.
 
 * [`approxchol_lap`](@ref)
+
+A second version is roughly a factor 2 slower, but more robust:
+
+* [`approxchol_lap2`](@ref)
+
+A detailed description of [`approxchol_lap`](@ref) and [`approxchol_lap2`](@ref) and experimental evaluation of them can be found in the paper
+"Robust and Practical Solution of Laplacian Equations by Approximate Elimination"
+by Yuan Gao, Rasmus Kyng, and Daniel A. Spielman. Paper link: https://arxiv.org/abs/2303.00709.
 
 ## Algebraic Multigrid
 
