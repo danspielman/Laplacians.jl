@@ -1548,7 +1548,7 @@ end
     solver = approxchol_lap2(a); x = solver(b);
     solver = approxchol_lap2(a; tol::Real=1e-6, maxits=1000, maxtime=Inf, verbose=false, pcgIts=Int[], params=ApproxCholParams())
 
-approxchol_lap2 is slower than approxchol_lap (by roughly a factor 2), but is more robust.
+`approxchol_lap2` is slower than `approxchol_lap` (by roughly a factor 2), but is more robust.
 
 A heuristic solver by Yuan Gao, Rasmus Kyng, and Daniel Spielman, see paper https://arxiv.org/abs/2303.00709. The solver is inspired by the solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
 The `ApproxCholParams` let you choose one of three orderings to perform the elimination.
