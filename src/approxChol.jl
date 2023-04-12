@@ -12,7 +12,7 @@ by Yuan Gao, Rasmus Kyng, and Daniel A. Spielman.
 
 Paper link: https://arxiv.org/abs/2303.00709.
 
-For usage exaples, see http://danspielman.github.io/Laplacians.jl/latest/usingSolvers/index.html
+For usage examples, see https://danspielman.github.io/Laplacians.jl/dev/usingSolvers/
 
 There are several versions of this solver.
 
