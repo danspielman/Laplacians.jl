@@ -12,7 +12,7 @@ For SDDM systems, one should use [`approxchol_sddm`](@ref).  Here is a quick dem
 julia> a = grid3(50); # an adjacency matrix
 julia> la = lap(a); # it's Laplacian
 julia> sol = approxchol_lap(a); # a solver for la
-julia> b = randn(size(la,1)); b = b - mean(b); # a right-hand-side
+julia> b = randn(size(la,1)); b = b .- mean(b); # a right-hand-side
 julia> x = sol(b); # the solution
 julia> norm(la*x-b) / norm(b)
 5.911931368666469e-7
