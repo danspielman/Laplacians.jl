@@ -1561,7 +1561,6 @@ The `ApproxCholParams` let you choose one of three orderings to perform the elim
 
 For more info, see http://danspielman.github.io/Laplacians.jl/dev/usingSolvers/index.html
 """
-
 function approxchol_lap2(a::SparseMatrixCSC{Tv,Ti};
     tol::Real=1e-6,
     maxits=1000,
