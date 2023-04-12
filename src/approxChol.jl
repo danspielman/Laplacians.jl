@@ -1551,13 +1551,8 @@ end
 `approxchol_lap2` is slower than `approxchol_lap` (by roughly a factor 2), but is more robust.
 
 A heuristic solver by Yuan Gao, Rasmus Kyng, and Daniel Spielman, see paper https://arxiv.org/abs/2303.00709. The solver is inspired by the solver in https://arxiv.org/abs/1605.02353 by Rasmus Kyng and Sushant Sachdeva. Whereas that paper eliminates vertices one at a time, this eliminates edges one at a time.  It is probably possible to analyze it.
-The `ApproxCholParams` let you choose one of three orderings to perform the elimination.
 
-* ApproxCholParams(:given) - in the order given.
-    This is the fastest for construction the preconditioner, but the slowest solve.
-* ApproxCholParams(:deg) - always eliminate the node of lowest degree.
-    This is the slowest build, but the fastest solve.
-* ApproxCholParams(:wdeg) - go by a perturbed order of wted degree.
+`approxchol_lap2` only implements the ordering given by ApproxCholParams(:deg) - always eliminate the node of lowest degree.
 
 For more info, see http://danspielman.github.io/Laplacians.jl/dev/usingSolvers/index.html
 """
