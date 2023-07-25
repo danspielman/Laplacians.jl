@@ -1,13 +1,15 @@
 name = "Laplacians"
 uuid = "6f8e5838-0efe-5de0-80a3-5fb4f8dbb1de"
-version = "1.3.0"
+version = "1.4.0"
 
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RandomV06 = "3639840a-3b65-599e-a5e5-6439523e890e"
@@ -18,7 +20,9 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Arpack = "0.4, 0.5"
+CSV = "0.10"
 DataStructures = "0.7 - 0.17, 0.18"
 Plots = "1.6"
+Polynomials = "3.2"
 RandomV06 = "0.0.2"
-julia = "1.7"
+julia = "1.7, 1.8"

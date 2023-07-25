@@ -1,10 +1,5 @@
 # Laplacians.jl
 
-[![codecov](https://codecov.io/gh/danspielman/Laplacians.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/danspielman/Laplacians.jl/dev)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://danspielman.github.io/Laplacians.jl/latest)
-
-
-
 Laplacians is a package containing graph algorithms, with an emphasis on tasks related to spectral and algebraic graph theory. It contains (and will contain more) code for solving systems of linear equations in graph Laplacians, low stretch spanning trees, sparsifiation, clustering, local clustering, and optimization on graphs.
 
 All graphs are represented by sparse adjacency matrices. This is both for speed, and because our main concerns are algebraic tasks. It does not handle dynamic graphs. It would be very slow to implement dynamic graphs this way.
@@ -27,7 +22,7 @@ If you want to solve Laplacian equations, we recommend `approxchol_lap`.
 The algorithms provide by Laplacians.jl include:
 
 * `akpw`, a heuristic for computing low stretch spanning trees written by Daniel Spielman, inspired by the algorithm from the paper "A graph-theoretic game and its application to the k-server problem" by Alon, Karp, Peleg, and West, <i>SIAM Journal on Computing</i>, 1995.
-* `approxchol_lap`: a fast heuristic for solving Laplacians equations written by Daniel Spielman, based on the paper "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.   For SDDM systems, use `approxchol_sddm`.
+* `approxchol_lap`: a fast heuristic for solving Laplacians equations written by Yuan Gao, Rasmus Kyng, and Daniel Spielman. It is described in the paper "Robust and Practical Solution of Laplacian Equations by Approximate Elimination" (https://arxiv.org/abs/2303.00709). The solver is based on  "Approximate Gaussian Elimination for Laplacians: Fast, Sparse, and Simple" by Rasmus Kyng and Sushant Sachdeva, FOCS 2016.   For SDDM systems, use `approxchol_sddm`.
 * `harmonic_interp`: Harmonic Interpolation on graphs.  Minimizes the Laplacians quadratic form subject to fixing values at certain vertices.
 * `sparsify`, an implementation of sparsification by effective resistance sampling, following Spielman and Srivastava.
 * `KMPLapSolver` and `KMPSDDSolver`: linear equation solvers based on the paper "Approaching optimality for solving SDD systems" by Koutis, Miller, and Peng, <i>SIAM Journal on Computing</i>, 2014.
@@ -38,6 +33,10 @@ The algorithms provide by Laplacians.jl include:
 ## Current Development Version
 
 To get the current version of the master branch, run `pkg> add Laplacians#master`
+
+# Version 1.4.0
+
+Contains the revised approximate Cholesky preconditioner described in the forthcoming paper by Gao, Kyng, and Spielman.
 
 # Version 1.3.0
 

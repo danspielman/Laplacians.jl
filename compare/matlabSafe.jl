@@ -7,6 +7,8 @@
 =#
 
 using MATLAB
+using Laplacians
+using Dates
 
 function timeLimitCmg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
 
@@ -17,7 +19,9 @@ function timeLimitCmg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
     put_variable(mf, "maxits", maxits)
     close(mf)
     
-    fn = "$(Pkg.dir("Laplacians"))/matlab/timeCmg.m"
+    lapdir = dirname(pathof(Laplacians))
+    
+    fn = "$(lapdir)/../matlab/timeCmg.m"
     mat = ENV["MATLAB_HOME"]
     matlab = "$(mat)/bin/matlab"
     cmd = `gtimeout $(limit) $(matlab) -nojvm \< $(fn)`
@@ -32,7 +36,10 @@ function timeLimitCmg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
 
     try
         run(cmd)
-    catch
+    catch e
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
+        println(msg)
         println("Matlab Died")
     end
 
@@ -73,8 +80,11 @@ function timeLimitIcc(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
     put_variable(mf, "tol", tol)
     put_variable(mf, "maxits", maxits)
     close(mf)
+
+    lapdir = dirname(pathof(Laplacians))
     
-    fn = "$(Pkg.dir("Laplacians"))/matlab/timeIccLap.m"
+    #fn = "$(lapdir)/../matlab/timeIccLap.m"
+    fn = "$(lapdir)/../matlab/timeIcc.m"
     mat = ENV["MATLAB_HOME"]
     matlab = "$(mat)/bin/matlab"
     cmd = `gtimeout $(limit) $(matlab) -nojvm \< $(fn)`
@@ -89,7 +99,10 @@ function timeLimitIcc(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
 
     try
         run(cmd)
-    catch
+    catch e
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
+        println(msg)
         println("Matlab Died")
     end
 
@@ -131,7 +144,9 @@ function timeLimitLamg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
     put_variable(mf, "maxits", maxits)
     close(mf)
     
-    fn = "$(Pkg.dir("Laplacians"))/matlab/timeLamg.m"
+    lapdir = dirname(pathof(Laplacians))
+    
+    fn = "$(lapdir)/../matlab/timeLamg.m"
     mat = ENV["MATLAB_HOME"]
     matlab = "$(mat)/bin/matlab"
     cmd = `gtimeout $(limit) $(matlab) -nojvm \< $(fn)`
@@ -146,7 +161,10 @@ function timeLimitLamg(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=false)
 
     try
         run(cmd)
-    catch
+    catch e
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
+        println(msg)
         println("Matlab Died")
     end
 
@@ -188,7 +206,9 @@ function timeLimitLamgSddm(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=fa
     put_variable(mf, "maxits", maxits)
     close(mf)
     
-    fn = "$(Pkg.dir("Laplacians"))/matlab/timeLamgSddm.m"
+    lapdir = dirname(pathof(Laplacians))
+    
+    fn = "$(lapdir)/../matlab/timeLamgSddm.m"
     mat = ENV["MATLAB_HOME"]
     matlab = "$(mat)/bin/matlab"
     cmd = `gtimeout $(limit) $(matlab) -nojvm \< $(fn)`
@@ -203,7 +223,10 @@ function timeLimitLamgSddm(limit, la, b; tol::Real=1e-8, maxits=1000, verbose=fa
 
     try
         run(cmd)
-    catch
+    catch e
+        errtrace = backtrace()
+        msg = sprint(showerror, e, errtrace)
+        println(msg)
         println("Matlab Died")
     end
 

@@ -67,7 +67,8 @@ function wrapInterface(solver::Function)
 end
 
 function nullSolver(a;params...)
-    return 0.0
+    #return 0.0
+    return zeros(eltype(a), length(a))
 end
 
 """
@@ -170,6 +171,9 @@ function blockSolver(comps, solvers; tol::Real=1e-6, maxits=Inf, maxtime=Inf, ve
 
         x = zeros(size(b))
         for i in 1:length(comps)
+            if verbose
+                println("BlockSolver component index $(i)")
+            end
             ind = comps[i]
             bi = b[ind]
             x[ind] .= (solvers[i])(bi;  tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgTmp)
@@ -229,17 +233,28 @@ function lapWrapComponents(solver, a::AbstractArray; tol::Real=1e-6, maxits=Inf,
     else
 
         comps = vecToComps(co)
-
         solvers = []
-        for i in 1:length(comps)
+
+        checkSizeOne(v) = length(v) == 1
+        nullComps = findall(checkSizeOne, comps)
+        hasNullComps = length(nullComps) > 0
+        start = 1
+        if hasNullComps
+            start = 2
+            flatNullComps = vcat(comps[nullComps]...)
+            comps = vcat([flatNullComps], comps[setdiff(1:end, nullComps)])
+            push!(solvers, nullSolver)
+        end
+        
+        for i in start:length(comps)
             ind = comps[i]
 
             asub = a[ind,ind]
 
-            if (length(ind) == 1)
-                subSolver = nullSolver
+            # if (length(ind) == 1)
+            #     subSolver = nullSolver
 
-            elseif (length(ind) < 50)
+            if (length(ind) < 50)
                 subSolver = lapWrapConnected(chol_sddm,asub)
 
             else
@@ -309,8 +324,8 @@ Uses a `lapSolver` to solve systems of linear equations in sddm matrices.
 function sddmWrapLap(lapSolver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
 
     # Make a new adj matrix, a1, with an extra entry at the end.
-    a, d = adj(sddm)
-    a1 = extendMatrix(a,d)
+    a, dVal, dExcess = adjValAndExcess(sddm)
+    a1 = extendMatrix(a,dVal, dExcess)
     F = lapSolver(a1; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params...)
 
     # make a function that solves the extended system, modulo the last entry
@@ -337,6 +352,105 @@ function sddmWrapLap(lapSolver)
     return f
 end
 
+
+#=
+    f = sddmWrapLapComponents(solver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+
+Uses a `solver` to solve systems of linear equations in sddm matrices.
+Solver is a lap solver over connected Laplacians
+It does not assume that the sddm matrix is connected after extention
+=#
+
+function sddmWrapLapComponents(solver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+    a, dVal, dExcess = adjValAndExcess(sddm)
+    a1 = extendMatrix(a,dVal,dExcess)
+    # a1 might not be connected.
+    t1 = time()
+
+    co = components(a1)
+
+    if maximum(co) == 1
+        # a1 is connected, then this is the same as sddmWrapLap
+        F = solver(a1; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params...)
+        if verbose
+            println("Solver build time: ", round((time() - t1),digits=3), " seconds.")
+        end
+        # make a function that solves the extended system, modulo the last entry
+        tol_=tol
+        maxits_=maxits
+        maxtime_=maxtime
+        verbose_=verbose
+        pcgIts_=pcgIts
+
+        f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
+            xaug = F([b; -sum(b)], tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+            xaug = xaug .- xaug[end]
+            return xaug[1:a.n]
+        end
+
+        return f
+    else
+        comps = vecToComps(co)
+        
+        solvers = []
+
+        for i in 1:length(comps)
+            ind = comps[i]
+
+            asub = a1[ind, ind]
+
+            if (length(ind) == 1)
+                subSolver = nullSolver
+            
+            elseif (length(ind) < 50)   
+                subSolver = lapWrapConnected(chol_sddm,asub)
+            
+            else
+
+                subSolver = solver(asub; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params... );
+
+            end
+            push!(solvers, subSolver)
+        end
+        if verbose
+            println("Solver build time: ", round((time() - t1),digits=3), " seconds.")
+        end
+
+        # make a function that solves the extended system, modulo the last entry
+        tol_=tol
+        maxits_=maxits
+        maxtime_=maxtime
+        verbose_=verbose
+        pcgIts_=pcgIts
+
+        aug_comp_idx = co[end] # this is the index of component containing the auxillary vertex
+        aug_comp_ind = comps[aug_comp_idx]
+        aug_comp_ind = aug_comp_ind[1:length(aug_comp_ind) - 1]
+
+        #@show comps
+        F = blockSolver(comps,solvers; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+
+        f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
+            
+            xaug = F([b; -sum(b[aug_comp_ind])], tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+            # test 
+            #@show xaug
+            xaug[aug_comp_ind] = xaug[aug_comp_ind] .- xaug[end]
+            # test
+            #@show xaug
+            return xaug[1:a.n]
+        end
+
+        return f
+    end
+end
+
+function sddmWrapLapComponents(solver)
+    f = function(sddm::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
+        return sddmWrapLapComponents(solver, sddm;  tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params... )
+    end
+    return f
+end
     
 """
     f = wrapCaptureRhs(sola::Function, rhss; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
