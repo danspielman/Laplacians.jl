@@ -693,9 +693,19 @@ If more than 2 coords are desired, you can use
 """
 function spectral_coords(a; k = 2)
 
-    E = eigs(lap(a), nev = (k+1), which=:SR)
-    V = E[2]
-    return tuple([V[:,i] for i in 2:(k+1)]...)
+    tup = []
+    try
+        E = eigs(lap(a), nev = (k+1), which=:SR)
+        V = E[2]
+        tup = tuple([V[:,i] for i in 2:(k+1)]...)
+    catch e
+        f = approxchol_lap(a) 
+        op = Laplacians.SqLinOp(true,1.0,size(a,1),f)
+        E = eigs(op, which=:LM, nev=k)
+        V = E[2]
+        tup = tuple([V[:,i] for i in 1:(k)]...)
+    end
+    return tup
 
 end # spectral_coords
 
