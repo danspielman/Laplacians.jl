@@ -82,12 +82,13 @@ mutable struct ApproxCholParams
     stag_test::Integer
     split::Integer
     merge::Integer
+    keep_last_vertex_for_last::Bool
 end
 
-ApproxCholParams() = ApproxCholParams(:deg, 5, 0, 0)
-ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5, 0, 0)
-ApproxCholParams(sym::Symbol, k) = ApproxCholParams(sym, 5, k, k)
-ApproxCholParams(sym::Symbol, k, m) = ApproxCholParams(sym, 5, k, m)
+ApproxCholParams() = ApproxCholParams(:deg, 5, 0, 0, false)
+ApproxCholParams(sym::Symbol) = ApproxCholParams(sym, 5, 0, 0, false)
+ApproxCholParams(sym::Symbol, k) = ApproxCholParams(sym, 5, k, k, false)
+ApproxCholParams(sym::Symbol, k, m) = ApproxCholParams(sym, 5, k, m, false)
 
 LDLinv(a::SparseMatrixCSC{Tval,Tind}) where {Tind,Tval} =
   LDLinv(zeros(Tind,a.n-1), zeros(Tind,a.n),Tind[],Tval[],zeros(Tval,a.n))
@@ -976,7 +977,7 @@ function approxChol(a::LLmatp{Tind,Tval}) where {Tind,Tval}
     return ldli
 end
 
-function approxChol(a::LLmatp{Tind,Tval}, split::Int, merge::Int) where {Tind,Tval}
+function approxChol(a::LLmatp{Tind,Tval}, split::Int, merge::Int, keep_last_vertex_for_last::Bool = false) where {Tind,Tval}
     n = a.n
 
     ldli = LDLinv(a)
@@ -985,7 +986,7 @@ function approxChol(a::LLmatp{Tind,Tval}, split::Int, merge::Int) where {Tind,Tv
     d = zeros(n)
     #@show a.degs
 
-    pq = ApproxCholPQ(a.degs, split)
+    pq = ApproxCholPQ(a.degs, split, keep_last_vertex_for_last)
 
     it = 1
 
@@ -1159,7 +1160,7 @@ end
 
 # This code is deprecated. It should only be used for testing
 # Split is used to create ApproxCholPQ
-function approxChol(a::LLmatp{Tind,Tval}, split::Int) where {Tind,Tval}
+function approxChol(a::LLmatp{Tind,Tval}, split::Int, keep_last_vertex_for_last::Bool = false) where {Tind,Tval}
     n = a.n
 
     ldli = LDLinv(a)
@@ -1168,7 +1169,7 @@ function approxChol(a::LLmatp{Tind,Tval}, split::Int) where {Tind,Tval}
     d = zeros(n)
     #@show a.degs
 
-    pq = ApproxCholPQ(a.degs, split)
+    pq = ApproxCholPQ(a.degs, split, keep_last_vertex_for_last)
 
     it = 1
 
@@ -1574,7 +1575,7 @@ function approxchol_lap2(a::SparseMatrixCSC{Tv,Ti};
       maxits=maxits,
       maxtime=maxtime,
       pcgIts=pcgIts,
-      params=ApproxCholParams(:deg, params.stag_test, 2)) # use split = 2 and merge = 2
+      params=ApproxCholParams(:deg, params.stag_test, 2, 2, params.keep_last_vertex_for_last)) # use split = 2 and merge = 2
   
 end
 
@@ -1602,7 +1603,7 @@ function approxchol_lapGreedy(a::SparseMatrixCSC;
     ldli = approxChol(llmat, params.split)
   elseif params.split >= 1 && params.merge >= 1
     llmat = LLmatp(a, params.split)
-    ldli = approxChol(llmat, params.split, params.merge)
+    ldli = approxChol(llmat, params.split, params.merge, params.keep_last_vertex_for_last)
   else
     llmat = LLmatp(a)
     ldli = approxChol(llmat)
@@ -2091,9 +2092,13 @@ function keyMap(x, k, upper)
     return x <= k ? x : min(upper, k + div(x, k))
 end
 
-function ApproxCholPQ(a::Vector{Tind}) where Tind
+function ApproxCholPQ(a::Vector{Tind}, keep_last_vertex_for_last::Bool = false) where Tind
 
     n = length(a)
+    if keep_last_vertex_for_last
+        n -= 1
+    end
+
     elems = Array{ApproxCholPQElem{Tind}}(undef, n)
     lists = zeros(Tind, 2*n+1)
     minlist = one(n)
@@ -2114,18 +2119,21 @@ function ApproxCholPQ(a::Vector{Tind}) where Tind
         lists[key] = i
     end
 
-    return ApproxCholPQ(elems, lists, minlist, n, n, one(Tind))
+    return ApproxCholPQ(elems, lists, minlist, n, n, one(Tind), keep_last_vertex_for_last ? length(a) : nothing)
 end
 
 
-function ApproxCholPQ(a::Vector{Tind}, split::Int) where Tind
+function ApproxCholPQ(a::Vector{Tind}, split::Int, keep_last_vertex_for_last::Bool = false) where Tind
 
     n = length(a)
+    if keep_last_vertex_for_last
+        n -= 1
+    end
     elems = Array{ApproxCholPQElem{Tind}}(undef, n)
     lists = zeros(Tind, 2* split * n+1)
     minlist = one(n)
 
-    for i in 1:length(a)
+    for i in 1:n
         key = a[i]
         head = lists[key]
 
@@ -2141,10 +2149,16 @@ function ApproxCholPQ(a::Vector{Tind}, split::Int) where Tind
         lists[key] = i
     end
 
-    return ApproxCholPQ(elems, lists, minlist, n, n, split)
+    return ApproxCholPQ(elems, lists, minlist, n, n, split, keep_last_vertex_for_last ? length(a) : nothing)
 end
 
 function approxCholPQPop!(pq::ApproxCholPQ{Tind}) where Tind
+    if pq.nitems == 0 && !isnothing(pq.last_vertex)
+        local v = pq.last_vertex
+        pq.last_vertex = nothing
+        return v
+    end
+
     if pq.nitems == 0
         error("ApproxPQ is empty")
     end
@@ -2198,6 +2212,9 @@ end
     This could crash if i exceeds the maxkey
 """
 function approxCholPQDec!(pq::ApproxCholPQ{Tind}, i) where Tind
+    if i == pq.last_vertex
+        return nothing
+    end
 
     oldlist = keyMap(pq.elems[i].key, pq.split * pq.n, 2 * pq.split * pq.n + 1)
     newlist = keyMap(pq.elems[i].key - one(Tind), pq.split * pq.n, 2 * pq.split * pq.n + 1)
@@ -2223,6 +2240,9 @@ end
     This could crash if i exceeds the maxkey
 """
 function approxCholPQInc!(pq::ApproxCholPQ{Tind}, i) where Tind
+    if i == pq.last_vertex
+        return nothing
+    end
 
     oldlist = keyMap(pq.elems[i].key, pq.split * pq.n, 2 * pq.split * pq.n + 1)
     newlist = keyMap(pq.elems[i].key + one(Tind), pq.split * pq.n, 2 * pq.split * pq.n + 1)

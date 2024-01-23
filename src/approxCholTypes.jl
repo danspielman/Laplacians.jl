@@ -106,4 +106,5 @@ mutable struct ApproxCholPQ{Tind}
     n::Int64
     # RG21 this is just a quick hack to make it work with multiedge
     split::Tind
+    last_vertex::Union{Nothing,Tind}
 end
