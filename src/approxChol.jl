@@ -495,6 +495,65 @@ function compressCol!(
     return ptr
 end
 
+#=
+Pre-condition: `colspace`` has at least `len` elements (accessing further
+elements is invalid) with all the rows in a single column, and each entry
+has a reference back to the original linked-list entry it represents.
+
+Post-condition: `colspace` will have at most `len` elements and the new length
+will be returned (accessing elements past the new length will be invalid).
+All multiedges will be replaced by at most `merge` multiedges, each with the
+same value such that the sum of their values remain unchanged. Also, all the
+new multiedges will be sorted in a specific order.
+The actual linked-list entries are unaffected here. We are only updating the
+references to them.
+=#
+function compressAvgSortCol!(
+  colspace::Vector{LLcol{Tind,Tval}},
+  len::Int, merge::Int
+) where {Tind,Tval}
+
+    # Sort by row-number so that the multiedges are next to each other
+    sort!(colspace, one(len), len, QuickSort, Base.Order.ord(isless, x->x.row, false, Base.Order.Forward))
+
+    # Every iteration we will take the range of [src, ..] multiedges,
+    # average and compress them (potentially reducing their cardinality),
+    # then write back as [dst, ..] multiedges.
+    # Since `dst` will always follow `src`, there is no loss of information.
+    local src::Int, dst::Int = 1, 1
+    @inbounds while src <= len  # As long as we have some unprocessed edges...
+        # Aggregate all the entries that share the same row.
+        local row = colspace[src].row
+        local val::Tval, cnt::Int = 0, 0
+        while src <= len && colspace[src].row == row
+            val += colspace[src].val
+            cnt += 1
+            src += 1
+        end
+        if cnt > merge
+            cnt = merge
+        end
+        local avgval = val / cnt
+
+        for _ in 1:cnt
+            # If we want to transfer these changes to the actual linked-list,
+            # `ptr` will point to the nodes that needs to be updated.
+            local ptr = colspace[dst].ptr
+            colspace[dst] = LLcol(row, ptr, avgval)
+            dst += 1
+        end
+    end
+
+    # At this point, `dst-1` is the number of edges that survived this compression.
+    len = dst - 1
+
+    # Now sort by value (while keeping the rows together, which is possible
+    # since all the multiedges have the same value now)
+    sort!(colspace, one(len), len, QuickSort, Base.Order.ord(isless, x->(x.val, x.row), false, Base.Order.Forward))
+
+    return len
+end
+
 function avgCol!(colspace::Vector{LLp{Tind,Tval}},
     len::Int) where {Tind,Tval}
 
@@ -856,6 +915,128 @@ function approxChol(a::LLMatOrd{Tind,Tval}) where {Tind,Tval}
 
     ldli.colptr[n] = ldli_row_ptr
 
+    ldli.d = d
+
+    return ldli
+end
+
+function approxChol(a::LLMatOrd{Tind,Tval}, merge::Int) where {Tind,Tval}
+    local n = a.n  # Number of vertices.
+    local ldli = LDLinv(a)  # L^{-1} in the output structure.
+    local ldli_row_ptr = 1  # Next entry to write during output construction.
+    local d = zeros(Tval, n)  # Diagonal entries in the output structure.
+
+    # Intermediate structure to hold the edges (rows) for the vertex (column)
+    # we are processing currently. The size may grow with `get_ll_col()` calls.
+    local colspace = Vector{LLcol{Tind,Tval}}(undef, n)
+    # Intermediate structure to hold the cumulative sums of the weights of the
+    # incident edges of the vertex to be eliminated. We use reversed cumulative
+    # sums to avoid subtraction later.
+    local csumspace_rev = Vector{Tval}(undef, n)
+
+    @inbounds for i in 1:(n-1)
+        # We will eliminate `n-1` vertices and we will eliminate in the given
+        # order (so, i-th vertex).
+
+        # Compress the incident edges and hold their references into `colspace`.
+        local len = get_ll_col(a, i, colspace)
+        len = compressAvgSortCol!(colspace, len, merge)
+
+        # Partial construction of the output structure for this elimination.
+        ldli.col[i] = i
+        ldli.colptr[i] = ldli_row_ptr
+
+        # Compute the cumulative sums and a few other intermediate values.
+        local csum_rev = zero(Tval)
+        for ii in len:-1:1
+            csum_rev += colspace[ii].val
+            csumspace_rev[ii] = csum_rev
+        end
+        local wdeg = csum_rev
+        local colScale = one(Tval)
+
+        # `next_edge` is the edge that is not a multiedge of `joffset`
+        local next_edge::Int = 1
+        local final_d::Tval = 0
+        for joffset in 1:(len-1)
+            local isNewNeighbor = (joffset == next_edge)
+            if isNewNeighbor
+                # Find the next edge that is not a multiedge of the current one.
+                # This needs to be computed only once per group of multiedges.
+                while next_edge <= len && colspace[joffset].row == colspace[next_edge].row
+                    next_edge += 1
+                end
+            end
+
+            # Avoid adding selfloop at the second last entry
+            if next_edge == len + 1
+                # We are working with the last group of multiedges.
+                # Remove all the multiedges left (except for the very last one).
+                while joffset <= len - 1
+                    llcol = colspace[joffset]
+                    final_d += llcol.val * colScale
+                    joffset += 1
+                end
+                # But there is no need to go through the sampling anymore.
+                break
+            end
+
+            local llcol = colspace[joffset]  # the edge we're eliminating.
+            local j = llcol.row  # the corresponding neighbour.
+            local f = (llcol.val * colScale) / wdeg
+            local newEdgeVal = llcol.val * csumspace_rev[next_edge] / wdeg
+
+            # Sampling starts from the next_edge (and we break early on the
+            # last group of multiedges)
+            local r = rand() * csumspace_rev[next_edge]
+            local koff = searchsortedlast(csumspace_rev, r, one(len), len,
+                            Base.Order.ord(isless, identity, true, Base.Order.Forward))
+            local k = colspace[koff].row  # `k` is the sampled neighbour.
+
+            # Create edge between `j` and `k` with the weight `newEdgeVal`.
+            # Since we know the order of elimination, we do not have to keep
+            # track of the reverse edges here.
+            if j < k # put it in col j
+                local jhead = a.cols[j]
+                a.lles[llcol.ptr] = LLord(k, jhead, newEdgeVal)
+                a.cols[j] = llcol.ptr
+            else # put it in col k
+                local khead = a.cols[k]
+                a.lles[llcol.ptr] = LLord(j, khead, newEdgeVal)
+                a.cols[k] = llcol.ptr
+            end
+
+            # Construct the further partial output for this vertex elimination.
+            # We compress all the multiedges in the output, so appends happen
+            # only for a new group of multiedges (i.e. a new neighbour).
+            if isNewNeighbor
+                push!(ldli.rowval,j)
+                push!(ldli.fval, f)
+                ldli_row_ptr += 1
+            else
+                ldli.fval[end] += f
+            end
+            # Only update these after we processed an entire group of multiedges.
+            if joffset == next_edge - 1
+                local f = last(ldli.fval)
+                colScale = colScale * (one(Tval)-f)
+                wdeg = wdeg * (one(Tval)-f)^2
+            end
+        end
+
+        # Construct the remaining output for this vertex elimination.
+        # The last neighbour is to be treated differently.
+        local llcol = colspace[len]
+        final_d += llcol.val * colScale
+        local j = llcol.row
+        push!(ldli.rowval,j)
+        push!(ldli.fval, one(Tval))
+        ldli_row_ptr += 1
+        d[i] = final_d
+    end
+
+    # Complete the output construction.
+    ldli.colptr[n] = ldli_row_ptr
     ldli.d = d
 
     return ldli
@@ -1644,9 +1825,6 @@ function approxchol_lapGiven(a::SparseMatrixCSC;
 
   la = lap(a)
 
-  llmat = LLMatOrd(a)
-
-
   #=
   nv = size(a, 1)
   for i in 1:nv
@@ -1655,9 +1833,8 @@ function approxchol_lapGiven(a::SparseMatrixCSC;
   println("print all cols complete")
   =#
 
-  ldli = approxChol(llmat)
-
-  
+  local llmat = (params.split >= 1 && params.merge >= 1) ? LLMatOrd(a, params.split) : LLMatOrd(a)
+  local ldli = (params.split >= 1 && params.merge >= 1) ? approxChol(llmat, params.merge) : approxChol(llmat)
 
   F(b) = LDLsolver(ldli, b)
 
