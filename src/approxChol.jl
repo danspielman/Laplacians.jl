@@ -941,6 +941,9 @@ function approxChol(a::LLMatOrd{Tind,Tval}, merge::Int) where {Tind,Tval}
         # Compress the incident edges and hold their references into `colspace`.
         local len = get_ll_col(a, i, colspace)
         len = compressAvgSortCol!(colspace, len, merge)
+        if length(csumspace_rev) < len
+            resize!(csumspace_rev, len)
+        end
 
         # Partial construction of the output structure for this elimination.
         ldli.col[i] = i
