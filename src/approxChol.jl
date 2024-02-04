@@ -987,7 +987,7 @@ function approxChol(a::LLMatOrd{Tind,Tval}, merge::Int) where {Tind,Tval}
             local llcol = colspace[joffset]  # the edge we're eliminating.
             local j = llcol.row  # the corresponding neighbour.
             local f = (llcol.val * colScale) / wdeg
-            local newEdgeVal = llcol.val * csumspace_rev[next_edge] / wdeg
+            local newEdgeVal = llcol.val * csumspace_rev[next_edge] / csum_rev
 
             # Sampling starts from the next_edge (and we break early on the
             # last group of multiedges)
