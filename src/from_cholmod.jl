@@ -26,8 +26,9 @@ function ask_cholmod(sdd)
     # s_anal = unsafe_load(get(anal.p))
     #s_anal = unsafe_load(pointer(anal))
 
-    anal = ba.cholmod_l_analyze(ba.Sparse(sdd), ba.COMMONS[Threads.threadid()])
+    anal = ba.cholmod_l_analyze(ba.Sparse(sdd), ba.getcommon())
     s_anal = unsafe_load(anal)
+    colcount = Base.unsafe_convert(Ptr{Int}, s_anal.ColCount)
 
     n = Int(s_anal.n)
     
@@ -35,7 +36,7 @@ function ask_cholmod(sdd)
     flops = 0
     
     for i in 1:n
-        nzl = Int(unsafe_load(s_anal.ColCount,i))
+        nzl = Int(unsafe_load(colcount,i))
         nnzL += nzl
         flops += nzl^2
     end
@@ -54,8 +55,9 @@ function cholmod_perm(sdd)
     #cm = ba.common()
     #cm = ba.defaults(ba.common_struct[Threads.threadid()])
 
-    anal = ba.cholmod_l_analyze(ba.Sparse(sdd), ba.COMMONS[Threads.threadid()])
+    anal = ba.cholmod_l_analyze(ba.Sparse(sdd), ba.getcommon())
     s_anal = unsafe_load(anal)
+    perm = Base.unsafe_convert(Ptr{Int}, s_anal.Perm)
     
     #anal = ba.analyze(ba.Sparse(lap(sdd)), cm);
 
@@ -66,7 +68,7 @@ function cholmod_perm(sdd)
 
     p = zeros(Int,n)
     for i in 1:n
-        p[i] = unsafe_load(s_anal.Perm,i)+1
+        p[i] = unsafe_load(perm, i) + 1
     end
 
     return p
