@@ -49,7 +49,7 @@ end
 
 
 """
-Add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight.
+*May* add a new vertex to a with weights to the other vertices corresponding to diagonal surplus weight. But if there is no surplus weight at all, then return just the input matrix.
 
 This is an efficient way of writing [a d; d' 0]
 """
