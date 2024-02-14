@@ -323,11 +323,6 @@ Uses a `lapSolver` to solve systems of linear equations in sddm matrices.
 """
 function sddmWrapLap(lapSolver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf, maxtime=Inf, verbose=false, pcgIts=Int[], params...)
 
-    # Make a new adj matrix, a1, with an extra entry at the end.
-    a, dVal, dExcess = adjValAndExcess(sddm)
-    a1 = extendMatrix(a,dVal, dExcess)
-    F = lapSolver(a1; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params...)
-
     # make a function that solves the extended system, modulo the last entry
     tol_=tol
     maxits_=maxits
@@ -335,13 +330,24 @@ function sddmWrapLap(lapSolver, sddm::AbstractArray; tol::Real=1e-6, maxits=Inf,
     verbose_=verbose
     pcgIts_=pcgIts
 
-    f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
-        xaug = F([b; -sum(b)], tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
-        xaug = xaug .- xaug[end]
-        return xaug[1:a.n]
-    end
+    # Make a new adj matrix, a1, with an extra entry at the end.
+    a, dVal, dExcess = adjValAndExcess(sddm)
+    a1 = extendMatrix(a,dVal, dExcess)
 
-    return f
+    # `extendMatrix()` may or may not have actually made an extension.
+    if size(a1) == size(sddm)
+      # If it didn't, then just treat the SDDM as a regular Laplacian.
+      local adjm = adj(sddm)[1]
+      return lapSolver(adjm; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params...)
+    else
+      F = lapSolver(a1; tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts, params...)
+      f = function(b; tol=tol_, maxits=maxits_, maxtime=maxtime_, verbose=verbose_, pcgIts=pcgIts_)
+          xaug = F([b; -sum(b)], tol=tol, maxits=maxits, maxtime=maxtime, verbose=verbose, pcgIts=pcgIts)
+          xaug = xaug .- xaug[end]
+          return xaug[1:a.n]
+      end
+      return f
+    end
 
 end
 
