@@ -1062,7 +1062,7 @@ It returns an SDDM matrix.
 function bndry_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver=Vcur)
     a = chimera(n, k; verbose=verbose, prefix=prefix, ver=ver)
     L = lap(a)
-    int = setdiff(1:n,1:ceil(n^(1/3)):n)
+    int = setdiff(1:n,1:ceil(Int, n^(1/3)):n)
     M = L[int, int]
     return M
 end
@@ -1084,7 +1084,7 @@ function uni_bndry_chimera(n::Integer, k::Integer; verbose=false, prefix="", ver
     a = chimera(n, k; verbose=verbose, prefix=prefix, ver=ver)
     unweight!(a)
     L = lap(a)
-    int = setdiff(1:n,1:ceil(n^(1/3)):n)
+    int = setdiff(1:n,1:ceil(Int, n^(1/3)):n)
     M = L[int, int]
     return M
 end
@@ -1225,3 +1225,4 @@ function star_join(a, k)
 
     return sparse(ai,aj,av)
 end
+
