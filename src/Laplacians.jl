@@ -78,6 +78,7 @@ module Laplacians
   export bndry_chimera
   export uni_chimera
   export uni_bndry_chimera
+  export wted_bndry_chimera
   export star_join
 
   #export wgrid2
