@@ -1202,6 +1202,20 @@ function wted_chimera(n::Integer; verbose=false, ver=Vcur)
     return rand_weight(gr, ver=ver)
 end
 
+
+
+"""
+Wrapper for weighted boundary chimera.
+It returns an SDDM matrix.
+"""
+function wted_bndry_chimera(n::Integer, k::Integer; verbose=false,  ver=Vcur)
+    a = wted_chimera(n, k; verbose=verbose,  ver=ver)
+    L = lap(a)
+    int = setdiff(1:n,1:ceil(Int, n^(1/3)):n)
+    M = L[int, int]
+    return M
+end
+
 function star_join(a, k)
     if !issparse(a)
         a = sparse(a)
